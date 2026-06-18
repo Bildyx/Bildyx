@@ -1,15 +1,5 @@
-<<<<<<< HEAD
-node_modules
-# Keep environment variables out of version control
-.env
-
-.vscode
-
-/generated/prisma
-=======
 node_modules
 # Keep environment variables out of version control
 .env
 
 /generated/prisma
->>>>>>> dcfcf94 (Update gitignore .env)
