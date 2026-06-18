@@ -12,3 +12,11 @@ source venv/bin/activate   # ou venv\Scripts\activate sur Windows
 ```bash
 pip install -r requirements.txt
 ```
+
+## 3. Orders to run
+```bash
+npm install
+npm install prisma --save-dev
+npm install @prisma/client
+npx prisma generate
+```
