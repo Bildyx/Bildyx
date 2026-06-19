@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF‑8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bildyx – Accueil</title>
+    <!-- Feuille de styles externe -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <!-- Header à réutiliser -->
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <!-- Logo intégré : utilisez votre propre logo si nécessaire -->
+                <img src="images/Logo.png" alt="Logo Bildyx" />
+            </a>
+            <nav class="nav-buttons">
+                <!-- Les deux liens pointent vers login.html pour l'instant -->
+                <a href="login.html" class="login">Log In</a>
+                <a href="login.html" class="signup">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main>
+        <!-- Section Héro (accueil) -->
+        <div class="hero">
+            <div class="hero-column">
+                <div class="badge">Pour les équipes &amp; entreprises</div>
+                <h2>Créer un profil d'équipe</h2>
+                <p>Mettez en avant le talent collectif de votre organisation. Gérez les identités et profils vérifiés de votre équipe en un seul endroit.</p>
+                <a href="#" class="btn-primary">Créer un profil d'équipe</a>
+            </div>
+            <div class="hero-column">
+                <div class="badge">Pour les professionnels</div>
+                <h2>Créer un MicroCV</h2>
+                <p>Construisez un profil professionnel concis et vérifié qui met en avant vos compétences et réalisations en quelques secondes.</p>
+                <a href="#" class="btn-primary">Créer un MicroCV</a>
+            </div>
+        </div>
+
+        <!-- Section des équipes -->
+        <div class="teams-section">
+            <div class="teams-left">
+                <h3>Nos équipes</h3>
+                <!-- Onglets d'équipe (pas encore de logique JS) -->
+                <div class="team-tabs">
+                    <button class="active">Team Alpha</button>
+                    <button>Team Beta</button>
+                    <button>Team Gamma</button>
+                    <button>Team Delta</button>
+                    <button>Team Fusion</button>
+                </div>
+                <!-- Membres de l'équipe -->
+                <div class="team-members">
+                    <div class="member">
+                        <div class="photo"></div>
+                        <span>Michael</span>
+                        <small>VP Marketing</small>
+                    </div>
+                    <div class="member">
+                        <div class="photo"></div>
+                        <span>Amelia</span>
+                        <small>Product Manager</small>
+                    </div>
+                    <div class="member">
+                        <div class="photo"></div>
+                        <span>Carlos</span>
+                        <small>Lead Engineer</small>
+                    </div>
+                    <div class="member">
+                        <div class="photo"></div>
+                        <span>Hana</span>
+                        <small>UX Designer</small>
+                    </div>
+                    <div class="member">
+                        <div class="photo"></div>
+                        <span>Ethan</span>
+                        <small>DevOps Engineer</small>
+                    </div>
+                </div>
+
+                <!-- Liste des bureaux -->
+                <div class="offices">
+                    <h4>Bureaux</h4>
+                    <div class="office-cities">
+                        <div class="city">
+                            <div class="photo"></div>
+                            <span>Paris</span>
+                        </div>
+                        <div class="city">
+                            <div class="photo"></div>
+                            <span>Lyon</span>
+                        </div>
+                        <div class="city">
+                            <div class="photo"></div>
+                            <span>Marseille</span>
+                        </div>
+                        <div class="city">
+                            <div class="photo"></div>
+                            <span>Toulouse</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des produits -->
+                <div class="products">
+                    <h4>Nos produits</h4>
+                    <div class="product-list">
+                        <div class="product-item">
+                            <span class="icon"></span>
+                            <span>Outil d'IA</span>
+                        </div>
+                        <div class="product-item">
+                            <span class="icon"></span>
+                            <span>Tableau de bord</span>
+                        </div>
+                        <div class="product-item">
+                            <span class="icon"></span>
+                            <span>Sécurité</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profil d'équipe -->
+            <div class="teams-right">
+                <h4>Profil de l'équipe Alpha</h4>
+                <ul>
+                    <li>
+                        <h5>Mission</h5>
+                        <p>Développer une solution innovante de recrutement basée sur l'IA.</p>
+                    </li>
+                    <li>
+                        <h5>Vision</h5>
+                        <p>Rendre le processus de recrutement plus humain et plus efficace.</p>
+                    </li>
+                    <li>
+                        <h5>Valeurs</h5>
+                        <p>Transparence, innovation et inclusion.</p>
+                    </li>
+                </ul>
+                <div class="cta">
+                    <a href="#">Rejoindre la Team Alpha</a>
+                    <a href="#">Découvrir les autres équipes</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pied de page réutilisable -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>Bildyx</h4>
+                <p>Une couche de visibilité structurée et modulaire pour le recrutement moderne.</p>
+            </div>
+            <div class="footer-column">
+                <h4>À propos</h4>
+                <ul>
+                    <li><a href="generic.html">Entreprise</a></li>
+                    <li><a href="generic.html">Mission</a></li>
+                    <li><a href="generic.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Notre histoire</h4>
+                <ul>
+                    <li><a href="generic.html">Pourquoi nous l'avons créée</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Réseaux sociaux</h4>
+                <ul>
+                    <li><a href="generic.html">LinkedIn</a></li>
+                    <li><a href="generic.html">Facebook</a></li>
+                    <li><a href="generic.html">YouTube</a></li>
+                    <li><a href="generic.html">X / Twitter</a></li>
+                    <li><a href="generic.html">Instagram</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 MayGraph. Tous droits réservés.</p>
+            <ul class="footer-links">
+                <li><a href="generic.html">Politique de confidentialité</a></li>
+                <li><a href="generic.html">Conditions d'utilisation</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>
