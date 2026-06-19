@@ -13,6 +13,7 @@
     "dotenv": "^17.4.2"
   },
   "scripts": {
+    "dev": "tsx watch apps/api/src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
