@@ -1,0 +1,772 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# BILDIX API — OpenAPI 3.0 Specification
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# This file is the single source of truth for the Bildix REST API.
+# NSwag reads it to generate C# controller interfaces and DTO types.
+# Swagger UI reads it to generate interactive documentation.
+#
+# Rule: edit this file FIRST, then regenerate code. Never the reverse.
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── BLOC 1 : EN-TÊTE ─────────────────────────────────────────────────────────
+# Obligatoire. Identifie la version du standard OpenAPI utilisée.
+openapi: 3.0.3
+
+# Métadonnées de l'API (affichées dans Swagger UI)
+info:
+  title: Bildix API
+  version: 1.0.0
+  description: |
+    Recruitment platform API.
+    Matches candidates with job offers using rule-based and semantic scoring.
+
+# ── BLOC 2 : SERVEURS ─────────────────────────────────────────────────────────
+# Où tourne l'API ? On peut en lister plusieurs (dev, staging, prod).
+# Swagger UI propose une liste déroulante pour choisir contre quel serveur tester.
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local development
+  # - url: https://api.bildix.com/v1
+  #   description: Production  (uncomment when deployed)
+
+# ── BLOC 3 : SÉCURITÉ GLOBALE ─────────────────────────────────────────────────
+# Déclare que TOUS les endpoints nécessitent un token JWT par défaut.
+# Un endpoint peut surcharger cette règle avec "security: []" pour être public.
+security:
+  - bearerAuth: []
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BLOC 4 : COMPOSANTS RÉUTILISABLES
+# ══════════════════════════════════════════════════════════════════════════════
+# Tout ce qui est défini ici peut être référencé ailleurs avec $ref.
+# Exemple : $ref: '#/components/schemas/Candidate'
+# Cela évite la répétition : on décrit une fois, on réutilise partout.
+components:
+
+  # ── Schéma d'authentification ──────────────────────────────────────────────
+  # Déclare le type d'auth : JWT transmis dans le header HTTP Authorization.
+  # Header attendu : "Authorization: Bearer <token>"
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # ── Réponses d'erreur réutilisables ───────────────────────────────────────
+  # Plutôt que répéter "401 Unauthorized" dans chaque endpoint, on le déclare
+  # une fois ici et on y fait référence avec $ref.
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Schémas de données ────────────────────────────────────────────────────
+  # Un schéma décrit la FORME d'un objet JSON :
+  # - quelles propriétés il a
+  # - quel type chacune (string, integer, boolean, array, object…)
+  # - lesquelles sont obligatoires (listed under "required")
+  # - contraintes optionnelles (minLength, minimum, enum…)
+  schemas:
+
+    # ── Réponse d'erreur standard ──────────────────────────────────────────
+    # Toutes les erreurs de l'API retournent ce format.
+    # Ex: { "error": { "code": "NOT_FOUND", "message": "Candidate not found" } }
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: NOT_FOUND
+            message:
+              type: string
+              example: Candidate not found
+
+    # ══════════════════════════════════════════════════════════════════════
+    # CANDIDATE
+    # ══════════════════════════════════════════════════════════════════════
+
+    # Ce que l'API RETOURNE quand on lit un candidat.
+    # Contient les champs calculés par le serveur (id, createdAt).
+    Candidate:
+      type: object
+      required: [id, name, email, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid              # UUID v4 généré côté serveur
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          example: Alice Martin
+        email:
+          type: string
+          format: email
+          example: alice@example.com
+        skills:
+          type: array
+          items:
+            type: string
+          example: [C#, SQL, Docker]
+        location:
+          type: string
+          example: Paris, France
+        experienceYears:
+          type: integer
+          minimum: 0
+          example: 3
+        createdAt:
+          type: string
+          format: date-time         # ISO 8601 : "2024-05-20T10:30:00Z"
+          example: "2024-05-20T10:30:00Z"
+
+    # Ce que le CLIENT ENVOIE pour créer un candidat.
+    # Pas d'id ni de createdAt : c'est le serveur qui les génère.
+    CreateCandidateRequest:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Alice Martin
+        email:
+          type: string
+          format: email
+          example: alice@example.com
+        skills:
+          type: array
+          items:
+            type: string
+          example: [C#, SQL, Docker]
+        location:
+          type: string
+          example: Paris, France
+        experienceYears:
+          type: integer
+          minimum: 0
+          example: 3
+
+    # ══════════════════════════════════════════════════════════════════════
+    # COMPANY
+    # ══════════════════════════════════════════════════════════════════════
+
+    Company:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Acme Corp
+        sector:
+          type: string
+          example: Technology
+        location:
+          type: string
+          example: Lyon, France
+        websiteUrl:
+          type: string
+          format: uri
+          example: https://acme.com
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateCompanyRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Acme Corp
+        sector:
+          type: string
+          example: Technology
+        location:
+          type: string
+          example: Lyon, France
+        websiteUrl:
+          type: string
+          format: uri
+
+    # ══════════════════════════════════════════════════════════════════════
+    # JOB OFFER
+    # ══════════════════════════════════════════════════════════════════════
+
+    JobOffer:
+      type: object
+      required: [id, companyId, title, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid              # Foreign key → links to a Company
+        title:
+          type: string
+          example: Senior Backend Engineer
+        description:
+          type: string
+          example: Build and maintain the core API...
+        requiredSkills:
+          type: array
+          items:
+            type: string
+          example: [C#, PostgreSQL, Docker]
+        location:
+          type: string
+          example: Remote
+        salaryMin:
+          type: integer
+          example: 45000
+        salaryMax:
+          type: integer
+          example: 65000
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateJobOfferRequest:
+      type: object
+      required: [companyId, title]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+          description: ID of the company posting this offer
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Senior Backend Engineer
+        description:
+          type: string
+        requiredSkills:
+          type: array
+          items:
+            type: string
+          example: [C#, PostgreSQL, Docker]
+        location:
+          type: string
+        salaryMin:
+          type: integer
+          minimum: 0
+        salaryMax:
+          type: integer
+          minimum: 0
+
+    # ══════════════════════════════════════════════════════════════════════
+    # MATCH
+    # ══════════════════════════════════════════════════════════════════════
+    # A Match is created by the scoring engine when a candidate is evaluated
+    # against a job offer. Status evolves as candidates/companies respond.
+
+    Match:
+      type: object
+      required: [id, candidateId, jobOfferId, score, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        candidateId:
+          type: string
+          format: uuid
+        jobOfferId:
+          type: string
+          format: uuid
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 87.5
+        status:
+          type: string
+          # Only these 3 values are valid — enforced at API level
+          enum: [pending, accepted, rejected]
+          example: pending
+        createdAt:
+          type: string
+          format: date-time
+
+    UpdateMatchStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [accepted, rejected]
+
+    # ══════════════════════════════════════════════════════════════════════
+    # AUTH
+    # ══════════════════════════════════════════════════════════════════════
+
+    RegisterRequest:
+      type: object
+      required: [email, password, role]
+      properties:
+        email:
+          type: string
+          format: email
+          example: alice@example.com
+        password:
+          type: string
+          minLength: 8
+          example: "SecurePass1!"
+        role:
+          type: string
+          enum: [candidate, company]
+          example: candidate
+        turnstileToken:
+          type: string
+          description: |
+            Cloudflare Turnstile challenge token obtained from the frontend widget.
+            Omit or leave empty when calling from Swagger UI (verification is skipped
+            server-side when Turnstile:SecretKey is not configured).
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    # The token returned on successful login or registration.
+    # The client stores this and sends it as: Authorization: Bearer <token>
+    AuthResponse:
+      type: object
+      required: [token, expiresAt, userId, role]
+      properties:
+        token:
+          type: string
+          description: JWT bearer token — include in Authorization header for all protected requests
+          example: eyJhbGciOiJIUzI1NiJ9...
+        expiresAt:
+          type: string
+          format: date-time
+          description: UTC timestamp when the token expires
+        userId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [candidate, company, admin]
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BLOC 5 : PATHS (les endpoints)
+# ══════════════════════════════════════════════════════════════════════════════
+# Chaque "path" est une route HTTP. On y définit :
+#   - le verbe HTTP (get, post, put, delete, patch)
+#   - les paramètres (path params, query params)
+#   - le corps de la requête (requestBody)
+#   - les réponses possibles avec leur code HTTP et leur schéma
+#
+# Convention : les routes ne contiennent jamais de verbe.
+#   ✅ GET /candidates      ❌ GET /getCandidates
+#   ✅ POST /candidates     ❌ POST /createCandidate
+paths:
+
+  # ── CANDIDATES ─────────────────────────────────────────────────────────────
+
+  /candidates:
+    # GET /api/v1/candidates → liste tous les candidats
+    get:
+      summary: List all candidates
+      tags: [Candidates]           # Regroupe les endpoints dans Swagger UI
+      responses:
+        '200':
+          description: Array of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Candidate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    # POST /api/v1/candidates → crée un nouveau candidat
+    post:
+      summary: Create a candidate profile
+      tags: [Candidates]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCandidateRequest'
+      responses:
+        '201':                     # 201 Created (pas 200) pour une création
+          description: Candidate created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /candidates/{id}:
+    # {id} est un path parameter : /candidates/3fa85f64-...
+    get:
+      summary: Get a candidate by ID
+      tags: [Candidates]
+      parameters:
+        - name: id
+          in: path                 # "path" = dans l'URL, "query" = après le ?
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Candidate found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete a candidate
+      tags: [Candidates]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':                     # 204 No Content : succès mais rien à retourner
+          description: Candidate deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── COMPANIES ──────────────────────────────────────────────────────────────
+
+  /companies:
+    get:
+      summary: List all companies
+      tags: [Companies]
+      responses:
+        '200':
+          description: Array of companies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Company'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create a company
+      tags: [Companies]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanyRequest'
+      responses:
+        '201':
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /companies/{id}:
+    get:
+      summary: Get a company by ID
+      tags: [Companies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Company found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── JOB OFFERS ─────────────────────────────────────────────────────────────
+
+  /jobs:
+    get:
+      summary: List job offers
+      tags: [Jobs]
+      # Query parameters : /jobs?sector=tech&location=Paris
+      parameters:
+        - name: sector
+          in: query
+          required: false
+          schema:
+            type: string
+          example: Technology
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+          example: Paris
+        - name: companyId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Array of job offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobOffer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create a job offer
+      tags: [Jobs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobOfferRequest'
+      responses:
+        '201':
+          description: Job offer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobOffer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /jobs/{id}:
+    get:
+      summary: Get a job offer by ID
+      tags: [Jobs]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job offer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobOffer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── MATCHES ────────────────────────────────────────────────────────────────
+
+  /match/candidates/{jobId}:
+    get:
+      summary: Get top matching candidates for a job offer
+      description: |
+        Runs the scoring engine against all candidates and returns them ranked
+        by match score (highest first). This is the core matching endpoint.
+      tags: [Matching]
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Ranked list of matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /match/{candidateId}/{jobId}:
+    post:
+      summary: Compute and store a match between a candidate and a job offer
+      tags: [Matching]
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Match computed and stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /match/{id}/status:
+    patch:
+      summary: Accept or reject a match (candidate or company action)
+      tags: [Matching]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMatchStatusRequest'
+      responses:
+        '200':
+          description: Match status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── AUTH ───────────────────────────────────────────────────────────────────
+  # These endpoints are public (security: []) — they don't require a JWT token.
+  # They ARE the endpoints used to obtain a token.
+
+  /auth/register:
+    post:
+      summary: Create a user account
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created — token returned immediately
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email address already in use
+
+  /auth/login:
+    post:
+      summary: Log in and receive a JWT token
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid email or password
