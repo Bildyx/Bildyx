@@ -1,4 +1,4 @@
-﻿Name of product;Type;Company;Product Type;Description;Industries;Competitors;Fun Fact;Serial Number
+name;type;company;product_type;description;industries;competitors;fun_fact;serial_number
 MS Dynamics;B2B;Microsoft;ERP & CRM Solution;Suite of business apps for managing finance, sales, customer service, and operations.;Finance, Retail, Healthcare, Gov’t, Manufacturing;SAP, Oracle NetSuite, Salesforce, Infor;First ERP/CRM suite with a unified business and customer platform.;PRO-0000001
 Salesforce;B2B;Salesforce;CRM Platform;Cloud-based CRM platform for managing sales, service, marketing, and commerce.;Retail, Finance, Manufacturing, Healthcare, Nonprofit;MS Dynamics, Oracle, SAP, HubSpot;Salesforce has a mascot bear named Astro.;PRO-0000002
 Slack;B2B;Salesforce;Collaboration Tool;Business messaging and collaboration tool for real-time communication and workflow automation.;Tech, Media, Education, Consulting, Startups;Microsoft Teams, Google Chat, Zoom, Webex;Slack was originally an internal tool for a failed video game.;PRO-0000003

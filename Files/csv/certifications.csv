@@ -1,4 +1,4 @@
-﻿Name;Level;Description;Issued by;Product Related;Jobs Related;Serial Number
+name;level;description;issued_by;products;jobs;serial_number
 Microsoft Azure Fundamentals;Beginner;Microsoft Azure Fundamentals is an entry-level certification designed to introduce individuals to the core concepts and services of Microsoft Azure, focusing on cloud computing, Azure architecture, and basic management tools. It provides foundational knowledge for deploying, managing, and securing applications in the Azure cloud environment.;Microsoft;Azure;Cloud Administrator, Cloud Services Specialist;CER-00001
 AWS Certified Solutions Architect – Associate;Intermediate;Validates the ability to design and deploy scalable, highly available systems on AWS, with an emphasis on cost-optimization and security.;Amazon Web Services;AWS;Solutions Architect, Cloud Engineer;CER-00002
 Cisco Certified Network Associate (CCNA);Beginner;Recognizes foundational skills in networking, including IP connectivity, security fundamentals, automation, and programmability.;Cisco;Cisco Networking Devices;Network Engineer, IT Support Specialist;CER-00003
