@@ -12,3 +12,323 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+// =============================================================================
+// BILDYX — COUCHE DE RÉFÉRENCE (les 10 "cartes")
+// Source : Files/excel/*.xlsx
+// Les relations entre tables sont normalisées (many-to-many implicites Prisma).
+// Les listes pointant vers des entités hors base (ex. plus grandes entreprises,
+// groupes ethniques, religions) restent en String[] pour éviter des lignes
+// fantômes. Les couches Auth / Candidats / Recrutement seront ajoutées ensuite.
+// (research_institute.csv n'a pas d'Excel — non inclus pour l'instant.)
+// =============================================================================
+
+// ----------------------------------- Enums -----------------------------------
+
+enum CertificationLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum CompanyType {
+  PUBLIC
+  PRIVATE
+  NONPROFIT
+  GOVERNMENT
+}
+
+enum ProductType {
+  B2B
+  B2C
+  B2B2C
+}
+
+enum SkillType {
+  TECHNICAL
+  SOFT
+}
+
+// --------------------------------- Industry ----------------------------------
+// Hub taxonomique référencé par companies, products, cities, countries, skills.
+
+model Industry {
+  id           String  @id @default(uuid()) @db.Uuid
+  serialNumber String? @unique @map("serial_number")
+  name         String
+  description  String?
+  medianSalary String? @map("median_salary")
+
+  companies Company[]
+  products  Product[]
+  cities    City[]
+  countries Country[]
+  skills    Skill[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("industries")
+}
+
+// ---------------------------------- Company ----------------------------------
+
+model Company {
+  id                   String       @id @default(uuid()) @db.Uuid
+  serialNumber         String?      @unique @map("serial_number")
+  organizationName     String       @map("organization_name")
+  category             String? // "Type 1" : Local Company, Multinational, ...
+  founded              Int?
+  companyType          CompanyType? @map("company_type") // "Type 2"
+  headquartersLocation String?      @map("headquarters_location")
+  numberOfOffices      Int?         @map("number_of_offices")
+  numberOfEmployees    String?      @map("number_of_employees") // ex. "101-250"
+  subsidiariesCount    Int?         @map("subsidiaries_count")
+  knownFor             String?      @map("known_for")
+
+  // Auto-relation : maison-mère / filiales ("Parent")
+  parentId     String?   @map("parent_id") @db.Uuid
+  parent       Company?  @relation("CompanyHierarchy", fields: [parentId], references: [id])
+  subsidiaries Company[] @relation("CompanyHierarchy")
+
+  industries Industry[]
+  products   Product[] // l'entreprise est productrice de ces produits
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([parentId])
+  @@map("companies")
+}
+
+// ---------------------------------- Product ----------------------------------
+
+model Product {
+  id           String       @id @default(uuid()) @db.Uuid
+  serialNumber String?      @unique @map("serial_number")
+  name         String
+  type         ProductType?
+  productType  String?      @map("product_type") // ex. "ERP & CRM Solution"
+  description  String?
+  funFact      String?      @map("fun_fact")
+
+  // Producteur : FK si l'entreprise existe en base, sinon nom libre
+  companyId   String?  @map("company_id") @db.Uuid
+  company     Company? @relation(fields: [companyId], references: [id])
+  companyName String?  @map("company_name")
+
+  industries Industry[]
+
+  // Concurrents : auto-relation pour les produits en base + noms externes
+  competesWith        Product[] @relation("ProductCompetitors")
+  competitorOf        Product[] @relation("ProductCompetitors")
+  externalCompetitors String[]  @map("external_competitors")
+
+  certifications Certification[]
+  jobs           Job[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([companyId])
+  @@map("products")
+}
+
+// ------------------------------- Certification -------------------------------
+
+model Certification {
+  id           String              @id @default(uuid()) @db.Uuid
+  serialNumber String?             @unique @map("serial_number")
+  name         String
+  level        CertificationLevel?
+  description  String?
+  issuedBy     String?             @map("issued_by")
+
+  products Product[] // "Product Related"
+  jobs     Job[] // "Jobs Related"
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("certifications")
+}
+
+// ------------------------------------ Job ------------------------------------
+
+model Job {
+  id           String   @id @default(uuid()) @db.Uuid
+  serialNumber String?  @unique @map("serial_number")
+  name         String // "Job Name"
+  description  String?
+  toolsAndTech String[] @map("tools_and_tech")
+
+  products       Product[]
+  skills         Skill[] // via "Job Occupations" côté skills
+  certifications Certification[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("jobs")
+}
+
+// ----------------------------------- Skill -----------------------------------
+
+model Skill {
+  id                  String     @id @default(uuid()) @db.Uuid
+  serialNumber        String?    @unique @map("serial_number")
+  name                String
+  type                SkillType?
+  categories          String[] // "Skill Categories"
+  usedIn              String[]   @map("used_in")
+  productCategories   String[]   @map("product_categories")
+  commonFieldsOfStudy String[]   @map("common_fields_of_study")
+  relatedAbilities    String[]   @map("related_abilities")
+  timeToMaster        String?    @map("time_to_master")
+
+  jobs       Job[] // "Job Occupations"
+  industries Industry[] // "Industry"
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("skills")
+}
+
+// ----------------------------------- City ------------------------------------
+
+model City {
+  id                       String   @id @default(uuid()) @db.Uuid
+  serialNumber             String?  @unique @map("serial_number")
+  name                     String   @map("city_name")
+  population               String?
+  numberOfMultinationalHQs Int?     @map("number_of_multinational_hqs")
+  numberOfAirports         Int?     @map("number_of_airports")
+  largestCompanies         String[] @map("largest_companies")
+  medianSalary             String?  @map("median_salary")
+  costOfLiving             String?  @map("cost_of_living")
+  medianHomePrice          String?  @map("median_home_price")
+  averageRent              String?  @map("average_rent")
+  temperatures             String?
+  climate                  String?
+  interestingFact          String?  @map("interesting_fact")
+  degreeHolders            String?  @map("degree_holders")
+  numberOfUniversities     Int?     @map("number_of_universities")
+  numberOfNationalities    String?  @map("number_of_nationalities")
+  languages                String[]
+  peopleDescription        String?  @map("people_description")
+
+  // Pays de rattachement (relation prête, non présente dans le fichier source)
+  countryId String?  @map("country_id") @db.Uuid
+  country   Country? @relation("CountryCities", fields: [countryId], references: [id])
+
+  // Pays dont cette ville est la capitale (inverse de Country.capital)
+  capitalOf Country[] @relation("CountryCapital")
+
+  mainIndustries  Industry[]
+  topUniversities University[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([countryId])
+  @@map("cities")
+}
+
+// ---------------------------------- Country ----------------------------------
+
+model Country {
+  id                            String   @id @default(uuid()) @db.Uuid
+  serialNumber                  String?  @unique @map("serial_number")
+  name                          String   @map("country_name")
+  qualityOfLife                 String?  @map("quality_of_life")
+  temperatures                  String? // "Temperature"
+  climate                       String?
+  crimeRate                     String?  @map("crime_rate")
+  incomeInequality              String?  @map("income_inequality")
+  workLifeBalance               String?  @map("work_life_balance")
+  population                    String?
+  currency                      String?
+  largestCompanies              String[] @map("largest_companies")
+  numberOfMultinationalHQs      Int?     @map("number_of_multinational_hqs")
+  medianSalary                  String?  @map("median_salary")
+  personalIncomeTax             String?  @map("personal_income_tax")
+  costOfLiving                  String?  @map("cost_of_living")
+  medianHomePrice               String?  @map("median_home_price")
+  averageRent                   String?  @map("average_rent")
+  interestingFact               String?  @map("interesting_fact")
+  citizenshipProcess            String?  @map("citizenship_process")
+  workPermit                    String?  @map("work_permit")
+  globalCompetitivenessIndex    String?  @map("global_competitiveness_index")
+  levelOfGlobalization          String?  @map("level_of_globalization")
+  numberOfInternationalStudents String?  @map("number_of_international_students")
+  numberOfForeignCompanies      String?  @map("number_of_foreign_companies")
+  numberOfTourists              String?  @map("number_of_tourists")
+  numberOfAirports              Int?     @map("number_of_airports")
+  qualityOfEducation            String?  @map("quality_of_education")
+  degreeHolders                 String?  @map("degree_holders")
+  numberOfUniversities          Int?     @map("number_of_universities")
+  ethnicGroups                  String[] @map("ethnic_groups")
+  languages                     String[]
+  religion                      String[]
+  culturalValues                String?  @map("cultural_values")
+  peopleDescription             String?  @map("people_description")
+
+  // Villes du pays (inverse de City.country)
+  cities City[] @relation("CountryCities")
+
+  // Capitale ("Capital")
+  capitalCityId String? @map("capital_city_id") @db.Uuid
+  capital       City?   @relation("CountryCapital", fields: [capitalCityId], references: [id])
+
+  mainIndustries  Industry[]
+  topUniversities University[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([capitalCityId])
+  @@map("countries")
+}
+
+// --------------------------------- University --------------------------------
+
+model University {
+  id             String  @id @default(uuid()) @db.Uuid
+  serialNumber   String? @unique @map("serial_number")
+  name           String
+  established    Int?
+  type           String?
+  location       String?
+  totalStudents  Int?    @map("total_students")
+  undergraduates Int?
+  postgraduates  Int?
+  notes          String?
+
+  cities    City[]
+  countries Country[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("universities")
+}
+
+// ----------------------------------- Fact ------------------------------------
+// Contenu autonome (anecdotes / storytelling), sans relation.
+
+model Fact {
+  id           String  @id @default(uuid()) @db.Uuid
+  serialNumber String? @unique @map("serial_number")
+  hashtag1     String? @map("hashtag_1")
+  icon1        String? @map("icon_1")
+  hashtag2     String? @map("hashtag_2")
+  title        String?
+  story        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("facts")
+}
