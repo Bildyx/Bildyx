@@ -1,4 +1,4 @@
-﻿Job Name;Description;Products;Tools and Tech;Serial Number
+name;description;products;tools_and_tech;serial_number
 Software Engineer;A software engineer designs, develops, tests, and maintains computer programs and systems to solve problems and improve processes through coding and technical expertise.;System Software, Application Software, Development Software, Database Software, Embedded Software, Networking Software, Security Software, etc.;Git, Python, AWS, Docker, etc.;JOB-000001
 Data Scientist;A data scientist analyzes and interprets complex data to help companies make decisions, using statistical, machine learning, and data visualization methods.;Predictive Models, Data Dashboards, Analytical Reports, Machine Learning Pipelines, AI Solutions;Python, R, Jupyter, TensorFlow, SQL, Tableau, Power BI;JOB-000002
 Mechanical Engineer;A mechanical engineer designs, builds, and tests mechanical devices, from engines to HVAC systems, ensuring functionality and efficiency.;Automotive Parts, HVAC Systems, Industrial Equipment, Robotics, Consumer Devices;SolidWorks, AutoCAD, MATLAB, 3D Printers, CNC Machines;JOB-000003
