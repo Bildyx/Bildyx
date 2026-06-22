@@ -32,3 +32,13 @@ export const GetTeamsOutputSchema = z.object({
     totalPages: z.number(),
   }),
 });
+
+export const PostTeamSchema = z.object({
+  company_account_id: z.string().uuid(),
+  name: z.string(),
+  who_we_are: z.string().nullable().optional(),
+  what_we_are_great_at: z.string().nullable().optional(),
+  team_culture: z.string().nullable().optional(),
+  how_we_work_together: z.string().nullable().optional(),
+  not_for_you_if: z.string().nullable().optional(),
+});
