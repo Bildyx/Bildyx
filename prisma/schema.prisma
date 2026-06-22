@@ -419,12 +419,12 @@ model Company {
   createdAt             DateTime            @default(now()) @map("created_at")
   updatedAt             DateTime            @updatedAt @map("updated_at")
 
-  industries          Industry[]      @relation("CompanyIndustries")
-  products            Product[]
-  jobOffers           JobOffer[]
+  industries           Industry[]      @relation("CompanyIndustries")
+  products             Product[]
+  jobOffers            JobOffer[]
   issuedCertifications Certification[] @relation("CertificationIssuer")
-  facts               Fact[]
-  userProfiles        UserProfile[]   @relation("UserCurrentCompany")
+  facts                Fact[]
+  userProfiles         UserProfile[]   @relation("UserCurrentCompany")
 
   @@index([parentCompanyId])
   @@index([headquartersCountryId])
@@ -467,24 +467,24 @@ model Job {
 
 /// Compétence (technique, soft skill, langue, outil…)
 model Skill {
-  id            String          @id @default(uuid()) @db.Uuid
+  id            String           @id @default(uuid()) @db.Uuid
   name          String
-  slug          String          @unique
+  slug          String           @unique
   category      SkillCategory?
   description   String?
-  iconUrl       String?         @map("icon_url")
-  industryId    String?         @map("industry_id") @db.Uuid
-  industry      Industry?       @relation(fields: [industryId], references: [id])
+  iconUrl       String?          @map("icon_url")
+  industryId    String?          @map("industry_id") @db.Uuid
+  industry      Industry?        @relation(fields: [industryId], references: [id])
   difficulty    DifficultyLevel?
-  isVerifiable  Boolean         @default(false) @map("is_verifiable")
-  parentSkillId String?         @map("parent_skill_id") @db.Uuid
-  parentSkill   Skill?          @relation("SkillHierarchy", fields: [parentSkillId], references: [id])
-  childSkills   Skill[]         @relation("SkillHierarchy")
+  isVerifiable  Boolean          @default(false) @map("is_verifiable")
+  parentSkillId String?          @map("parent_skill_id") @db.Uuid
+  parentSkill   Skill?           @relation("SkillHierarchy", fields: [parentSkillId], references: [id])
+  childSkills   Skill[]          @relation("SkillHierarchy")
   aliases       String[]
   metadata      Json?
-  deletedAt     DateTime?       @map("deleted_at")
-  createdAt     DateTime        @default(now()) @map("created_at")
-  updatedAt     DateTime        @updatedAt @map("updated_at")
+  deletedAt     DateTime?        @map("deleted_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
 
   jobOfferSkills JobOfferSkill[]
 
@@ -748,19 +748,17 @@ model User {
   status        UserStatus @default(PENDING_VERIFICATION)
   locale        String?    @default("fr")
   timezone      String?
-  lastLoginAt   DateTime?  @map("last_login_at")
-  metadata      Json?
-  deletedAt     DateTime?  @map("deleted_at")
+  lastLoginAt         DateTime?  @map("last_login_at")
+  failedLoginAttempts Int        @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?  @map("locked_until")
+  passwordChangedAt   DateTime?  @map("password_changed_at")
+  metadata            Json?
+  deletedAt           DateTime?  @map("deleted_at")
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
-  sessions      UserSession[]
-  profile       UserProfile?
-  bookmarks     Bookmark[]
-  cardViews     CardView[]
-  reviews       Review[]
-  notifications Notification[]
-  followings    UserFollowing[]
+  sessions UserSession[]
+  profile  UserProfile?
 
   @@index([status])
   @@index([role])
@@ -772,8 +770,9 @@ model UserSession {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique
+  tokenHash String   @unique @map("token_hash")
   expiresAt DateTime @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
   ipAddress String?  @map("ip_address")
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
@@ -815,93 +814,17 @@ model UserProfile {
   @@map("user_profiles")
 }
 
-// =============================================================================
-// COUCHE 3 — INTERACTIONS UTILISATEURS
-// =============================================================================
-
-/// Favori / Carte sauvegardée (organisable en collections)
-model Bookmark {
-  id             String     @id @default(uuid()) @db.Uuid
-  userId         String     @map("user_id") @db.Uuid
-  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entityType     EntityType @map("entity_type")
-  entityId       String     @map("entity_id") @db.Uuid
-  collectionName String?    @map("collection_name")
-  createdAt      DateTime   @default(now()) @map("created_at")
-
-  @@unique([userId, entityType, entityId])
-  @@index([userId])
-  @@index([entityType, entityId])
-  @@map("bookmarks")
-}
-
-/// Vue / Consultation d'une carte (analytics)
-model CardView {
-  id              String     @id @default(uuid()) @db.Uuid
-  entityType      EntityType @map("entity_type")
-  entityId        String     @map("entity_id") @db.Uuid
-  userId          String?    @map("user_id") @db.Uuid
-  user            User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  viewedAt        DateTime   @default(now()) @map("viewed_at")
-  durationSeconds Int?       @map("duration_seconds")
-  source          String?
-  createdAt       DateTime   @default(now()) @map("created_at")
-
-  @@index([entityType, entityId])
-  @@index([userId])
-  @@index([viewedAt])
-  @@map("card_views")
-}
-
-/// Avis / Note (1-5) sur une carte
-model Review {
-  id         String     @id @default(uuid()) @db.Uuid
-  userId     String     @map("user_id") @db.Uuid
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entityType EntityType @map("entity_type")
-  entityId   String     @map("entity_id") @db.Uuid
-  rating     Int        @db.SmallInt
-  comment    String?
-  isVerified Boolean    @default(false) @map("is_verified")
-  metadata   Json?
-  deletedAt  DateTime?  @map("deleted_at")
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
-
-  @@unique([userId, entityType, entityId])
-  @@index([entityType, entityId])
-  @@index([rating])
-  @@map("reviews")
-}
-
-/// Notification utilisateur
-model Notification {
-  id        String           @id @default(uuid()) @db.Uuid
-  userId    String           @map("user_id") @db.Uuid
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      NotificationType
-  title     String
-  body      String?
-  isRead    Boolean          @default(false) @map("is_read")
-  actionUrl String?          @map("action_url")
+/// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  action    String
+  ipAddress String?  @map("ip_address")
   metadata  Json?
-  createdAt DateTime         @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([userId, isRead])
+  @@index([userId])
+  @@index([action])
   @@index([createdAt])
-  @@map("notifications")
-}
-
-/// Abonnement / Suivi d'une entité (user, company, pays…)
-model UserFollowing {
-  id         String     @id @default(uuid()) @db.Uuid
-  followerId String     @map("follower_id") @db.Uuid
-  follower   User       @relation(fields: [followerId], references: [id], onDelete: Cascade)
-  entityType EntityType @map("entity_type")
-  entityId   String     @map("entity_id") @db.Uuid
-  createdAt  DateTime   @default(now()) @map("created_at")
-
-  @@unique([followerId, entityType, entityId])
-  @@index([entityType, entityId])
-  @@map("user_followings")
+  @@map("audit_logs")
 }
