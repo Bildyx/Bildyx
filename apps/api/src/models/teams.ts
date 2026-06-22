@@ -15,6 +15,20 @@ export const TeamSchema = z.object({
 
 export const GetTeamsSchema = z.object({
   companyId: z.string().uuid(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  search: z.string().optional(),
+  name: z.string().optional(),
 });
 
 export type GetTeamsInput = z.infer<typeof GetTeamsSchema>;
+
+export const GetTeamsOutputSchema = z.object({
+  data: z.array(TeamSchema),
+  meta: z.object({
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+  }),
+});
