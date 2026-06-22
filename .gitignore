@@ -3,3 +3,7 @@ node_modules
 .env
 
 /generated/prisma
+
+CLAUDE.MD
+Database.rtf
+Database_prompt.rtf
