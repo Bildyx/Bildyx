@@ -5,16 +5,25 @@
   "main": "index.js",
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^25.9.4",
+    "@types/node": "^25.9.3",
     "prisma": "^6.19.3",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@prisma/client": "^7.8.0",
+    "@orpc/openapi": "^1.14.6",
+    "@orpc/server": "^1.14.6",
+    "@orpc/valibot": "^1.14.6",
+    "@orpc/zod": "^1.14.6",
+    "@prisma/client": "^6.19.0",
     "@scalar/express-api-reference": "^0.10.4",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "kysely": "^0.29.2",
+    "pg": "^8.22.0",
+    "pretty-ms": "^9.3.0",
+    "valibot": "^1.4.1",
+    "zod": "^4.4.3"
   },
   "scripts": {
     "dev": "tsx watch apps/api/src/index.ts",
