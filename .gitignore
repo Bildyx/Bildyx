@@ -3,8 +3,3 @@ node_modules
 .env
 
 /generated/prisma
-
-#Valentin
-CLAUDE.MD
-Database.rtf
-Database_prompt.rtf
