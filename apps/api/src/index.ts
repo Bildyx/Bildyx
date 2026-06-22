@@ -91,9 +91,9 @@ const server = app.listen(PORT, HOST, () => {
   const afterTimeMs = performance.now()
   const elapsedTimeMs = afterTimeMs - beforeTimeMs
 
-  const address = JSON.stringify(server.address())
+  const url = `http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`
   console.log(
-    `API ${util.styleText("bold", `v${VERSION}`)} listening at ${util.styleText("cyan", address)}`,
+    `API ${util.styleText("bold", `v${VERSION}`)} listening at ${util.styleText("cyan", url)}`,
   )
   console.log(`Ready in ${prettyMilliseconds(elapsedTimeMs)}`)
   console.log()

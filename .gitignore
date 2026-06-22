@@ -2,6 +2,7 @@
 .env
 
 /generated/prisma
+.vscode/
 
 CLAUDE.MD
 Database.rtf

@@ -1,0 +1,36 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "Bildyx Backend API",
+  "main": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.3",
+    "@types/pg": "^8.20.0",
+    "kysely-codegen": "^0.20.0",
+    "prisma": "^6.19.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@orpc/openapi": "^1.14.6",
+    "@orpc/server": "^1.14.6",
+    "@orpc/valibot": "^1.14.6",
+    "@orpc/zod": "^1.14.6",
+    "@prisma/client": "^6.19.0",
+    "@scalar/express-api-reference": "^0.10.4",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "kysely": "^0.29.2",
+    "pg": "^8.22.0",
+    "pretty-ms": "^9.3.0",
+    "valibot": "^1.4.1",
+    "zod": "^4.4.3"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "seed": "tsx src/seed.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

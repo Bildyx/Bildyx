@@ -188,7 +188,7 @@ function renderTeam(teamKey) {
 
     membersContainer.innerHTML = team.members.map(([name, role, image]) => `
         <div class="member-card">
-            <img class="member-avatar" src="images/${image}" alt="${name}" />
+            <img class="member-avatar" src="../images/${image}" alt="${name}" />
             <strong>${name}</strong>
             <span>${role}</span>
         </div>
