@@ -1,12 +1,19 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { GetTeamsSchema, TeamSchema, GetTeamsOutputSchema } from "../models/teams";
+import { GetTeamsSchema, TeamSchema, GetTeamsOutputSchema, PostTeamSchema } from "../models/teams";
 import { z } from "zod";
+import { randomUUID } from "node:crypto";
 
 export const teams = {
   getByCompany: publicProcedure
-    .route({ method: "GET", path: "/companies/{companyId}/teams", tags: ["Team"] })
+    .route({ 
+      method: "GET", 
+      summary: "List all teams",
+      description: "Get all teams by company",
+      path: "/companies/{companyId}/teams", 
+      tags: ["Team"] 
+    })
     .input(GetTeamsSchema)
     .output(GetTeamsOutputSchema)
     .handler(async ({ input }) => {
@@ -62,7 +69,12 @@ export const teams = {
     }),
 
   getByTeam: publicProcedure
-    .route({ method: "GET", path: "/teams/{teamId}", tags: ["Team"] })
+    .route({ 
+      method: "GET", 
+      summary: "List one team",
+      description: "Get one team by team id",
+      path: "/teams/{teamId}", 
+      tags: ["Team"] })
     .input(z.object({ teamId: z.string().uuid() }))
     .output(TeamSchema)
     .handler(async ({ input }) => {
@@ -79,5 +91,44 @@ export const teams = {
       }
 
       return data;
-    })
+    }),
+
+  create: publicProcedure
+    .route({
+      method: "POST", 
+      summary: "Create a new team",
+      description: "Create a new team for a company account",
+      path: "/teams", 
+      tags: ["Team"] })
+    .input(PostTeamSchema)
+    .output(TeamSchema)
+    .handler(async ({ input }) => {
+
+      const { company_account_id } = input;
+
+      const companyAccount = await database.selectFrom('company_accounts')
+        .where('id', '=', company_account_id)
+        .select('id')
+        .executeTakeFirst();
+
+      if (!companyAccount) {
+        throw new ORPCError("NOT_FOUND", { message: "Company account not found" });
+      }
+
+      const data = await database
+        .insertInto('teams')
+        .values({
+          ...input,
+          id: randomUUID(),
+          updated_at: new Date(),
+        })
+        .returningAll()
+        .executeTakeFirst();
+
+      if (!data) {
+        throw new ORPCError("NOT_FOUND", { message: "Team not found" });
+      }
+
+      return data;
+    }),
 };
