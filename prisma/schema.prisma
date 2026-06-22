@@ -83,9 +83,8 @@ enum SkillImportance {
 
 // --- Company ---
 
-enum CompanyType {
-  PRIVATE
-  PUBLIC
+enum OrganizationType {
+  COMPANY
   NGO
   GOVERNMENT_MINISTRY
   RESEARCH_INSTITUTE
@@ -278,7 +277,7 @@ enum NotificationType {
 }
 
 // =============================================================================
-// COUCHE 1 — TABLES DE RÉFÉRENCE (les "cartes")
+// LAYER 1 — TABLES DE RÉFÉRENCE (les "cartes")
 // =============================================================================
 
 /// Secteur d'activité (hiérarchie NACE/SIC)
@@ -302,8 +301,8 @@ model Industry {
 
   jobs      Job[]
   skills    Skill[]
-  companies Company[] @relation("CompanyIndustries")
-  products  Product[] @relation("ProductIndustries")
+  companies Organization[] @relation("CompanyIndustries")
+  products  Subject[]      @relation("ProductIndustries")
   facts     Fact[]
 
   @@index([parentIndustryId])
@@ -344,11 +343,11 @@ model Country {
   cities       City[]
   jobs         Job[]
   jobOffers    JobOffer[]
-  companiesHq  Company[]     @relation("CompanyHqCountry")
+  companiesHq  Organization[] @relation("CompanyHqCountry")
   universities University[]
   degrees      Degree[]
   facts        Fact[]
-  userProfiles UserProfile[] @relation("UserProfileCountry")
+  userProfiles UserProfile[]  @relation("UserProfileCountry")
 
   @@index([continent])
   @@map("countries")
@@ -375,7 +374,7 @@ model City {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  companiesHq  Company[]     @relation("CompanyHqCity")
+  companiesHq  Organization[] @relation("CompanyHqCity")
   universities University[]
   jobOffers    JobOffer[]
   userProfiles UserProfile[]
@@ -387,12 +386,12 @@ model City {
 }
 
 /// Entreprise / Organisation
-model Company {
+model Organization {
   id                    String              @id @default(uuid()) @db.Uuid
   name                  String
   slug                  String              @unique
   legalName             String?             @map("legal_name")
-  type                  CompanyType?
+  type                  OrganizationType?
   description           String?
   shortDescription      String?             @map("short_description")
   logoUrl               String?             @map("logo_url")
@@ -410,8 +409,8 @@ model Company {
   stockTicker           String?             @map("stock_ticker")
   stockExchange         String?             @map("stock_exchange")
   parentCompanyId       String?             @map("parent_company_id") @db.Uuid
-  parentCompany         Company?            @relation("CompanyHierarchy", fields: [parentCompanyId], references: [id])
-  subsidiaries          Company[]           @relation("CompanyHierarchy")
+  parentCompany         Organization?       @relation("CompanyHierarchy", fields: [parentCompanyId], references: [id])
+  subsidiaries          Organization[]      @relation("CompanyHierarchy")
   isCertified           Boolean             @default(false) @map("is_certified")
   tags                  String[]
   metadata              Json?
@@ -420,7 +419,7 @@ model Company {
   updatedAt             DateTime            @updatedAt @map("updated_at")
 
   industries           Industry[]      @relation("CompanyIndustries")
-  products             Product[]
+  products             Subject[]
   jobOffers            JobOffer[]
   issuedCertifications Certification[] @relation("CertificationIssuer")
   facts                Fact[]
@@ -500,7 +499,7 @@ model Certification {
   name                   String
   slug                   String                 @unique
   issuingOrganizationId  String?                @map("issuing_organization_id") @db.Uuid
-  issuingOrganization    Company?               @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
+  issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
   description            String?
   category               CertificationCategory?
   validityDurationMonths Int?                   @map("validity_duration_months")
@@ -591,7 +590,7 @@ model Degree {
 }
 
 /// Produit / Service / Solution
-model Product {
+model Subject {
   id               String           @id @default(uuid()) @db.Uuid
   name             String
   slug             String           @unique
@@ -599,7 +598,7 @@ model Product {
   shortDescription String?          @map("short_description")
   category         ProductCategory?
   companyId        String?          @map("company_id") @db.Uuid
-  company          Company?         @relation(fields: [companyId], references: [id])
+  company          Organization?    @relation(fields: [companyId], references: [id])
   websiteUrl       String?          @map("website_url")
   logoUrl          String?          @map("logo_url")
   pricingModel     PricingModel?    @map("pricing_model")
@@ -639,7 +638,7 @@ model Fact {
   relatedCityId       String?       @map("related_city_id") @db.Uuid
   relatedCity         City?         @relation(fields: [relatedCityId], references: [id])
   relatedCompanyId    String?       @map("related_company_id") @db.Uuid
-  relatedCompany      Company?      @relation(fields: [relatedCompanyId], references: [id])
+  relatedCompany      Organization? @relation(fields: [relatedCompanyId], references: [id])
   relatedIndustryId   String?       @map("related_industry_id") @db.Uuid
   relatedIndustry     Industry?     @relation(fields: [relatedIndustryId], references: [id])
   relatedJobId        String?       @map("related_job_id") @db.Uuid
@@ -647,7 +646,7 @@ model Fact {
   relatedUniversityId String?       @map("related_university_id") @db.Uuid
   relatedUniversity   University?   @relation(fields: [relatedUniversityId], references: [id])
   relatedProductId    String?       @map("related_product_id") @db.Uuid
-  relatedProduct      Product?      @relation(fields: [relatedProductId], references: [id])
+  relatedProduct      Subject?      @relation(fields: [relatedProductId], references: [id])
   tags                String[]
   metadata            Json?
   deletedAt           DateTime?     @map("deleted_at")
@@ -672,7 +671,7 @@ model JobOffer {
   title                   String
   slug                    String          @unique
   companyId               String          @map("company_id") @db.Uuid
-  company                 Company         @relation(fields: [companyId], references: [id])
+  company                 Organization    @relation(fields: [companyId], references: [id])
   jobId                   String?         @map("job_id") @db.Uuid
   job                     Job?            @relation(fields: [jobId], references: [id])
   description             String?
@@ -735,27 +734,27 @@ model JobOfferSkill {
 
 /// Utilisateur (authentification & identité)
 model User {
-  id            String     @id @default(uuid()) @db.Uuid
-  email         String     @unique
-  emailVerified Boolean    @default(false) @map("email_verified")
-  passwordHash  String     @map("password_hash")
-  firstName     String?    @map("first_name")
-  lastName      String?    @map("last_name")
-  displayName   String?    @map("display_name")
-  avatarUrl     String?    @map("avatar_url")
-  bio           String?
-  role          UserRole   @default(USER)
-  status        UserStatus @default(PENDING_VERIFICATION)
-  locale        String?    @default("fr")
-  timezone      String?
+  id                  String     @id @default(uuid()) @db.Uuid
+  email               String     @unique
+  emailVerified       Boolean    @default(false) @map("email_verified")
+  passwordHash        String     @map("password_hash")
+  firstName           String?    @map("first_name")
+  lastName            String?    @map("last_name")
+  displayName         String?    @map("display_name")
+  avatarUrl           String?    @map("avatar_url")
+  bio                 String?
+  role                UserRole   @default(USER)
+  status              UserStatus @default(PENDING_VERIFICATION)
+  locale              String?    @default("fr")
+  timezone            String?
   lastLoginAt         DateTime?  @map("last_login_at")
   failedLoginAttempts Int        @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime?  @map("locked_until")
   passwordChangedAt   DateTime?  @map("password_changed_at")
   metadata            Json?
   deletedAt           DateTime?  @map("deleted_at")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
 
   sessions UserSession[]
   profile  UserProfile?
@@ -767,15 +766,15 @@ model User {
 
 /// Session JWT / Refresh token
 model UserSession {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String   @unique @map("token_hash")
-  expiresAt DateTime @map("expires_at")
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
   revokedAt DateTime? @map("revoked_at")
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
-  createdAt DateTime @default(now()) @map("created_at")
+  ipAddress String?   @map("ip_address")
+  userAgent String?   @map("user_agent")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   @@index([userId])
   @@index([expiresAt])
@@ -784,28 +783,28 @@ model UserSession {
 
 /// Profil public étendu (1-to-1 avec User)
 model UserProfile {
-  id                  String    @id @default(uuid()) @db.Uuid
-  userId              String    @unique @map("user_id") @db.Uuid
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String        @id @default(uuid()) @db.Uuid
+  userId              String        @unique @map("user_id") @db.Uuid
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   headline            String?
   biography           String?
-  countryId           String?   @map("country_id") @db.Uuid
-  country             Country?  @relation("UserProfileCountry", fields: [countryId], references: [id])
-  cityId              String?   @map("city_id") @db.Uuid
-  city                City?     @relation(fields: [cityId], references: [id])
-  linkedinUrl         String?   @map("linkedin_url")
-  twitterUrl          String?   @map("twitter_url")
-  githubUrl           String?   @map("github_url")
-  websiteUrl          String?   @map("website_url")
-  isPublic            Boolean   @default(true) @map("is_public")
-  currentJobId        String?   @map("current_job_id") @db.Uuid
-  currentJob          Job?      @relation("UserCurrentJob", fields: [currentJobId], references: [id])
-  currentJobStartedAt DateTime? @map("current_job_started_at")
-  currentCompanyId    String?   @map("current_company_id") @db.Uuid
-  currentCompany      Company?  @relation("UserCurrentCompany", fields: [currentCompanyId], references: [id])
+  countryId           String?       @map("country_id") @db.Uuid
+  country             Country?      @relation("UserProfileCountry", fields: [countryId], references: [id])
+  cityId              String?       @map("city_id") @db.Uuid
+  city                City?         @relation(fields: [cityId], references: [id])
+  linkedinUrl         String?       @map("linkedin_url")
+  twitterUrl          String?       @map("twitter_url")
+  githubUrl           String?       @map("github_url")
+  websiteUrl          String?       @map("website_url")
+  isPublic            Boolean       @default(true) @map("is_public")
+  currentJobId        String?       @map("current_job_id") @db.Uuid
+  currentJob          Job?          @relation("UserCurrentJob", fields: [currentJobId], references: [id])
+  currentJobStartedAt DateTime?     @map("current_job_started_at")
+  currentCompanyId    String?       @map("current_company_id") @db.Uuid
+  currentCompany      Organization? @relation("UserCurrentCompany", fields: [currentCompanyId], references: [id])
   metadata            Json?
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
 
   @@index([countryId])
   @@index([cityId])
