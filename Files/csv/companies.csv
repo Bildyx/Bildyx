@@ -1,4 +1,4 @@
-﻿Organization Name;Category;Industry;Founded ;Company Type;Headquarters Location;Parent;Number of Offices;Number of Employees;Products;Subsidiaries;Known For;Serial Number
+organization_name;category;industries;founded;company_type;headquarters_location;parent;number_of_offices;number_of_employees;products;subsidiaries_count;known_for;serial_number
 Amtel Systems;Local Company;Communication Hardware, Customer Service, Manufacturing, Messaging, SMS, Technical Support;1900;Public;Chester Springs, Pennsylvania, United States;Quixote Corp.;;;Product 1;2;Innovation;COM-000001
 Archeio Technologies;Local Company;Oil and Gas, SaaS, Software;2014;Public;Dallas, Texas, United States;Quorum Software;;101-250;Product 2;2;Innovation;COM-000002
 Arcinova;Local Company;Biotechnology, Chemical;2015;Public;Alnwick, Northumberland, United Kingdom;Quotient Sciences;;101-250;Product 3;2;Innovation;COM-000003
