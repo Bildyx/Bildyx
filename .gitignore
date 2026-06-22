@@ -4,6 +4,7 @@ node_modules
 
 /generated/prisma
 
+#Valentin
 CLAUDE.MD
 Database.rtf
 Database_prompt.rtf
