@@ -1,5 +1,22 @@
-node_modules
 # Keep environment variables out of version control
 .env
 
 /generated/prisma
+
+CLAUDE.MD
+Database.rtf
+Database_prompt.rtf
+
+# macOS
+.DS_Store
+
+# .NET
+**/bin/
+**/obj/
+
+# Node
+node_modules/
+
+# Build
+dist/
+build/
