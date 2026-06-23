@@ -81,7 +81,7 @@ enum SkillImportance {
   NICE_TO_HAVE
 }
 
-// --- Company ---
+// --- Organization ---
 
 enum OrganizationType {
   COMPANY
@@ -343,7 +343,6 @@ model Country {
   cities       City[]
   jobs         Job[]
   jobOffers    JobOffer[]
-  companiesHq  Organization[] @relation("CompanyHqCountry")
   universities University[]
   degrees      Degree[]
   facts        Fact[]
@@ -374,7 +373,6 @@ model City {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  companiesHq  Organization[] @relation("CompanyHqCity")
   universities University[]
   jobOffers    JobOffer[]
   userProfiles UserProfile[]
@@ -387,49 +385,134 @@ model City {
 
 /// Entreprise / Organisation
 model Organization {
-  id                    String              @id @default(uuid()) @db.Uuid
-  name                  String
-  slug                  String              @unique
-  legalName             String?             @map("legal_name")
-  type                  OrganizationType?
-  description           String?
-  shortDescription      String?             @map("short_description")
-  logoUrl               String?             @map("logo_url")
-  websiteUrl            String?             @map("website_url")
-  linkedinUrl           String?             @map("linkedin_url")
-  foundedYear           Int?                @map("founded_year")
-  dissolutionYear       Int?                @map("dissolution_year")    //?
-  headquartersCountryId String?             @map("headquarters_country_id") @db.Uuid
-  headquartersCountry   Country?            @relation("CompanyHqCountry", fields: [headquartersCountryId], references: [id])
-  headquartersCityId    String?             @map("headquarters_city_id") @db.Uuid
-  headquartersCity      City?               @relation("CompanyHqCity", fields: [headquartersCityId], references: [id])
-  employeeCountRange    EmployeeCountRange? @map("employee_count_range")
-  revenueRange          RevenueRange?       @map("revenue_range")
-  isPubliclyTraded      Boolean             @default(false) @map("is_publicly_traded")    //?
-  stockTicker           String?             @map("stock_ticker")    //?
-  stockExchange         String?             @map("stock_exchange")    //?
-  parentCompanyId       String?             @map("parent_company_id") @db.Uuid
-  parentCompany         Organization?       @relation("CompanyHierarchy", fields: [parentCompanyId], references: [id])
-  subsidiaries          Organization[]      @relation("CompanyHierarchy")
-  isCertified           Boolean             @default(false) @map("is_certified")
-  tags                  String[]
-  metadata              Json?
-  deletedAt             DateTime?           @map("deleted_at")
-  createdAt             DateTime            @default(now()) @map("created_at")
-  updatedAt             DateTime            @updatedAt @map("updated_at")
+  id                          String             @id @default(uuid()) @db.Uuid
+  name                        String
+  slug                        String             @unique
+  type                        OrganizationType?
+  legalStatus                 String?            @map("legal_status")
+  ownership                   String?
+  mission                     String?
+  purpose                     String?
+  focus                       String?
+  focusAreas                  String[]           @map("focus_areas")
+  strategicFocus              String?            @map("strategic_focus")
+  knownFor                    String[]           @map("known_for")
+  distinction                 String?
+  fields                      String[]
+  keyActivities               String[]           @map("key_activities")
+  keyProject                  String?            @map("key_project")
+  keyResearchOutput           String?            @map("key_research_output")
+  majorPrograms               String[]           @map("major_programs")
+  majorProjects               String[]           @map("major_projects")
+  researchAreas               String[]           @map("research_areas")
+  researchModel               String?            @map("research_model")
+  businessAndInnovation       String?            @map("business_and_innovation")
+  products                    String[]
+  services                    String[]
+  managementAndAdmin          String?            @map("management_and_admin")
+  mainOrgan                   String?            @map("main_organ")
+  constituency                String?
+  affiliation                 String?
+  collaborations              String[]
+  partnerships                String[]
+  fundingSources              String[]           @map("funding_sources")
+  budget                      String?
+  endowment                   String?
+  gdp                         String?
+  founded                     String?
+  formed                      String?
+  formation                   String?
+  opened                      String?
+  dissolved                   String?
+  founder                     String?
 
+  // --- Localisation ---
+  headquarters                String?
+  location                    String?
+  regionServed                String?            @map("region_served")
+  geography                   String?
+  totalLandArea               String?            @map("total_land_area")
+  populationOfCity            String?            @map("population_of_city")
+
+  // --- Taille & Effectifs ---
+  numberOfOffices             Int?               @map("number_of_offices")
+  numberOfEmployees           Int?               @map("number_of_employees")
+  numberOfMembers             Int?               @map("number_of_members")
+  numberOfPersonnel           Int?               @map("number_of_personnel")
+  numberOfVolunteers          Int?               @map("number_of_volunteers")
+  numberOfGovernmentMinistries Int?              @map("number_of_government_ministries")
+  numberOfMinistries          Int?               @map("number_of_ministries")
+  scale                       String?
+  size                        String?
+  visitors                    String?
+
+  // --- Installations & Structures ---
+  labs                        String[]
+  giantFacilities             String[]           @map("giant_facilities")
+  nationalParks               String[]           @map("national_parks")
+  librariesAndPublications    String?            @map("libraries_and_publications")
+  tacticalUnits               String[]           @map("tactical_units")
+
+  // --- Hiérarchie ---
+  parentOrganizationId        String?            @map("parent_organization_id") @db.Uuid
+  parentOrganization          Organization?      @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
+  childAgencies               Organization[]     @relation("OrganizationHierarchy")
+  parentBureau                String?            @map("parent_bureau")
+  parentDepartment            String?            @map("parent_department")
+  parentMinistry              String?            @map("parent_ministry")
+  precedingAgency             String?            @map("preceding_agency")
+  precedingBureau             String?            @map("preceding_bureau")
+  precedingDepartment         String?            @map("preceding_department")
+  supersedingAgencies         String[]           @map("superseding_agencies")
+  supersedingPostalSystem     String?            @map("superseding_postal_system")
+
+  // --- Militaire : Marine ---
+  numberOfActiveNavyPersonnel Int?               @map("number_of_active_navy_personnel")
+  numberOfDestroyers          Int?               @map("number_of_destroyers")
+  numberOfSubmarinesDiesel    Int?               @map("number_of_submarines_diesel")
+  numberOfSubmarinesNuclear   Int?               @map("number_of_submarines_nuclear")
+  numberOfNavalShipyards      Int?               @map("number_of_naval_shipyards")
+  numberOfMaritimePatrolAircraft Int?            @map("number_of_maritime_patrol_aircraft")
+  numberOfStealthFleet        Int?               @map("number_of_stealth_fleet")
+  numberOfSurveillanceRadars  Int?               @map("number_of_surveillance_radars")
+
+  // --- Militaire : Aérien ---
+  numberOfAircrafts           Int?               @map("number_of_aircrafts")
+  numberOfFighterJets         Int?               @map("number_of_fighter_jets")
+  numberOfHelicopters         Int?               @map("number_of_helicopters")
+  numberOfDrones              Int?               @map("number_of_drones")
+  numberOfTankerPlanes        Int?               @map("number_of_tanker_planes")
+  numberOfTransportPlanes     Int?               @map("number_of_transport_planes")
+
+  // --- Spatial ---
+  numberOfCommunicationSatellites Int?           @map("number_of_communication_satellites")
+  numberOfMissileWarningSatellites Int?          @map("number_of_missile_warning_satellites")
+  numberOfNavigationSatellites Int?              @map("number_of_navigation_satellites")
+  numberOfSpySatellites       Int?               @map("number_of_spy_satellites")
+  numberOfSatelliteJammingSystems Int?           @map("number_of_satellite_jamming_systems")
+  numberOfSurveillanceTelescopes Int?            @map("number_of_surveillance_telescopes")
+  numberOfOperationalSpaceplanes Int?            @map("number_of_operational_spaceplanes")
+  numberOfSpaceLaunchSites    Int?               @map("number_of_space_launch_sites")
+  numberOfSpaceOperationsSquadrons Int?          @map("number_of_space_operations_squadrons")
+  numberOfSpacePersonnel      Int?               @map("number_of_space_personnel")
+
+  // --- Métadonnées ---
+  metadata                    Json?
+  deletedAt                   DateTime?          @map("deleted_at")
+  createdAt                   DateTime           @default(now()) @map("created_at")
+  updatedAt                   DateTime           @updatedAt @map("updated_at")
+
+  // --- Relations ---
   industries           Industry[]      @relation("CompanyIndustries")
-  products             Subject[]
+  subjects             Subject[]
   jobOffers            JobOffer[]
   issuedCertifications Certification[] @relation("CertificationIssuer")
   facts                Fact[]
   userProfiles         UserProfile[]   @relation("UserCurrentCompany")
 
-  @@index([parentCompanyId])
-  @@index([headquartersCountryId])
-  @@index([headquartersCityId])
+  @@index([parentOrganizationId])
   @@index([type])
-  @@map("companies")
+  @@map("organizations")
 }
 
 /// Métier / Fonction exercée par une personne (≠ offre d'emploi)
@@ -499,7 +582,7 @@ model Certification {
   name                   String
   slug                   String                 @unique
   issuingOrganizationId  String?                @map("issuing_organization_id") @db.Uuid
-  issuingOrganization    Company?               @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
+  issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
   description            String?
   category               CertificationCategory?
   validityDurationMonths Int?                   @map("validity_duration_months")
@@ -599,7 +682,7 @@ model Subject {
   shortDescription String?          @map("short_description")
   category         ProductCategory?
   companyId        String?          @map("company_id") @db.Uuid
-  company          Company?         @relation(fields: [companyId], references: [id])
+  company          Organization?    @relation(fields: [companyId], references: [id])
   websiteUrl       String?          @map("website_url")
   logoUrl          String?          @map("logo_url")
   pricingModel     PricingModel?    @map("pricing_model")
@@ -673,7 +756,7 @@ model JobOffer {
   title                   String
   slug                    String          @unique
   companyId               String          @map("company_id") @db.Uuid
-  company                 Company         @relation(fields: [companyId], references: [id])
+  company                 Organization    @relation(fields: [companyId], references: [id])
   jobId                   String?         @map("job_id") @db.Uuid
   job                     Job?            @relation(fields: [jobId], references: [id])
   description             String?
@@ -805,7 +888,7 @@ model UserProfile {
   currentJob          Job?      @relation("UserCurrentJob", fields: [currentJobId], references: [id])
   currentJobStartedAt DateTime? @map("current_job_started_at")
   currentCompanyId    String?   @map("current_company_id") @db.Uuid
-  currentCompany      Company?  @relation("UserCurrentCompany", fields: [currentCompanyId], references: [id])
+  currentCompany      Organization?  @relation("UserCurrentCompany", fields: [currentCompanyId], references: [id])
   metadata            Json?
   createdAt           DateTime      @default(now()) @map("created_at")
   updatedAt           DateTime      @updatedAt @map("updated_at")
