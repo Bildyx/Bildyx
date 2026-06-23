@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bildyx — Verify Email</title>
+
+    <!-- Font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Global CSS first, auth-specific CSS second -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+    <!-- Reusable header -->
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/image.jpg" alt="Logo Bildyx" />
+            </a>
+
+            <nav class="nav-buttons">
+                <a href="login.html" class="signup">Log In / Sign Up</a>
+            </nav>
+        </div>
+    </header>
+    <main class="auth-shell">
+        <!-- Left panel: dynamic brand content -->
+        <section class="brand-panel" id="brandPanel" aria-label="Bildyx presentation">
+            <a class="brand" href="index.html" aria-label="Back to home">
+                <img class="brand-icon" src="assets/image.jpg" alt="" />
+                <span>BILDYX</span>
+            </a>
+
+            <div class="brand-content">
+                <h1 id="brandTitle">"Right Teams. Right<br>Candidates."</h1>
+
+                <div class="brand-features">
+                    <article class="feature-card brand-feature">
+                        <span class="feature-icon">
+                            <img src="assets/image.jpg" alt="" />
+                        </span>
+
+                        <div>
+                            <h2 class="brand-feature-title">For Companies</h2>
+                            <p class="brand-feature-text">Build profile and present your teams to potential candidates.</p>
+                        </div>
+                    </article>
+
+                    <article class="feature-card brand-feature">
+                        <span class="feature-icon">
+                            <img src="assets/image.jpg" alt="" />
+                        </span>
+
+                        <div>
+                            <h2 class="brand-feature-title">For Job Seekers</h2>
+                            <p class="brand-feature-text">Create a powerful microresume in minutes. Use Microresume as elevator pitch to potential employers.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <p class="copyright">© 2026 MayGraph.com. All rights reserved.</p>
+        </section>
+
+        <section class="form-panel" aria-label="Email verification page">
+            <div class="auth-card">
+                <div class="form-heading center">
+                    <h2>Check your inbox</h2>
+                    <p>We sent you a verification email.</p>
+                </div>
+
+                <p class="switch-text">
+                    Verification target:
+                    <strong id="verifyEmail">your email address</strong>
+                </p>
+
+                <button id="resendVerification" class="submit-btn" type="button">Resend verification email</button>
+
+                <p class="switch-text">
+                    Already verified?
+                    <a class="link-btn" href="login.html">Log in</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Shared debug panel -->
+    <aside class="debug-panel" aria-label="Debug panel">
+        <button id="debugToggle" type="button">Debug</button>
+
+        <div id="debugContent" class="debug-content">
+            <h3>Debug Console</h3>
+            <p>No database yet: validated submissions are captured here and stored in <code>localStorage</code>.</p>
+
+            <pre id="debugOutput">Waiting for form submission...</pre>
+
+            <div class="debug-actions">
+                <button id="clearDebug" type="button">Clear</button>
+                <button id="fakeSuccess" type="button">Fake success</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- Shared auth logic -->
+    <script src="js/auth.js"></script>
+    <script>
+        // Display the last debug email when available.
+        try {
+            const lastDebug = JSON.parse(localStorage.getItem("bildyx_last_debug") || "{}");
+
+            if (lastDebug.email) {
+                document.getElementById("verifyEmail").textContent = lastDebug.email;
+            }
+        } catch (error) {
+            // Keep default placeholder if localStorage is invalid.
+        }
+
+        const resendButton = document.getElementById("resendVerification");
+
+        if (resendButton) {
+            resendButton.addEventListener("click", () => {
+                debug({
+                    action: "VERIFY_EMAIL_RESEND_DEBUG",
+                    createdAt: new Date().toISOString(),
+                    email: sanitize(document.getElementById("verifyEmail").textContent),
+                    status: "validated_not_sent_no_database"
+                });
+
+                toast("Debug verification email resent. No email sent.");
+            });
+        }
+    </script>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>Bildyx</h4>
+                <p>Une couche de visibilité structurée et modulaire pour le recrutement moderne.</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 MayGraph. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>

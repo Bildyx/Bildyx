@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bildyx — Login / Sign Up</title>
+    <title>Bildyx — Register</title>
 
     <!-- Font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -66,12 +66,12 @@
             <p class="copyright">© 2026 MayGraph.com. All rights reserved.</p>
         </section>
 
-        <!-- Right panel: authentication forms -->
-        <section class="form-panel" aria-label="Authentication forms">
+        <!-- Right panel: register form -->
+        <section class="form-panel" aria-label="Registration form">
             <div class="auth-card">
                 <div class="tabs" role="tablist" aria-label="Authentication tabs">
-                    <button class="tab" id="signup-tab" type="button" data-target="signup-form" role="tab" aria-selected="true">Sign Up</button>
-                    <button class="tab active" id="login-tab" type="button" data-target="login-form" role="tab" aria-selected="false">Log In</button>
+                    <a class="tab active" href="register.html">Sign Up</a>
+                    <a class="tab" href="login.html">Log In</a>
                 </div>
 
                     <!-- Sign up form -->
@@ -202,61 +202,6 @@
                             <button type="button" class="social-btn">LinkedIn</button>
                             <button type="button" class="social-btn">Google</button>
                         </div>
-                    </form>
-
-                    <!-- Login form -->
-                    <form id="login-form" class="auth-form" novalidate>
-                        <div class="form-heading center">
-                            <h2>Log In</h2>
-                            <p>Welcome back! Please enter your details.</p>
-                        </div>
-
-                        <div class="field">
-                            <label for="loginEmail">Email</label>
-
-                            <div class="input-wrap">
-                                <img class="input-icon" src="assets/image.jpg" alt="" />
-                                <input id="loginEmail" name="email" type="email" placeholder="you@example.com" maxlength="120" autocomplete="email" required />
-                            </div>
-
-                            <small class="error"></small>
-                        </div>
-
-                        <div class="field">
-                            <div class="label-row">
-                                <label for="loginPassword">Password</label>
-                                <a href="forgot-password.html" id="forgotPassword">Forgot password?</a>
-                            </div>
-
-                            <div class="input-wrap">
-                                <img class="input-icon" src="assets/image.jpg" alt="" />
-                                <input id="loginPassword" name="password" type="password" placeholder="••••••••" maxlength="72" autocomplete="current-password" required />
-                                <button class="icon-btn toggle-password" type="button" aria-label="Show password">
-                                    <img class="eye-icon" src="assets/image.jpg" alt="" />
-                                </button>
-                            </div>
-
-                            <small class="error"></small>
-                        </div>
-
-                        <div class="captcha-box" data-captcha="login">
-                            <div>
-                                <strong>Security check</strong>
-                                <p>Solve this quick captcha: <span class="captcha-question"></span></p>
-                            </div>
-
-                            <button class="captcha-refresh" type="button" aria-label="Refresh captcha">Refresh</button>
-                            <input class="captcha-answer" type="number" inputmode="numeric" placeholder="Answer" required />
-                        </div>
-
-                        <small class="captcha-error error"></small>
-
-                        <button class="submit-btn" type="submit">Log In</button>
-
-                        <p class="switch-text">
-                            Don't have an account?
-                            <button type="button" class="link-btn" data-target="signup-form">Sign up</button>
-                        </p>
                     </form>
 
             </div>

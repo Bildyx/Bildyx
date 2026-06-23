@@ -1,26 +1,32 @@
-/* Feuille de styles commune pour toutes les pages du site Bildyx.
- * Les variables de couleurs sont basées sur le nouveau design system.
- */
+/* =========================================================
+   Bildyx - Global stylesheet
+   Keep only shared site styles here:
+   header, footer, homepage, generic pages and global tokens.
+   Auth pages use css/auth.css.
+   ========================================================= */
 
-/* Variables globales */
+/* ---------- Global variables ---------- */
+
 :root {
-    /* Couleurs principales */
     --primary-color: #2244ec;
     --primary-dark: #1a35bb;
     --primary-light: #4d6ff0;
 
-    /* Nuances complémentaires */
     --secondary-color: #f8f9fc;
     --light-gray: #f2f4fa;
     --border-color: #e4e7ed;
 
-    /* Couleurs de texte */
     --text-color: #0f1729;
     --text-secondary: #4a5578;
     --text-muted: #9aa5bc;
 }
 
-/* Réinitialisations de base */
+/* ---------- Base reset ---------- */
+
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -33,7 +39,13 @@ a {
     text-decoration: none;
 }
 
-/* Header */
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ---------- Header ---------- */
+
 header {
     background-color: var(--primary-color);
     color: #ffffff;
@@ -44,6 +56,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -57,13 +70,16 @@ header {
     height: 32px;
 }
 
-/* Navigation */
 .nav-buttons a {
     margin-left: 16px;
     padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+
     border: 1px solid #ffffff;
+    border-radius: 20px;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+
     transition: background-color 0.2s, color 0.2s;
 }
 
@@ -86,15 +102,17 @@ header {
     color: #ffffff;
 }
 
-/* Hero Section */
+/* ---------- Homepage ---------- */
+
 .hero {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 40px;
-    padding: 60px 20px;
+
     max-width: 1200px;
     margin: 0 auto;
+    padding: 60px 20px;
 }
 
 .hero-column {
@@ -105,19 +123,24 @@ header {
 
 .badge {
     display: inline-block;
+
+    margin-bottom: 12px;
+    padding: 4px 10px;
+
+    border-radius: 12px;
     background-color: var(--secondary-color);
     color: var(--primary-color);
-    padding: 4px 10px;
-    border-radius: 12px;
+
     font-size: 0.75rem;
     text-transform: uppercase;
-    margin-bottom: 12px;
 }
 
 .hero h2 {
     margin: 0 0 12px;
-    font-size: 2rem;
+
     color: var(--primary-color);
+
+    font-size: 2rem;
 }
 
 .hero p {
@@ -127,11 +150,15 @@ header {
 
 .btn-primary {
     display: inline-block;
+
     padding: 10px 20px;
+
+    border-radius: 20px;
     background-color: var(--primary-color);
     color: #ffffff;
-    border-radius: 20px;
+
     font-weight: bold;
+
     transition: background-color 0.2s;
 }
 
@@ -139,16 +166,19 @@ header {
     background-color: var(--primary-dark);
 }
 
-/* Teams Section */
+/* ---------- Teams section ---------- */
+
 .teams-section {
     display: flex;
     flex-wrap: wrap;
     gap: 40px;
-    padding: 40px 20px;
+
     max-width: 1200px;
     margin: 0 auto;
-    background-color: var(--secondary-color);
+    padding: 40px 20px;
+
     border-radius: 12px;
+    background-color: var(--secondary-color);
 }
 
 .teams-left {
@@ -159,6 +189,7 @@ header {
 .teams-left h3 {
     margin-top: 0;
     margin-bottom: 8px;
+
     font-size: 1.5rem;
 }
 
@@ -166,17 +197,21 @@ header {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+
     margin-bottom: 20px;
 }
 
 .team-tabs button {
-    background-color: var(--light-gray);
-    border: none;
     padding: 8px 16px;
+
+    border: none;
     border-radius: 20px;
+    background-color: var(--light-gray);
+    color: var(--primary-color);
+
     cursor: pointer;
     font-size: 0.85rem;
-    color: var(--primary-color);
+
     transition: background-color 0.2s, color 0.2s;
 }
 
@@ -192,7 +227,9 @@ header {
     gap: 16px;
 }
 
-.member {
+.member,
+.city,
+.product-item {
     text-align: center;
     font-size: 0.8rem;
 }
@@ -201,8 +238,9 @@ header {
     width: 60px;
     height: 60px;
     margin: 0 auto 6px;
-    background-color: var(--light-gray);
+
     border-radius: 50%;
+    background-color: var(--light-gray);
 }
 
 .member span {
@@ -226,42 +264,44 @@ header {
     gap: 16px;
 }
 
-.city,
-.product-item {
-    text-align: center;
-    font-size: 0.8rem;
-}
-
 .city .photo {
     width: 50px;
     height: 50px;
     margin: 0 auto 4px;
-    background-color: var(--light-gray);
+
     border-radius: 50%;
+    background-color: var(--light-gray);
 }
 
 .product-item {
     display: flex;
     align-items: center;
-    background-color: #ffffff;
-    border: 1px solid var(--border-color);
-    padding: 6px 12px;
-    border-radius: 20px;
     gap: 6px;
+
+    padding: 6px 12px;
+
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background-color: #ffffff;
 }
 
 .product-item .icon {
-    font-weight: bold;
-    color: var(--primary-color);
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+    background-color: var(--primary-color);
 }
 
 .teams-right {
     flex: 1;
     min-width: 320px;
+
+    padding: 24px;
+
+    border-radius: 12px;
     background-color: var(--primary-color);
     color: #ffffff;
-    padding: 24px;
-    border-radius: 12px;
 }
 
 .teams-right h4 {
@@ -270,9 +310,9 @@ header {
 }
 
 .teams-right ul {
-    list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .teams-right li {
@@ -296,14 +336,18 @@ header {
 
 .teams-right .cta a {
     display: inline-block;
+
     margin-right: 10px;
     margin-bottom: 10px;
     padding: 8px 16px;
+
+    border-radius: 20px;
     background-color: #ffffff;
     color: var(--primary-color);
-    border-radius: 20px;
+
     font-size: 0.8rem;
     font-weight: bold;
+
     transition: background-color 0.2s;
 }
 
@@ -312,85 +356,31 @@ header {
     color: #ffffff;
 }
 
-/* Auth Section */
-.auth-wrapper {
-    max-width: 800px;
-    margin: 60px auto;
-    padding: 20px;
-    display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-}
+/* ---------- Generic page ---------- */
 
-.auth-form {
-    flex: 1;
-    min-width: 280px;
-}
-
-.auth-form h2 {
-    margin-top: 0;
-    font-size: 1.4rem;
-    margin-bottom: 12px;
-    color: var(--primary-color);
-}
-
-.auth-form label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.85rem;
-}
-
-.auth-form input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.auth-form button {
-    padding: 8px 16px;
-    background-color: var(--primary-color);
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.auth-form button:hover {
-    background-color: var(--primary-dark);
-}
-
-.auth-form p {
-    font-size: 0.8rem;
-    margin-top: 8px;
-}
-
-/* Generic Page */
 .content {
     max-width: 800px;
     margin: 60px auto;
     padding: 20px;
+
     text-align: center;
 }
 
-/* Footer */
+/* ---------- Footer ---------- */
+
 footer {
+    margin-top: 60px;
+    padding: 40px 20px 20px;
+
     background-color: var(--primary-color);
     color: #ffffff;
-    padding: 40px 20px 20px;
-    margin-top: 60px;
 }
 
 .footer-content {
     display: flex;
     flex-wrap: wrap;
     gap: 40px;
+
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -403,19 +393,21 @@ footer {
 .footer-column h4 {
     margin-top: 0;
     margin-bottom: 8px;
+
     font-size: 1rem;
 }
 
 .footer-column p {
     margin-top: 0;
+
     font-size: 0.85rem;
     line-height: 1.4;
 }
 
 .footer-column ul {
-    list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .footer-column li {
@@ -425,6 +417,7 @@ footer {
 .footer-column a {
     color: #ffffff;
     font-size: 0.85rem;
+
     transition: opacity 0.2s;
 }
 
@@ -433,14 +426,17 @@ footer {
 }
 
 .footer-bottom {
-    max-width: 1200px;
-    margin: 20px auto 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+
+    max-width: 1200px;
+    margin: 20px auto 0;
     padding-top: 10px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+
     font-size: 0.75rem;
 }
 
@@ -449,11 +445,13 @@ footer {
 }
 
 .footer-links {
-    list-style: none;
     display: flex;
     gap: 16px;
-    padding: 0;
+
     margin: 0;
+    padding: 0;
+
+    list-style: none;
 }
 
 .footer-links a {
@@ -465,18 +463,22 @@ footer {
     opacity: 0.7;
 }
 
-/* Responsive adjustments */
+/* ---------- Responsive ---------- */
+
 @media (max-width: 768px) {
     .hero {
         flex-direction: column;
         text-align: center;
     }
+
     .teams-section {
         flex-direction: column;
     }
+
     .teams-right {
         margin-top: 20px;
     }
+
     .footer-content {
         flex-direction: column;
         gap: 20px;
