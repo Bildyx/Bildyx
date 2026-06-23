@@ -77,7 +77,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "seed": "tsx src/seed.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsx --test tests/teams.test.ts"
   }
 }
 >>>>>>> 457140e (Réorganisation des fichiers sur main):apps/api/package.json

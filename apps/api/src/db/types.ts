@@ -990,7 +990,7 @@ export interface StorageVectorIndexes {
 
 export interface TeamMembers {
   created_at: Generated<Timestamp>;
-  id: string;
+  id: Generated<string>;
   job_title: string | null;
   name: string;
   photo_url: string | null;
@@ -1014,11 +1014,11 @@ export interface Teams {
   company_account_id: string;
   created_at: Generated<Timestamp>;
   how_we_work_together: string | null;
-  id: string;
+  id: Generated<string>;
   name: string;
   not_for_you_if: string | null;
   team_culture: string | null;
-  updated_at: Timestamp;
+  updated_at: Generated<Timestamp>;
   what_we_are_great_at: string | null;
   who_we_are: string | null;
 }

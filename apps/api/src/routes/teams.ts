@@ -1,9 +1,8 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { GetTeamsSchema, TeamSchema, GetTeamsOutputSchema, PostTeamSchema } from "../models/teams";
+import { GetTeamsSchema, TeamSchema, PostTeamSchema, AddTeamMemberSchema, TeamMemberSchema } from "../models/teams";
 import { z } from "zod";
-import { randomUUID } from "node:crypto";
 
 export const teams = {
   getByCompany: publicProcedure
@@ -15,9 +14,9 @@ export const teams = {
       tags: ["Team"] 
     })
     .input(GetTeamsSchema)
-    .output(GetTeamsOutputSchema)
+    .output(z.array(TeamSchema))
     .handler(async ({ input }) => {
-      const { companyId, page, limit, search, name } = input;
+      const { companyId, search } = input;
 
       const company = await database.selectFrom('companies')
         .where('id', '=', companyId)
@@ -28,44 +27,22 @@ export const teams = {
         throw new ORPCError("NOT_FOUND", { message: "Company not found" });
       }
 
-      // 1. Base query
       let query = database
         .selectFrom('teams')
         .innerJoin('company_accounts', 'company_accounts.id', 'teams.company_account_id')
         .where('company_accounts.company_id', '=', companyId);
 
-      // 2. Filtres
       if (search) {
         const p = `%${search.trim()}%`;
         query = query.where((eb) => eb('teams.name', 'ilike', p).or('teams.who_we_are', 'ilike', p));
       }
 
-      if (name) {
-        query = query.where('teams.name', 'ilike', `%${name.trim()}%`);
-      }
+      const teamsData = await query
+        .selectAll('teams')
+        .orderBy('teams.created_at', 'desc')
+        .execute();
 
-      // 3. Exécution avec pagination
-      const [totalResult, teamsData] = await Promise.all([
-        query.select((eb) => eb.fn.count<number>('teams.id').as('count')).executeTakeFirst(),
-        query
-          .selectAll('teams')
-          .limit(limit)
-          .offset((page - 1) * limit)
-          .orderBy('teams.created_at', 'desc')
-          .execute()
-      ]);
-
-      const total = Number(totalResult?.count ?? 0);
-
-      return {
-        data: teamsData,
-        meta: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        }
-      };
+      return teamsData;
     }),
 
   getByTeam: publicProcedure
@@ -103,11 +80,8 @@ export const teams = {
     .input(PostTeamSchema)
     .output(TeamSchema)
     .handler(async ({ input }) => {
-
-      const { company_account_id } = input;
-
       const companyAccount = await database.selectFrom('company_accounts')
-        .where('id', '=', company_account_id)
+        .where('id', '=', input.company_account_id)
         .select('id')
         .executeTakeFirst();
 
@@ -115,20 +89,69 @@ export const teams = {
         throw new ORPCError("NOT_FOUND", { message: "Company account not found" });
       }
 
-      const data = await database
+      const existingTeam = await database.selectFrom('teams')
+        .where('company_account_id', '=', input.company_account_id)
+        .where('name', 'ilike', input.name)
+        .select('id')
+        .executeTakeFirst();
+
+      if (existingTeam) {
+        throw new ORPCError("CONFLICT", { message: "A team with this name already exists for this company account" });
+      }
+
+      const team = await database
         .insertInto('teams')
-        .values({
-          ...input,
-          id: randomUUID(),
-          updated_at: new Date(),
-        })
+        .values(input)
         .returningAll()
         .executeTakeFirst();
 
-      if (!data) {
+      if (!team) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create team" });
+      }
+
+      return team;
+    }),
+
+  addMember: publicProcedure
+    .route({
+      method: "POST",
+      summary: "Add a member to a team",
+      description: "Add a new member to a specific team",
+      path: "/teams/{team_id}/members",
+      tags: ["Team"]
+    })
+    .input(AddTeamMemberSchema)
+    .output(TeamMemberSchema)
+    .handler(async ({ input }) => {
+      const team = await database.selectFrom('teams')
+        .where('id', '=', input.team_id)
+        .select('id')
+        .executeTakeFirst();
+
+      if (!team) {
         throw new ORPCError("NOT_FOUND", { message: "Team not found" });
       }
 
-      return data;
+      const existingMember = await database.selectFrom('team_members')
+        .where('team_id', '=', input.team_id)
+        .where('name', 'ilike', input.name)
+        .select('id')
+        .executeTakeFirst();
+
+      if (existingMember) {
+        throw new ORPCError("CONFLICT", { message: `A member named "${input.name}" already exists in this team` });
+      }
+
+      const newMember = await database
+        .insertInto('team_members')
+        .values(input)
+        .returningAll()
+        .executeTakeFirst();
+
+      if (!newMember) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to add member to team" });
+      }
+
+      return newMember;
     }),
 };
