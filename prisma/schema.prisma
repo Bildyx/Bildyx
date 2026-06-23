@@ -20,6 +20,122 @@ datasource db {
 
 // --- Job (métier exercé) ---
 
+enum CostOfLiving {
+  LOW
+  MEDIAN
+  HIGH
+}
+
+enum qualityOfLife {
+  LOW
+  MEDIAN
+  HIGH
+}
+
+enum Language {
+  AFRIKAANS
+  ALBANIAN
+  AMHARIC
+  ARABIC
+  ARMENIAN
+  AZERBAIJANI
+  BASQUE
+  BELARUSIAN
+  BENGALI
+  BOSNIAN
+  BULGARIAN
+  BURMESE
+  CATALAN
+  CEBUANO
+  CHINESE_MANDARIN
+  CHINESE_CANTONESE
+  CROATIAN
+  CZECH
+  DANISH
+  DUTCH
+  ENGLISH
+  ESPERANTO
+  ESTONIAN
+  FILIPINO
+  FINNISH
+  FRENCH
+  GALICIAN
+  GEORGIAN
+  GERMAN
+  GREEK
+  GUJARATI
+  HAITIAN_CREOLE
+  HAUSA
+  HEBREW
+  HINDI
+  HUNGARIAN
+  ICELANDIC
+  IGBO
+  INDONESIAN
+  IRISH
+  ITALIAN
+  JAPANESE
+  JAVANESE
+  KANNADA
+  KAZAKH
+  KHMER
+  KOREAN
+  KURDISH
+  KYRGYZ
+  LAO
+  LATIN
+  LATVIAN
+  LITHUANIAN
+  LUXEMBOURGISH
+  MACEDONIAN
+  MALAGASY
+  MALAY
+  MALAYALAM
+  MALTESE
+  MAORI
+  MARATHI
+  MONGOLIAN
+  NEPALI
+  NORWEGIAN
+  PASHTO
+  PERSIAN
+  POLISH
+  PORTUGUESE
+  PUNJABI
+  ROMANIAN
+  RUSSIAN
+  SAMOAN
+  SERBIAN
+  SHONA
+  SINDHI
+  SINHALA
+  SLOVAK
+  SLOVENIAN
+  SOMALI
+  SPANISH
+  SUNDANESE
+  SWAHILI
+  SWEDISH
+  TAJIK
+  TAMIL
+  TATAR
+  TELUGU
+  THAI
+  TIBETAN
+  TURKISH
+  TURKMEN
+  UKRAINIAN
+  URDU
+  UZBEK
+  VIETNAMESE
+  WELSH
+  WOLOF
+  XHOSA
+  YIDDISH
+  YORUBA
+  ZULU
+}
+
 enum JobCategory {
   PRIVATE_SECTOR
   PUBLIC_SECTOR
@@ -284,7 +400,7 @@ enum NotificationType {
 model Industry {
   id               String     @id @default(uuid()) @db.Uuid
   name             String
-  slug             String     @unique
+  serialNumber             String     @unique
   description      String?
   parentIndustryId String?    @map("parent_industry_id") @db.Uuid
   parentIndustry   Industry?  @relation("IndustryHierarchy", fields: [parentIndustryId], references: [id])
@@ -315,12 +431,10 @@ model Industry {
 model Country {
   id                String          @id @default(uuid()) @db.Uuid
   name              String
-  nameFr            String?         @map("name_fr")    //?
-  slug              String          @unique
-  isoCode2          String?         @unique @map("iso_code_2") @db.Char(2)    //?
-  isoCode3          String?         @unique @map("iso_code_3") @db.Char(3)    //?
-  continent         Continent?    //?
-  capitalName       String?         @map("capital_name")
+  serialNumber      String          @unique
+  isoCode           String?         @unique @map("iso_code") @db.Char(2)
+  capitalName       City[]          @map("capital_name") //à vérifier pour les relations villes
+  cities            City[]
   flagUrl           String?         @map("flag_url")
   population        BigInt?
   areaKm2           Float?          @map("area_km2")
@@ -328,13 +442,29 @@ model Country {
   gdpPerCapitaUsd   Float?          @map("gdp_per_capita_usd")
   hdi               Float?
   currency          String?
-  currencyCode      String?         @map("currency_code") @db.Char(3)
-  officialLanguages String[]        @map("official_languages")
+  officialLanguages Language?       @map("official_languages")
   callingCode       String?         @map("calling_code")
-  isEuMember        Boolean         @default(false) @map("is_eu_member")    //?
-  isNatoMember      Boolean         @default(false) @map("is_nato_member")    //?
-  isOecdMember      Boolean         @default(false) @map("is_oecd_member")    //?
   governmentType    GovernmentType? @map("government_type")
+  qualityOfLife     qualityOfLife?
+  temperatures      String?
+  climate           String?
+  crimeRate         String?
+  incomeInequality  String?
+  workLifeBalance   String?
+  mainIndustries    Industry[]
+  largestsCompanies Organisation[]
+  numberOfMultinationalHqs  Int?
+  medianSalary      Int?
+  costOfLiving      CostOfLiving?
+  medianHomePrice   Int?
+  averageRent       Int? // à vérifier, data en string. Voir si on ne peut pas regrouper certaines infos avec les villes
+  interestingFact   String?
+  citizenshipProcess String?
+  workPermit        String? //à voir éventuellement pour un enum
+  globalCompetivenessIndex Int?
+  levelOfGlobalisation String? //à voir éventuellement pour un enum
+  numberOfInternationalStudents Int?
+  numberOfForeignCompanies Organisation[]
   metadata          Json?
   deletedAt         DateTime?       @map("deleted_at")
   createdAt         DateTime        @default(now()) @map("created_at")
@@ -356,18 +486,31 @@ model Country {
 model City {
   id              String    @id @default(uuid()) @db.Uuid
   name            String
-  slug            String    @unique
+  serialNumber            String    @unique
   countryId       String    @map("country_id") @db.Uuid
   country         Country   @relation(fields: [countryId], references: [id])
   region          String?
   department      String?
   population      Int?
-  isCapital       Boolean   @default(false) @map("is_capital")
+  mainIndustries  Industry[]
+  numberOfMultinationalHqs  Int?
+  numberOfAirports  Int?
+  largestsCompanies Organisation[]
+  medianSalary    Int?
+  costOfLiving    CostOfLiving?
+  medianHomePrice Int?
+  averageRent     Int?
+  temperatures    String?
+  climate         String?
+  interestingFact String?
+  degreeHolders   String?
+  numberOfUniversities  String?
+  topUniversities university[]
+  numberOfNationalities String?
+  language        Language?
+  peopleDescription String?
   latitude        Float?
   longitude       Float?
-  timezone        String?
-  elevation       Int?
-  metroPopulation Int?      @map("metro_population")
   metadata        Json?
   deletedAt       DateTime? @map("deleted_at")
   createdAt       DateTime  @default(now()) @map("created_at")
@@ -519,7 +662,7 @@ model Organization {
 model Job {
   id             String          @id @default(uuid()) @db.Uuid
   title          String
-  slug           String          @unique
+  serialNumber           String          @unique
   category       JobCategory?
   description    String?
   seniorityLevel SeniorityLevel? @map("seniority_level")
@@ -551,7 +694,7 @@ model Job {
 model Skill {
   id            String           @id @default(uuid()) @db.Uuid
   name          String
-  slug          String           @unique
+  serialNumber          String           @unique
   category      SkillCategory?
   description   String?
   iconUrl       String?          @map("icon_url")
@@ -580,7 +723,7 @@ model Skill {
 model Certification {
   id                     String                 @id @default(uuid()) @db.Uuid
   name                   String
-  slug                   String                 @unique
+  serialNumber                   String                 @unique
   issuingOrganizationId  String?                @map("issuing_organization_id") @db.Uuid
   issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
   description            String?
@@ -608,7 +751,7 @@ model Certification {
 model University {
   id              String          @id @default(uuid()) @db.Uuid
   name            String
-  slug            String          @unique
+  serialNumber            String          @unique
   officialName    String?         @map("official_name")
   acronym         String?
   type            UniversityType?
@@ -646,7 +789,7 @@ model University {
 model Degree {
   id                    String       @id @default(uuid()) @db.Uuid
   name                  String
-  slug                  String       @unique
+  serialNumber                  String       @unique
   universityId          String       @map("university_id") @db.Uuid
   university            University   @relation(fields: [universityId], references: [id])
   level                 DegreeLevel?
@@ -658,7 +801,7 @@ model Degree {
   languageOfInstruction String?      @map("language_of_instruction")
   countryId             String?      @map("country_id") @db.Uuid
   country               Country?     @relation(fields: [countryId], references: [id])
-  creditsRequired       Int?         @map("credits_required")
+  creditsRequired       Int?         @map("credits_required")    //?
   tuitionFeeMin         Float?       @map("tuition_fee_min")    //?
   tuitionFeeMax         Float?       @map("tuition_fee_max")    //?
   tuitionCurrency       String?      @map("tuition_currency") @db.Char(3)    //?
@@ -677,7 +820,7 @@ model Degree {
 model Subject {
   id               String           @id @default(uuid()) @db.Uuid
   name             String
-  slug             String           @unique
+  serialNumber             String           @unique
   description      String?
   shortDescription String?          @map("short_description")
   category         ProductCategory?
@@ -710,7 +853,7 @@ model Subject {
 model Fact {
   id                  String        @id @default(uuid()) @db.Uuid
   title               String
-  slug                String        @unique
+  serialNumber                String        @unique
   content             String?
   category            FactCategory?
   sourceUrl           String?       @map("source_url")    //?
@@ -754,7 +897,7 @@ model Fact {
 model JobOffer {
   id                      String          @id @default(uuid()) @db.Uuid
   title                   String
-  slug                    String          @unique
+  serialNumber                    String          @unique
   companyId               String          @map("company_id") @db.Uuid
   company                 Organization    @relation(fields: [companyId], references: [id])
   jobId                   String?         @map("job_id") @db.Uuid
