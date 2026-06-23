@@ -409,6 +409,7 @@ model Industry {
   sicCode          String?    @map("sic_code") //?
   iconUrl          String?    @map("icon_url")
   color            String?
+  medianSalary     Int?       @map("median_salary")
   isActive         Boolean    @default(true) @map("is_active") //?
   metadata         Json? //?
   deletedAt        DateTime?  @map("deleted_at")
@@ -466,6 +467,17 @@ model Country {
   levelOfGlobalisation          String?         @map("level_of_globalisation")
   numberOfInternationalStudents Int?            @map("number_of_international_students")
   numberOfForeignCompanies      Int?            @map("number_of_foreign_companies")
+  personalIncomeTax             String?         @map("personal_income_tax")
+  numberOfTourists              Int?            @map("number_of_tourists")
+  numberOfAirports              Int?            @map("number_of_airports")
+  qualityOfEducation            String?         @map("quality_of_education")
+  degreeHolders                 String?         @map("degree_holders")
+  numberOfUniversities          Int?            @map("number_of_universities")
+  topUniversities               University[]    @relation("CountryTopUniversities")
+  ethnicGroups                  String[]        @map("ethnic_groups")
+  religion                      String[]
+  culturalValues                String?         @map("cultural_values")
+  peopleDescription             String?         @map("people_description")
   metadata                      Json?
   deletedAt                     DateTime?       @map("deleted_at")
   createdAt                     DateTime        @default(now()) @map("created_at")
@@ -531,6 +543,8 @@ model Organization {
   name                  String
   slug                  String            @unique
   type                  OrganizationType?
+  category              String?
+  subsidiariesCount     Int?              @map("subsidiaries_count")
   legalStatus           String?           @map("legal_status")
   ownership             String?
   mission               String?
@@ -674,6 +688,8 @@ model Job {
   industry       Industry?       @relation(fields: [industryId], references: [id])
   countryId      String?         @map("country_id") @db.Uuid
   country        Country?        @relation(fields: [countryId], references: [id])
+  products       String[]
+  toolsAndTech   String[]        @map("tools_and_tech")
   tags           String[]
   metadata       Json?
   deletedAt      DateTime?       @map("deleted_at")
@@ -696,18 +712,26 @@ model Skill {
   id            String           @id @default(uuid()) @db.Uuid
   name          String
   serialNumber  String           @unique
-  category      SkillCategory?
-  description   String?
-  iconUrl       String?          @map("icon_url")
-  industryId    String?          @map("industry_id") @db.Uuid
-  industry      Industry?        @relation(fields: [industryId], references: [id])
-  difficulty    DifficultyLevel?
-  isVerifiable  Boolean          @default(false) @map("is_verifiable") //?
-  parentSkillId String?          @map("parent_skill_id") @db.Uuid //?
-  parentSkill   Skill?           @relation("SkillHierarchy", fields: [parentSkillId], references: [id]) //?
-  childSkills   Skill[]          @relation("SkillHierarchy") //?
-  aliases       String[] //?
-  metadata      Json?
+  type              String?
+  category          SkillCategory?
+  categories        String[]
+  description       String?
+  iconUrl           String?          @map("icon_url")
+  industryId        String?          @map("industry_id") @db.Uuid
+  industry          Industry?        @relation(fields: [industryId], references: [id])
+  difficulty        DifficultyLevel?
+  usedIn            String[]         @map("used_in")
+  jobs              String[]
+  productCategories String[]         @map("product_categories")
+  commonFieldsOfStudy String[]       @map("common_fields_of_study")
+  relatedAbilities  String[]         @map("related_abilities")
+  timeToMaster      String?          @map("time_to_master")
+  isVerifiable      Boolean          @default(false) @map("is_verifiable") //?
+  parentSkillId     String?          @map("parent_skill_id") @db.Uuid //?
+  parentSkill       Skill?           @relation("SkillHierarchy", fields: [parentSkillId], references: [id]) //?
+  childSkills       Skill[]          @relation("SkillHierarchy") //?
+  aliases           String[] //?
+  metadata          Json?
   deletedAt     DateTime?        @map("deleted_at")
   createdAt     DateTime         @default(now()) @map("created_at")
   updatedAt     DateTime         @updatedAt @map("updated_at")
@@ -728,7 +752,10 @@ model Certification {
   issuingOrganizationId  String?                @map("issuing_organization_id") @db.Uuid
   issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
   description            String?
+  level                  String?
   category               CertificationCategory?
+  products               String[]
+  jobs                   String[]
   validityDurationMonths Int?                   @map("validity_duration_months")
   isRenewable            Boolean                @default(false) @map("is_renewable") //?
   difficulty             DifficultyLevel?
@@ -776,9 +803,12 @@ model University {
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
 
-  degrees       Degree[]
-  facts         Fact[]
-  topOfCities   City[]   @relation("CityTopUniversities")
+  degrees          Degree[]
+  facts            Fact[]
+  topOfCities      City[]    @relation("CityTopUniversities")
+  topOfCountries   Country[] @relation("CountryTopUniversities")
+  undergraduates   Int?
+  postgraduates    Int?
 
   @@index([countryId])
   @@index([cityId])
@@ -823,9 +853,12 @@ model Subject {
   id               String           @id @default(uuid()) @db.Uuid
   name             String
   serialNumber     String           @unique
+  type             String?
   description      String?
   shortDescription String?          @map("short_description")
   category         ProductCategory?
+  competitors      String[]
+  funFact          String?          @map("fun_fact")
   companyId        String?          @map("company_id") @db.Uuid
   company          Organization?    @relation(fields: [companyId], references: [id])
   websiteUrl       String?          @map("website_url")
@@ -857,6 +890,8 @@ model Fact {
   title               String
   serialNumber        String        @unique
   content             String?
+  hashtags            String[]
+  icon                String?
   category            FactCategory?
   sourceUrl           String?       @map("source_url") //?
   sourceTitle         String?       @map("source_title") //?
