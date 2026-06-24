@@ -19,16 +19,16 @@ export const countries = {
     .handler(async ({ input }) => {
       const { search } = input;
 
-      let query = database.selectFrom('countries');
+      let query = database.selectFrom('countries').where('deleted_at', 'is', null);
 
       if (search) {
         const p = `%${search.trim()}%`;
-        query = query.where('country_name', 'ilike', p);
+        query = query.where('name', 'ilike', p);
       }
 
       return await query
         .selectAll()
-        .orderBy('country_name', 'asc')
+        .orderBy('name', 'asc')
         .execute();
     }),
 
@@ -46,6 +46,7 @@ export const countries = {
       const data = await database
         .selectFrom('countries')
         .where('id', '=', input.countryId)
+        .where('deleted_at', 'is', null)
         .selectAll()
         .executeTakeFirst();
 
@@ -69,7 +70,8 @@ export const countries = {
     .handler(async ({ input }) => {
       const existing = await database
         .selectFrom('countries')
-        .where('country_name', 'ilike', input.country_name)
+        .where('name', 'ilike', input.name)
+        .where('deleted_at', 'is', null)
         .select('id')
         .executeTakeFirst();
 
@@ -77,12 +79,15 @@ export const countries = {
         throw new ORPCError("CONFLICT", { message: "A country with this name already exists" });
       }
 
+      const { metadata, ...rest } = input;
+
       const country = await database
         .insertInto('countries')
         .values({
-          ...input,
+          ...rest,
           id: uuidv4(),
           updated_at: new Date(),
+          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -105,11 +110,12 @@ export const countries = {
     .input(z.object({ countryId: z.string().uuid() }).merge(UpdateCountrySchema))
     .output(CountrySchema)
     .handler(async ({ input }) => {
-      const { countryId, ...data } = input;
+      const { countryId, metadata, ...rest } = input;
 
       const existing = await database
         .selectFrom('countries')
         .where('id', '=', countryId)
+        .where('deleted_at', 'is', null)
         .select('id')
         .executeTakeFirst();
 
@@ -119,7 +125,7 @@ export const countries = {
 
       const country = await database
         .updateTable('countries')
-        .set({ ...data, updated_at: new Date() })
+        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
         .where('id', '=', countryId)
         .returningAll()
         .executeTakeFirst();
@@ -135,7 +141,7 @@ export const countries = {
     .route({
       method: "DELETE",
       summary: "Delete a country",
-      description: "Delete a country by its ID",
+      description: "Soft delete a country by its ID",
       path: "/countries/{countryId}",
       tags: ["Country"]
     })
@@ -145,6 +151,7 @@ export const countries = {
       const existing = await database
         .selectFrom('countries')
         .where('id', '=', input.countryId)
+        .where('deleted_at', 'is', null)
         .select('id')
         .executeTakeFirst();
 
@@ -153,7 +160,8 @@ export const countries = {
       }
 
       await database
-        .deleteFrom('countries')
+        .updateTable('countries')
+        .set({ deleted_at: new Date() })
         .where('id', '=', input.countryId)
         .execute();
 

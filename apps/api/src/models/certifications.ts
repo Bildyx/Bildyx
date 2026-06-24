@@ -1,48 +1,48 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const CertificationCategorySchema = z.enum([
-  'PROFESSIONAL',
-  'TECHNICAL',
-  'QUALITY',
-  'COMPLIANCE',
-  'LANGUAGE',
-  'SECURITY',
-  'OTHER',
-]);
+export const CertificationCategoryEnum = z.enum(["COMPLIANCE", "LANGUAGE", "OTHER", "PROFESSIONAL", "QUALITY", "SECURITY", "TECHNICAL"]);
+export const DifficultyLevelEnum = z.enum(["ADVANCED", "BEGINNER", "EXPERT", "INTERMEDIATE"]);
+export const RecognitionLevelEnum = z.enum(["GLOBAL", "INDUSTRY_SPECIFIC", "NATIONAL", "REGIONAL"]);
 
-// Représentation de l'objet complet en base de données
 export const CertificationSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   serialNumber: z.string(),
-  issuingOrganizationId: z.string().uuid(),
-  description: z.string(),
-  level: z.string(),
-  category: CertificationCategorySchema,
-  products: z.array(z.string()),
-  jobs: z.array(z.string()),
-  validityDurationMonths: z.number().int(),
-  cost: z.number(),
-  costCurrency: z.string(),
-  websiteUrl: z.string(),
-  logoUrl: z.string(),
-  metadata: z.record(z.string(), z.any()),
-  deletedAt: z.date().nullable().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  issuing_organization_id: z.string().uuid().nullable(),
+  description: z.string().nullable(),
+  level: z.string().nullable(),
+  category: CertificationCategoryEnum.nullable(),
+  products: z.array(z.string()).nullable(),
+  jobs: z.array(z.string()).nullable(),
+  validity_duration_months: z.number().int().nullable(),
+  difficulty: DifficultyLevelEnum.nullable(),
+  cost: z.number().nullable(),
+  cost_currency: z.string().nullable(),
+  website_url: z.string().nullable(),
+  logo_url: z.string().nullable(),
+  recognition_level: RecognitionLevelEnum.nullable(),
+  prerequisites: z.array(z.string()).nullable(),
+  metadata: z.unknown().nullable(),  
+  deleted_at: z.date().nullable(),
+  created_at: z.date(),
+  updated_at: z.date(),
 });
 
-// Schéma pour la validation du listing (Query params)
-export const GetCertificationsSchema = z.object({
-  companyId: z.string().uuid(),
-  search: z.string().optional(),
-  category: CertificationCategorySchema.optional(), // Filtre par catégorie optionnel
-});
-
-// Schéma pour la création (Body)
-export const PostCertificationSchema = CertificationSchema.omit({
+export const CreateCertificationSchema = CertificationSchema.omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
 });
+
+export const UpdateCertificationSchema = CreateCertificationSchema.partial();
+
+export const GetCertificationsSchema = z.object({
+  search: z.string().optional(),
+  category: CertificationCategoryEnum.optional(),
+  difficulty: DifficultyLevelEnum.optional(),
+});
+
+export type Certification = z.infer<typeof CertificationSchema>;
+export type CreateCertification = z.infer<typeof CreateCertificationSchema>;
+export type UpdateCertification = z.infer<typeof UpdateCertificationSchema>;

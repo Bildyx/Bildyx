@@ -19,11 +19,11 @@ export const cities = {
     .handler(async ({ input }) => {
       const { search, country_id } = input;
 
-      let query = database.selectFrom('cities');
+      let query = database.selectFrom('cities').where('deleted_at', 'is', null);
 
       if (search) {
         const p = `%${search.trim()}%`;
-        query = query.where('city_name', 'ilike', p);
+        query = query.where('name', 'ilike', p);
       }
 
       if (country_id) {
@@ -32,7 +32,7 @@ export const cities = {
 
       return await query
         .selectAll()
-        .orderBy('city_name', 'asc')
+        .orderBy('name', 'asc')
         .execute();
     }),
 
@@ -50,6 +50,7 @@ export const cities = {
       const data = await database
         .selectFrom('cities')
         .where('id', '=', input.cityId)
+        .where('deleted_at', 'is', null)
         .selectAll()
         .executeTakeFirst();
 
@@ -73,8 +74,9 @@ export const cities = {
     .handler(async ({ input }) => {
       const existing = await database
         .selectFrom('cities')
-        .where('city_name', 'ilike', input.city_name)
-        .$if(!!input.country_id, (qb) => qb.where('country_id', '=', input.country_id!))
+        .where('name', 'ilike', input.name)
+        .where('country_id', '=', input.country_id)
+        .where('deleted_at', 'is', null)
         .select('id')
         .executeTakeFirst();
 
@@ -82,12 +84,15 @@ export const cities = {
         throw new ORPCError("CONFLICT", { message: "A city with this name already exists in this country" });
       }
 
+      const { metadata, ...rest } = input;
+
       const city = await database
         .insertInto('cities')
         .values({
-          ...input,
+          ...rest,
           id: uuidv4(),
           updated_at: new Date(),
+          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -110,11 +115,12 @@ export const cities = {
     .input(z.object({ cityId: z.string().uuid() }).merge(UpdateCitySchema))
     .output(CitySchema)
     .handler(async ({ input }) => {
-      const { cityId, ...data } = input;
+      const { cityId, metadata, ...rest } = input;
 
       const existing = await database
         .selectFrom('cities')
         .where('id', '=', cityId)
+        .where('deleted_at', 'is', null)
         .select('id')
         .executeTakeFirst();
 
@@ -124,7 +130,7 @@ export const cities = {
 
       const city = await database
         .updateTable('cities')
-        .set({ ...data, updated_at: new Date() })
+        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
         .where('id', '=', cityId)
         .returningAll()
         .executeTakeFirst();
@@ -140,7 +146,7 @@ export const cities = {
     .route({
       method: "DELETE",
       summary: "Delete a city",
-      description: "Delete a city by its ID",
+      description: "Soft delete a city by its ID",
       path: "/cities/{cityId}",
       tags: ["City"]
     })
@@ -150,6 +156,7 @@ export const cities = {
       const existing = await database
         .selectFrom('cities')
         .where('id', '=', input.cityId)
+        .where('deleted_at', 'is', null)
         .select('id')
         .executeTakeFirst();
 
@@ -158,7 +165,8 @@ export const cities = {
       }
 
       await database
-        .deleteFrom('cities')
+        .updateTable('cities')
+        .set({ deleted_at: new Date() })
         .where('id', '=', input.cityId)
         .execute();
 
