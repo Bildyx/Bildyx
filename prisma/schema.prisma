@@ -872,7 +872,6 @@ model Fact {
   sourceTitle         String?       @map("source_title") //?
   publishedAt         DateTime?     @map("published_at") //?
   verifiedAt          DateTime?     @map("verified_at") //?
-  isVerified          Boolean       @default(false) @map("is_verified") //?
   relatedCountryId    String?       @map("related_country_id") @db.Uuid
   relatedCountry      Country?      @relation(fields: [relatedCountryId], references: [id])
   relatedCityId       String?       @map("related_city_id") @db.Uuid
@@ -901,7 +900,6 @@ model Fact {
   @@index([relatedUniversityId])
   @@index([relatedProductId])
   @@index([category])
-  @@index([isVerified])
   @@map("facts")
 }
 
