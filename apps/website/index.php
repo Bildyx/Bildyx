@@ -12,7 +12,7 @@ require __DIR__ . '/includes/header.php';
                     <span class="eyebrow">For teams &amp; companies</span>
                     <h1>Create Team Profile</h1>
                     <p>Showcase your organization's collective talent. Manage team credentials and verified profiles in one place.</p>
-                    <a href="generic.php?page=create-team-profile" class="primary-button">
+                    <a href="why-teams.php" class="primary-button">
                         <span class="button-icon" aria-hidden="true">▣</span>
                         Create Team Profile
                     </a>
