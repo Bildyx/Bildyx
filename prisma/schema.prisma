@@ -396,7 +396,7 @@ enum NotificationType {
 // LAYER 1 — TABLES DE RÉFÉRENCE (les "cartes")
 // =============================================================================
 
-/// Secteur d'activité (hiérarchie NACE/SIC)
+/// Secteur d'activité
 model Industry {
   id               String     @id @default(uuid()) @db.Uuid
   name             String
@@ -405,12 +405,9 @@ model Industry {
   parentIndustryId String?    @map("parent_industry_id") @db.Uuid
   parentIndustry   Industry?  @relation("IndustryHierarchy", fields: [parentIndustryId], references: [id])
   childIndustries  Industry[] @relation("IndustryHierarchy")
-  naceCode         String?    @map("nace_code") //?
-  sicCode          String?    @map("sic_code") //?
   iconUrl          String?    @map("icon_url")
   color            String?
   medianSalary     Int?       @map("median_salary")
-  isActive         Boolean    @default(true) @map("is_active") //?
   metadata         Json? //?
   deletedAt        DateTime?  @map("deleted_at")
   createdAt        DateTime   @default(now()) @map("created_at")
@@ -425,8 +422,6 @@ model Industry {
   mainIndustryCities    City[]         @relation("CityMainIndustries")
 
   @@index([parentIndustryId])
-  @@index([naceCode])
-  @@index([sicCode])
   @@map("industries")
 }
 
@@ -487,7 +482,6 @@ model Country {
   jobs         Job[]
   jobOffers    JobOffer[]
   universities University[]
-  degrees      Degree[]
   facts        Fact[]
   userProfiles UserProfile[] @relation("UserProfileCountry")
 
@@ -673,7 +667,7 @@ model Organization {
   @@map("organizations")
 }
 
-/// Métier / Fonction exercée par une personne (≠ offre d'emploi)
+/// Métier
 model Job {
   id             String          @id @default(uuid()) @db.Uuid
   title          String
@@ -726,11 +720,6 @@ model Skill {
   commonFieldsOfStudy String[]       @map("common_fields_of_study")
   relatedAbilities  String[]         @map("related_abilities")
   timeToMaster      String?          @map("time_to_master")
-  isVerifiable      Boolean          @default(false) @map("is_verifiable") //?
-  parentSkillId     String?          @map("parent_skill_id") @db.Uuid //?
-  parentSkill       Skill?           @relation("SkillHierarchy", fields: [parentSkillId], references: [id]) //?
-  childSkills       Skill[]          @relation("SkillHierarchy") //?
-  aliases           String[] //?
   metadata          Json?
   deletedAt     DateTime?        @map("deleted_at")
   createdAt     DateTime         @default(now()) @map("created_at")
@@ -740,11 +729,10 @@ model Skill {
 
   @@index([industryId])
   @@index([category])
-  @@index([parentSkillId])
   @@map("skills")
 }
 
-/// Certification / Accréditation
+/// Certification
 model Certification {
   id                     String                 @id @default(uuid()) @db.Uuid
   name                   String
@@ -757,7 +745,6 @@ model Certification {
   products               String[]
   jobs                   String[]
   validityDurationMonths Int?                   @map("validity_duration_months")
-  isRenewable            Boolean                @default(false) @map("is_renewable") //?
   difficulty             DifficultyLevel?
   cost                   Float?
   costCurrency           String?                @map("cost_currency") @db.Char(3)
@@ -791,10 +778,6 @@ model University {
   country         Country?        @relation(fields: [countryId], references: [id])
   cityId          String?         @map("city_id") @db.Uuid
   city            City?           @relation(fields: [cityId], references: [id])
-  worldRanking    Int?            @map("world_ranking") //?
-  shanghaiRanking Int?            @map("shanghai_ranking") //?
-  theRanking      Int?            @map("the_ranking") //?
-  qsRanking       Int?            @map("qs_ranking") //?
   isPublic        Boolean?        @map("is_public")
   acceptanceRate  Float?          @map("acceptance_rate")
   studentCount    Int?            @map("student_count")
@@ -823,19 +806,13 @@ model Degree {
   name                  String
   serialNumber          String       @unique
   universityId          String       @map("university_id") @db.Uuid
-  university            University   @relation(fields: [universityId], references: [id])
+  university            University?   @relation(fields: [universityId], references: [id])
   level                 DegreeLevel?
   field                 String?
   durationYears         Float?       @map("duration_years")
   description           String?
-  isAccredited          Boolean      @default(true) @map("is_accredited") //?
-  isDistanceLearning    Boolean      @default(false) @map("is_distance_learning") //?
   languageOfInstruction String?      @map("language_of_instruction")
   countryId             String?      @map("country_id") @db.Uuid
-  country               Country?     @relation(fields: [countryId], references: [id])
-  creditsRequired       Int?         @map("credits_required") //?
-  tuitionFeeMin         Float?       @map("tuition_fee_min") //?
-  tuitionFeeMax         Float?       @map("tuition_fee_max") //?
   tuitionCurrency       String?      @map("tuition_currency") @db.Char(3) //?
   metadata              Json?
   deletedAt             DateTime?    @map("deleted_at")
@@ -843,7 +820,6 @@ model Degree {
   updatedAt             DateTime     @updatedAt @map("updated_at")
 
   @@index([universityId])
-  @@index([countryId])
   @@index([level])
   @@map("degrees")
 }
@@ -884,7 +860,6 @@ model Subject {
 }
 
 /// Fait d'information vérifiable (polymorphique via FK nullables)
-//? Est ce que c'est vraiment nécessaire ? Benjamin en a besoin ?
 model Fact {
   id                  String        @id @default(uuid()) @db.Uuid
   title               String
@@ -930,7 +905,7 @@ model Fact {
   @@map("facts")
 }
 
-/// Offre d'emploi publiée par une entreprise (≠ Job)
+/// Offre d'emploi
 model JobOffer {
   id                      String          @id @default(uuid()) @db.Uuid
   title                   String
@@ -1008,14 +983,11 @@ model User {
   lastName            String?    @map("last_name")
   displayName         String?    @map("display_name")
   avatarUrl           String?    @map("avatar_url")
-  bio                 String?
   role                UserRole   @default(USER)
   status              UserStatus @default(PENDING_VERIFICATION)
-  locale              String?    @default("fr")
-  timezone            String?
   lastLoginAt         DateTime?  @map("last_login_at")
-  failedLoginAttempts Int        @default(0) @map("failed_login_attempts") //?
-  lockedUntil         DateTime?  @map("locked_until") //?
+  failedLoginAttempts Int        @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?  @map("locked_until")
   passwordChangedAt   DateTime?  @map("password_changed_at")
   metadata            Json?
   deletedAt           DateTime?  @map("deleted_at")
@@ -1030,7 +1002,6 @@ model User {
   @@map("users")
 }
 
-/// Session JWT / Refresh token
 model UserSession {
   id        String    @id @default(uuid()) @db.Uuid
   userId    String    @map("user_id") @db.Uuid
@@ -1047,22 +1018,21 @@ model UserSession {
   @@map("user_sessions")
 }
 
-/// Profil public étendu (1-to-1 avec User)
-//? Vraiment utile ? 
+/// Profil public user
 model UserProfile {
   id                  String        @id @default(uuid()) @db.Uuid
   userId              String        @unique @map("user_id") @db.Uuid
   user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  headline            String?
   biography           String?
   countryId           String?       @map("country_id") @db.Uuid
   country             Country?      @relation("UserProfileCountry", fields: [countryId], references: [id])
   cityId              String?       @map("city_id") @db.Uuid
   city                City?         @relation(fields: [cityId], references: [id])
   linkedinUrl         String?       @map("linkedin_url")
-  twitterUrl          String?       @map("twitter_url")
   githubUrl           String?       @map("github_url")
   websiteUrl          String?       @map("website_url")
+  locale              String?    @default("fr")
+  timezone            String?
   isPublic            Boolean       @default(true) @map("is_public")
   currentJobId        String?       @map("current_job_id") @db.Uuid
   currentJob          Job?          @relation("UserCurrentJob", fields: [currentJobId], references: [id])
