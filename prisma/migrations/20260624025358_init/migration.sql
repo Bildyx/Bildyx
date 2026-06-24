@@ -35,16 +35,10 @@ CREATE TYPE "OrganizationType" AS ENUM ('COMPANY', 'NGO', 'GOVERNMENT_MINISTRY',
 CREATE TYPE "EmployeeCountRange" AS ENUM ('RANGE_1_10', 'RANGE_11_50', 'RANGE_51_200', 'RANGE_201_1000', 'RANGE_1001_5000', 'RANGE_5000_PLUS');
 
 -- CreateEnum
-CREATE TYPE "RevenueRange" AS ENUM ('UNDER_1M', 'RANGE_1M_10M', 'RANGE_10M_100M', 'RANGE_100M_1B', 'OVER_1B');
-
--- CreateEnum
 CREATE TYPE "FactCategory" AS ENUM ('STATISTIC', 'HISTORICAL', 'LEGAL', 'SCIENTIFIC', 'GEOPOLITICAL', 'ECONOMIC', 'OTHER');
 
 -- CreateEnum
 CREATE TYPE "UniversityType" AS ENUM ('UNIVERSITY', 'GRANDE_ECOLE', 'INSTITUTE', 'ACADEMY', 'ONLINE', 'OTHER');
-
--- CreateEnum
-CREATE TYPE "Continent" AS ENUM ('AFRICA', 'ANTARCTICA', 'ASIA', 'EUROPE', 'NORTH_AMERICA', 'OCEANIA', 'SOUTH_AMERICA');
 
 -- CreateEnum
 CREATE TYPE "GovernmentType" AS ENUM ('REPUBLIC', 'CONSTITUTIONAL_MONARCHY', 'ABSOLUTE_MONARCHY', 'FEDERATION', 'PARLIAMENTARY', 'COMMUNIST', 'THEOCRACY', 'MILITARY_JUNTA', 'OTHER');
@@ -75,12 +69,6 @@ CREATE TYPE "UserRole" AS ENUM ('USER', 'MODERATOR', 'ADMIN', 'SUPER_ADMIN');
 
 -- CreateEnum
 CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'SUSPENDED', 'DELETED', 'PENDING_VERIFICATION');
-
--- CreateEnum
-CREATE TYPE "EntityType" AS ENUM ('JOB', 'JOB_OFFER', 'COMPANY', 'INDUSTRY', 'FACT', 'UNIVERSITY', 'COUNTRY', 'CITY', 'SKILL', 'CERTIFICATION', 'DEGREE', 'PRODUCT');
-
--- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('SYSTEM', 'FOLLOW', 'BOOKMARK', 'REVIEW', 'NEW_CARD', 'UPDATE', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "industries" (
@@ -237,7 +225,7 @@ CREATE TABLE "organizations" (
     "total_land_area" TEXT,
     "population_of_city" TEXT,
     "number_of_offices" INTEGER,
-    "number_of_employees" INTEGER,
+    "numberOfEmployees" "EmployeeCountRange",
     "number_of_members" INTEGER,
     "number_of_personnel" INTEGER,
     "number_of_volunteers" INTEGER,
@@ -455,10 +443,6 @@ CREATE TABLE "facts" (
     "hashtags" TEXT[],
     "icon" TEXT,
     "category" "FactCategory",
-    "source_url" TEXT,
-    "source_title" TEXT,
-    "published_at" TIMESTAMP(3),
-    "verified_at" TIMESTAMP(3),
     "related_country_id" UUID,
     "related_city_id" UUID,
     "related_company_id" UUID,
@@ -488,15 +472,11 @@ CREATE TABLE "job_offers" (
     "remote" "RemotePolicy",
     "country_id" UUID,
     "city_id" UUID,
-    "salary_min" INTEGER,
-    "salary_max" INTEGER,
-    "salary_currency" CHAR(3),
+    "salaryRange" TEXT,
     "required_years_experience" INTEGER,
     "required_education_level" "EducationLevel",
     "application_url" TEXT,
     "application_email" TEXT,
-    "number_of_positions" INTEGER,
-    "benefits_description" TEXT,
     "published_at" TIMESTAMP(3),
     "expires_at" TIMESTAMP(3),
     "tags" TEXT[],

@@ -1,8 +1,3 @@
-// Bildyx — Database Schema V2 (Prisma + PostgreSQL)
-// Couche 1 : Tables de référence (les "cartes")
-// Couche 2 : Utilisateurs, Auth & Profils
-// Couche 3 : Interactions utilisateurs (Bookmarks, Reviews, Analytics, Notifications)
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres"]
@@ -14,11 +9,10 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// =============================================================================
-// ENUMS
-// =============================================================================
+// layer 1 : Cards
+// layer 2 : Users
 
-// --- Job (métier exercé) ---
+// Enums
 
 enum CostOfLiving {
   LOW
@@ -158,8 +152,6 @@ enum SeniorityLevel {
   OTHER
 }
 
-// --- JobOffer (offre d'emploi) ---
-
 enum JobOfferStatus {
   DRAFT
   PUBLISHED
@@ -197,8 +189,6 @@ enum SkillImportance {
   NICE_TO_HAVE
 }
 
-// --- Organization ---
-
 enum OrganizationType {
   COMPANY
   NGO
@@ -220,16 +210,6 @@ enum EmployeeCountRange {
   RANGE_5000_PLUS
 }
 
-enum RevenueRange {
-  UNDER_1M
-  RANGE_1M_10M
-  RANGE_10M_100M
-  RANGE_100M_1B
-  OVER_1B
-}
-
-// --- Fact ---
-
 enum FactCategory {
   STATISTIC
   HISTORICAL
@@ -240,8 +220,6 @@ enum FactCategory {
   OTHER
 }
 
-// --- University ---
-
 enum UniversityType {
   UNIVERSITY
   GRANDE_ECOLE
@@ -249,18 +227,6 @@ enum UniversityType {
   ACADEMY
   ONLINE
   OTHER
-}
-
-// --- Country ---
-
-enum Continent {
-  AFRICA
-  ANTARCTICA
-  ASIA
-  EUROPE
-  NORTH_AMERICA
-  OCEANIA
-  SOUTH_AMERICA
 }
 
 enum GovernmentType {
@@ -274,8 +240,6 @@ enum GovernmentType {
   MILITARY_JUNTA
   OTHER
 }
-
-// --- Skill ---
 
 enum SkillCategory {
   TECHNICAL
@@ -294,8 +258,6 @@ enum DifficultyLevel {
   EXPERT
 }
 
-// --- Certification ---
-
 enum CertificationCategory {
   PROFESSIONAL
   TECHNICAL
@@ -313,8 +275,6 @@ enum RecognitionLevel {
   INDUSTRY_SPECIFIC
 }
 
-// --- Degree ---
-
 enum DegreeLevel {
   HIGH_SCHOOL
   BACHELOR
@@ -326,8 +286,6 @@ enum DegreeLevel {
   LAW
   OTHER
 }
-
-// --- Product ---
 
 enum ProductCategory {
   SOFTWARE
@@ -349,8 +307,6 @@ enum PricingModel {
   OTHER
 }
 
-// --- User ---
-
 enum UserRole {
   USER
   MODERATOR
@@ -365,38 +321,8 @@ enum UserStatus {
   PENDING_VERIFICATION
 }
 
-// --- Interactions (polymorphiques) ---
+// LAYER 1 : Cards
 
-enum EntityType {
-  JOB
-  JOB_OFFER
-  COMPANY
-  INDUSTRY
-  FACT
-  UNIVERSITY
-  COUNTRY
-  CITY
-  SKILL
-  CERTIFICATION
-  DEGREE
-  PRODUCT
-}
-
-enum NotificationType {
-  SYSTEM
-  FOLLOW
-  BOOKMARK
-  REVIEW
-  NEW_CARD
-  UPDATE
-  OTHER
-}
-
-// =============================================================================
-// LAYER 1 — TABLES DE RÉFÉRENCE (les "cartes")
-// =============================================================================
-
-/// Secteur d'activité
 model Industry {
   id               String     @id @default(uuid()) @db.Uuid
   name             String
@@ -425,7 +351,6 @@ model Industry {
   @@map("industries")
 }
 
-/// Pays
 model Country {
   id                            String          @id @default(uuid()) @db.Uuid
   name                          String
@@ -488,7 +413,6 @@ model Country {
   @@map("countries")
 }
 
-/// Ville
 model City {
   id                       String        @id @default(uuid()) @db.Uuid
   name                     String
@@ -531,7 +455,6 @@ model City {
   @@map("cities")
 }
 
-/// Entreprise / Organisation
 model Organization {
   id                    String            @id @default(uuid()) @db.Uuid
   name                  String
@@ -576,7 +499,7 @@ model Organization {
   dissolved             String?
   founder               String?
 
-  // --- Localisation ---
+  // Localisation
   headquarters     String?
   location         String?
   regionServed     String? @map("region_served")
@@ -584,9 +507,9 @@ model Organization {
   totalLandArea    String? @map("total_land_area")
   populationOfCity String? @map("population_of_city")
 
-  // --- Taille & Effectifs ---
+  // Taille & Effectifs
   numberOfOffices              Int?    @map("number_of_offices")
-  numberOfEmployees            Int?    @map("number_of_employees")
+  numberOfEmployees            EmployeeCountRange?
   numberOfMembers              Int?    @map("number_of_members")
   numberOfPersonnel            Int?    @map("number_of_personnel")
   numberOfVolunteers           Int?    @map("number_of_volunteers")
@@ -596,14 +519,14 @@ model Organization {
   size                         String?
   visitors                     String?
 
-  // --- Installations & Structures ---
+  // Installations & Structures
   labs                     String[]
   giantFacilities          String[] @map("giant_facilities")
   nationalParks            String[] @map("national_parks")
   librariesAndPublications String?  @map("libraries_and_publications")
   tacticalUnits            String[] @map("tactical_units")
 
-  // --- Hiérarchie ---
+  // Hiérarchie
   parentOrganizationId    String?        @map("parent_organization_id") @db.Uuid
   parentOrganization      Organization?  @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
   childAgencies           Organization[] @relation("OrganizationHierarchy")
@@ -616,7 +539,7 @@ model Organization {
   supersedingAgencies     String[]       @map("superseding_agencies")
   supersedingPostalSystem String?        @map("superseding_postal_system")
 
-  // --- Militaire : Marine ---
+  // Militaire : Marine
   numberOfActiveNavyPersonnel    Int? @map("number_of_active_navy_personnel")
   numberOfDestroyers             Int? @map("number_of_destroyers")
   numberOfSubmarinesDiesel       Int? @map("number_of_submarines_diesel")
@@ -626,7 +549,7 @@ model Organization {
   numberOfStealthFleet           Int? @map("number_of_stealth_fleet")
   numberOfSurveillanceRadars     Int? @map("number_of_surveillance_radars")
 
-  // --- Militaire : Aérien ---
+  // Militaire : Aérien
   numberOfAircrafts       Int? @map("number_of_aircrafts")
   numberOfFighterJets     Int? @map("number_of_fighter_jets")
   numberOfHelicopters     Int? @map("number_of_helicopters")
@@ -634,7 +557,7 @@ model Organization {
   numberOfTankerPlanes    Int? @map("number_of_tanker_planes")
   numberOfTransportPlanes Int? @map("number_of_transport_planes")
 
-  // --- Spatial ---
+  // Spatial
   numberOfCommunicationSatellites  Int? @map("number_of_communication_satellites")
   numberOfMissileWarningSatellites Int? @map("number_of_missile_warning_satellites")
   numberOfNavigationSatellites     Int? @map("number_of_navigation_satellites")
@@ -646,13 +569,11 @@ model Organization {
   numberOfSpaceOperationsSquadrons Int? @map("number_of_space_operations_squadrons")
   numberOfSpacePersonnel           Int? @map("number_of_space_personnel")
 
-  // --- Métadonnées ---
   metadata  Json?
   deletedAt DateTime? @map("deleted_at")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  // --- Relations ---
   industries              Industry[]      @relation("CompanyIndustries")
   subjects                Subject[]
   jobOffers               JobOffer[]
@@ -667,7 +588,6 @@ model Organization {
   @@map("organizations")
 }
 
-/// Métier
 model Job {
   id             String          @id @default(uuid()) @db.Uuid
   title          String
@@ -701,7 +621,6 @@ model Job {
   @@map("jobs")
 }
 
-/// Compétence (technique, soft skill, langue, outil…)
 model Skill {
   id            String           @id @default(uuid()) @db.Uuid
   name          String
@@ -732,7 +651,6 @@ model Skill {
   @@map("skills")
 }
 
-/// Certification
 model Certification {
   id                     String                 @id @default(uuid()) @db.Uuid
   name                   String
@@ -762,7 +680,6 @@ model Certification {
   @@map("certifications")
 }
 
-/// Université / Grande école / Institution académique
 model University {
   id              String          @id @default(uuid()) @db.Uuid
   name            String
@@ -799,14 +716,12 @@ model University {
   @@map("universities")
 }
 
-/// Diplôme (relié à une université)
-//? à voir pour ne pas juste faire des diplômes simples (liste) plutôt que les relier à des universités
 model Degree {
   id                    String       @id @default(uuid()) @db.Uuid
   name                  String
   serialNumber          String       @unique
   universityId          String       @map("university_id") @db.Uuid
-  university            University?   @relation(fields: [universityId], references: [id])
+  university            University?   @relation(fields: [universityId], references: [id]) // Pas toujours relié à une université mais possible
   level                 DegreeLevel?
   field                 String?
   durationYears         Float?       @map("duration_years")
@@ -859,7 +774,7 @@ model Subject {
   @@map("products")
 }
 
-/// Fait d'information vérifiable (polymorphique via FK nullables)
+/// Fait d'information vérifiable
 model Fact {
   id                  String        @id @default(uuid()) @db.Uuid
   title               String
@@ -868,10 +783,6 @@ model Fact {
   hashtags            String[]
   icon                String?
   category            FactCategory?
-  sourceUrl           String?       @map("source_url") //?
-  sourceTitle         String?       @map("source_title") //?
-  publishedAt         DateTime?     @map("published_at") //?
-  verifiedAt          DateTime?     @map("verified_at") //?
   relatedCountryId    String?       @map("related_country_id") @db.Uuid
   relatedCountry      Country?      @relation(fields: [relatedCountryId], references: [id])
   relatedCityId       String?       @map("related_city_id") @db.Uuid
@@ -903,7 +814,6 @@ model Fact {
   @@map("facts")
 }
 
-/// Offre d'emploi
 model JobOffer {
   id                      String          @id @default(uuid()) @db.Uuid
   title                   String
@@ -920,18 +830,14 @@ model JobOffer {
   country                 Country?        @relation(fields: [countryId], references: [id])
   cityId                  String?         @map("city_id") @db.Uuid
   city                    City?           @relation(fields: [cityId], references: [id])
-  salaryMin               Int?            @map("salary_min")
-  salaryMax               Int?            @map("salary_max") //? Maybe salaryRange ?
-  salaryCurrency          String?         @map("salary_currency") @db.Char(3) //?
+  salaryRange             String?         @map("salaryRange") //String pour pouvoir rajouter la devise + range
   requiredYearsExperience Int?            @map("required_years_experience")
   requiredEducationLevel  EducationLevel? @map("required_education_level") //? à relier avec degree éventuellement
   applicationUrl          String?         @map("application_url")
   applicationEmail        String?         @map("application_email")
-  numberOfPositions       Int?            @map("number_of_positions") //?
-  benefitsDescription     String?         @map("benefits_description") //?
   publishedAt             DateTime?       @map("published_at")
   expiresAt               DateTime?       @map("expires_at")
-  tags                    String[]
+  tags                    String[] // à voir pour faire une liste de tags prédéfinis
   metadata                Json?
   deletedAt               DateTime?       @map("deleted_at")
   createdAt               DateTime        @default(now()) @map("created_at")
@@ -950,8 +856,6 @@ model JobOffer {
   @@map("job_offers")
 }
 
-// --- Table de jonction M2M avec attributs ---
-
 /// Compétence requise pour une offre d'emploi (avec niveau d'importance)
 //? Est ce vraiment utile ? 
 model JobOfferSkill {
@@ -960,16 +864,14 @@ model JobOfferSkill {
   jobOffer   JobOffer        @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
   skillId    String          @map("skill_id") @db.Uuid
   skill      Skill           @relation(fields: [skillId], references: [id])
-  importance SkillImportance @default(REQUIRED) //?
+  importance SkillImportance @default(REQUIRED)
 
   @@unique([jobOfferId, skillId])
   @@index([skillId])
   @@map("job_offer_skills")
 }
 
-// =============================================================================
-// COUCHE 2 — UTILISATEURS, AUTH & PROFILS
-// =============================================================================
+// layer 2 : Users
 
 /// Utilisateur (authentification & identité)
 model User {
