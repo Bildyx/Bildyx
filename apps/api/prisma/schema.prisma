@@ -282,6 +282,8 @@ enum UserRole {
   MODERATOR
   ADMIN
   SUPER_ADMIN
+  CANDIDATE
+  ORGANISATION
 }
 
 enum UserStatus {
@@ -431,45 +433,29 @@ model Organization {
   mission               String?
   purpose               String?
   focus                 String?
-  focusAreas            String[]          @map("focus_areas")
-  strategicFocus        String?           @map("strategic_focus")
   knownFor              String[]          @map("known_for")
-  distinction           String?
-  fields                String[]
   keyActivities         String[]          @map("key_activities")
   keyProject            String?           @map("key_project")
   keyResearchOutput     String?           @map("key_research_output")
   majorPrograms         String[]          @map("major_programs")
   majorProjects         String[]          @map("major_projects")
   researchAreas         String[]          @map("research_areas")
-  researchModel         String?           @map("research_model")
-  businessAndInnovation String?           @map("business_and_innovation")
   products              String[]
   services              String[]
-  managementAndAdmin    String?           @map("management_and_admin")
-  mainOrgan             String?           @map("main_organ")
-  constituency          String?
-  affiliation           String?
-  collaborations        String[]
   partnerships          String[]
   fundingSources        String[]          @map("funding_sources")
   budget                String?
   endowment             String?
   gdp                   String?
   founded               String?
-  formed                String?
-  formation             String?
-  opened                String?
-  dissolved             String?
   founder               String?
 
   // Localisation
+  location         City[]
   headquarters     String?
-  location         String?
   regionServed     String? @map("region_served")
   geography        String?
   totalLandArea    String? @map("total_land_area")
-  populationOfCity String? @map("population_of_city")
 
   // Taille & Effectifs
   numberOfOffices              Int?    @map("number_of_offices")
@@ -477,7 +463,6 @@ model Organization {
   numberOfMembers              Int?    @map("number_of_members")
   numberOfPersonnel            Int?    @map("number_of_personnel")
   numberOfVolunteers           Int?    @map("number_of_volunteers")
-  numberOfGovernmentMinistries Int?    @map("number_of_government_ministries")
   numberOfMinistries           Int?    @map("number_of_ministries")
   scale                        String?
   size                         String?
@@ -487,8 +472,6 @@ model Organization {
   labs                     String[]
   giantFacilities          String[] @map("giant_facilities")
   nationalParks            String[] @map("national_parks")
-  librariesAndPublications String?  @map("libraries_and_publications")
-  tacticalUnits            String[] @map("tactical_units")
 
   // Hiérarchie
   parentOrganizationId    String?        @map("parent_organization_id") @db.Uuid
@@ -792,6 +775,22 @@ model User {
   lastName            String?    @map("last_name")
   displayName         String?    @map("display_name")
   avatarUrl           String?    @map("avatar_url")
+  /// When the account represents a organisation, this stores the name.
+  organisationName         String?    @map("organisation_name")
+  /// Indicates whether the user has opted in to receive marketing communications.
+  marketingOptIn      Boolean    @default(false) @map("marketing_opt_in")
+  /// One‑time code sent to the user for email verification. Null when verification completed.
+  verificationCode        String?    @map("verification_code")
+  /// Expiration timestamp for the verification code.
+  verificationExpiresAt   DateTime?  @map("verification_expires_at")
+  /// Last time a verification email was sent, used to throttle re‑sends.
+  lastVerificationSentAt  DateTime?  @map("last_verification_sent_at")
+  /// One‑time token used for password reset flows. Null when unused or expired.
+  resetToken              String?    @map("reset_token")
+  /// Expiration timestamp for the password reset token.
+  resetExpiresAt          DateTime?  @map("reset_expires_at")
+  /// Last time a password reset email was sent, used to throttle re‑sends.
+  lastResetSentAt         DateTime?  @map("last_reset_sent_at")
   role                UserRole   @default(USER)
   status              UserStatus @default(PENDING_VERIFICATION)
   lastLoginAt         DateTime?  @map("last_login_at")
