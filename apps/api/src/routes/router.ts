@@ -10,6 +10,7 @@ import { organizations } from "./organizations";
 import { products } from "./products";
 import { jobs } from "./jobs";
 import { job_ads } from "./job_ads";
+import { job_ad_skills } from "./job_ad_skills";
 
 
 
@@ -24,6 +25,7 @@ export const router = publicProcedure.router({
   organizations,
   products,
   jobs,
-  job_ads
+  job_ads,
+  job_ad_skills,
 });
 export type Router = typeof router;
