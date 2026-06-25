@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-export const OrganizationTypeEnum = z.enum(["COMPANY", "GOVERNMENT_MINISTRY", "INTERNATIONAL_ORG", "MILITARY", "NGO", "OTHER", "POLITICAL_PARTY", "RESEARCH_INSTITUTE", "STARTUP"]);
+export const OrganizationSubtypeEnum = z.enum(["ARMY", "CLUB", "GOVERNMENT", "INTERNATIONAL_ORGANIZATION", "NGO", "NON_PROFIT", "ORGANIZATION", "OTHER", "RESEARCH_INSTITUTE", "SOCIETY", "UNIVERSITY"]);
 export const EmployeeCountRangeEnum = z.enum(["RANGE_1_10", "RANGE_1001_5000", "RANGE_11_50", "RANGE_201_1000", "RANGE_5000_PLUS", "RANGE_51_200"]);
 
 export const OrganizationSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   slug: z.string(),
-  type: OrganizationTypeEnum.nullable(),
+  type: OrganizationSubtypeEnum.nullable(),
   category: z.string().nullable(),
   subsidiaries_count: z.number().int().nullable(),
   legal_status: z.string().nullable(),
@@ -117,7 +117,7 @@ export const UpdateOrganizationSchema = CreateOrganizationSchema.partial();
 
 export const GetOrganizationsSchema = z.object({
   search: z.string().optional(),
-  type: OrganizationTypeEnum.optional(),
+  type: OrganizationSubtypeEnum.optional(),
 });
 
 export type Organization = z.infer<typeof OrganizationSchema>;

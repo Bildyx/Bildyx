@@ -28,18 +28,10 @@ export const certifications = {
         );
       }
 
-      if (category) {
-        query = query.where('category', '=', category);
-      }
+      if (category) query = query.where('category', '=', category);
+      if (difficulty) query = query.where('difficulty', '=', difficulty);
 
-      if (difficulty) {
-        query = query.where('difficulty', '=', difficulty);
-      }
-
-      return await query
-        .selectAll()
-        .orderBy('name', 'asc')
-        .execute();
+      return await query.selectAll().orderBy('name', 'asc').execute();
     }),
 
   getOne: publicProcedure
@@ -60,9 +52,7 @@ export const certifications = {
         .selectAll()
         .executeTakeFirst();
 
-      if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
-      }
+      if (!data) throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
 
       return data;
     }),
@@ -85,26 +75,17 @@ export const certifications = {
         .select('id')
         .executeTakeFirst();
 
-      if (existing) {
-        throw new ORPCError("CONFLICT", { message: "A certification with this name already exists" });
-      }
+      if (existing) throw new ORPCError("CONFLICT", { message: "A certification with this name already exists" });
 
       const { metadata, ...rest } = input;
 
       const certification = await database
         .insertInto('certifications')
-        .values({
-          ...rest,
-          id: uuidv4(),
-          updated_at: new Date(),
-          metadata: metadata as any,
-        })
+        .values({ ...rest, id: uuidv4(), updated_at: new Date(), metadata: metadata as any })
         .returningAll()
         .executeTakeFirst();
 
-      if (!certification) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create certification" });
-      }
+      if (!certification) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create certification" });
 
       return certification;
     }),
@@ -129,9 +110,7 @@ export const certifications = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
 
       const certification = await database
         .updateTable('certifications')
@@ -140,9 +119,7 @@ export const certifications = {
         .returningAll()
         .executeTakeFirst();
 
-      if (!certification) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update certification" });
-      }
+      if (!certification) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update certification" });
 
       return certification;
     }),
@@ -165,15 +142,9 @@ export const certifications = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
 
-      await database
-        .updateTable('certifications')
-        .set({ deleted_at: new Date() })
-        .where('id', '=', input.certificationId)
-        .execute();
+      await database.updateTable('certifications').set({ deleted_at: new Date() }).where('id', '=', input.certificationId).execute();
 
       return { success: true };
     }),

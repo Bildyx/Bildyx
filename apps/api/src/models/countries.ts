@@ -11,7 +11,7 @@ export const CountrySchema = z.object({
   iso_code: z.string().nullable(),
   capital_name: z.string().nullable(),
   flag_url: z.string().nullable(),
-  population: z.string().nullable(), // Int8 = string in Kysely
+  population: z.string().nullable(),
   area_km2: z.number().nullable(),
   gdp_usd: z.number().nullable(),
   gdp_per_capita_usd: z.number().nullable(),
@@ -37,7 +37,7 @@ export const CountrySchema = z.object({
   global_competitiveness_index: z.number().int().nullable(),
   level_of_globalisation: z.string().nullable(),
   number_of_international_students: z.number().int().nullable(),
-  number_of_foreign_companies: z.number().int().nullable(),
+  number_of_foreign_organizations: z.number().int().nullable(),
   personal_income_tax: z.string().nullable(),
   number_of_tourists: z.number().int().nullable(),
   number_of_airports: z.number().int().nullable(),

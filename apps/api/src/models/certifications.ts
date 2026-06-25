@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-export const CertificationCategoryEnum = z.enum(["COMPLIANCE", "LANGUAGE", "OTHER", "PROFESSIONAL", "QUALITY", "SECURITY", "TECHNICAL"]);
+export const CertificationCategoryEnum = z.enum(["LANGUAGE", "OTHER", "PROFESSIONAL", "PROJECTMANAGEMENT", "TECHNICAL", "VENDORPRODUCT"]);
 export const DifficultyLevelEnum = z.enum(["ADVANCED", "BEGINNER", "EXPERT", "INTERMEDIATE"]);
-export const RecognitionLevelEnum = z.enum(["GLOBAL", "INDUSTRY_SPECIFIC", "NATIONAL", "REGIONAL"]);
 
 export const CertificationSchema = z.object({
   id: z.string().uuid(),
@@ -16,13 +15,8 @@ export const CertificationSchema = z.object({
   jobs: z.array(z.string()).nullable(),
   validity_duration_months: z.number().int().nullable(),
   difficulty: DifficultyLevelEnum.nullable(),
-  cost: z.number().nullable(),
-  cost_currency: z.string().nullable(),
   website_url: z.string().nullable(),
-  logo_url: z.string().nullable(),
-  recognition_level: RecognitionLevelEnum.nullable(),
-  prerequisites: z.array(z.string()).nullable(),
-  metadata: z.unknown().nullable(),  
+  metadata: z.unknown().nullable(),
   deleted_at: z.date().nullable(),
   created_at: z.date(),
   updated_at: z.date(),

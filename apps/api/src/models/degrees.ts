@@ -1,19 +1,18 @@
 import { z } from "zod";
 
-export const DegreeLevelEnum = z.enum(["BACHELOR", "ENGINEERING", "HIGH_SCHOOL", "LAW", "MASTER", "MBA", "MEDICAL", "OTHER", "PHD"]);
+export const DegreeLevelEnum = z.enum(["ASSOCIATE", "BACHELOR", "HIGH_SCHOOL", "MASTER", "PHD"]);
 
 export const DegreeSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   serialNumber: z.string(),
-  university_id: z.string().uuid(),
+  university_id: z.string().uuid().nullable(),
   level: DegreeLevelEnum.nullable(),
   field: z.string().nullable(),
   duration_years: z.number().nullable(),
   description: z.string().nullable(),
   language_of_instruction: z.string().nullable(),
   country_id: z.string().uuid().nullable(),
-  tuition_currency: z.string().nullable(),
   metadata: z.unknown().nullable(),
   deleted_at: z.date().nullable(),
   created_at: z.date(),

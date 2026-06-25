@@ -10,7 +10,7 @@ export const cities = {
     .route({
       method: "GET",
       summary: "List all cities",
-      description: "Get all cities with optional search and country filter",
+      description: "Get all cities with optional filters",
       path: "/cities",
       tags: ["City"]
     })
@@ -26,14 +26,9 @@ export const cities = {
         query = query.where('name', 'ilike', p);
       }
 
-      if (country_id) {
-        query = query.where('country_id', '=', country_id);
-      }
+      if (country_id) query = query.where('country_id', '=', country_id);
 
-      return await query
-        .selectAll()
-        .orderBy('name', 'asc')
-        .execute();
+      return await query.selectAll().orderBy('name', 'asc').execute();
     }),
 
   getOne: publicProcedure
@@ -54,9 +49,7 @@ export const cities = {
         .selectAll()
         .executeTakeFirst();
 
-      if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "City not found" });
-      }
+      if (!data) throw new ORPCError("NOT_FOUND", { message: "City not found" });
 
       return data;
     }),
@@ -80,26 +73,17 @@ export const cities = {
         .select('id')
         .executeTakeFirst();
 
-      if (existing) {
-        throw new ORPCError("CONFLICT", { message: "A city with this name already exists in this country" });
-      }
+      if (existing) throw new ORPCError("CONFLICT", { message: "A city with this name already exists in this country" });
 
       const { metadata, ...rest } = input;
 
       const city = await database
         .insertInto('cities')
-        .values({
-          ...rest,
-          id: uuidv4(),
-          updated_at: new Date(),
-          metadata: metadata as any,
-        })
+        .values({ ...rest, id: uuidv4(), updated_at: new Date(), metadata: metadata as any })
         .returningAll()
         .executeTakeFirst();
 
-      if (!city) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create city" });
-      }
+      if (!city) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create city" });
 
       return city;
     }),
@@ -124,9 +108,7 @@ export const cities = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "City not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "City not found" });
 
       const city = await database
         .updateTable('cities')
@@ -135,9 +117,7 @@ export const cities = {
         .returningAll()
         .executeTakeFirst();
 
-      if (!city) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update city" });
-      }
+      if (!city) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update city" });
 
       return city;
     }),
@@ -160,15 +140,9 @@ export const cities = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "City not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "City not found" });
 
-      await database
-        .updateTable('cities')
-        .set({ deleted_at: new Date() })
-        .where('id', '=', input.cityId)
-        .execute();
+      await database.updateTable('cities').set({ deleted_at: new Date() }).where('id', '=', input.cityId).execute();
 
       return { success: true };
     }),

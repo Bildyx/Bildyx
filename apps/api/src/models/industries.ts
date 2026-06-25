@@ -7,8 +7,6 @@ export const IndustrySchema = z.object({
   description: z.string().nullable(),
   icon_url: z.string().nullable(),
   color: z.string().nullable(),
-  median_salary: z.number().int().nullable(),
-  parent_industry_id: z.string().uuid().nullable(),
   metadata: z.unknown().nullable(),
   deleted_at: z.date().nullable(),
   created_at: z.date(),
@@ -26,7 +24,6 @@ export const UpdateIndustrySchema = CreateIndustrySchema.partial();
 
 export const GetIndustriesSchema = z.object({
   search: z.string().optional(),
-  parent_industry_id: z.string().uuid().optional(),
 });
 
 export type Industry = z.infer<typeof IndustrySchema>;

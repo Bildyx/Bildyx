@@ -10,14 +10,14 @@ export const industries = {
     .route({
       method: "GET",
       summary: "List all industries",
-      description: "Get all industries with optional search and parent filter",
+      description: "Get all industries with optional search",
       path: "/industries",
       tags: ["Industry"]
     })
     .input(GetIndustriesSchema)
     .output(z.array(IndustrySchema))
     .handler(async ({ input }) => {
-      const { search, parent_industry_id } = input;
+      const { search } = input;
 
       let query = database.selectFrom('industries').where('deleted_at', 'is', null);
 
@@ -28,14 +28,7 @@ export const industries = {
         );
       }
 
-      if (parent_industry_id) {
-        query = query.where('parent_industry_id', '=', parent_industry_id);
-      }
-
-      return await query
-        .selectAll()
-        .orderBy('name', 'asc')
-        .execute();
+      return await query.selectAll().orderBy('name', 'asc').execute();
     }),
 
   getOne: publicProcedure
@@ -56,9 +49,7 @@ export const industries = {
         .selectAll()
         .executeTakeFirst();
 
-      if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
-      }
+      if (!data) throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
 
       return data;
     }),
@@ -81,26 +72,17 @@ export const industries = {
         .select('id')
         .executeTakeFirst();
 
-      if (existing) {
-        throw new ORPCError("CONFLICT", { message: "An industry with this name already exists" });
-      }
+      if (existing) throw new ORPCError("CONFLICT", { message: "An industry with this name already exists" });
 
       const { metadata, ...rest } = input;
 
       const industry = await database
         .insertInto('industries')
-        .values({
-          ...rest,
-          id: uuidv4(),
-          updated_at: new Date(),
-          metadata: metadata as any,
-        })
+        .values({ ...rest, id: uuidv4(), updated_at: new Date(), metadata: metadata as any })
         .returningAll()
         .executeTakeFirst();
 
-      if (!industry) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create industry" });
-      }
+      if (!industry) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create industry" });
 
       return industry;
     }),
@@ -125,9 +107,7 @@ export const industries = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
 
       const industry = await database
         .updateTable('industries')
@@ -136,9 +116,7 @@ export const industries = {
         .returningAll()
         .executeTakeFirst();
 
-      if (!industry) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update industry" });
-      }
+      if (!industry) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update industry" });
 
       return industry;
     }),
@@ -161,15 +139,9 @@ export const industries = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
 
-      await database
-        .updateTable('industries')
-        .set({ deleted_at: new Date() })
-        .where('id', '=', input.industryId)
-        .execute();
+      await database.updateTable('industries').set({ deleted_at: new Date() }).where('id', '=', input.industryId).execute();
 
       return { success: true };
     }),

@@ -17,7 +17,7 @@ export const products = {
     .input(GetProductsSchema)
     .output(z.array(ProductSchema))
     .handler(async ({ input }) => {
-      const { search, category, pricing_model, company_id } = input;
+      const { search, category, organization_id } = input;
 
       let query = database.selectFrom('products').where('deleted_at', 'is', null);
 
@@ -29,13 +29,9 @@ export const products = {
       }
 
       if (category) query = query.where('category', '=', category);
-      if (pricing_model) query = query.where('pricing_model', '=', pricing_model);
-      if (company_id) query = query.where('company_id', '=', company_id);
+      if (organization_id) query = query.where('organization_id', '=', organization_id);
 
-      return await query
-        .selectAll()
-        .orderBy('name', 'asc')
-        .execute();
+      return await query.selectAll().orderBy('name', 'asc').execute();
     }),
 
   getOne: publicProcedure
@@ -56,9 +52,7 @@ export const products = {
         .selectAll()
         .executeTakeFirst();
 
-      if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Product not found" });
-      }
+      if (!data) throw new ORPCError("NOT_FOUND", { message: "Product not found" });
 
       return data;
     }),
@@ -77,31 +71,22 @@ export const products = {
       const existing = await database
         .selectFrom('products')
         .where('name', 'ilike', input.name)
-        .$if(!!input.company_id, (qb) => qb.where('company_id', '=', input.company_id!))
+        .$if(!!input.organization_id, (qb) => qb.where('organization_id', '=', input.organization_id!))
         .where('deleted_at', 'is', null)
         .select('id')
         .executeTakeFirst();
 
-      if (existing) {
-        throw new ORPCError("CONFLICT", { message: "A product with this name already exists for this company" });
-      }
+      if (existing) throw new ORPCError("CONFLICT", { message: "A product with this name already exists for this organization" });
 
       const { metadata, ...rest } = input;
 
       const product = await database
         .insertInto('products')
-        .values({
-          ...rest,
-          id: uuidv4(),
-          updated_at: new Date(),
-          metadata: metadata as any,
-        })
+        .values({ ...rest, id: uuidv4(), updated_at: new Date(), metadata: metadata as any })
         .returningAll()
         .executeTakeFirst();
 
-      if (!product) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create product" });
-      }
+      if (!product) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create product" });
 
       return product;
     }),
@@ -126,9 +111,7 @@ export const products = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Product not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Product not found" });
 
       const product = await database
         .updateTable('products')
@@ -137,9 +120,7 @@ export const products = {
         .returningAll()
         .executeTakeFirst();
 
-      if (!product) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update product" });
-      }
+      if (!product) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update product" });
 
       return product;
     }),
@@ -162,15 +143,9 @@ export const products = {
         .select('id')
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Product not found" });
-      }
+      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Product not found" });
 
-      await database
-        .updateTable('products')
-        .set({ deleted_at: new Date() })
-        .where('id', '=', input.productId)
-        .execute();
+      await database.updateTable('products').set({ deleted_at: new Date() }).where('id', '=', input.productId).execute();
 
       return { success: true };
     }),
