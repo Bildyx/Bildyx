@@ -374,6 +374,7 @@ model Country {
   cities       City[]
   jobs         Job[]
   jobAds       JobAd[]
+  degrees      Degree[]
   universities University[]
   userProfiles UserProfile[] @relation("UserProfileCountry")
 
@@ -416,10 +417,7 @@ model City {
   universities   University[]
   jobAds         JobAd[]
   userProfiles   UserProfile[]
-  organizations  Organization[]
-  organizationId String?        @db.Uuid
-  organization   Organization?  @relation(fields: [organizationId], references: [id])
-
+  organizations  Organization[]           @relation("OrganizationHeadquarters")
 
   @@index([countryId])
   @@map("cities")
@@ -435,8 +433,8 @@ model Organization {
   ownership         String?
   mission           String?
   knownFor          String[]             @map("known_for")
-  Activities        String[]             @map("activities")
-  Project           String?              @map("project")
+  activities        String[]             @map("activities")
+  project           String?              @map("project")
   researchAreas     String[]             @map("research_areas")
   products          String[]
   services          String[]
@@ -447,7 +445,7 @@ model Organization {
   equipments        String?
 
   // Localisation
-  headquarters City?  @relation(fields: [cityId], references: [id])
+  headquarters City?  @relation("OrganizationHeadquarters", fields: [cityId], references: [id])
   workingArea  City[] @relation("working_area")
 
   // Taille & Effectifs
@@ -533,7 +531,7 @@ model Skill {
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
 
-  JobAdSkills JobAdSkill[]
+  jobAdSkills JobAdSkill[]
 
   @@index([industryId])
   @@index([category])
@@ -584,7 +582,7 @@ model University {
   createdAt    DateTime        @default(now()) @map("created_at")
   updatedAt    DateTime        @updatedAt @map("updated_at")
   score        Float?
-  localName    String?
+  localName    String?         @map("local_name")
   location     String?
   notes        String?
   established  String?
@@ -613,6 +611,7 @@ model Degree {
   description           String?
   languageOfInstruction String?      @map("language_of_instruction")
   countryId             String?      @map("country_id") @db.Uuid
+  country               Country?     @relation(fields: [countryId], references: [id])
   metadata              Json?
   deletedAt             DateTime?    @map("deleted_at")
   createdAt             DateTime     @default(now()) @map("created_at")
@@ -620,6 +619,7 @@ model Degree {
 
   @@index([universityId])
   @@index([level])
+  @@index([countryId])
   @@map("degrees")
 }
 
@@ -748,6 +748,7 @@ model User {
 
   sessions UserSession[]
   profile  UserProfile?
+  auditlogs  AuditLog?
 
   @@index([status])
   @@index([role])
@@ -806,6 +807,7 @@ model UserProfile {
 model AuditLog {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: SetDefault)
   action    String
   ipAddress String?  @map("ip_address")
   metadata  Json?
