@@ -5,7 +5,7 @@ import { JobAdSkillSchema, CreateJobAdSkillSchema, UpdateJobAdSkillSchema, GetJo
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 
-export const job_ad_skills = {
+export const job_ads_skills = {
   getAll: publicProcedure
     .route({
       method: "GET",
