@@ -308,6 +308,7 @@ model Industry {
   deletedAt         DateTime?  @map("deleted_at")
   createdAt         DateTime   @default(now()) @map("created_at")
   updatedAt         DateTime   @updatedAt @map("updated_at")
+  score             Int?
 
   jobs                  Job[]
   skills                Skill[]
@@ -414,10 +415,10 @@ model City {
   createdAt                DateTime       @default(now()) @map("created_at")
   updatedAt                DateTime       @updatedAt @map("updated_at")
 
-  universities   University[]
-  jobAds         JobAd[]
-  userProfiles   UserProfile[]
-  organizations  Organization[]           @relation("OrganizationHeadquarters")
+  universities             University[]
+  jobAds                   JobAd[]
+  userProfiles             UserProfile[]
+  organizations            Organization[] @relation("OrganizationHeadquarters")
   workingAreaOrganizations Organization[] @relation("working_area")
 
   @@index([countryId])
@@ -425,25 +426,26 @@ model City {
 }
 
 model Organization {
-  id                String               @id @default(uuid()) @db.Uuid
-  name              String
-  slug              String               @unique
-  type              OrganizationSubType?
-  legalStatus       String?              @map("legal_status")
-  category          String?
-  ownership         String?
-  mission           String?
-  knownFor          String[]             @map("known_for")
-  activities        String[]             @map("activities")
-  project           String?              @map("project")
-  researchAreas     String[]             @map("research_areas")
-  products          String[]
-  services          String[]
-  partnerships      String[]
-  budget            String?
-  founded           String?
-  founder           String?
-  equipments        String?
+  id            String               @id @default(uuid()) @db.Uuid
+  name          String
+  slug          String               @unique
+  type          OrganizationSubType?
+  legalStatus   String?              @map("legal_status")
+  category      String?
+  ownership     String?
+  mission       String?
+  knownFor      String[]             @map("known_for")
+  activities    String[]             @map("activities")
+  project       String?              @map("project")
+  researchAreas String[]             @map("research_areas")
+  products      String[]
+  services      String[]
+  partnerships  String[]
+  budget        String?
+  founded       String?
+  founder       String?
+  equipments    String?
+  score         Int?
 
   // Localisation
   headquarters City?  @relation("OrganizationHeadquarters", fields: [cityId], references: [id])
@@ -498,6 +500,7 @@ model Job {
   deletedAt      DateTime?       @map("deleted_at")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
+  score          Int?
 
   jobAds       JobAd[]
   userProfiles UserProfile[] @relation("UserCurrentJob")
@@ -531,6 +534,7 @@ model Skill {
   deletedAt           DateTime?        @map("deleted_at")
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
+  score               Int?
 
   jobAdSkills JobAdSkill[]
 
@@ -557,6 +561,7 @@ model Certification {
   deletedAt              DateTime?              @map("deleted_at")
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime               @updatedAt @map("updated_at")
+  score                  Int?
 
   @@index([issuingOrganizationId])
   @@index([category])
@@ -587,6 +592,7 @@ model University {
   location     String?
   notes        String?
   established  String?
+  score        Int?
 
   degrees        Degree[]
   topOfCities    City[]    @relation("CityTopUniversities")
@@ -617,6 +623,7 @@ model Degree {
   deletedAt             DateTime?    @map("deleted_at")
   createdAt             DateTime     @default(now()) @map("created_at")
   updatedAt             DateTime     @updatedAt @map("updated_at")
+  score                 Int?
 
   @@index([universityId])
   @@index([level])
@@ -644,6 +651,7 @@ model Subject {
   deletedAt        DateTime?        @map("deleted_at")
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
+  score            Int?
 
   industries Industry[] @relation("ProductIndustries")
 
@@ -747,9 +755,9 @@ model User {
   createdAt              DateTime   @default(now()) @map("created_at")
   updatedAt              DateTime   @updatedAt @map("updated_at")
 
-  sessions UserSession[]
-  profile  UserProfile?
-  auditlogs  AuditLog[]
+  sessions  UserSession[]
+  profile   UserProfile?
+  auditlogs AuditLog[]
 
   @@index([status])
   @@index([role])
