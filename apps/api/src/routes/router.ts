@@ -6,6 +6,7 @@ import { degrees } from "./degrees";
 import { industries } from "./industries";
 import { skills } from "./skills";
 import { universities } from "./universities";
+import { organizations } from "./orgnizations";
 
 
 
@@ -17,5 +18,6 @@ export const router = publicProcedure.router({
   industries,
   skills,
   universities,
+  organizations,
 });
 export type Router = typeof router;
