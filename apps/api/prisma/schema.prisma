@@ -418,6 +418,7 @@ model City {
   jobAds         JobAd[]
   userProfiles   UserProfile[]
   organizations  Organization[]           @relation("OrganizationHeadquarters")
+  workingAreaOrganizations Organization[] @relation("working_area")
 
   @@index([countryId])
   @@map("cities")
@@ -748,7 +749,7 @@ model User {
 
   sessions UserSession[]
   profile  UserProfile?
-  auditlogs  AuditLog?
+  auditlogs  AuditLog[]
 
   @@index([status])
   @@index([role])
