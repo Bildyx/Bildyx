@@ -1,0 +1,815 @@
+/* Page dédiée "Why Teams". Aucun style global existant n'est modifié. */
+
+.why-teams-page {
+    --wt-blue: #2948ef;
+    --wt-blue-dark: #1f3ed8;
+    --wt-text: #0f1729;
+    --wt-muted: #5b6682;
+    --wt-surface: #f7f8fb;
+    --wt-card: #ffffff;
+    --wt-border: #dce1ea;
+    background: #ffffff;
+    color: var(--wt-text);
+}
+
+.why-teams-page .header-content {
+    position: relative;
+}
+
+.wt-main-nav {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    gap: 32px;
+    transform: translate(-50%, -50%);
+}
+
+.wt-main-nav a {
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 500;
+    opacity: 0.92;
+}
+
+.wt-main-nav a:hover,
+.wt-main-nav a:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.wt-page *,
+.wt-page *::before,
+.wt-page *::after {
+    box-sizing: border-box;
+}
+
+.wt-page {
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.wt-container {
+    width: min(1120px, calc(100% - 40px));
+    margin-inline: auto;
+}
+
+.wt-container--wide {
+    width: min(1240px, calc(100% - 40px));
+}
+
+.wt-blue-section {
+    color: #ffffff;
+    background: var(--wt-blue);
+}
+
+.wt-section-heading {
+    margin-bottom: 44px;
+    text-align: center;
+}
+
+.wt-section-heading h2,
+.wt-magnet-copy h2,
+.wt-candidate-copy h2,
+.wt-cta-section h2 {
+    margin: 0;
+    color: var(--wt-text);
+    font-size: clamp(1.75rem, 3vw, 2.45rem);
+    font-weight: 800;
+    line-height: 1.16;
+    letter-spacing: -0.035em;
+}
+
+.wt-section-heading p,
+.wt-cta-section p {
+    max-width: 760px;
+    margin: 14px auto 0;
+    color: var(--wt-muted);
+    font-size: 0.95rem;
+    line-height: 1.65;
+}
+
+.wt-section-heading--light h2,
+.wt-section-heading--light p {
+    color: #ffffff;
+}
+
+.wt-section-heading--light p {
+    opacity: 0.82;
+}
+
+/* Hero */
+.wt-hero {
+    padding: 92px 0 88px;
+    background: #f7f8fa;
+}
+
+.wt-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.93fr) minmax(420px, 1.07fr);
+    align-items: center;
+    gap: 78px;
+}
+
+.wt-kicker {
+    margin: 0 0 16px;
+    color: var(--wt-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.045em;
+}
+
+.wt-hero h1 {
+    margin: 0;
+    color: var(--wt-text);
+    font-size: clamp(2.6rem, 4.5vw, 4.25rem);
+    font-weight: 800;
+    line-height: 0.99;
+    letter-spacing: -0.055em;
+}
+
+.wt-hero__lead {
+    max-width: 590px;
+    margin: 24px 0 0;
+    color: var(--wt-muted);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.wt-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 30px;
+}
+
+.wt-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 24px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.wt-button:hover,
+.wt-button:focus-visible {
+    transform: translateY(-2px);
+}
+
+.wt-button--primary {
+    color: #ffffff;
+    background: var(--wt-blue);
+}
+
+.wt-button--primary:hover,
+.wt-button--primary:focus-visible {
+    background: var(--wt-blue-dark);
+}
+
+.wt-button--secondary {
+    color: var(--wt-text);
+    border-color: var(--wt-border);
+    background: #ffffff;
+}
+
+.wt-hero__media {
+    margin: 0;
+}
+
+.wt-hero__media img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.46 / 1;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(15, 23, 41, 0.14);
+}
+
+/* Benefits */
+.wt-benefits {
+    padding: 82px 0 86px;
+}
+
+.wt-benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.wt-benefit-card {
+    min-height: 205px;
+    padding: 28px 26px;
+    color: var(--wt-text);
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 8px 18px rgba(17, 27, 69, 0.08);
+}
+
+.wt-line-icon {
+    display: block;
+    margin-bottom: 18px;
+    color: var(--wt-blue);
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.wt-benefit-card h3,
+.wt-shine-card h3,
+.wt-checklist-card h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.wt-benefit-card p,
+.wt-shine-card p,
+.wt-candidate-copy > p,
+.wt-checklist-card li {
+    color: var(--wt-muted);
+    font-size: 0.85rem;
+    line-height: 1.65;
+}
+
+.wt-benefit-card p {
+    margin: 10px 0 0;
+}
+
+/* Team showcase */
+.wt-showcase-section {
+    padding: 86px 0 94px;
+    background: #ffffff;
+}
+
+.wt-team-card {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(300px, 0.9fr);
+    overflow: hidden;
+    border: 1.5px solid var(--wt-blue);
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(18, 31, 87, 0.12);
+}
+
+.wt-team-overview {
+    padding: 38px 38px 32px;
+    background: #ffffff;
+}
+
+.wt-team-overview > h3,
+.wt-team-profile > h3 {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.wt-team-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 26px;
+}
+
+.wt-team-tab,
+.wt-profile-button,
+.wt-product-chip,
+.wt-city {
+    font: inherit;
+}
+
+.wt-team-tab {
+    padding: 7px 14px;
+    color: var(--wt-muted);
+    border: 0;
+    border-radius: 999px;
+    background: #f0f2f6;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.wt-team-tab.is-active {
+    color: #ffffff;
+    background: var(--wt-blue);
+}
+
+.wt-team-members {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.wt-member {
+    display: flex;
+    min-height: 112px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 8px;
+    text-align: center;
+    border-radius: 12px;
+    background: #f3f4f7;
+}
+
+.wt-member img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.wt-member strong {
+    margin-top: 8px;
+    font-size: 0.74rem;
+}
+
+.wt-member span {
+    margin-top: 2px;
+    color: var(--wt-muted);
+    font-size: 0.62rem;
+    line-height: 1.35;
+}
+
+.wt-team-subsection {
+    margin-top: 28px;
+}
+
+.wt-team-subsection h4 {
+    margin: 0 0 14px;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.wt-office-cities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.wt-city {
+    display: flex;
+    width: 64px;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    color: var(--wt-muted);
+    border: 0;
+    background: transparent;
+    font-size: 0.62rem;
+    cursor: pointer;
+}
+
+.wt-city-photo {
+    display: block;
+    width: 52px;
+    height: 52px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: 50%;
+}
+
+.wt-city img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wt-city.is-active {
+    color: var(--wt-blue);
+}
+
+.wt-city.is-active .wt-city-photo {
+    border-color: var(--wt-blue);
+    box-shadow: 0 0 0 2px #ffffff inset;
+}
+
+.wt-product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.wt-product-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    color: var(--wt-muted);
+    border: 0;
+    border-radius: 999px;
+    background: #f1f2f5;
+    font-size: 0.68rem;
+    cursor: pointer;
+}
+
+.wt-product-chip.is-active {
+    color: #ffffff;
+    background: var(--wt-blue);
+}
+
+.wt-team-profile {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: 38px 34px 32px;
+    color: #ffffff;
+    background: var(--wt-blue);
+}
+
+.wt-team-badge {
+    align-self: flex-start;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.wt-profile-points {
+    display: grid;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.wt-profile-point h4 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.wt-profile-point p {
+    margin: 7px 0 0;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.72rem;
+    line-height: 1.55;
+}
+
+.wt-profile-point--warning h4 {
+    color: #ff334c;
+}
+
+.wt-team-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.wt-profile-button {
+    padding: 9px 14px;
+    color: #ffffff;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.wt-profile-button.is-active {
+    color: var(--wt-blue);
+    background: #ffffff;
+}
+
+/* Magnet */
+.wt-magnet-section {
+    padding: 82px 0;
+}
+
+.wt-magnet-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: 90px;
+}
+
+.wt-magnet-copy h2 {
+    color: #ffffff;
+}
+
+.wt-magnet-copy > p {
+    max-width: 570px;
+    margin: 18px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.92rem;
+    line-height: 1.65;
+}
+
+.wt-magnet-copy ul {
+    display: grid;
+    gap: 12px;
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.78rem;
+}
+
+.wt-magnet-copy li span {
+    margin-right: 9px;
+}
+
+.wt-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.wt-stat-card {
+    min-height: 150px;
+    padding: 28px 18px;
+    color: var(--wt-blue);
+    text-align: center;
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.wt-stat-card strong {
+    display: block;
+    font-size: 2.25rem;
+    font-weight: 800;
+}
+
+.wt-stat-card p {
+    max-width: 130px;
+    margin: 8px auto 0;
+    color: var(--wt-muted);
+    font-size: 0.68rem;
+    line-height: 1.5;
+}
+
+/* Candidate */
+.wt-candidate-section {
+    padding: 88px 0 96px;
+    background: #ffffff;
+}
+
+.wt-candidate-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 70px;
+}
+
+.wt-candidate-media {
+    margin: 0;
+}
+
+.wt-candidate-media img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.33 / 1;
+    object-fit: cover;
+    border-radius: 14px;
+    box-shadow: 0 14px 28px rgba(15, 23, 41, 0.14);
+}
+
+.wt-candidate-copy > p {
+    margin: 16px 0 0;
+}
+
+.wt-checklist-card {
+    margin-top: 20px;
+    padding: 22px 24px;
+    border: 1px solid var(--wt-border);
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.wt-checklist-card h3 span {
+    margin-right: 8px;
+    color: var(--wt-blue);
+}
+
+.wt-checklist-card ul {
+    display: grid;
+    gap: 9px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.wt-checklist-card li::before {
+    content: '⊙';
+    margin-right: 8px;
+    color: var(--wt-blue);
+}
+
+/* Shine */
+.wt-shine-section {
+    padding: 86px 0 92px;
+}
+
+.wt-shine-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.wt-shine-card {
+    min-height: 280px;
+    padding: 34px;
+    color: var(--wt-text);
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.wt-shine-card p {
+    margin: 16px 0 0;
+}
+
+.wt-shine-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+    margin-top: 22px;
+    color: var(--wt-muted);
+    font-size: 0.76rem;
+}
+
+.wt-shine-list span::first-letter {
+    color: var(--wt-blue);
+}
+
+.wt-shine-card .wt-button {
+    margin-top: 24px;
+}
+
+/* CTA */
+.wt-cta-section {
+    padding: 74px 0 82px;
+    text-align: center;
+    background: #f7f8fa;
+}
+
+.wt-cta-section .wt-button {
+    margin-top: 26px;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .wt-hero__grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 42px;
+    }
+
+    .wt-benefit-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .wt-team-card {
+        grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr);
+    }
+
+    .wt-team-overview {
+        padding: 30px 26px;
+    }
+
+    .wt-team-members {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 900px) {
+    .wt-main-nav {
+        display: none;
+    }
+
+    .wt-hero {
+        padding: 64px 0 70px;
+    }
+
+    .wt-hero__grid,
+    .wt-magnet-grid,
+    .wt-candidate-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wt-hero__grid,
+    .wt-candidate-grid {
+        gap: 42px;
+    }
+
+    .wt-hero__copy {
+        max-width: 680px;
+    }
+
+    .wt-team-card {
+        grid-template-columns: 1fr;
+    }
+
+    .wt-team-profile {
+        min-height: 440px;
+    }
+
+    .wt-magnet-grid {
+        gap: 44px;
+    }
+
+    .wt-stat-grid {
+        max-width: 520px;
+    }
+}
+
+@media (max-width: 680px) {
+    .wt-container,
+    .wt-container--wide {
+        width: min(100% - 28px, 1120px);
+    }
+
+    .wt-desktop-break {
+        display: none;
+    }
+
+    .wt-hero h1 {
+        font-size: clamp(2.35rem, 13vw, 3.45rem);
+    }
+
+    .wt-hero__media img {
+        aspect-ratio: 1.2 / 1;
+    }
+
+    .wt-benefits,
+    .wt-showcase-section,
+    .wt-magnet-section,
+    .wt-candidate-section,
+    .wt-shine-section {
+        padding-block: 62px;
+    }
+
+    .wt-benefit-grid,
+    .wt-shine-grid,
+    .wt-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wt-benefit-card {
+        min-height: 0;
+    }
+
+    .wt-team-overview,
+    .wt-team-profile {
+        padding: 26px 20px;
+    }
+
+    .wt-team-tabs {
+        gap: 8px;
+    }
+
+    .wt-team-members {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .wt-office-cities {
+        gap: 10px;
+    }
+
+    .wt-shine-card {
+        min-height: 0;
+        padding: 26px 22px;
+    }
+
+    .wt-shine-list {
+        grid-template-columns: 1fr;
+    }
+
+    .wt-button-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .wt-button-row .wt-button {
+        width: 100%;
+    }
+
+    .wt-cta-section {
+        padding-block: 58px;
+    }
+}
+
+@media (max-width: 430px) {
+    .wt-team-members {
+        grid-template-columns: 1fr;
+    }
+
+    .wt-member {
+        min-height: 96px;
+    }
+
+    .wt-team-actions {
+        flex-direction: column;
+    }
+
+    .wt-profile-button {
+        width: 100%;
+    }
+}
