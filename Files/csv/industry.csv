@@ -1,2 +1,2 @@
-name;description;median_salary;serial_number
-Building;construction buildings;2 € ;IND-000001
+Industry Name,Description,Median Salary,Serial Number
+Building,construction buildings,2,IND-000001

@@ -5,6 +5,14 @@
 
 import type { ColumnType } from "kysely";
 
+export type ArrayType<T> = ArrayTypeImpl<T> extends (infer U)[]
+  ? U[]
+  : ArrayTypeImpl<T>;
+
+export type ArrayTypeImpl<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S[], I[], U[]>
+  : T[];
+
 export type AuthAalLevel = "aal1" | "aal2" | "aal3";
 
 export type AuthCodeChallengeMethod = "plain" | "s256";
@@ -23,25 +31,31 @@ export type AuthOauthResponseType = "code";
 
 export type AuthOneTimeTokenType = "confirmation_token" | "email_change_token_current" | "email_change_token_new" | "phone_change_token" | "reauthentication_token" | "recovery_token";
 
-export type Availability = "IMMEDIATE" | "NOT_LOOKING" | "ONE_MONTH" | "THREE_MONTHS" | "TWO_WEEKS";
+export type Certificationcategory = "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "PROJECTMANAGEMENT" | "TECHNICAL" | "VENDORPRODUCT";
 
-export type Candidatestatus = "ACTIVE" | "HIRED" | "INACTIVE" | "PASSIVE";
+export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "OTHER" | "PART_TIME";
 
-export type Certificationlevel = "ADVANCED" | "BEGINNER" | "EXPERT" | "INTERMEDIATE";
+export type Costofliving = "HIGH" | "LOW" | "MEDIAN";
 
-export type Companymemberrole = "ADMIN" | "MEMBER" | "OWNER";
+export type Degreelevel = "ASSOCIATE" | "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "PHD";
 
-export type Companytype = "GOVERNMENT" | "NONPROFIT" | "PRIVATE" | "PUBLIC";
+export type Difficultylevel = "ADVANCED" | "BEGINNER" | "EXPERT" | "INTERMEDIATE";
 
-export type Employmenttype = "CONTRACT" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "PART_TIME";
+export type Educationlevel = "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "NONE" | "OTHER" | "PHD";
+
+export type Employeecountrange = "RANGE_1_10" | "RANGE_1001_5000" | "RANGE_11_50" | "RANGE_201_1000" | "RANGE_5000_PLUS" | "RANGE_51_200";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Governmenttype = "ABSOLUTE_MONARCHY" | "COMMUNIST" | "CONSTITUTIONAL_MONARCHY" | "FEDERATION" | "MILITARY_JUNTA" | "OTHER" | "PARLIAMENTARY" | "REPUBLIC" | "THEOCRACY";
+
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
-export type Jobofferstatus = "CLOSED" | "DRAFT" | "FILLED" | "PAUSED" | "PUBLISHED";
+export type Jobadstatus = "CLOSED" | "DRAFT" | "FILLED" | "PUBLISHED";
+
+export type Jobcategory = "ACADEMIC" | "GOVERNMENT" | "MILITARY" | "NGO" | "OTHER" | "PRIVATE_SECTOR" | "PUBLIC_SECTOR";
 
 export type Json = JsonValue;
 
@@ -55,86 +69,65 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
+export type Language = "AFRIKAANS" | "ALBANIAN" | "AMHARIC" | "ARABIC" | "ARMENIAN" | "AZERBAIJANI" | "BASQUE" | "BELARUSIAN" | "BENGALI" | "BOSNIAN" | "BULGARIAN" | "BURMESE" | "CATALAN" | "CEBUANO" | "CHINESE_CANTONESE" | "CHINESE_MANDARIN" | "CROATIAN" | "CZECH" | "DANISH" | "DUTCH" | "ENGLISH" | "ESPERANTO" | "ESTONIAN" | "FILIPINO" | "FINNISH" | "FRENCH" | "GALICIAN" | "GEORGIAN" | "GERMAN" | "GREEK" | "GUJARATI" | "HAITIAN_CREOLE" | "HAUSA" | "HEBREW" | "HINDI" | "HUNGARIAN" | "ICELANDIC" | "IGBO" | "INDONESIAN" | "IRISH" | "ITALIAN" | "JAPANESE" | "JAVANESE" | "KANNADA" | "KAZAKH" | "KHMER" | "KOREAN" | "KURDISH" | "KYRGYZ" | "LAO" | "LATIN" | "LATVIAN" | "LITHUANIAN" | "LUXEMBOURGISH" | "MACEDONIAN" | "MALAGASY" | "MALAY" | "MALAYALAM" | "MALTESE" | "MAORI" | "MARATHI" | "MONGOLIAN" | "NEPALI" | "NORWEGIAN" | "PASHTO" | "PERSIAN" | "POLISH" | "PORTUGUESE" | "PUNJABI" | "ROMANIAN" | "RUSSIAN" | "SAMOAN" | "SERBIAN" | "SHONA" | "SINDHI" | "SINHALA" | "SLOVAK" | "SLOVENIAN" | "SOMALI" | "SPANISH" | "SUNDANESE" | "SWAHILI" | "SWEDISH" | "TAJIK" | "TAMIL" | "TATAR" | "TELUGU" | "THAI" | "TIBETAN" | "TURKISH" | "TURKMEN" | "UKRAINIAN" | "URDU" | "UZBEK" | "VIETNAMESE" | "WELSH" | "WOLOF" | "XHOSA" | "YIDDISH" | "YORUBA" | "ZULU";
+
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type Producttype = "B2B" | "B2B2C" | "B2C";
+export type Organizationsubtype = "ARMY" | "CLUB" | "GOVERNMENT" | "INTERNATIONAL_ORGANIZATION" | "NGO" | "NON_PROFIT" | "ORGANIZATION" | "OTHER" | "RESEARCH_INSTITUTE" | "SOCIETY" | "UNIVERSITY";
 
-export type Proficiencylevel = "ADVANCED" | "BEGINNER" | "FLUENT" | "INTERMEDIATE" | "NATIVE";
+export type Qualityoflife = "HIGH" | "LOW" | "MEDIAN";
 
-export type Proposaldecision = "INTERESTED" | "INTERVIEW_REQUESTED" | "NOT_INTERESTED" | "PENDING";
+export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
-export type Proposalstatus = "DRAFT" | "EXPIRED" | "RESPONDED" | "SENT" | "VIEWED";
+export type Senioritylevel = "C_LEVEL" | "DIRECTOR" | "ELECTED" | "INTERN" | "JUNIOR" | "LEAD" | "MID" | "OTHER" | "SENIOR";
 
-export type Remotetype = "HYBRID" | "ON_SITE" | "REMOTE";
-
-export type Seniority = "C_LEVEL" | "DIRECTOR" | "INTERN" | "JUNIOR" | "LEAD" | "MANAGER" | "MID" | "SENIOR" | "VP";
+export type Skillcategory = "FRAMEWORK" | "LANGUAGE" | "METHODOLOGY" | "OTHER" | "SOFT" | "TECHNICAL" | "TOOL";
 
 export type Skillimportance = "NICE_TO_HAVE" | "PREFERRED" | "REQUIRED";
 
-export type Skilltype = "SOFT" | "TECHNICAL";
-
 export type StorageBuckettype = "ANALYTICS" | "STANDARD" | "VECTOR";
+
+export type Subjectcategory = "API" | "HARDWARE" | "OTHER" | "PHYSICAL_PRODUCT" | "PLATFORM" | "SERVICE" | "SOFTWARE";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export type Userrole = "ADMIN" | "CANDIDATE" | "COMPANY";
+export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
 
-export interface _CertificationToJob {
+export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANISATION" | "SUPER_ADMIN" | "USER";
+
+export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
+
+export interface _CityLargestOrganizations {
   A: string;
   B: string;
 }
 
-export interface _CertificationToProduct {
+export interface _CityMainIndustries {
   A: string;
   B: string;
 }
 
-export interface _CityToIndustry {
+export interface _CityTopUniversities {
   A: string;
   B: string;
 }
 
-export interface _CityToUniversity {
+export interface _CountryLargestOrganizations {
   A: string;
   B: string;
 }
 
-export interface _CompanyToIndustry {
+export interface _CountryMainIndustries {
   A: string;
   B: string;
 }
 
-export interface _CountryToIndustry {
+export interface _CountryTopUniversities {
   A: string;
   B: string;
 }
 
-export interface _CountryToUniversity {
-  A: string;
-  B: string;
-}
-
-export interface _IndustryToProduct {
-  A: string;
-  B: string;
-}
-
-export interface _IndustryToSkill {
-  A: string;
-  B: string;
-}
-
-export interface _JobOfferToProduct {
-  A: string;
-  B: string;
-}
-
-export interface _JobToProduct {
-  A: string;
-  B: string;
-}
-
-export interface _JobToSkill {
+export interface _OrganizationIndustries {
   A: string;
   B: string;
 }
@@ -150,9 +143,28 @@ export interface _PrismaMigrations {
   started_at: Generated<Timestamp>;
 }
 
-export interface _ProductCompetitors {
+export interface _ProductIndustries {
   A: string;
   B: string;
+}
+
+export interface _RelatedIndustries {
+  A: string;
+  B: string;
+}
+
+export interface _WorkingArea {
+  A: string;
+  B: string;
+}
+
+export interface AuditLogs {
+  action: string;
+  created_at: Generated<Timestamp>;
+  id: string;
+  ip_address: string | null;
+  metadata: Json | null;
+  user_id: string;
 }
 
 export interface AuthAuditLogEntries {
@@ -484,191 +496,120 @@ export interface AuthWebauthnCredentials {
   user_id: string;
 }
 
-export interface CandidateCertifications {
-  candidate_id: string;
-  certification_id: string;
-  created_at: Generated<Timestamp>;
-  date_obtained: Timestamp | null;
-  expiry_date: Timestamp | null;
-  id: string;
-}
-
-export interface CandidateEducations {
-  candidate_id: string;
-  created_at: Generated<Timestamp>;
-  degree: string | null;
-  end_year: number | null;
-  field_of_study: string | null;
-  id: string;
-  school_name: string | null;
-  start_year: number | null;
-  university_id: string | null;
-}
-
-export interface CandidateExperiences {
-  candidate_id: string;
-  city_id: string | null;
-  company_id: string | null;
-  company_name: string | null;
-  created_at: Generated<Timestamp>;
-  description: string | null;
-  end_date: Timestamp | null;
-  id: string;
-  impact: string | null;
-  is_current: Generated<boolean>;
-  job_id: string | null;
-  start_date: Timestamp | null;
-  title: string | null;
-}
-
-export interface CandidateLanguages {
-  candidate_id: string;
-  created_at: Generated<Timestamp>;
-  id: string;
-  language: string;
-  proficiency: Proficiencylevel;
-}
-
-export interface CandidateProducts {
-  candidate_id: string;
-  context: string | null;
-  created_at: Generated<Timestamp>;
-  id: string;
-  product_id: string;
-}
-
-export interface Candidates {
-  availability: Availability | null;
-  bio: string | null;
-  created_at: Generated<Timestamp>;
-  current_city_id: string | null;
-  headline: string | null;
-  id: string;
-  origin_country_id: string | null;
-  profile_id: string;
-  status: Generated<Candidatestatus>;
-  updated_at: Timestamp;
-}
-
-export interface CandidateSkills {
-  candidate_id: string;
-  created_at: Generated<Timestamp>;
-  id: string;
-  proficiency: Proficiencylevel | null;
-  skill_id: string;
-  years_of_experience: number | null;
-}
-
 export interface Certifications {
+  category: Certificationcategory | null;
   created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
   description: string | null;
+  difficulty: Difficultylevel | null;
   id: string;
-  issued_by: string | null;
-  level: Certificationlevel | null;
+  issuing_organization_id: string | null;
+  jobs: string[] | null;
+  level: string | null;
+  metadata: Json | null;
   name: string;
-  serial_number: string | null;
+  products: string[] | null;
+  serialNumber: string;
   updated_at: Timestamp;
+  validity_duration_months: number | null;
+  website_url: string | null;
 }
 
 export interface Cities {
-  average_rent: string | null;
-  city_name: string;
+  average_rent: number | null;
   climate: string | null;
-  cost_of_living: string | null;
-  country_id: string | null;
+  cost_of_living: Costofliving | null;
+  country_id: string;
   created_at: Generated<Timestamp>;
   degree_holders: string | null;
+  deleted_at: Timestamp | null;
   id: string;
   interesting_fact: string | null;
-  languages: string[] | null;
-  largest_companies: string[] | null;
-  median_home_price: string | null;
-  median_salary: string | null;
+  is_capital: Generated<boolean>;
+  language: Language | null;
+  latitude: number | null;
+  longitude: number | null;
+  median_home_price: number | null;
+  median_salary: number | null;
+  metadata: Json | null;
+  name: string;
   number_of_airports: number | null;
   number_of_multinational_hqs: number | null;
-  number_of_nationalities: string | null;
+  number_of_nationalities: number | null;
   number_of_universities: number | null;
   people_description: string | null;
-  population: string | null;
-  serial_number: string | null;
+  population: number | null;
+  serialNumber: string;
+  state_province: string | null;
   temperatures: string | null;
   updated_at: Timestamp;
 }
 
-export interface Companies {
-  category: string | null;
-  company_type: Companytype | null;
-  created_at: Generated<Timestamp>;
-  founded: number | null;
-  headquarters_location: string | null;
-  id: string;
-  known_for: string | null;
-  number_of_employees: string | null;
-  number_of_offices: number | null;
-  organization_name: string;
-  parent_id: string | null;
-  serial_number: string | null;
-  subsidiaries_count: number | null;
-  updated_at: Timestamp;
-}
-
-export interface CompanyAccounts {
-  company_id: string | null;
-  contact_email: string;
-  created_at: Generated<Timestamp>;
-  id: string;
-  is_active: Generated<boolean>;
-  updated_at: Timestamp;
-}
-
-export interface CompanyMembers {
-  company_account_id: string;
-  created_at: Generated<Timestamp>;
-  id: string;
-  profile_id: string;
-  role: Generated<Companymemberrole>;
-  updated_at: Timestamp;
-}
-
 export interface Countries {
-  average_rent: string | null;
-  capital_city_id: string | null;
+  area_km2: number | null;
+  average_rent: number | null;
+  calling_code: string | null;
+  capital_name: string | null;
   citizenship_process: string | null;
   climate: string | null;
-  cost_of_living: string | null;
-  country_name: string;
+  cost_of_living: Costofliving | null;
   created_at: Generated<Timestamp>;
   crime_rate: string | null;
   cultural_values: string | null;
   currency: string | null;
   degree_holders: string | null;
+  deleted_at: Timestamp | null;
   ethnic_groups: string[] | null;
-  global_competitiveness_index: string | null;
+  flag_url: string | null;
+  gdp_per_capita_usd: number | null;
+  gdp_usd: number | null;
+  global_competitiveness_index: number | null;
+  government_type: Governmenttype | null;
+  hdi: number | null;
   id: string;
   income_inequality: string | null;
   interesting_fact: string | null;
-  languages: string[] | null;
-  largest_companies: string[] | null;
-  level_of_globalization: string | null;
-  median_home_price: string | null;
-  median_salary: string | null;
+  iso_code: string | null;
+  level_of_globalisation: string | null;
+  median_home_price: number | null;
+  median_salary: number | null;
+  metadata: Json | null;
+  name: string;
   number_of_airports: number | null;
-  number_of_foreign_companies: string | null;
-  number_of_international_students: string | null;
+  number_of_foreign_organizations: number | null;
+  number_of_international_students: number | null;
   number_of_multinational_hqs: number | null;
-  number_of_tourists: string | null;
+  number_of_tourists: number | null;
   number_of_universities: number | null;
+  officialLanguages: ArrayType<Language> | null;
   people_description: string | null;
   personal_income_tax: string | null;
-  population: string | null;
+  population: Int8 | null;
   quality_of_education: string | null;
-  quality_of_life: string | null;
+  quality_of_life: Qualityoflife | null;
   religion: string[] | null;
-  serial_number: string | null;
+  serialNumber: string;
   temperatures: string | null;
   updated_at: Timestamp;
   work_life_balance: string | null;
   work_permit: string | null;
+}
+
+export interface Degrees {
+  country_id: string | null;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  description: string | null;
+  duration_years: number | null;
+  field: string | null;
+  id: string;
+  language_of_instruction: string | null;
+  level: Degreelevel | null;
+  metadata: Json | null;
+  name: string;
+  serialNumber: string;
+  university_id: string | null;
+  updated_at: Timestamp;
 }
 
 export interface ExtensionsPgStatStatements {
@@ -728,123 +669,121 @@ export interface ExtensionsPgStatStatementsInfo {
   stats_reset: Timestamp | null;
 }
 
-export interface Facts {
-  created_at: Generated<Timestamp>;
-  hashtag_1: string | null;
-  hashtag_2: string | null;
-  icon_1: string | null;
-  id: string;
-  serial_number: string | null;
-  story: string | null;
-  title: string | null;
-  updated_at: Timestamp;
-}
-
 export interface Industries {
+  color: string | null;
   created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
   description: string | null;
+  icon_url: string | null;
   id: string;
-  median_salary: string | null;
+  metadata: Json | null;
   name: string;
-  serial_number: string | null;
+  serialNumber: string;
   updated_at: Timestamp;
 }
 
-export interface JobOfferLanguages {
-  id: string;
-  job_offer_id: string;
-  language: string;
-  min_proficiency: Proficiencylevel;
-}
-
-export interface JobOffers {
+export interface JobAds {
+  application_email: string | null;
+  application_url: string | null;
   city_id: string | null;
-  closed_at: Timestamp | null;
-  company_account_id: string;
+  contract_type: Contracttype | null;
   country_id: string | null;
   created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
   description: string | null;
-  employment_type: Employmenttype | null;
+  expires_at: Timestamp | null;
   id: string;
   job_id: string | null;
+  metadata: Json | null;
+  organization_id: string;
   published_at: Timestamp | null;
-  remote_type: Remotetype | null;
-  salary_currency: string | null;
-  salary_max: number | null;
-  salary_min: number | null;
-  seniority: Seniority | null;
-  status: Generated<Jobofferstatus>;
+  remote: Remotepolicy | null;
+  required_education_level: Educationlevel | null;
+  required_years_experience: number | null;
+  salary_range: string | null;
+  serialNumber: string;
+  status: Generated<Jobadstatus>;
+  tags: string[] | null;
   title: string;
   updated_at: Timestamp;
 }
 
-export interface JobOfferSkills {
+export interface JobAdSkills {
   id: string;
   importance: Generated<Skillimportance>;
-  job_offer_id: string;
+  job_ad_id: string;
   skill_id: string;
 }
 
 export interface Jobs {
+  category: Jobcategory | null;
+  country_id: string | null;
   created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
   description: string | null;
   id: string;
-  name: string;
-  serial_number: string | null;
+  industry_id: string | null;
+  is_elected: Generated<boolean>;
+  is_regulated: Generated<boolean>;
+  metadata: Json | null;
+  products: string[] | null;
+  seniority_level: Senioritylevel | null;
+  serialNumber: string;
+  start_year: number | null;
+  tags: string[] | null;
+  title: string;
   tools_and_tech: string[] | null;
   updated_at: Timestamp;
 }
 
-export interface Products {
-  company_id: string | null;
-  company_name: string | null;
+export interface Organizations {
+  activities: string[] | null;
+  budget: string | null;
+  category: string | null;
+  cityId: string | null;
   created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  equipments: string | null;
+  founded: string | null;
+  founder: string | null;
+  id: string;
+  known_for: string[] | null;
+  legal_status: string | null;
+  metadata: Json | null;
+  mission: string | null;
+  name: string;
+  numberOfEmployees: Employeecountrange | null;
+  numberOfSubsidiaries: number | null;
+  ownership: string | null;
+  parent_organization_id: string | null;
+  partnerships: string[] | null;
+  products: string[] | null;
+  project: string | null;
+  research_areas: string[] | null;
+  services: string[] | null;
+  slug: string;
+  type: Organizationsubtype | null;
+  updated_at: Timestamp;
+}
+
+export interface Products {
+  category: Subjectcategory | null;
+  competitors: string[] | null;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
   description: string | null;
-  external_competitors: string[] | null;
   fun_fact: string | null;
   id: string;
+  logo_url: string | null;
+  metadata: Json | null;
   name: string;
-  product_type: string | null;
-  serial_number: string | null;
-  type: Producttype | null;
+  organization_id: string | null;
+  serialNumber: string;
+  short_description: string | null;
+  tags: string[] | null;
+  type: string | null;
   updated_at: Timestamp;
-}
-
-export interface Profiles {
-  avatar_url: string | null;
-  created_at: Generated<Timestamp>;
-  email: string;
-  first_name: string | null;
-  id: string;
-  last_name: string | null;
-  marketing_opt_in: Generated<boolean>;
-  phone: string | null;
-  role: Userrole;
-  updated_at: Timestamp;
-}
-
-export interface ProposalCandidates {
-  admin_note: string | null;
-  candidate_id: string;
-  company_note: string | null;
-  created_at: Generated<Timestamp>;
-  decided_at: Timestamp | null;
-  decision: Generated<Proposaldecision>;
-  id: string;
-  proposal_id: string;
-  rank: number;
-}
-
-export interface Proposals {
-  admin_note: string | null;
-  company_account_id: string;
-  created_at: Generated<Timestamp>;
-  id: string;
-  job_offer_id: string;
-  sent_at: Timestamp | null;
-  status: Generated<Proposalstatus>;
-  updated_at: Timestamp;
-  viewed_at: Timestamp | null;
+  website_url: string | null;
 }
 
 export interface RealtimeMessages {
@@ -878,15 +817,23 @@ export interface RealtimeSubscription {
 
 export interface Skills {
   categories: string[] | null;
+  category: Skillcategory | null;
   common_fields_of_study: string[] | null;
   created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  description: string | null;
+  difficulty: Difficultylevel | null;
+  icon_url: string | null;
   id: string;
+  industry_id: string | null;
+  jobs: string[] | null;
+  metadata: Json | null;
   name: string;
   product_categories: string[] | null;
   related_abilities: string[] | null;
-  serial_number: string | null;
+  serialNumber: string;
   time_to_master: string | null;
-  type: Skilltype | null;
+  type: string | null;
   updated_at: Timestamp;
   used_in: string[] | null;
 }
@@ -988,54 +935,90 @@ export interface StorageVectorIndexes {
   updated_at: Generated<Timestamp>;
 }
 
-export interface TeamMembers {
-  created_at: Generated<Timestamp>;
-  id: Generated<string>;
-  job_title: string | null;
-  name: string;
-  photo_url: string | null;
-  sort_order: Generated<number>;
-  team_id: string;
-}
-
-export interface TeamOffices {
-  city_id: string;
-  id: string;
-  team_id: string;
-}
-
-export interface TeamProducts {
-  id: string;
-  product_id: string;
-  team_id: string;
-}
-
-export interface Teams {
-  company_account_id: string;
-  created_at: Generated<Timestamp>;
-  how_we_work_together: string | null;
-  id: Generated<string>;
-  name: string;
-  not_for_you_if: string | null;
-  team_culture: string | null;
-  updated_at: Generated<Timestamp>;
-  what_we_are_great_at: string | null;
-  who_we_are: string | null;
-}
-
 export interface Universities {
+  city_id: string | null;
+  country_id: string | null;
   created_at: Generated<Timestamp>;
-  established: number | null;
+  deleted_at: Timestamp | null;
+  description: string | null;
+  established: string | null;
+  founded_year: number | null;
   id: string;
+  is_public: boolean | null;
+  local_name: string | null;
   location: string | null;
+  logo_url: string | null;
+  metadata: Json | null;
   name: string;
   notes: string | null;
   postgraduates: number | null;
-  serial_number: string | null;
-  total_students: number | null;
-  type: string | null;
+  score: number | null;
+  serialNumber: string;
+  student_count: number | null;
+  type: Universitytype | null;
   undergraduates: number | null;
   updated_at: Timestamp;
+  website_url: string | null;
+}
+
+export interface UserProfiles {
+  biography: string | null;
+  city_id: string | null;
+  country_id: string | null;
+  created_at: Generated<Timestamp>;
+  current_job_id: string | null;
+  current_job_started_at: Timestamp | null;
+  current_organization_id: string | null;
+  github_url: string | null;
+  id: string;
+  is_public: Generated<boolean>;
+  linkedin_url: string | null;
+  locale: Generated<string | null>;
+  metadata: Json | null;
+  timezone: string | null;
+  updated_at: Timestamp;
+  user_id: string;
+  website_url: string | null;
+}
+
+export interface Users {
+  avatar_url: string | null;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  display_name: string | null;
+  email: string;
+  email_verified: Generated<boolean>;
+  failed_login_attempts: Generated<number>;
+  first_name: string | null;
+  id: string;
+  last_login_at: Timestamp | null;
+  last_name: string | null;
+  last_reset_sent_at: Timestamp | null;
+  last_verification_sent_at: Timestamp | null;
+  locked_until: Timestamp | null;
+  marketing_opt_in: Generated<boolean>;
+  metadata: Json | null;
+  organisation_name: string | null;
+  password_changed_at: Timestamp | null;
+  password_hash: string;
+  reset_expires_at: Timestamp | null;
+  reset_token: string | null;
+  role: Generated<Userrole>;
+  status: Generated<Userstatus>;
+  updated_at: Timestamp;
+  verification_code: string | null;
+  verification_expires_at: Timestamp | null;
+}
+
+export interface UserSessions {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  id: string;
+  ip_address: string | null;
+  revoked_at: Timestamp | null;
+  token_hash: string;
+  user_agent: string | null;
+  user_id: string;
 }
 
 export interface VaultDecryptedSecrets {
@@ -1062,20 +1045,18 @@ export interface VaultSecrets {
 }
 
 export interface DB {
-  _CertificationToJob: _CertificationToJob;
-  _CertificationToProduct: _CertificationToProduct;
-  _CityToIndustry: _CityToIndustry;
-  _CityToUniversity: _CityToUniversity;
-  _CompanyToIndustry: _CompanyToIndustry;
-  _CountryToIndustry: _CountryToIndustry;
-  _CountryToUniversity: _CountryToUniversity;
-  _IndustryToProduct: _IndustryToProduct;
-  _IndustryToSkill: _IndustryToSkill;
-  _JobOfferToProduct: _JobOfferToProduct;
-  _JobToProduct: _JobToProduct;
-  _JobToSkill: _JobToSkill;
+  _CityLargestOrganizations: _CityLargestOrganizations;
+  _CityMainIndustries: _CityMainIndustries;
+  _CityTopUniversities: _CityTopUniversities;
+  _CountryLargestOrganizations: _CountryLargestOrganizations;
+  _CountryMainIndustries: _CountryMainIndustries;
+  _CountryTopUniversities: _CountryTopUniversities;
+  _OrganizationIndustries: _OrganizationIndustries;
   _prisma_migrations: _PrismaMigrations;
-  _ProductCompetitors: _ProductCompetitors;
+  _ProductIndustries: _ProductIndustries;
+  _RelatedIndustries: _RelatedIndustries;
+  _working_area: _WorkingArea;
+  audit_logs: AuditLogs;
   "auth.audit_log_entries": AuthAuditLogEntries;
   "auth.custom_oauth_providers": AuthCustomOauthProviders;
   "auth.flow_state": AuthFlowState;
@@ -1099,31 +1080,18 @@ export interface DB {
   "auth.users": AuthUsers;
   "auth.webauthn_challenges": AuthWebauthnChallenges;
   "auth.webauthn_credentials": AuthWebauthnCredentials;
-  candidate_certifications: CandidateCertifications;
-  candidate_educations: CandidateEducations;
-  candidate_experiences: CandidateExperiences;
-  candidate_languages: CandidateLanguages;
-  candidate_products: CandidateProducts;
-  candidate_skills: CandidateSkills;
-  candidates: Candidates;
   certifications: Certifications;
   cities: Cities;
-  companies: Companies;
-  company_accounts: CompanyAccounts;
-  company_members: CompanyMembers;
   countries: Countries;
+  degrees: Degrees;
   "extensions.pg_stat_statements": ExtensionsPgStatStatements;
   "extensions.pg_stat_statements_info": ExtensionsPgStatStatementsInfo;
-  facts: Facts;
   industries: Industries;
-  job_offer_languages: JobOfferLanguages;
-  job_offer_skills: JobOfferSkills;
-  job_offers: JobOffers;
+  job_ad_skills: JobAdSkills;
+  job_ads: JobAds;
   jobs: Jobs;
+  organizations: Organizations;
   products: Products;
-  profiles: Profiles;
-  proposal_candidates: ProposalCandidates;
-  proposals: Proposals;
   "realtime.messages": RealtimeMessages;
   "realtime.schema_migrations": RealtimeSchemaMigrations;
   "realtime.subscription": RealtimeSubscription;
@@ -1136,11 +1104,10 @@ export interface DB {
   "storage.s3_multipart_uploads": StorageS3MultipartUploads;
   "storage.s3_multipart_uploads_parts": StorageS3MultipartUploadsParts;
   "storage.vector_indexes": StorageVectorIndexes;
-  team_members: TeamMembers;
-  team_offices: TeamOffices;
-  team_products: TeamProducts;
-  teams: Teams;
   universities: Universities;
+  user_profiles: UserProfiles;
+  user_sessions: UserSessions;
+  users: Users;
   "vault.decrypted_secrets": VaultDecryptedSecrets;
   "vault.secrets": VaultSecrets;
 }
