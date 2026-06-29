@@ -5,13 +5,11 @@ import {
   GetCertificationsSchema,
   CertificationSchema,
   PostCertificationSchema,
-  PatchCertificationSchema,
 } from "../models/certifications";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import type { Insertable } from "kysely";
 import type { Certifications } from "../db/types";
-import type { Certification } from "../models/certifications";
 
 export const certifications = {
   // 1. Récupérer toutes les certifications d'une entreprise

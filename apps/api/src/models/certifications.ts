@@ -53,6 +53,3 @@ export const GetCertificationsSchema = z.object({
 export const PostCertificationSchema = CertificationSchema.omit({
   id: true,
 });
-
-// Schéma pour la modification partielle (PATCH)
-export const PatchCertificationSchema = PostCertificationSchema.partial();
