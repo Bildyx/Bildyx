@@ -1,19 +1,19 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const CertificationCategorySchema = z.enum([
-  'TECHNICAL',
-  'PROFESSIONAL',
-  'PROJECTMANAGEMENT',
-  'VENDORPRODUCT',
-  'LANGUAGE',
-  'OTHER',
+  "TECHNICAL",
+  "PROFESSIONAL",
+  "PROJECTMANAGEMENT",
+  "VENDORPRODUCT",
+  "LANGUAGE",
+  "OTHER",
 ]);
 
 export const DifficultyLevelSchema = z.enum([
-  'BEGINNER',
-  'INTERMEDIATE',
-  'ADVANCED',
-  'EXPERT',
+  "BEGINNER",
+  "INTERMEDIATE",
+  "ADVANCED",
+  "EXPERT",
 ]);
 
 // Représentation de l'objet complet en base de données (aligné avec Kysely/PostgreSQL)
@@ -31,7 +31,11 @@ export const CertificationSchema = z.object({
   validity_duration_months: z.number().int().nullable().optional(),
   website_url: z.string().nullable().optional(),
   metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null as any),
+  deleted_at: z
+    .date()
+    .nullable()
+    .optional()
+    .default(null as any),
   created_at: z.date().default(new Date()),
   updated_at: z.date().default(new Date()),
 });
@@ -47,8 +51,5 @@ export const GetCertificationsSchema = z.object({
 
 // Schéma pour la création (Body)
 export const PostCertificationSchema = CertificationSchema.omit({
-  id: true
+  id: true,
 });
-
-// Schéma pour la modification partielle (PATCH)
-export const PatchCertificationSchema = PostCertificationSchema.partial();

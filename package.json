@@ -8,6 +8,10 @@
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
     "build": "npm run build --workspaces --if-present"
+<<<<<<< HEAD
+  }
+}
+=======
   },
   "devDependencies": {
     "prisma": "^7.8.0"
@@ -16,3 +20,4 @@
     "@prisma/client": "^7.8.0"
   }
 }
+>>>>>>> ef73fb4d41f6671766d370cbaade44e4049c149b
