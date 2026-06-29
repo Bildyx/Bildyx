@@ -5,11 +5,25 @@ import 'dotenv/config';
 
 const { Pool } = pg;
 
-export const database = new Kysely<DB>({
-  dialect: new PostgresDialect({
+let dialect: any;
+export let pgliteClient: any = null;
+
+if (process.env.NODE_ENV === 'test') {
+  const { PGlite } = await import('@electric-sql/pglite');
+  const { PGliteDialect } = await import('kysely');
+  pgliteClient = new PGlite();
+  dialect = new PGliteDialect({
+    pglite: pgliteClient,
+  });
+} else {
+  dialect = new PostgresDialect({
     pool: new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 10,
     })
-  })
+  });
+}
+
+export const database = new Kysely<DB>({
+  dialect,
 });

@@ -13,11 +13,12 @@ import type { Certifications } from "../db/types";
 
 export const certifications = {
   // 1. Récupérer toutes les certifications d'une entreprise
-  getByCompany: publicProcedure
+  getByOrganization: publicProcedure
     .route({
       method: "GET",
-      summary: "List all certifications",
-      description: "Get all certifications by company with optional filters",
+      summary: "List all certifications for an organization",
+      description:
+        "Get all certifications for an organization with optional filters",
       path: "/organizations/{organizationId}/certifications",
       tags: ["Certification"],
     })
@@ -26,14 +27,14 @@ export const certifications = {
     .handler(async ({ input }) => {
       const { organizationId, name, category } = input;
 
-      const company = await database
+      const organization = await database
         .selectFrom("organizations")
         .where("id", "=", organizationId)
         .select("id")
         .executeTakeFirst();
 
-      if (!company) {
-        throw new ORPCError("NOT_FOUND", { message: "Company not found" });
+      if (!organization) {
+        throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
       }
 
       let query = database
@@ -83,7 +84,7 @@ export const certifications = {
   getById: publicProcedure
     .route({
       method: "GET",
-      summary: "Get a certification by ID",
+      summary: "Get a specific certification",
       description: "Get a specific certification by its unique ID",
       path: "/certifications/{certificationId}",
       tags: ["Certification"],

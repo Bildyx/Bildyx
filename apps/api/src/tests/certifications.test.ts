@@ -1,25 +1,41 @@
-import { test, describe, before, after } from 'node:test';
-import assert from 'node:assert';
-import { certifications } from '../routes/certifications';
-import { database } from '../database';
-import { ORPCError } from '@orpc/server';
-import { randomUUID } from 'node:crypto';
+process.env.NODE_ENV = "test";
+import { test, describe, before, after } from "node:test";
+import assert from "node:assert";
+import { certifications } from "../routes/certifications";
+import { database, pgliteClient } from "../database";
+import { ORPCError } from "@orpc/server";
+import { randomUUID } from "node:crypto";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { sql } from "kysely";
 
-describe('Certifications API Endpoints', () => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+describe("Certifications API Endpoints", () => {
   let testOrgId: string;
   let createdCertId1: string;
   let createdCertId2: string;
 
   before(async () => {
+    // If running in test environment, initialize the database schema in memory
+    if (process.env.NODE_ENV === "test" && pgliteClient) {
+      const schemaPath = path.join(__dirname, "schema.sql");
+      const schemaSql = fs.readFileSync(schemaPath, "utf8");
+      await pgliteClient.exec(schemaSql);
+    }
+
     // Setup temporary organization for testing
     testOrgId = randomUUID();
 
-    await database.insertInto('organizations')
+    await database
+      .insertInto("organizations")
       .values({
         id: testOrgId,
-        name: 'Test Org for Certifications',
-        slug: 'test-org-for-certifications-' + testOrgId,
-        updated_at: new Date()
+        name: "Test Org for Certifications",
+        slug: "test-org-for-certifications-" + testOrgId,
+        updated_at: new Date(),
       })
       .execute();
   });
@@ -29,13 +45,15 @@ describe('Certifications API Endpoints', () => {
     try {
       const certIds = [createdCertId1, createdCertId2].filter(Boolean);
       if (certIds.length > 0) {
-        await database.deleteFrom('certifications')
-          .where('id', 'in', certIds)
+        await database
+          .deleteFrom("certifications")
+          .where("id", "in", certIds)
           .execute();
       }
 
-      await database.deleteFrom('organizations')
-        .where('id', '=', testOrgId)
+      await database
+        .deleteFrom("organizations")
+        .where("id", "=", testOrgId)
         .execute();
     } catch (err) {
       console.error("Cleanup error in test teardown:", err);
@@ -45,55 +63,55 @@ describe('Certifications API Endpoints', () => {
   });
 
   const callProcedure = async (procedure: any, input?: any) => {
-    const schema = procedure['~orpc']?.inputSchema;
+    const schema = procedure["~orpc"]?.inputSchema;
     const validatedInput = schema && input ? schema.parse(input) : input;
-    const handler = procedure['~orpc']?.handler;
+    const handler = procedure["~orpc"]?.handler;
     return await handler({ input: validatedInput });
   };
 
-  describe('POST /certifications (Create)', () => {
-    test('should throw ZodError when name is missing', async () => {
+  describe("POST /certifications (Create)", () => {
+    test("should throw ZodError when name is missing", async () => {
       await assert.rejects(
         callProcedure(certifications.create, {
-          serialNumber: 'SN-CREATE-FAIL',
+          serialNumber: "SN-CREATE-FAIL",
         }),
-        (err: any) => err.name === 'ZodError'
+        (err: any) => err.name === "ZodError",
       );
     });
 
-    test('should throw ZodError when serialNumber is missing', async () => {
+    test("should throw ZodError when serialNumber is missing", async () => {
       await assert.rejects(
         callProcedure(certifications.create, {
-          name: 'Some Cert',
+          name: "Some Cert",
         }),
-        (err: any) => err.name === 'ZodError'
+        (err: any) => err.name === "ZodError",
       );
     });
 
-    test('should successfully create a certification', async () => {
+    test("should successfully create a certification", async () => {
       const res = await callProcedure(certifications.create, {
-        name: 'Integration Test AWS Certification',
-        serialNumber: 'AWS-INTEG-111',
+        name: "Integration Test AWS Certification",
+        serialNumber: "AWS-INTEG-111",
         issuing_organization_id: testOrgId,
-        description: 'Test description',
-        level: 'INTERMEDIATE',
-        category: 'TECHNICAL',
+        description: "Test description",
+        level: "INTERMEDIATE",
+        category: "TECHNICAL",
         validity_duration_months: 12,
       });
 
       assert.ok(res.id);
-      assert.strictEqual(res.name, 'Integration Test AWS Certification');
-      assert.strictEqual(res.serialNumber, 'AWS-INTEG-111');
+      assert.strictEqual(res.name, "Integration Test AWS Certification");
+      assert.strictEqual(res.serialNumber, "AWS-INTEG-111");
       assert.strictEqual(res.issuing_organization_id, testOrgId);
       createdCertId1 = res.id;
     });
 
-    test('should successfully create a second certification', async () => {
+    test("should successfully create a second certification", async () => {
       const res = await callProcedure(certifications.create, {
-        name: 'Integration Test Scrum Master',
-        serialNumber: 'SCRUM-INTEG-222',
+        name: "Integration Test Scrum Master",
+        serialNumber: "SCRUM-INTEG-222",
         issuing_organization_id: testOrgId,
-        category: 'PROJECTMANAGEMENT',
+        category: "PROJECTMANAGEMENT",
       });
 
       assert.ok(res.id);
@@ -101,18 +119,18 @@ describe('Certifications API Endpoints', () => {
     });
   });
 
-  describe('GET /organizations/{organizationId}/certifications (GetByCompany)', () => {
-    test('should throw NOT_FOUND when organization does not exist', async () => {
+  describe("GET /organizations/{organizationId}/certifications (GetByOrganization)", () => {
+    test("should throw NOT_FOUND when organization does not exist", async () => {
       await assert.rejects(
-        callProcedure(certifications.getByCompany, {
+        callProcedure(certifications.getByOrganization, {
           organizationId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === 'NOT_FOUND'
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
-    test('should successfully return the certifications of the organization', async () => {
-      const res = await callProcedure(certifications.getByCompany, {
+    test("should successfully return the certifications of the organization", async () => {
+      const res = await callProcedure(certifications.getByOrganization, {
         organizationId: testOrgId,
       });
 
@@ -123,10 +141,10 @@ describe('Certifications API Endpoints', () => {
       assert.ok(ids.includes(createdCertId2));
     });
 
-    test('should filter certifications by name search', async () => {
-      const res = await callProcedure(certifications.getByCompany, {
+    test("should filter certifications by name search", async () => {
+      const res = await callProcedure(certifications.getByOrganization, {
         organizationId: testOrgId,
-        name: 'AWS',
+        name: "AWS",
       });
 
       assert.ok(Array.isArray(res));
@@ -134,10 +152,10 @@ describe('Certifications API Endpoints', () => {
       assert.strictEqual(res[0].id, createdCertId1);
     });
 
-    test('should filter certifications by category', async () => {
-      const res = await callProcedure(certifications.getByCompany, {
+    test("should filter certifications by category", async () => {
+      const res = await callProcedure(certifications.getByOrganization, {
         organizationId: testOrgId,
-        category: 'PROJECTMANAGEMENT',
+        category: "PROJECTMANAGEMENT",
       });
 
       assert.ok(Array.isArray(res));
@@ -146,71 +164,71 @@ describe('Certifications API Endpoints', () => {
     });
   });
 
-  describe('GET /certifications (GetAll)', () => {
-    test('should successfully return all certifications', async () => {
+  describe("GET /certifications (GetAll)", () => {
+    test("should successfully return all certifications", async () => {
       const res = await callProcedure(certifications.getAll);
       assert.ok(Array.isArray(res));
       assert.ok(res.length >= 2);
     });
   });
 
-  describe('GET /certifications/{certificationId} (GetById)', () => {
-    test('should throw NOT_FOUND for a non-existent ID', async () => {
+  describe("GET /certifications/{certificationId} (GetById)", () => {
+    test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(certifications.getById, {
           certificationId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === 'NOT_FOUND'
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
-    test('should successfully return the certification by its ID', async () => {
+    test("should successfully return the certification by its ID", async () => {
       const res = await callProcedure(certifications.getById, {
         certificationId: createdCertId1,
       });
 
       assert.strictEqual(res.id, createdCertId1);
-      assert.strictEqual(res.name, 'Integration Test AWS Certification');
+      assert.strictEqual(res.name, "Integration Test AWS Certification");
     });
   });
 
-  describe('PUT /certifications/{certificationId} (Update)', () => {
-    test('should throw NOT_FOUND for a non-existent ID', async () => {
+  describe("PUT /certifications/{certificationId} (Update)", () => {
+    test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(certifications.update, {
           certificationId: randomUUID(),
-          name: 'Updated Name',
-          serialNumber: 'SN-111',
+          name: "Updated Name",
+          serialNumber: "SN-111",
         }),
-        (err: any) => err instanceof ORPCError && err.code === 'NOT_FOUND'
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
-    test('should successfully replace the certification completely', async () => {
+    test("should successfully replace the certification completely", async () => {
       const res = await callProcedure(certifications.update, {
         certificationId: createdCertId1,
-        name: 'Updated AWS Certification Name',
-        serialNumber: 'AWS-INTEG-111-UPDATED',
+        name: "Updated AWS Certification Name",
+        serialNumber: "AWS-INTEG-111-UPDATED",
         issuing_organization_id: testOrgId,
       });
 
       assert.strictEqual(res.id, createdCertId1);
-      assert.strictEqual(res.name, 'Updated AWS Certification Name');
-      assert.strictEqual(res.serialNumber, 'AWS-INTEG-111-UPDATED');
+      assert.strictEqual(res.name, "Updated AWS Certification Name");
+      assert.strictEqual(res.serialNumber, "AWS-INTEG-111-UPDATED");
     });
   });
 
-  describe('DELETE /certifications/{certificationId} (Delete)', () => {
-    test('should throw NOT_FOUND for a non-existent ID', async () => {
+  describe("DELETE /certifications/{certificationId} (Delete)", () => {
+    test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(certifications.delete, {
           certificationId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === 'NOT_FOUND'
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
-    test('should successfully delete a certification by ID', async () => {
+    test("should successfully delete a certification by ID", async () => {
       const res = await callProcedure(certifications.delete, {
         certificationId: createdCertId1,
       });
@@ -222,15 +240,15 @@ describe('Certifications API Endpoints', () => {
         callProcedure(certifications.getById, {
           certificationId: createdCertId1,
         }),
-        (err: any) => err instanceof ORPCError && err.code === 'NOT_FOUND'
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 
-      createdCertId1 = ''; // Clear for teardown
+      createdCertId1 = ""; // Clear for teardown
     });
   });
 
-  describe('DELETE /certifications/bulk (DeleteBulk)', () => {
-    test('should successfully bulk delete certifications by IDs', async () => {
+  describe("DELETE /certifications/bulk (DeleteBulk)", () => {
+    test("should successfully bulk delete certifications by IDs", async () => {
       const res = await callProcedure(certifications.deleteBulk, {
         ids: [createdCertId2],
       });
@@ -244,10 +262,10 @@ describe('Certifications API Endpoints', () => {
         callProcedure(certifications.getById, {
           certificationId: createdCertId2,
         }),
-        (err: any) => err instanceof ORPCError && err.code === 'NOT_FOUND'
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 
-      createdCertId2 = ''; // Clear for teardown
+      createdCertId2 = ""; // Clear for teardown
     });
   });
 });

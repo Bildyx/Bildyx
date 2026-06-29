@@ -20,7 +20,7 @@ export const DifficultyLevelSchema = z.enum([
 export const CertificationSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
-  serialNumber: z.string(),
+  serialNumber: z.string().nullable().optional(),
   issuing_organization_id: z.string().uuid().nullable().optional(),
   description: z.string().nullable().optional(),
   level: z.string().nullable().optional(),
@@ -49,7 +49,10 @@ export const GetCertificationsSchema = z.object({
   category: CertificationCategorySchema.optional(),
 });
 
-// Schéma pour la création (Body)
+// Schéma pour la création (Body) : Enforce serialNumber to be a required string on creation
 export const PostCertificationSchema = CertificationSchema.omit({
   id: true,
+  serialNumber: true,
+}).extend({
+  serialNumber: z.string(),
 });
