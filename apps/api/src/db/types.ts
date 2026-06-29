@@ -509,7 +509,7 @@ export interface Certifications {
   metadata: Json | null;
   name: string;
   products: string[] | null;
-  serialNumber: string;
+  serialNumber: string | null;
   updated_at: Timestamp;
   validity_duration_months: number | null;
   website_url: string | null;
@@ -757,7 +757,6 @@ export interface Organizations {
   ownership: string | null;
   parent_organization_id: string | null;
   partnerships: string[] | null;
-  products: string[] | null;
   project: string | null;
   research_areas: string[] | null;
   services: string[] | null;
