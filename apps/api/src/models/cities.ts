@@ -1,34 +1,47 @@
 import { z } from "zod";
+import { CostOfLivingSchema, LanguageSchema } from "./countries";
 
 export const CitySchema = z.object({
-  id: z.string(),
-  city_name: z.string(),
-  serial_number: z.string().nullable(),
-  country_id: z.string().nullable(),
-  population: z.string().nullable(),
-  number_of_multinational_hqs: z.number().int().nullable(),
-  number_of_airports: z.number().int().nullable(),
-  largest_companies: z.array(z.string()).nullable(),
-  median_salary: z.string().nullable(),
-  cost_of_living: z.string().nullable(),
-  median_home_price: z.string().nullable(),
-  average_rent: z.string().nullable(),
-  temperatures: z.string().nullable(),
-  climate: z.string().nullable(),
-  interesting_fact: z.string().nullable(),
-  degree_holders: z.string().nullable(),
-  number_of_universities: z.number().int().nullable(),
-  number_of_nationalities: z.string().nullable(),
-  languages: z.array(z.string()).nullable(),
-  people_description: z.string().nullable(),
-  created_at: z.date(),
-  updated_at: z.date(),
+  id: z.string().uuid(),
+  name: z.string().trim().min(1),
+  serialNumber: z.string().trim().min(1),
+  country_id: z.string().uuid(),
+  is_capital: z.boolean().optional().default(false),
+  state_province: z.string().nullable().optional(),
+  population: z.number().int().nullable().optional(),
+  number_of_multinational_hqs: z.number().int().nullable().optional(),
+  number_of_airports: z.number().int().nullable().optional(),
+  median_salary: z.number().int().nullable().optional(),
+  cost_of_living: CostOfLivingSchema.nullable().optional(),
+  median_home_price: z.number().int().nullable().optional(),
+  average_rent: z.number().int().nullable().optional(),
+  temperatures: z.string().nullable().optional(),
+  climate: z.string().nullable().optional(),
+  interesting_fact: z.string().nullable().optional(),
+  degree_holders: z.string().nullable().optional(),
+  number_of_universities: z.number().int().nullable().optional(),
+  number_of_nationalities: z.number().int().nullable().optional(),
+  language: LanguageSchema.nullable().optional(),
+  people_description: z.string().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  metadata: z.any().nullable().optional(),
+  deleted_at: z
+    .date()
+    .nullable()
+    .optional()
+    .default(null as any),
+  created_at: z.date().default(new Date()),
+  updated_at: z.date().default(new Date()),
 });
 
 export const CreateCitySchema = CitySchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
+  serialNumber: true,
+}).extend({
+  serialNumber: z.string().trim().min(1),
 });
 
 export const UpdateCitySchema = CreateCitySchema.partial();
