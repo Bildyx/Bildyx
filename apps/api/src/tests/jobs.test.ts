@@ -56,10 +56,7 @@ describe("Jobs API Endpoints", () => {
     try {
       const jobIds = [createdJobId1, createdJobId2].filter(Boolean);
       if (jobIds.length > 0) {
-        await database
-          .deleteFrom("jobs")
-          .where("id", "in", jobIds)
-          .execute();
+        await database.deleteFrom("jobs").where("id", "in", jobIds).execute();
       }
       if (testIndustryId) {
         await database
@@ -87,7 +84,7 @@ describe("Jobs API Endpoints", () => {
           title: "",
           serialNumber: "JOB-01",
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -97,7 +94,7 @@ describe("Jobs API Endpoints", () => {
           title: "Fullstack Developer",
           serialNumber: "",
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -132,7 +129,7 @@ describe("Jobs API Endpoints", () => {
           serialNumber: "JOB-02",
           industry_id: testIndustryId,
         }),
-        (err: any) => err instanceof ORPCError && err.code === "CONFLICT"
+        (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
     });
 
@@ -220,7 +217,7 @@ describe("Jobs API Endpoints", () => {
         callProcedure(jobs.getById, {
           jobId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -241,7 +238,7 @@ describe("Jobs API Endpoints", () => {
           jobId: randomUUID(),
           title: "Updated Title",
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -272,7 +269,7 @@ describe("Jobs API Endpoints", () => {
         callProcedure(jobs.delete, {
           jobId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -292,7 +289,7 @@ describe("Jobs API Endpoints", () => {
     });
   });
 
-  describe("DELETE /jobs/bulk (DeleteBulk)", () => {
+  describe("DELETE /jobs (DeleteBulk)", () => {
     test("should successfully bulk delete jobs by IDs", async () => {
       // Create one more job to test bulk delete
       const extraJob = await callProcedure(jobs.create, {

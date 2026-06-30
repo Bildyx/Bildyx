@@ -199,7 +199,7 @@ export const degrees = {
       method: "DELETE",
       summary: "Delete multiple degrees",
       description: "Delete multiple existing degrees by their IDs",
-      path: "/degrees/bulk",
+      path: "/degrees",
       tags: ["Degree"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))

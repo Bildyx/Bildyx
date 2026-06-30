@@ -49,7 +49,10 @@ describe("Products API Endpoints", () => {
     // Clean up test items
     try {
       if (testOrgId) {
-        await database.deleteFrom("organizations").where("id", "=", testOrgId).execute();
+        await database
+          .deleteFrom("organizations")
+          .where("id", "=", testOrgId)
+          .execute();
       }
       // Hard delete any remaining products created in tests
       await database.deleteFrom("products").execute();
@@ -67,7 +70,7 @@ describe("Products API Endpoints", () => {
           name: "",
           serialNumber: "PRD-TEST-01",
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -77,7 +80,7 @@ describe("Products API Endpoints", () => {
           name: "Test Software",
           serialNumber: "   ",
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -112,7 +115,7 @@ describe("Products API Endpoints", () => {
           serialNumber: "PRD-TEST-02",
           organization_id: testOrgId,
         }),
-        (err: any) => err instanceof ORPCError && err.code === "CONFLICT"
+        (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
     });
 
@@ -172,7 +175,7 @@ describe("Products API Endpoints", () => {
         callProcedure(products.getById, {
           productId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -206,7 +209,7 @@ describe("Products API Endpoints", () => {
         callProcedure(products.delete, {
           productId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -220,7 +223,7 @@ describe("Products API Endpoints", () => {
         callProcedure(products.getById, {
           productId: createdProductId2,
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 
       // Verify no longer returned in getAll
@@ -232,7 +235,7 @@ describe("Products API Endpoints", () => {
     });
   });
 
-  describe("DELETE /products/bulk (DeleteBulk)", () => {
+  describe("DELETE /products (DeleteBulk)", () => {
     test("should successfully bulk soft delete products", async () => {
       // Create another one to test bulk delete
       const extra = await callProcedure(products.create, {

@@ -72,7 +72,7 @@ describe("Cities API Endpoints", () => {
           serialNumber: "NYC-01",
           country_id: testCountryId,
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -83,7 +83,7 @@ describe("Cities API Endpoints", () => {
           serialNumber: "",
           country_id: testCountryId,
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -111,7 +111,7 @@ describe("Cities API Endpoints", () => {
           serialNumber: "NYC-02",
           country_id: testCountryId,
         }),
-        (err: any) => err instanceof ORPCError && err.code === "CONFLICT"
+        (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
     });
 
@@ -169,7 +169,7 @@ describe("Cities API Endpoints", () => {
         callProcedure(cities.getById, {
           cityId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -190,7 +190,7 @@ describe("Cities API Endpoints", () => {
           cityId: randomUUID(),
           name: "Updated Name",
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -221,7 +221,7 @@ describe("Cities API Endpoints", () => {
         callProcedure(cities.delete, {
           cityId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -241,7 +241,7 @@ describe("Cities API Endpoints", () => {
     });
   });
 
-  describe("DELETE /cities/bulk (DeleteBulk)", () => {
+  describe("DELETE /cities (DeleteBulk)", () => {
     test("should successfully bulk delete cities by IDs", async () => {
       // Create one more city to test bulk delete
       const extraCity = await callProcedure(cities.create, {

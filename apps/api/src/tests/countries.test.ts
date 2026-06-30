@@ -208,7 +208,7 @@ describe("Countries API Endpoints", () => {
     });
   });
 
-  describe("DELETE /countries/bulk (DeleteBulk)", () => {
+  describe("DELETE /countries (DeleteBulk)", () => {
     test("should successfully bulk delete countries by IDs", async () => {
       // Create one more country to test bulk delete
       const extraCountry = await callProcedure(countries.create, {

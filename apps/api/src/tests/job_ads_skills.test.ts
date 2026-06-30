@@ -95,16 +95,28 @@ describe("Job Ad Skills API Endpoints", () => {
           .execute();
       }
       if (testSkillId1) {
-        await database.deleteFrom("skills").where("id", "=", testSkillId1).execute();
+        await database
+          .deleteFrom("skills")
+          .where("id", "=", testSkillId1)
+          .execute();
       }
       if (testSkillId2) {
-        await database.deleteFrom("skills").where("id", "=", testSkillId2).execute();
+        await database
+          .deleteFrom("skills")
+          .where("id", "=", testSkillId2)
+          .execute();
       }
       if (testJobAdId) {
-        await database.deleteFrom("job_ads").where("id", "=", testJobAdId).execute();
+        await database
+          .deleteFrom("job_ads")
+          .where("id", "=", testJobAdId)
+          .execute();
       }
       if (testOrgId) {
-        await database.deleteFrom("organizations").where("id", "=", testOrgId).execute();
+        await database
+          .deleteFrom("organizations")
+          .where("id", "=", testOrgId)
+          .execute();
       }
     } catch (e) {
       console.warn("Cleanup error in test teardown:", e);
@@ -121,7 +133,7 @@ describe("Job Ad Skills API Endpoints", () => {
           skill_id: testSkillId1,
           importance: "REQUIRED",
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -146,7 +158,7 @@ describe("Job Ad Skills API Endpoints", () => {
           skill_id: testSkillId1,
           importance: "PREFERRED",
         }),
-        (err: any) => err instanceof ORPCError && err.code === "CONFLICT"
+        (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
     });
 
@@ -210,7 +222,7 @@ describe("Job Ad Skills API Endpoints", () => {
         callProcedure(job_ads_skills.delete, {
           jobAdSkillId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -230,7 +242,7 @@ describe("Job Ad Skills API Endpoints", () => {
     });
   });
 
-  describe("DELETE /job-ad-skills/bulk (DeleteBulk)", () => {
+  describe("DELETE /job-ad-skills (DeleteBulk)", () => {
     test("should successfully bulk delete job ad skills by IDs", async () => {
       // Create one more to test bulk delete
       const extra = await callProcedure(job_ads_skills.create, {

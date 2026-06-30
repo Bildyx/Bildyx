@@ -181,7 +181,7 @@ export const job_ads_skills = {
       method: "DELETE",
       summary: "Remove multiple skills from job ads",
       description: "Remove multiple skills from job ads by their IDs",
-      path: "/job-ad-skills/bulk",
+      path: "/job-ad-skills",
       tags: ["JobAdSkill"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))
