@@ -73,6 +73,7 @@ CREATE TABLE "industries" (
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "score" INTEGER,
 
     CONSTRAINT "industries_pkey" PRIMARY KEY ("id")
 );
@@ -184,6 +185,7 @@ CREATE TABLE "organizations" (
     "founded" TEXT,
     "founder" TEXT,
     "equipments" TEXT,
+    "score" INTEGER,
     "numberOfEmployees" "EmployeeCountRange",
     "numberOfSubsidiaries" INTEGER,
     "parent_organization_id" UUID,
@@ -216,6 +218,7 @@ CREATE TABLE "jobs" (
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "score" INTEGER,
 
     CONSTRAINT "jobs_pkey" PRIMARY KEY ("id")
 );
@@ -242,6 +245,7 @@ CREATE TABLE "skills" (
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "score" INTEGER,
 
     CONSTRAINT "skills_pkey" PRIMARY KEY ("id")
 );
@@ -264,6 +268,7 @@ CREATE TABLE "certifications" (
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "score" INTEGER,
 
     CONSTRAINT "certifications_pkey" PRIMARY KEY ("id")
 );
@@ -286,11 +291,12 @@ CREATE TABLE "universities" (
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "score" DOUBLE PRECISION,
+    "score_university" DOUBLE PRECISION,
     "local_name" TEXT,
     "location" TEXT,
     "notes" TEXT,
     "established" TEXT,
+    "score" INTEGER,
     "undergraduates" INTEGER,
     "postgraduates" INTEGER,
 
@@ -313,6 +319,7 @@ CREATE TABLE "degrees" (
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "score" INTEGER,
 
     CONSTRAINT "degrees_pkey" PRIMARY KEY ("id")
 );
@@ -336,6 +343,7 @@ CREATE TABLE "products" (
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "score" INTEGER,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
