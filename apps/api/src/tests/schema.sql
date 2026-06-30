@@ -409,7 +409,7 @@ CREATE TABLE "universities" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "score" DOUBLE PRECISION,
-    "localName" TEXT,
+    "local_name" TEXT,
     "location" TEXT,
     "notes" TEXT,
     "established" TEXT,

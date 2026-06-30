@@ -719,7 +719,7 @@ model University {
   createdAt    DateTime        @default(now()) @map("created_at")
   updatedAt    DateTime        @updatedAt @map("updated_at")
   score        Float?
-  localName    String?
+  localName    String?         @map("local_name")
   location     String?
   notes        String?
   established  String?
