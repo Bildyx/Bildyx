@@ -978,6 +978,7 @@ export interface Organizations {
   slug: string;
   type: Organizationsubtype | null;
   updated_at: Timestamp;
+  visitors: string | null;
 }
 
 export interface Products {
@@ -1164,7 +1165,7 @@ export interface Universities {
   logo_url: string | null;
   metadata: Json | null;
   name: string;
-  official_name: string | null;
+  notes: string | null;
   postgraduates: number | null;
   score: number | null;
   serialNumber: string;
