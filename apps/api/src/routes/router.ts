@@ -9,6 +9,7 @@ import { job_ads } from "./job_ads";
 import { job_ads_skills } from "./job_ads_skills";
 import { products } from "./products";
 import { skills } from "./skills";
+import { universities } from "./universities";
 
 export const router = publicProcedure.router({
   certifications,
@@ -21,6 +22,7 @@ export const router = publicProcedure.router({
   job_ads_skills,
   products,
   skills,
+  universities,
 });
 export type Router = typeof router;
 
