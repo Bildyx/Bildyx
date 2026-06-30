@@ -279,9 +279,7 @@ model University {
   logoUrl         String?         @map("logo_url")
   foundedYear     Int?            @map("founded_year")
   countryId       String?         @map("country_id") @db.Uuid
-  country         Country?        @relation(fields: [countryId], references: [id])
   cityId          String?         @map("city_id") @db.Uuid
-  city            City?           @relation(fields: [cityId], references: [id])
   isPublic        Boolean?        @map("is_public")
   studentCount    Int?            @map("student_count")
   metadata        Json?
@@ -294,12 +292,13 @@ model University {
   notes           String?
   established     String?
   score           Int?
-
-  degrees        Degree[]
-  topOfCities    City[]    @relation("CityTopUniversities")
-  topOfCountries Country[] @relation("CountryTopUniversities")
-  undergraduates Int?
-  postgraduates  Int?
+  undergraduates  Int?
+  postgraduates   Int?
+  degrees         Degree[]
+  city            City?           @relation(fields: [cityId], references: [id])
+  country         Country?        @relation(fields: [countryId], references: [id])
+  topOfCities     City[]          @relation("CityTopUniversities")
+  topOfCountries  Country[]       @relation("CountryTopUniversities")
 
   @@index([countryId])
   @@index([cityId])
@@ -470,7 +469,7 @@ model UserSession {
   userAgent String?   @map("user_agent")
   createdAt DateTime  @default(now()) @map("created_at")
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@index([userId])
   @@index([expiresAt])
   @@map("user_sessions")
