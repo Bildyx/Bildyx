@@ -103,7 +103,7 @@ require __DIR__ . '/includes/header.php';
                     <span class="eyebrow eyebrow--light">For professionals</span>
                     <h1>Create MicroResume</h1>
                     <p>Build a verified, concise professional profile that highlights your core skills and achievements in seconds.</p>
-                    <a href="generic.php?page=create-microresume" class="secondary-button">
+                    <a href="microresume.php" class="secondary-button">
                         Create MicroResume
                         <span aria-hidden="true">→</span>
                     </a>
