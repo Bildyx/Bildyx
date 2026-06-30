@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-export const SkillImportanceEnum = z.enum(["REQUIRED", "PREFERRED", "NICE_TO_HAVE"]);
+import { SkillImportanceEnum } from "./utils/enums";
 
 export const JobAdSkillSchema = z.object({
   id: z.string().uuid(),

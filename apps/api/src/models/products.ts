@@ -1,14 +1,5 @@
 import { z } from "zod";
-
-export const SubjectCategoryEnum = z.enum([
-  "SOFTWARE",
-  "HARDWARE",
-  "SERVICE",
-  "PLATFORM",
-  "API",
-  "PHYSICAL_PRODUCT",
-  "OTHER",
-]);
+import { SubjectCategoryEnum } from "./utils/enums";
 
 export const ProductSchema = z.object({
   id: z.string().uuid(),
@@ -36,6 +27,7 @@ export const ProductSchema = z.object({
     }
     return val === "" ? null : val;
   }, z.array(z.string()).nullable().optional()),
+  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z
     .date()

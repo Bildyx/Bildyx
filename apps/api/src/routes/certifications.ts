@@ -125,6 +125,7 @@ export const certifications = {
         .insertInto("certifications")
         .values({
           id: randomUUID(),
+          updated_at: new Date(),
           ...input,
         } as Insertable<Certifications>)
         .returningAll()

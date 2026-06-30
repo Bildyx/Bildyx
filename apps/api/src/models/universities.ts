@@ -1,13 +1,7 @@
 import { z } from "zod";
+import { UniversityTypeEnum } from "./utils/enums";
 
-export const UniversityTypeEnum = z.enum([
-  "ACADEMY",
-  "GRANDE_ECOLE",
-  "INSTITUTE",
-  "ONLINE",
-  "OTHER",
-  "UNIVERSITY",
-]);
+const currentYear = () => new Date().getFullYear();
 
 export const UniversitySchema = z.object({
   id: z.string().uuid(),
@@ -17,14 +11,20 @@ export const UniversitySchema = z.object({
   description: z.string().nullable().optional(),
   website_url: z.string().nullable().optional(),
   logo_url: z.string().nullable().optional(),
-  founded_year: z.number().int().nullable().optional(),
+  founded_year: z
+    .number()
+    .int()
+    .min(0)
+    .max(currentYear())
+    .nullable()
+    .optional(),
   country_id: z.string().uuid().nullable().optional(),
   city_id: z.string().uuid().nullable().optional(),
   is_public: z.boolean().nullable().optional(),
-  student_count: z.number().int().nullable().optional(),
-  undergraduates: z.number().int().nullable().optional(),
-  postgraduates: z.number().int().nullable().optional(),
-  score: z.number().int().nullable().optional(),
+  student_count: z.number().int().min(0).nullable().optional(),
+  undergraduates: z.number().int().min(0).nullable().optional(),
+  postgraduates: z.number().int().min(0).nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   local_name: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),

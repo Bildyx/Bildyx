@@ -7,6 +7,7 @@ export const IndustrySchema = z.object({
   description: z.string().nullable().optional(),
   icon_url: z.string().nullable().optional(),
   color: z.string().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z
     .date()
@@ -21,6 +22,7 @@ export const CreateIndustrySchema = IndustrySchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
+  deleted_at: true,
   serialNumber: true,
 }).extend({
   serialNumber: z.string().trim().min(1),

@@ -1,9 +1,10 @@
 import { z } from "zod";
-
-export const ContractTypeEnum = z.enum(["APPRENTICESHIP", "FREELANCE", "FULL_TIME", "INTERNSHIP", "OTHER", "PART_TIME"]);
-export const RemotePolicyEnum = z.enum(["FULL_REMOTE", "HYBRID", "ON_SITE"]);
-export const EducationLevelEnum = z.enum(["BACHELOR", "HIGH_SCHOOL", "MASTER", "NONE", "OTHER", "PHD"]);
-export const JobAdStatusEnum = z.enum(["CLOSED", "DRAFT", "FILLED", "PUBLISHED"]);
+import {
+  ContractTypeEnum,
+  EducationLevelEnum,
+  JobAdStatusEnum,
+  RemotePolicyEnum,
+} from "./utils/enums";
 
 export const JobAdSchema = z.object({
   id: z.string().uuid(),
@@ -18,7 +19,7 @@ export const JobAdSchema = z.object({
   country_id: z.string().uuid().nullable().optional(),
   city_id: z.string().uuid().nullable().optional(),
   salary_range: z.string().nullable().optional(),
-  required_years_experience: z.number().int().nullable().optional(),
+  required_years_experience: z.number().int().min(0).nullable().optional(),
   required_education_level: EducationLevelEnum.nullable().optional(),
   application_url: z.string().nullable().optional(),
   application_email: z.string().nullable().optional(),

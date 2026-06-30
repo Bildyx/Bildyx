@@ -1,27 +1,5 @@
 import { z } from "zod";
-
-export const OrganizationTypeEnum = z.enum([
-  "ORGANIZATION",
-  "GOVERNMENT",
-  "RESEARCH_INSTITUTE",
-  "UNIVERSITY",
-  "INTERNATIONAL_ORGANIZATION",
-  "NGO",
-  "NON_PROFIT",
-  "SOCIETY",
-  "CLUB",
-  "ARMY",
-  "OTHER",
-]);
-
-export const EmployeeCountRangeEnum = z.enum([
-  "RANGE_1_10",
-  "RANGE_11_50",
-  "RANGE_51_200",
-  "RANGE_201_1000",
-  "RANGE_1001_5000",
-  "RANGE_5000_PLUS",
-]);
+import { EmployeeCountRangeEnum, OrganizationTypeEnum } from "./utils/enums";
 
 const arrayPreprocessor = z.preprocess((val) => {
   if (Array.isArray(val)) {
@@ -51,8 +29,9 @@ export const OrganizationSchema = z.object({
   founded: z.string().nullable().optional(),
   founder: z.string().nullable().optional(),
   equipments: z.string().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   numberOfEmployees: EmployeeCountRangeEnum.nullable().optional(),
-  numberOfSubsidiaries: z.number().int().nullable().optional(),
+  numberOfSubsidiaries: z.number().int().min(0).nullable().optional(),
   parent_organization_id: z.string().uuid().nullable().optional(),
   cityId: z.string().uuid().nullable().optional(),
   metadata: z.any().nullable().optional(),

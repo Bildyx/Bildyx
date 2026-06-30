@@ -1,7 +1,7 @@
 import { z } from "zod";
+import { JobCategoryEnum, SeniorityLevelEnum } from "./utils/enums";
 
-export const JobCategoryEnum = z.enum(["ACADEMIC", "GOVERNMENT", "MILITARY", "NGO", "OTHER", "PRIVATE_SECTOR", "PUBLIC_SECTOR"]);
-export const SeniorityLevelEnum = z.enum(["C_LEVEL", "DIRECTOR", "ELECTED", "INTERN", "JUNIOR", "LEAD", "MID", "OTHER", "SENIOR"]);
+const currentYear = () => new Date().getFullYear();
 
 export const JobSchema = z.object({
   id: z.string().uuid(),
@@ -12,7 +12,13 @@ export const JobSchema = z.object({
   seniority_level: SeniorityLevelEnum.nullable().optional(),
   is_elected: z.boolean().optional().default(false),
   is_regulated: z.boolean().optional().default(false),
-  start_year: z.number().int().nullable().optional(),
+  start_year: z
+    .number()
+    .int()
+    .min(0)
+    .max(currentYear())
+    .nullable()
+    .optional(),
   industry_id: z.string().uuid().nullable().optional(),
   country_id: z.string().uuid().nullable().optional(),
   products: z.preprocess((val) => {
@@ -36,6 +42,7 @@ export const JobSchema = z.object({
     }
     return val === "" ? null : val;
   }, z.array(z.string()).nullable().optional()),
+  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z
     .date()
@@ -50,6 +57,7 @@ export const CreateJobSchema = JobSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
+  deleted_at: true,
   serialNumber: true,
 }).extend({
   serialNumber: z.string().trim().min(1),

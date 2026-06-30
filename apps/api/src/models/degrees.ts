@@ -1,12 +1,5 @@
 import { z } from "zod";
-
-export const DegreeLevelEnum = z.enum([
-  "HIGH_SCHOOL",
-  "ASSOCIATE",
-  "BACHELOR",
-  "MASTER",
-  "PHD",
-]);
+import { DegreeLevelEnum } from "./utils/enums";
 
 export const DegreeSchema = z.object({
   id: z.string().uuid(),
@@ -15,10 +8,12 @@ export const DegreeSchema = z.object({
   university_id: z.string().uuid().nullable().optional(),
   level: DegreeLevelEnum.nullable().optional(),
   field: z.string().nullable().optional(),
-  duration_years: z.number().nullable().optional(),
+  // Float dans la DB (ex: 1.5 ans), mais toujours positif
+  duration_years: z.number().min(0).nullable().optional(),
   description: z.string().nullable().optional(),
   language_of_instruction: z.string().nullable().optional(),
   country_id: z.string().uuid().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z
     .date()
@@ -33,6 +28,7 @@ export const CreateDegreeSchema = DegreeSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
+  deleted_at: true,
   serialNumber: true,
 }).extend({
   serialNumber: z.string().trim().min(1),

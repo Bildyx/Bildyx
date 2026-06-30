@@ -1,20 +1,5 @@
 import { z } from "zod";
-
-export const SkillCategoryEnum = z.enum([
-  "FRAMEWORK",
-  "LANGUAGE",
-  "METHODOLOGY",
-  "OTHER",
-  "SOFT",
-  "TECHNICAL",
-  "TOOL",
-]);
-export const DifficultyLevelEnum = z.enum([
-  "ADVANCED",
-  "BEGINNER",
-  "EXPERT",
-  "INTERMEDIATE",
-]);
+import { DifficultyLevelEnum, SkillCategoryEnum } from "./utils/enums";
 
 const arrayPreprocessor = z.preprocess((val) => {
   if (Array.isArray(val)) {
@@ -41,6 +26,7 @@ export const SkillSchema = z.object({
   common_fields_of_study: arrayPreprocessor,
   related_abilities: arrayPreprocessor,
   time_to_master: z.string().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z
     .date()

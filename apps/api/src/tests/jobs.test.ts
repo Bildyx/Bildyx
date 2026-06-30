@@ -243,15 +243,16 @@ describe("Jobs API Endpoints", () => {
     });
 
     test("should successfully update job fields", async () => {
+      const currentYear = new Date().getFullYear();
       const result = await callProcedure(jobs.update, {
         jobId: createdJobId1,
         title: "Senior Fullstack Engineer",
-        start_year: 2027,
+        start_year: currentYear,
       });
 
       assert.strictEqual(result.id, createdJobId1);
       assert.strictEqual(result.title, "Senior Fullstack Engineer");
-      assert.strictEqual(result.start_year, 2027);
+      assert.strictEqual(result.start_year, currentYear);
 
       // Verify in DB
       const dbJob = await database

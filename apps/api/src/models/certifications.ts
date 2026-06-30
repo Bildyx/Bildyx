@@ -1,20 +1,5 @@
 import { z } from "zod";
-
-export const CertificationCategorySchema = z.enum([
-  "TECHNICAL",
-  "PROFESSIONAL",
-  "PROJECTMANAGEMENT",
-  "VENDORPRODUCT",
-  "LANGUAGE",
-  "OTHER",
-]);
-
-export const DifficultyLevelSchema = z.enum([
-  "BEGINNER",
-  "INTERMEDIATE",
-  "ADVANCED",
-  "EXPERT",
-]);
+import { CertificationCategoryEnum, DifficultyLevelEnum } from "./utils/enums";
 
 // Représentation de l'objet complet en base de données (aligné avec Kysely/PostgreSQL)
 export const CertificationSchema = z.object({
@@ -24,11 +9,11 @@ export const CertificationSchema = z.object({
   issuing_organization_id: z.string().uuid().nullable().optional(),
   description: z.string().nullable().optional(),
   level: z.string().nullable().optional(),
-  category: CertificationCategorySchema.nullable().optional(),
-  difficulty: DifficultyLevelSchema.nullable().optional(),
+  category: CertificationCategoryEnum.nullable().optional(),
+  difficulty: DifficultyLevelEnum.nullable().optional(),
   products: z.array(z.string()).nullable().optional(),
   jobs: z.array(z.string()).nullable().optional(),
-  validity_duration_months: z.number().int().nullable().optional(),
+  validity_duration_months: z.number().int().min(0).nullable().optional(),
   website_url: z.string().nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z
@@ -46,13 +31,16 @@ export type Certification = z.infer<typeof CertificationSchema>;
 export const GetCertificationsSchema = z.object({
   organizationId: z.string().uuid(),
   name: z.string().optional(),
-  category: CertificationCategorySchema.optional(),
+  category: CertificationCategoryEnum.optional(),
 });
 
 // Schéma pour la création (Body) : Enforce serialNumber to be a required string on creation
 export const PostCertificationSchema = CertificationSchema.omit({
   id: true,
   serialNumber: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
 }).extend({
   serialNumber: z.string(),
 });
