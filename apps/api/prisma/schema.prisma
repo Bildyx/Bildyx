@@ -469,7 +469,7 @@ model UserSession {
   userAgent String?   @map("user_agent")
   createdAt DateTime  @default(now()) @map("created_at")
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+ 
   @@index([userId])
   @@index([expiresAt])
   @@map("user_sessions")
