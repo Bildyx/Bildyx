@@ -48,14 +48,14 @@ describe("Products API Endpoints", () => {
   after(async () => {
     // Clean up test items
     try {
+      // Hard delete any remaining products created in tests first
+      await database.deleteFrom("products").execute();
       if (testOrgId) {
         await database
           .deleteFrom("organizations")
           .where("id", "=", testOrgId)
           .execute();
       }
-      // Hard delete any remaining products created in tests
-      await database.deleteFrom("products").execute();
     } catch (e) {
       console.warn("Cleanup error in test teardown:", e);
     } finally {

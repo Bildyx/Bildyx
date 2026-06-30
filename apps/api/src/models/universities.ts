@@ -24,7 +24,7 @@ export const UniversitySchema = z.object({
   student_count: z.number().int().nullable().optional(),
   undergraduates: z.number().int().nullable().optional(),
   postgraduates: z.number().int().nullable().optional(),
-  score: z.number().nullable().optional(),
+  score: z.number().int().nullable().optional(),
   local_name: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),

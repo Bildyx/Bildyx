@@ -61,6 +61,8 @@ describe("Job Ads API Endpoints", () => {
   after(async () => {
     // Clean up test items
     try {
+      // Hard delete any remaining job ads created in tests first
+      await database.deleteFrom("job_ads").execute();
       if (testJobId) {
         await database.deleteFrom("jobs").where("id", "=", testJobId).execute();
       }
@@ -70,8 +72,6 @@ describe("Job Ads API Endpoints", () => {
           .where("id", "=", testOrgId)
           .execute();
       }
-      // Hard delete any remaining job ads created in tests
-      await database.deleteFrom("job_ads").execute();
     } catch (e) {
       console.warn("Cleanup error in test teardown:", e);
     } finally {
