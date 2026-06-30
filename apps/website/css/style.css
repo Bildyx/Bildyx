@@ -1059,3 +1059,16 @@ a {
         padding: 34px 22px;
     }
 }
+
+
+/* Keep the shared footer at the bottom of short generic pages. */
+.generic-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.generic-page .generic-main {
+    flex: 1;
+    min-height: 0;
+}
