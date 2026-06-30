@@ -189,9 +189,6 @@ model Job {
   category       JobCategory?
   description    String?
   seniorityLevel SeniorityLevel? @map("seniority_level")
-  isElected      Boolean         @default(false) @map("is_elected")
-  isRegulated    Boolean         @default(false) @map("is_regulated")
-  startYear      Int?            @map("start_year")
   industryId     String?         @map("industry_id") @db.Uuid
   countryId      String?         @map("country_id") @db.Uuid
   products       String[]
@@ -208,7 +205,6 @@ model Job {
   userProfiles   UserProfile[]   @relation("UserCurrentJob")
 
   @@index([industryId])
-  @@index([countryId])
   @@index([category])
   @@index([seniorityLevel])
   @@map("jobs")
@@ -239,7 +235,6 @@ model Skill {
   JobAdSkills         JobAdSkill[]
   industry            Industry?        @relation(fields: [industryId], references: [id])
 
-  @@index([industryId])
   @@index([category])
   @@map("skills")
 }
@@ -277,7 +272,6 @@ model University {
   description     String?
   websiteUrl      String?         @map("website_url")
   logoUrl         String?         @map("logo_url")
-  foundedYear     Int?            @map("founded_year")
   countryId       String?         @map("country_id") @db.Uuid
   cityId          String?         @map("city_id") @db.Uuid
   isPublic        Boolean?        @map("is_public")
@@ -312,7 +306,7 @@ model Degree {
   serialNumber          String       @unique
   universityId          String?      @map("university_id") @db.Uuid
   level                 DegreeLevel?
-  field                 String?
+  area                  String?
   durationYears         Float?       @map("duration_years")
   description           String?
   languageOfInstruction String?      @map("language_of_instruction")
@@ -325,9 +319,7 @@ model Degree {
   countries             Country?     @relation(fields: [countryId], references: [id])
   university            University?  @relation(fields: [universityId], references: [id])
 
-  @@index([universityId])
   @@index([level])
-  @@index([countryId])
   @@map("degrees")
 }
 
