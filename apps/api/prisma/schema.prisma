@@ -190,7 +190,7 @@ enum SkillImportance {
 }
 
 enum OrganizationSubType {
-  ORGANIZATION
+  COMPANY
   GOVERNMENT
   RESEARCH_INSTITUTE
   UNIVERSITY
