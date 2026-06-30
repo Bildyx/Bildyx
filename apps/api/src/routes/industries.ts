@@ -1,9 +1,14 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { IndustrySchema, CreateIndustrySchema, UpdateIndustrySchema, GetIndustriesSchema } from "../models/industries";
+import {
+  IndustrySchema,
+  CreateIndustrySchema,
+  UpdateIndustrySchema,
+  GetIndustriesSchema,
+} from "../models/industries";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 export const industries = {
   getAll: publicProcedure
@@ -12,44 +17,44 @@ export const industries = {
       summary: "List all industries",
       description: "Get all industries with optional search",
       path: "/industries",
-      tags: ["Industry"]
+      tags: ["Industry"],
     })
     .input(GetIndustriesSchema)
     .output(z.array(IndustrySchema))
     .handler(async ({ input }) => {
       const { search } = input;
 
-      let query = database.selectFrom('industries').where('deleted_at', 'is', null);
+      let query = database.selectFrom("industries");
 
       if (search) {
         const p = `%${search.trim()}%`;
         query = query.where((eb) =>
-          eb('name', 'ilike', p).or('description', 'ilike', p)
+          eb("name", "ilike", p).or("description", "ilike", p),
         );
       }
 
-      return await query.selectAll().orderBy('name', 'asc').execute();
+      return await query.selectAll().orderBy("name", "asc").execute();
     }),
 
-  getOne: publicProcedure
+  getById: publicProcedure
     .route({
       method: "GET",
-      summary: "Get one industry",
+      summary: "Get a specific industry",
       description: "Get an industry by its ID",
       path: "/industries/{industryId}",
-      tags: ["Industry"]
+      tags: ["Industry"],
     })
     .input(z.object({ industryId: z.string().uuid() }))
     .output(IndustrySchema)
     .handler(async ({ input }) => {
       const data = await database
-        .selectFrom('industries')
-        .where('id', '=', input.industryId)
-        .where('deleted_at', 'is', null)
+        .selectFrom("industries")
+        .where("id", "=", input.industryId)
         .selectAll()
         .executeTakeFirst();
 
-      if (!data) throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
+      if (!data)
+        throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
 
       return data;
     }),
@@ -60,63 +65,81 @@ export const industries = {
       summary: "Create an industry",
       description: "Create a new industry",
       path: "/industries",
-      tags: ["Industry"]
+      tags: ["Industry"],
     })
     .input(CreateIndustrySchema)
     .output(IndustrySchema)
     .handler(async ({ input }) => {
       const existing = await database
-        .selectFrom('industries')
-        .where('name', 'ilike', input.name)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("industries")
+        .where("name", "ilike", input.name)
+        .select("id")
         .executeTakeFirst();
 
-      if (existing) throw new ORPCError("CONFLICT", { message: "An industry with this name already exists" });
+      if (existing) {
+        throw new ORPCError("CONFLICT", {
+          message: "An industry with this name already exists",
+        });
+      }
 
       const { metadata, ...rest } = input;
 
       const industry = await database
-        .insertInto('industries')
-        .values({ ...rest, id: uuidv4(), updated_at: new Date(), metadata: metadata as any })
+        .insertInto("industries")
+        .values({
+          ...rest,
+          id: randomUUID(),
+          updated_at: new Date(),
+          metadata: metadata as any,
+        })
         .returningAll()
         .executeTakeFirst();
 
-      if (!industry) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create industry" });
+      if (!industry) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to create industry",
+        });
+      }
 
       return industry;
     }),
 
   update: publicProcedure
     .route({
-      method: "PATCH",
+      method: "PUT",
       summary: "Update an industry",
       description: "Update an existing industry by its ID",
       path: "/industries/{industryId}",
-      tags: ["Industry"]
+      tags: ["Industry"],
     })
-    .input(z.object({ industryId: z.string().uuid() }).merge(UpdateIndustrySchema))
+    .input(
+      z.object({ industryId: z.string().uuid() }).merge(UpdateIndustrySchema),
+    )
     .output(IndustrySchema)
     .handler(async ({ input }) => {
       const { industryId, metadata, ...rest } = input;
 
       const existing = await database
-        .selectFrom('industries')
-        .where('id', '=', industryId)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("industries")
+        .where("id", "=", industryId)
+        .select("id")
         .executeTakeFirst();
 
-      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
+      if (!existing)
+        throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
 
       const industry = await database
-        .updateTable('industries')
+        .updateTable("industries")
         .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
-        .where('id', '=', industryId)
+        .where("id", "=", industryId)
         .returningAll()
         .executeTakeFirst();
 
-      if (!industry) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update industry" });
+      if (!industry) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to update industry",
+        });
+      }
 
       return industry;
     }),
@@ -125,24 +148,42 @@ export const industries = {
     .route({
       method: "DELETE",
       summary: "Delete an industry",
-      description: "Soft delete an industry by its ID",
+      description: "Delete an industry by its ID",
       path: "/industries/{industryId}",
-      tags: ["Industry"]
+      tags: ["Industry"],
     })
     .input(z.object({ industryId: z.string().uuid() }))
-    .output(z.object({ success: z.boolean() }))
+    .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
-        .selectFrom('industries')
-        .where('id', '=', input.industryId)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("industries")
+        .where("id", "=", input.industryId)
+        .select("id")
         .executeTakeFirst();
 
-      if (!existing) throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
+      if (!existing)
+        throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
 
-      await database.updateTable('industries').set({ deleted_at: new Date() }).where('id', '=', input.industryId).execute();
+      await database
+        .deleteFrom("industries")
+        .where("id", "=", input.industryId)
+        .execute();
+    }),
 
-      return { success: true };
+  deleteBulk: publicProcedure
+    .route({
+      method: "DELETE",
+      summary: "Delete multiple industries",
+      description: "Delete multiple existing industries by their IDs",
+      path: "/industries/bulk",
+      tags: ["Industry"],
+    })
+    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .output(z.void())
+    .handler(async ({ input }) => {
+      await database
+        .deleteFrom("industries")
+        .where("id", "in", input.ids)
+        .execute();
     }),
 };

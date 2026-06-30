@@ -1,42 +1,58 @@
 import { z } from "zod";
 
-export const CertificationCategoryEnum = z.enum(["LANGUAGE", "OTHER", "PROFESSIONAL", "PROJECTMANAGEMENT", "TECHNICAL", "VENDORPRODUCT"]);
-export const DifficultyLevelEnum = z.enum(["ADVANCED", "BEGINNER", "EXPERT", "INTERMEDIATE"]);
+export const CertificationCategorySchema = z.enum([
+  "TECHNICAL",
+  "PROFESSIONAL",
+  "PROJECTMANAGEMENT",
+  "VENDORPRODUCT",
+  "LANGUAGE",
+  "OTHER",
+]);
 
+export const DifficultyLevelSchema = z.enum([
+  "BEGINNER",
+  "INTERMEDIATE",
+  "ADVANCED",
+  "EXPERT",
+]);
+
+// Représentation de l'objet complet en base de données (aligné avec Kysely/PostgreSQL)
 export const CertificationSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
-  serialNumber: z.string(),
-  issuing_organization_id: z.string().uuid().nullable(),
-  description: z.string().nullable(),
-  level: z.string().nullable(),
-  category: CertificationCategoryEnum.nullable(),
-  products: z.array(z.string()).nullable(),
-  jobs: z.array(z.string()).nullable(),
-  validity_duration_months: z.number().int().nullable(),
-  difficulty: DifficultyLevelEnum.nullable(),
-  website_url: z.string().nullable(),
-  metadata: z.unknown().nullable(),
-  deleted_at: z.date().nullable(),
-  created_at: z.date(),
-  updated_at: z.date(),
-});
-
-export const CreateCertificationSchema = CertificationSchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
-});
-
-export const UpdateCertificationSchema = CreateCertificationSchema.partial();
-
-export const GetCertificationsSchema = z.object({
-  search: z.string().optional(),
-  category: CertificationCategoryEnum.optional(),
-  difficulty: DifficultyLevelEnum.optional(),
+  serialNumber: z.string().nullable().optional(),
+  issuing_organization_id: z.string().uuid().nullable().optional(),
+  description: z.string().nullable().optional(),
+  level: z.string().nullable().optional(),
+  category: CertificationCategorySchema.nullable().optional(),
+  difficulty: DifficultyLevelSchema.nullable().optional(),
+  products: z.array(z.string()).nullable().optional(),
+  jobs: z.array(z.string()).nullable().optional(),
+  validity_duration_months: z.number().int().nullable().optional(),
+  website_url: z.string().nullable().optional(),
+  metadata: z.any().nullable().optional(),
+  deleted_at: z
+    .date()
+    .nullable()
+    .optional()
+    .default(null as any),
+  created_at: z.date().default(new Date()),
+  updated_at: z.date().default(new Date()),
 });
 
 export type Certification = z.infer<typeof CertificationSchema>;
-export type CreateCertification = z.infer<typeof CreateCertificationSchema>;
-export type UpdateCertification = z.infer<typeof UpdateCertificationSchema>;
+
+// Schéma pour la validation du listing (Query params)
+export const GetCertificationsSchema = z.object({
+  organizationId: z.string().uuid(),
+  name: z.string().optional(),
+  category: CertificationCategorySchema.optional(),
+});
+
+// Schéma pour la création (Body) : Enforce serialNumber to be a required string on creation
+export const PostCertificationSchema = CertificationSchema.omit({
+  id: true,
+  serialNumber: true,
+}).extend({
+  serialNumber: z.string(),
+});

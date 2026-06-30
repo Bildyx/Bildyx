@@ -374,6 +374,7 @@ model Country {
   cities       City[]
   jobs         Job[]
   jobAds       JobAd[]
+  degrees      Degree[]
   universities University[]
   userProfiles UserProfile[] @relation("UserProfileCountry")
 
@@ -416,184 +417,46 @@ model City {
   universities   University[]
   jobAds         JobAd[]
   userProfiles   UserProfile[]
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String?       @db.Uuid
+  organizations  Organization[]           @relation("OrganizationHeadquarters")
+  workingAreaOrganizations Organization[] @relation("working_area")
 
   @@index([countryId])
   @@map("cities")
 }
 
 model Organization {
-  id                 String               @id @default(uuid()) @db.Uuid
-  name               String
-  slug               String               @unique
-  title              String?
-  type               OrganizationSubType?
-  category           String?
-  description        String?
-  subsidiaries       Int?
-  legalStatus        String?              @map("legal_status")
-  ownership          String?
-  mission            String?
-  purpose            String?
-  focus              String?
-  knownFor           String[]             @map("known_for")
-  activitiesPrograms String[]             @map("activities_programs")
-  keyProject         String?              @map("key_project")
-  researchOutput     String?              @map("research_output")
-  programs           String[]
-  projects           String[]
-  researchAreas      String[]             @map("research_areas")
-  products           String[]
-  services           String[]
-  partnerships       String[]
-  fundingSources     String[]             @map("funding_sources")
-  budget             String?
-  budgetAuthority    String?              @map("budget_authority")
-  fundingModel       String?              @map("funding_model")
-  endowment          String?
-  gdp                String?
-  founded            String?
-  founders           String?
-  established        String?
+  id                String               @id @default(uuid()) @db.Uuid
+  name              String
+  slug              String               @unique
+  type              OrganizationSubType?
+  legalStatus       String?              @map("legal_status")
+  category          String?
+  ownership         String?
+  mission           String?
+  knownFor          String[]             @map("known_for")
+  activities        String[]             @map("activities")
+  project           String?              @map("project")
+  researchAreas     String[]             @map("research_areas")
+  products          String[]
+  services          String[]
+  partnerships      String[]
+  budget            String?
+  founded           String?
+  founder           String?
+  equipments        String?
 
   // Localisation
-  location       City[]
-  locations      String[]
-  headquarters   String?
-  regionServed   String?  @map("region_served")
-  landArea       String?  @map("land_area")
-  country        String?
-  hostCountry    String?  @map("host_country")
-  sendingCountry String?  @map("sending_country")
-  capital        String?
-  areaSize       String?  @map("area_size")
+  headquarters City?  @relation("OrganizationHeadquarters", fields: [cityId], references: [id])
+  workingArea  City[] @relation("working_area")
 
   // Taille & Effectifs
-  offices                    Int?
-  employees                  EmployeeCountRange?
-  members                    Int?
-  membersMPs                 Int?                @map("members_mps")
-  membersStaff               Int?                @map("members_staff")
-  personnel                  Int?
-  activePersonnel            Int?                @map("active_personnel")
-  activeMilitaryPersonnel    Int?                @map("active_military_personnel")
-  reservePersonnel           Int?                @map("reserve_personnel")
-  civilianAuxiliaryPersonnel Int?                @map("civilian_auxiliary_personnel")
-  volunteers                 Int?
-  staff                      Int?
-  supportStaff               Int?                @map("support_staff")
-  medicalStaff               Int?                @map("medical_staff")
-  researchers                Int?
-  teachers                   Int?
-  students                   Int?
-  judges                     Int?
-  scale                      String?
-  size                       String?
-  visitors                   String?
-  scope                      String?
-
-  // Structure & Organisation
-  branchesChapters            String[] @map("branches_chapters")
-  departmentsOverseen         String[] @map("departments_overseen")
-  departmentsDivisions        String[] @map("departments_divisions")
-  ministriesDepartments       Int?     @map("ministries_departments")
-  regionalFieldOffices        String[] @map("regional_field_offices")
-  subordinateAgenciesPrograms String[] @map("subordinate_agencies_programs")
-  subordinateBodies           String[] @map("subordinate_bodies")
-  subordinateOfficesDivisions String[] @map("subordinate_offices_divisions")
-  subordinateUnitsBranches    String[] @map("subordinate_units_branches")
-  subordinateRegionalOffices  String[] @map("subordinate_regional_offices")
-
-  // Fonctions & Programmes
-  functions           String[]
-  functionsPrograms   String[] @map("functions_programs")
-  programsCenters     String[] @map("programs_centers")
-  programsInitiatives String[] @map("programs_initiatives")
-  programsProjects    String[] @map("programs_projects")
-  programsServices    String[] @map("programs_services")
-  programType         String?  @map("program_type")
-  serviceAreas        String[] @map("service_areas")
-  caseTypes           String[] @map("case_types")
-  typesOfAudits       String[] @map("types_of_audits")
-
-  // Juridique & Gouvernance
-  jurisdiction        String?
-  courtLevel          String? @map("court_level")
-  appointingAuthority String? @map("appointing_authority")
-  administeringAgency String? @map("administering_agency")
-  currencyIssued      String? @map("currency_issued")
-
-  // Spécifique
-  hospitalType          String?  @map("hospital_type")
-  parkType              String?  @map("park_type")
-  educationLevel        String?  @map("education_level")
-  cardStructure         String?  @map("card_structure")
-  dissolutionStatus     String?  @map("dissolution_status")
-  ecosystems            String[]
-  targetPopulation      String?  @map("target_population")
-  fleet                 String?
-  partOf                String?  @map("part_of")
-  industry              String?
-  infrastructureManaged String[] @map("infrastructure_managed")
-
-  // Collections
-  collections        String[]
-  collectionsSize    String?  @map("collections_size")
-  specialCollections String[] @map("special_collections")
-
-  // Installations & Structures
-  labs          String[]
-  facilities    String[]
-  nationalParks String[] @map("national_parks")
+  numberOfEmployees    EmployeeCountRange?
+  numberOfSubsidiaries Int?
 
   // Hiérarchie
-  parentOrganizationId    String?        @map("parent_organization_id") @db.Uuid
-  parentOrganization      Organization?  @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
-  childAgencies           Organization[] @relation("OrganizationHierarchy")
-  parent                  String?
-  precedingAgency         String?        @map("preceding_agency")
-  precedingBureau         String?        @map("preceding_bureau")
-  precedingDepartment     String?        @map("preceding_department")
-  supersedingAgencies     String[]       @map("superseding_agencies")
-  supersedingPostalSystem String?        @map("superseding_postal_system")
-
-  // Militaire : Terrestre
-  armoredVehicles Int? @map("armored_vehicles")
-  battleTanks     Int? @map("battle_tanks")
-  nuclearWarheads Int? @map("nuclear_warheads")
-
-  // Militaire : Marine
-  activeNavyPersonnel    Int? @map("active_navy_personnel")
-  destroyers             Int?
-  submarinesDiesel       Int? @map("submarines_diesel")
-  submarinesNuclear      Int? @map("submarines_nuclear")
-  navalShipyards         Int? @map("naval_shipyards")
-  maritimePatrolAircraft Int? @map("maritime_patrol_aircraft")
-  stealthFleet           Int? @map("stealth_fleet")
-  patrolBoats            Int? @map("patrol_boats")
-
-  // Militaire : Aérien
-  aircraft               Int?
-  fighterJets            Int? @map("fighter_jets")
-  fighterInterceptorJets Int? @map("fighter_interceptor_jets")
-  helicopters            Int?
-  militaryDrones         Int? @map("military_drones")
-  tankerPlanes           Int? @map("tanker_planes")
-  transportPlanes        Int? @map("transport_planes")
-
-  // Spatial
-  militaryCommunicationSatellites Int? @map("military_communication_satellites")
-  missileWarningSatellites        Int? @map("missile_warning_satellites")
-  militaryNavigationSatellites    Int? @map("military_navigation_satellites")
-  militarySpySatellites           Int? @map("military_spy_satellites")
-  satelliteJammingSystems         Int? @map("satellite_jamming_systems")
-  spaceSurveillanceTelescopes     Int? @map("space_surveillance_telescopes")
-  operationalSpaceplanes          Int? @map("operational_spaceplanes")
-  militarySpaceLaunchSites        Int? @map("military_space_launch_sites")
-  spaceOperationsSquadrons        Int? @map("space_operations_squadrons")
-  spacePersonnel                  Int? @map("space_personnel")
-  spaceSurveillanceRadars         Int? @map("space_surveillance_radars")
+  parentOrganizationId String?        @map("parent_organization_id") @db.Uuid
+  parentOrganization   Organization?  @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
+  childOrganization    Organization[] @relation("OrganizationHierarchy")
 
   metadata  Json?
   deletedAt DateTime? @map("deleted_at")
@@ -607,6 +470,7 @@ model Organization {
   userProfiles                 UserProfile[]   @relation("UserCurrentOrganization")
   largestOrganizationCountries Country[]       @relation("CountryLargestOrganizations")
   largestOrganizationCities    City[]          @relation("CityLargestOrganizations")
+  cityId                       String?         @db.Uuid
 
   @@index([parentOrganizationId])
   @@index([type])
@@ -668,7 +532,7 @@ model Skill {
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
 
-  JobAdSkills JobAdSkill[]
+  jobAdSkills JobAdSkill[]
 
   @@index([industryId])
   @@index([category])
@@ -719,7 +583,7 @@ model University {
   createdAt    DateTime        @default(now()) @map("created_at")
   updatedAt    DateTime        @updatedAt @map("updated_at")
   score        Float?
-  localName    String?
+  localName    String?         @map("local_name")
   location     String?
   notes        String?
   established  String?
@@ -748,6 +612,7 @@ model Degree {
   description           String?
   languageOfInstruction String?      @map("language_of_instruction")
   countryId             String?      @map("country_id") @db.Uuid
+  country               Country?     @relation(fields: [countryId], references: [id])
   metadata              Json?
   deletedAt             DateTime?    @map("deleted_at")
   createdAt             DateTime     @default(now()) @map("created_at")
@@ -755,6 +620,7 @@ model Degree {
 
   @@index([universityId])
   @@index([level])
+  @@index([countryId])
   @@map("degrees")
 }
 
@@ -883,6 +749,7 @@ model User {
 
   sessions UserSession[]
   profile  UserProfile?
+  auditlogs  AuditLog[]
 
   @@index([status])
   @@index([role])
@@ -941,6 +808,7 @@ model UserProfile {
 model AuditLog {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: SetDefault)
   action    String
   ipAddress String?  @map("ip_address")
   metadata  Json?
