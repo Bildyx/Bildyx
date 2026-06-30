@@ -122,6 +122,7 @@ export const cities = {
           ...input,
           id: randomUUID(),
           updated_at: new Date(),
+          metadata: input.metadata,
         })
         .returningAll()
         .executeTakeFirst();
@@ -146,7 +147,7 @@ export const cities = {
     .input(z.object({ cityId: z.string().uuid() }).merge(UpdateCitySchema))
     .output(CitySchema)
     .handler(async ({ input }) => {
-      const { cityId, ...data } = input;
+      const { cityId, metadata, ...data } = input;
 
       const existing = await database
         .selectFrom("cities")
@@ -178,7 +179,7 @@ export const cities = {
     .route({
       method: "DELETE",
       summary: "Delete a city",
-      description: "Delete a city by its ID",
+      description: "Soft delete a city by its ID",
       path: "/cities/{cityId}",
       tags: ["City"],
     })

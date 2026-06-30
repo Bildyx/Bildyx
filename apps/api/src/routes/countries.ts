@@ -83,6 +83,8 @@ export const countries = {
         });
       }
 
+      const { metadata, ...rest } = input;
+
       const country = await database
         .insertInto("countries")
         .values({
@@ -115,7 +117,7 @@ export const countries = {
     )
     .output(CountrySchema)
     .handler(async ({ input }) => {
-      const { countryId, ...data } = input;
+      const { countryId, metadata, ...data } = input;
 
       const existing = await database
         .selectFrom("countries")
@@ -147,7 +149,7 @@ export const countries = {
     .route({
       method: "DELETE",
       summary: "Delete a country",
-      description: "Delete a country by its ID",
+      description: "Soft delete a country by its ID",
       path: "/countries/{countryId}",
       tags: ["Country"],
     })
