@@ -1,180 +1,234 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { CertificationSchema, CreateCertificationSchema, UpdateCertificationSchema, GetCertificationsSchema } from "../models/certifications";
+import {
+  GetCertificationsSchema,
+  CertificationSchema,
+  PostCertificationSchema,
+} from "../models/certifications";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
+import type { Insertable } from "kysely";
+import type { Certifications } from "../db/types";
 
 export const certifications = {
-  getAll: publicProcedure
+  // 1. Récupérer toutes les certifications d'une entreprise
+  getByOrganization: publicProcedure
     .route({
       method: "GET",
-      summary: "List all certifications",
-      description: "Get all certifications with optional filters",
-      path: "/certifications",
-      tags: ["Certification"]
+      summary: "List all certifications for an organization",
+      description:
+        "Get all certifications for an organization with optional filters",
+      path: "/organizations/{organizationId}/certifications",
+      tags: ["Certification"],
     })
     .input(GetCertificationsSchema)
     .output(z.array(CertificationSchema))
     .handler(async ({ input }) => {
-      const { search, category, difficulty } = input;
+      const { organizationId, name, category } = input;
 
-      let query = database.selectFrom('certifications').where('deleted_at', 'is', null);
+      const organization = await database
+        .selectFrom("organizations")
+        .where("id", "=", organizationId)
+        .select("id")
+        .executeTakeFirst();
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (!organization) {
+        throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
+      }
+
+      let query = database
+        .selectFrom("certifications")
+        .selectAll()
+        .where("issuing_organization_id", "=", organizationId);
+
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
-          eb('name', 'ilike', p).or('description', 'ilike', p)
+          eb("name", "ilike", p).or("description", "ilike", p),
         );
       }
 
       if (category) {
-        query = query.where('category', '=', category);
+        query = query.where("category", "=", category);
       }
 
-      if (difficulty) {
-        query = query.where('difficulty', '=', difficulty);
-      }
-
-      return await query
-        .selectAll()
-        .orderBy('name', 'asc')
+      const certificationsData = await query
+        .orderBy("created_at", "desc")
         .execute();
+
+      return certificationsData;
     }),
 
-  getOne: publicProcedure
+  // 2. Récupérer toutes les certifications
+  getAll: publicProcedure
     .route({
       method: "GET",
-      summary: "Get one certification",
-      description: "Get a certification by its ID",
+      summary: "List all certifications",
+      description: "Get all certifications",
+      path: "/certifications",
+      tags: ["Certification"],
+    })
+    .output(z.array(CertificationSchema))
+    .handler(async () => {
+      let query = database.selectFrom("certifications").selectAll();
+
+      const certificationsData = await query
+        .orderBy("created_at", "desc")
+        .execute();
+
+      return certificationsData;
+    }),
+
+  // 3. Récupérer une seule certification par son ID
+  getById: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Get a specific certification",
+      description: "Get a specific certification by its unique ID",
       path: "/certifications/{certificationId}",
-      tags: ["Certification"]
+      tags: ["Certification"],
     })
     .input(z.object({ certificationId: z.string().uuid() }))
     .output(CertificationSchema)
     .handler(async ({ input }) => {
-      const data = await database
-        .selectFrom('certifications')
-        .where('id', '=', input.certificationId)
-        .where('deleted_at', 'is', null)
+      const { certificationId } = input;
+
+      const cert = await database
+        .selectFrom("certifications")
         .selectAll()
+        .where("id", "=", certificationId)
         .executeTakeFirst();
 
-      if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
+      if (!cert) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "Certification not found",
+        });
       }
 
-      return data;
+      return cert;
     }),
 
+  // 4. Créer une nouvelle certification
   create: publicProcedure
     .route({
       method: "POST",
-      summary: "Create a certification",
-      description: "Create a new certification",
+      summary: "Create a new certification",
+      description: "Create a new certification entry",
       path: "/certifications",
-      tags: ["Certification"]
+      tags: ["Certification"],
     })
     .input(CreateCertificationSchema)
     .output(CertificationSchema)
     .handler(async ({ input }) => {
-      const existing = await database
-        .selectFrom('certifications')
-        .where('name', 'ilike', input.name)
-        .where('deleted_at', 'is', null)
-        .select('id')
-        .executeTakeFirst();
-
-      if (existing) {
-        throw new ORPCError("CONFLICT", { message: "A certification with this name already exists" });
-      }
-
-      const { metadata, ...rest } = input;
-
-      const certification = await database
-        .insertInto('certifications')
+      const cert = await database
+        .insertInto("certifications")
         .values({
-          ...rest,
-          id: uuidv4(),
-          updated_at: new Date(),
-          metadata: metadata as any,
-        })
+          id: randomUUID(),
+          ...input,
+        } as Insertable<Certifications>)
         .returningAll()
         .executeTakeFirst();
 
-      if (!certification) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create certification" });
+      if (!cert) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to create certification",
+        });
       }
 
-      return certification;
+      return cert;
     }),
 
+  // 5. Mettre à jour une certification (remplacement complet)
   update: publicProcedure
     .route({
-      method: "PATCH",
+      method: "PUT",
       summary: "Update a certification",
-      description: "Update an existing certification by its ID",
+      description: "Replace an existing certification completely by its ID",
       path: "/certifications/{certificationId}",
-      tags: ["Certification"]
+      tags: ["Certification"],
     })
-    .input(z.object({ certificationId: z.string().uuid() }).merge(UpdateCertificationSchema))
+    .input(
+      z
+        .object({ certificationId: z.string().uuid() })
+        .merge(PostCertificationSchema),
+    )
     .output(CertificationSchema)
     .handler(async ({ input }) => {
-      const { certificationId, metadata, ...rest } = input;
+      const { certificationId, ...updates } = input;
 
-      const existing = await database
-        .selectFrom('certifications')
-        .where('id', '=', certificationId)
-        .where('deleted_at', 'is', null)
-        .select('id')
-        .executeTakeFirst();
-
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
-      }
-
-      const certification = await database
-        .updateTable('certifications')
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
-        .where('id', '=', certificationId)
+      const cert = await database
+        .updateTable("certifications")
+        .set({
+          ...updates,
+          updated_at: new Date(),
+        } as Insertable<Certifications>)
+        .where("id", "=", certificationId)
         .returningAll()
         .executeTakeFirst();
 
-      if (!certification) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update certification" });
+      if (!cert) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "Certification not found",
+        });
       }
 
-      return certification;
+      return cert;
     }),
 
+  // 6. Supprimer une certification par son ID
   delete: publicProcedure
     .route({
       method: "DELETE",
       summary: "Delete a certification",
-      description: "Soft delete a certification by its ID",
+      description: "Delete an existing certification by its ID",
       path: "/certifications/{certificationId}",
-      tags: ["Certification"]
+      tags: ["Certification"],
     })
     .input(z.object({ certificationId: z.string().uuid() }))
-    .output(z.object({ success: z.boolean() }))
+    .output(CertificationSchema)
     .handler(async ({ input }) => {
-      const existing = await database
-        .selectFrom('certifications')
-        .where('id', '=', input.certificationId)
-        .where('deleted_at', 'is', null)
-        .select('id')
+      const { certificationId } = input;
+
+      const cert = await database
+        .deleteFrom("certifications")
+        .where("id", "=", certificationId)
+        .returningAll()
         .executeTakeFirst();
 
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Certification not found" });
+      if (!cert) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "Certification not found",
+        });
       }
 
-      await database
-        .updateTable('certifications')
-        .set({ deleted_at: new Date() })
-        .where('id', '=', input.certificationId)
+      return cert;
+    }),
+
+  // 7. Supprimer plusieurs certifications (Bulk)
+  deleteBulk: publicProcedure
+    .route({
+      method: "DELETE",
+      summary: "Delete multiple certifications",
+      description: "Delete multiple existing certifications by their IDs",
+      path: "/certifications/bulk",
+      tags: ["Certification"],
+    })
+    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .output(z.array(CertificationSchema))
+    .handler(async ({ input }) => {
+      const { ids } = input;
+
+      if (ids.length === 0) {
+        return [];
+      }
+
+      const certs = await database
+        .deleteFrom("certifications")
+        .where("id", "in", ids)
+        .returningAll()
         .execute();
 
-      return { success: true };
+      return certs;
     }),
 };

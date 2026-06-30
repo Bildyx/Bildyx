@@ -31,21 +31,19 @@ export type AuthOauthResponseType = "code";
 
 export type AuthOneTimeTokenType = "confirmation_token" | "email_change_token_current" | "email_change_token_new" | "phone_change_token" | "reauthentication_token" | "recovery_token";
 
-export type Certificationcategory = "COMPLIANCE" | "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "QUALITY" | "SECURITY" | "TECHNICAL";
+export type Certificationcategory = "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "PROJECTMANAGEMENT" | "TECHNICAL" | "VENDORPRODUCT";
 
 export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "OTHER" | "PART_TIME";
 
 export type Costofliving = "HIGH" | "LOW" | "MEDIAN";
 
-export type Degreelevel = "BACHELOR" | "ENGINEERING" | "HIGH_SCHOOL" | "LAW" | "MASTER" | "MBA" | "MEDICAL" | "OTHER" | "PHD";
+export type Degreelevel = "ASSOCIATE" | "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "PHD";
 
 export type Difficultylevel = "ADVANCED" | "BEGINNER" | "EXPERT" | "INTERMEDIATE";
 
 export type Educationlevel = "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "NONE" | "OTHER" | "PHD";
 
 export type Employeecountrange = "RANGE_1_10" | "RANGE_1001_5000" | "RANGE_11_50" | "RANGE_201_1000" | "RANGE_5000_PLUS" | "RANGE_51_200";
-
-export type Factcategory = "ECONOMIC" | "GEOPOLITICAL" | "HISTORICAL" | "LEGAL" | "OTHER" | "SCIENTIFIC" | "STATISTIC";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -55,9 +53,9 @@ export type Governmenttype = "ABSOLUTE_MONARCHY" | "COMMUNIST" | "CONSTITUTIONAL
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
-export type Jobcategory = "ACADEMIC" | "GOVERNMENT" | "MILITARY" | "NGO" | "OTHER" | "PRIVATE_SECTOR" | "PUBLIC_SECTOR";
+export type Jobadstatus = "CLOSED" | "DRAFT" | "FILLED" | "PUBLISHED";
 
-export type Jobofferstatus = "CLOSED" | "DRAFT" | "FILLED" | "PUBLISHED";
+export type Jobcategory = "ACADEMIC" | "GOVERNMENT" | "MILITARY" | "NGO" | "OTHER" | "PRIVATE_SECTOR" | "PUBLIC_SECTOR";
 
 export type Json = JsonValue;
 
@@ -75,15 +73,9 @@ export type Language = "AFRIKAANS" | "ALBANIAN" | "AMHARIC" | "ARABIC" | "ARMENI
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type Organizationtype = "COMPANY" | "GOVERNMENT_MINISTRY" | "INTERNATIONAL_ORG" | "MILITARY" | "NGO" | "OTHER" | "POLITICAL_PARTY" | "RESEARCH_INSTITUTE" | "STARTUP";
-
-export type Pricingmodel = "ENTERPRISE" | "FREE" | "FREEMIUM" | "ONE_TIME" | "OPEN_SOURCE" | "OTHER" | "SUBSCRIPTION";
-
-export type Productcategory = "API" | "HARDWARE" | "OTHER" | "PHYSICAL_PRODUCT" | "PLATFORM" | "SERVICE" | "SOFTWARE";
+export type Organizationsubtype = "ARMY" | "CLUB" | "GOVERNMENT" | "INTERNATIONAL_ORGANIZATION" | "NGO" | "NON_PROFIT" | "ORGANIZATION" | "OTHER" | "RESEARCH_INSTITUTE" | "SOCIETY" | "UNIVERSITY";
 
 export type Qualityoflife = "HIGH" | "LOW" | "MEDIAN";
-
-export type Recognitionlevel = "GLOBAL" | "INDUSTRY_SPECIFIC" | "NATIONAL" | "REGIONAL";
 
 export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
@@ -95,15 +87,17 @@ export type Skillimportance = "NICE_TO_HAVE" | "PREFERRED" | "REQUIRED";
 
 export type StorageBuckettype = "ANALYTICS" | "STANDARD" | "VECTOR";
 
+export type Subjectcategory = "API" | "HARDWARE" | "OTHER" | "PHYSICAL_PRODUCT" | "PLATFORM" | "SERVICE" | "SOFTWARE";
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
 
-export type Userrole = "ADMIN" | "MODERATOR" | "SUPER_ADMIN" | "USER";
+export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANISATION" | "SUPER_ADMIN" | "USER";
 
 export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
 
-export interface _CityLargestCompanies {
+export interface _CityLargestOrganizations {
   A: string;
   B: string;
 }
@@ -118,12 +112,7 @@ export interface _CityTopUniversities {
   B: string;
 }
 
-export interface _CompanyIndustries {
-  A: string;
-  B: string;
-}
-
-export interface _CountryLargestCompanies {
+export interface _CountryLargestOrganizations {
   A: string;
   B: string;
 }
@@ -134,6 +123,11 @@ export interface _CountryMainIndustries {
 }
 
 export interface _CountryTopUniversities {
+  A: string;
+  B: string;
+}
+
+export interface _OrganizationIndustries {
   A: string;
   B: string;
 }
@@ -152,6 +146,25 @@ export interface _PrismaMigrations {
 export interface _ProductIndustries {
   A: string;
   B: string;
+}
+
+export interface _RelatedIndustries {
+  A: string;
+  B: string;
+}
+
+export interface _WorkingArea {
+  A: string;
+  B: string;
+}
+
+export interface AuditLogs {
+  action: string;
+  created_at: Generated<Timestamp>;
+  id: string;
+  ip_address: string | null;
+  metadata: Json | null;
+  user_id: string;
 }
 
 export interface AuditLogs {
@@ -494,8 +507,6 @@ export interface AuthWebauthnCredentials {
 
 export interface Certifications {
   category: Certificationcategory | null;
-  cost: number | null;
-  cost_currency: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   description: string | null;
@@ -504,13 +515,10 @@ export interface Certifications {
   issuing_organization_id: string | null;
   jobs: string[] | null;
   level: string | null;
-  logo_url: string | null;
   metadata: Json | null;
   name: string;
-  prerequisites: string[] | null;
   products: string[] | null;
-  recognition_level: Recognitionlevel | null;
-  serialNumber: string;
+  serialNumber: string | null;
   updated_at: Timestamp;
   validity_duration_months: number | null;
   website_url: string | null;
@@ -524,9 +532,9 @@ export interface Cities {
   created_at: Generated<Timestamp>;
   degree_holders: string | null;
   deleted_at: Timestamp | null;
-  department: string | null;
   id: string;
   interesting_fact: string | null;
+  is_capital: Generated<boolean>;
   language: Language | null;
   latitude: number | null;
   longitude: number | null;
@@ -540,8 +548,8 @@ export interface Cities {
   number_of_universities: number | null;
   people_description: string | null;
   population: number | null;
-  region: string | null;
   serialNumber: string;
+  state_province: string | null;
   temperatures: string | null;
   updated_at: Timestamp;
 }
@@ -577,7 +585,7 @@ export interface Countries {
   metadata: Json | null;
   name: string;
   number_of_airports: number | null;
-  number_of_foreign_companies: number | null;
+  number_of_foreign_organizations: number | null;
   number_of_international_students: number | null;
   number_of_multinational_hqs: number | null;
   number_of_tourists: number | null;
@@ -609,8 +617,7 @@ export interface Degrees {
   metadata: Json | null;
   name: string;
   serialNumber: string;
-  tuition_currency: string | null;
-  university_id: string;
+  university_id: string | null;
   updated_at: Timestamp;
 }
 
@@ -671,28 +678,6 @@ export interface ExtensionsPgStatStatementsInfo {
   stats_reset: Timestamp | null;
 }
 
-export interface Facts {
-  category: Factcategory | null;
-  content: string | null;
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
-  hashtags: string[] | null;
-  icon: string | null;
-  id: string;
-  metadata: Json | null;
-  related_city_id: string | null;
-  related_company_id: string | null;
-  related_country_id: string | null;
-  related_industry_id: string | null;
-  related_job_id: string | null;
-  related_product_id: string | null;
-  related_university_id: string | null;
-  serialNumber: string;
-  tags: string[] | null;
-  title: string;
-  updated_at: Timestamp;
-}
-
 export interface Industries {
   color: string | null;
   created_at: Generated<Timestamp>;
@@ -700,19 +685,16 @@ export interface Industries {
   description: string | null;
   icon_url: string | null;
   id: string;
-  median_salary: number | null;
   metadata: Json | null;
   name: string;
-  parent_industry_id: string | null;
   serialNumber: string;
   updated_at: Timestamp;
 }
 
-export interface JobOffers {
+export interface JobAds {
   application_email: string | null;
   application_url: string | null;
   city_id: string | null;
-  company_id: string;
   contract_type: Contracttype | null;
   country_id: string | null;
   created_at: Generated<Timestamp>;
@@ -722,22 +704,23 @@ export interface JobOffers {
   id: string;
   job_id: string | null;
   metadata: Json | null;
+  organization_id: string;
   published_at: Timestamp | null;
   remote: Remotepolicy | null;
   required_education_level: Educationlevel | null;
   required_years_experience: number | null;
-  salaryRange: string | null;
+  salary_range: string | null;
   serialNumber: string;
-  status: Generated<Jobofferstatus>;
+  status: Generated<Jobadstatus>;
   tags: string[] | null;
   title: string;
   updated_at: Timestamp;
 }
 
-export interface JobOfferSkills {
+export interface JobAdSkills {
   id: string;
   importance: Generated<Skillimportance>;
-  job_offer_id: string;
+  job_ad_id: string;
   skill_id: string;
 }
 
@@ -763,126 +746,47 @@ export interface Jobs {
 }
 
 export interface Organizations {
-  affiliation: string | null;
+  activities: string[] | null;
   budget: string | null;
-  business_and_innovation: string | null;
   category: string | null;
-  collaborations: string[] | null;
-  constituency: string | null;
+  cityId: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  dissolved: string | null;
-  distinction: string | null;
-  endowment: string | null;
-  fields: string[] | null;
-  focus: string | null;
-  focus_areas: string[] | null;
-  formation: string | null;
-  formed: string | null;
+  equipments: string | null;
   founded: string | null;
   founder: string | null;
-  funding_sources: string[] | null;
-  gdp: string | null;
-  geography: string | null;
-  giant_facilities: string[] | null;
-  headquarters: string | null;
   id: string;
-  key_activities: string[] | null;
-  key_project: string | null;
-  key_research_output: string | null;
   known_for: string[] | null;
-  labs: string[] | null;
   legal_status: string | null;
-  libraries_and_publications: string | null;
-  location: string | null;
-  main_organ: string | null;
-  major_programs: string[] | null;
-  major_projects: string[] | null;
-  management_and_admin: string | null;
   metadata: Json | null;
   mission: string | null;
   name: string;
-  national_parks: string[] | null;
-  number_of_active_navy_personnel: number | null;
-  number_of_aircrafts: number | null;
-  number_of_communication_satellites: number | null;
-  number_of_destroyers: number | null;
-  number_of_drones: number | null;
-  number_of_fighter_jets: number | null;
-  number_of_government_ministries: number | null;
-  number_of_helicopters: number | null;
-  number_of_maritime_patrol_aircraft: number | null;
-  number_of_members: number | null;
-  number_of_ministries: number | null;
-  number_of_missile_warning_satellites: number | null;
-  number_of_naval_shipyards: number | null;
-  number_of_navigation_satellites: number | null;
-  number_of_offices: number | null;
-  number_of_operational_spaceplanes: number | null;
-  number_of_personnel: number | null;
-  number_of_satellite_jamming_systems: number | null;
-  number_of_space_launch_sites: number | null;
-  number_of_space_operations_squadrons: number | null;
-  number_of_space_personnel: number | null;
-  number_of_spy_satellites: number | null;
-  number_of_stealth_fleet: number | null;
-  number_of_submarines_diesel: number | null;
-  number_of_submarines_nuclear: number | null;
-  number_of_surveillance_radars: number | null;
-  number_of_surveillance_telescopes: number | null;
-  number_of_tanker_planes: number | null;
-  number_of_transport_planes: number | null;
-  number_of_volunteers: number | null;
   numberOfEmployees: Employeecountrange | null;
-  opened: string | null;
+  numberOfSubsidiaries: number | null;
   ownership: string | null;
-  parent_bureau: string | null;
-  parent_department: string | null;
-  parent_ministry: string | null;
   parent_organization_id: string | null;
   partnerships: string[] | null;
-  population_of_city: string | null;
-  preceding_agency: string | null;
-  preceding_bureau: string | null;
-  preceding_department: string | null;
-  products: string[] | null;
-  purpose: string | null;
-  region_served: string | null;
+  project: string | null;
   research_areas: string[] | null;
-  research_model: string | null;
-  scale: string | null;
   services: string[] | null;
-  size: string | null;
   slug: string;
-  strategic_focus: string | null;
-  subsidiaries_count: number | null;
-  superseding_agencies: string[] | null;
-  superseding_postal_system: string | null;
-  tactical_units: string[] | null;
-  total_land_area: string | null;
-  type: Organizationtype | null;
+  type: Organizationsubtype | null;
   updated_at: Timestamp;
   visitors: string | null;
 }
 
 export interface Products {
-  category: Productcategory | null;
-  company_id: string | null;
+  category: Subjectcategory | null;
   competitors: string[] | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   description: string | null;
-  documentation_url: string | null;
   fun_fact: string | null;
   id: string;
-  is_deprecated: Generated<boolean>;
-  launch_year: number | null;
   logo_url: string | null;
   metadata: Json | null;
   name: string;
-  price_currency: string | null;
-  price_from: number | null;
-  pricing_model: Pricingmodel | null;
+  organization_id: string | null;
   serialNumber: string;
   short_description: string | null;
   tags: string[] | null;
@@ -1041,21 +945,23 @@ export interface StorageVectorIndexes {
 }
 
 export interface Universities {
-  acceptance_rate: number | null;
-  acronym: string | null;
   city_id: string | null;
   country_id: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   description: string | null;
+  established: string | null;
   founded_year: number | null;
   id: string;
   is_public: boolean | null;
+  local_name: string | null;
+  location: string | null;
   logo_url: string | null;
   metadata: Json | null;
   name: string;
-  official_name: string | null;
+  notes: string | null;
   postgraduates: number | null;
+  score: number | null;
   serialNumber: string;
   student_count: number | null;
   type: Universitytype | null;
@@ -1069,9 +975,9 @@ export interface UserProfiles {
   city_id: string | null;
   country_id: string | null;
   created_at: Generated<Timestamp>;
-  current_company_id: string | null;
   current_job_id: string | null;
   current_job_started_at: Timestamp | null;
+  current_organization_id: string | null;
   github_url: string | null;
   id: string;
   is_public: Generated<boolean>;
@@ -1096,13 +1002,21 @@ export interface Users {
   id: string;
   last_login_at: Timestamp | null;
   last_name: string | null;
+  last_reset_sent_at: Timestamp | null;
+  last_verification_sent_at: Timestamp | null;
   locked_until: Timestamp | null;
+  marketing_opt_in: Generated<boolean>;
   metadata: Json | null;
+  organisation_name: string | null;
   password_changed_at: Timestamp | null;
   password_hash: string;
+  reset_expires_at: Timestamp | null;
+  reset_token: string | null;
   role: Generated<Userrole>;
   status: Generated<Userstatus>;
   updated_at: Timestamp;
+  verification_code: string | null;
+  verification_expires_at: Timestamp | null;
 }
 
 export interface UserSessions {
@@ -1140,15 +1054,17 @@ export interface VaultSecrets {
 }
 
 export interface DB {
-  _CityLargestCompanies: _CityLargestCompanies;
+  _CityLargestOrganizations: _CityLargestOrganizations;
   _CityMainIndustries: _CityMainIndustries;
   _CityTopUniversities: _CityTopUniversities;
-  _CompanyIndustries: _CompanyIndustries;
-  _CountryLargestCompanies: _CountryLargestCompanies;
+  _CountryLargestOrganizations: _CountryLargestOrganizations;
   _CountryMainIndustries: _CountryMainIndustries;
   _CountryTopUniversities: _CountryTopUniversities;
+  _OrganizationIndustries: _OrganizationIndustries;
   _prisma_migrations: _PrismaMigrations;
   _ProductIndustries: _ProductIndustries;
+  _RelatedIndustries: _RelatedIndustries;
+  _working_area: _WorkingArea;
   audit_logs: AuditLogs;
   "auth.audit_log_entries": AuthAuditLogEntries;
   "auth.custom_oauth_providers": AuthCustomOauthProviders;
@@ -1179,10 +1095,9 @@ export interface DB {
   degrees: Degrees;
   "extensions.pg_stat_statements": ExtensionsPgStatStatements;
   "extensions.pg_stat_statements_info": ExtensionsPgStatStatementsInfo;
-  facts: Facts;
   industries: Industries;
-  job_offer_skills: JobOfferSkills;
-  job_offers: JobOffers;
+  job_ad_skills: JobAdSkills;
+  job_ads: JobAds;
   jobs: Jobs;
   organizations: Organizations;
   products: Products;

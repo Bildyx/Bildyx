@@ -1,9 +1,14 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { CitySchema, CreateCitySchema, UpdateCitySchema, GetCitiesSchema } from "../models/cities";
+import {
+  CitySchema,
+  CreateCitySchema,
+  UpdateCitySchema,
+  GetCitiesSchema,
+} from "../models/cities";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 export const cities = {
   getAll: publicProcedure
@@ -12,45 +17,41 @@ export const cities = {
       summary: "List all cities",
       description: "Get all cities with optional search and country filter",
       path: "/cities",
-      tags: ["City"]
+      tags: ["City"],
     })
     .input(GetCitiesSchema)
     .output(z.array(CitySchema))
     .handler(async ({ input }) => {
       const { search, country_id } = input;
 
-      let query = database.selectFrom('cities').where('deleted_at', 'is', null);
+      let query = database.selectFrom("cities");
 
       if (search) {
         const p = `%${search.trim()}%`;
-        query = query.where('name', 'ilike', p);
+        query = query.where("name", "ilike", p);
       }
 
       if (country_id) {
-        query = query.where('country_id', '=', country_id);
+        query = query.where("country_id", "=", country_id);
       }
 
-      return await query
-        .selectAll()
-        .orderBy('name', 'asc')
-        .execute();
+      return await query.selectAll().orderBy("name", "asc").execute();
     }),
 
-  getOne: publicProcedure
+  getById: publicProcedure
     .route({
       method: "GET",
-      summary: "Get one city",
+      summary: "Get a specific city",
       description: "Get a city by its ID",
       path: "/cities/{cityId}",
-      tags: ["City"]
+      tags: ["City"],
     })
     .input(z.object({ cityId: z.string().uuid() }))
     .output(CitySchema)
     .handler(async ({ input }) => {
       const data = await database
-        .selectFrom('cities')
-        .where('id', '=', input.cityId)
-        .where('deleted_at', 'is', null)
+        .selectFrom("cities")
+        .where("id", "=", input.cityId)
         .selectAll()
         .executeTakeFirst();
 
@@ -61,36 +62,65 @@ export const cities = {
       return data;
     }),
 
+  getCitiesForCountry: publicProcedure
+    .route({
+      method: "GET",
+      summary: "List all cities for a specific country",
+      description: "Get all cities for a country by its ID",
+      path: "/countries/{countryId}/cities",
+      tags: ["Country"],
+    })
+    .input(z.object({ countryId: z.string().uuid() }))
+    .output(z.array(CitySchema))
+    .handler(async ({ input }) => {
+      const cities = await database
+        .selectFrom("cities")
+        .where("country_id", "=", input.countryId)
+        .selectAll()
+        .execute();
+
+      return cities;
+    }),
+
   create: publicProcedure
     .route({
       method: "POST",
       summary: "Create a city",
       description: "Create a new city",
       path: "/cities",
-      tags: ["City"]
+      tags: ["City"],
     })
     .input(CreateCitySchema)
     .output(CitySchema)
     .handler(async ({ input }) => {
       const existing = await database
-        .selectFrom('cities')
-        .where('name', 'ilike', input.name)
-        .where('country_id', '=', input.country_id)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("cities")
+        .where("name", "ilike", input.name)
+        .where("country_id", "=", input.country_id)
+        .select("id")
         .executeTakeFirst();
 
       if (existing) {
-        throw new ORPCError("CONFLICT", { message: "A city with this name already exists in this country" });
+        throw new ORPCError("CONFLICT", {
+          message: "A city with this name already exists in this country",
+        });
       }
 
-      const { metadata, ...rest } = input;
+      const existingCountry = await database
+        .selectFrom("countries")
+        .where("id", "=", input.country_id)
+        .select("id")
+        .executeTakeFirst();
+
+      if (!existingCountry) {
+        throw new ORPCError("NOT_FOUND", { message: "Country not found" });
+      }
 
       const city = await database
-        .insertInto('cities')
+        .insertInto("cities")
         .values({
-          ...rest,
-          id: uuidv4(),
+          ...input,
+          id: randomUUID(),
           updated_at: new Date(),
           metadata: metadata as any,
         })
@@ -98,7 +128,9 @@ export const cities = {
         .executeTakeFirst();
 
       if (!city) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create city" });
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to create city",
+        });
       }
 
       return city;
@@ -106,11 +138,11 @@ export const cities = {
 
   update: publicProcedure
     .route({
-      method: "PATCH",
+      method: "PUT",
       summary: "Update a city",
       description: "Update an existing city by its ID",
       path: "/cities/{cityId}",
-      tags: ["City"]
+      tags: ["City"],
     })
     .input(z.object({ cityId: z.string().uuid() }).merge(UpdateCitySchema))
     .output(CitySchema)
@@ -118,10 +150,9 @@ export const cities = {
       const { cityId, metadata, ...rest } = input;
 
       const existing = await database
-        .selectFrom('cities')
-        .where('id', '=', cityId)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("cities")
+        .where("id", "=", cityId)
+        .select("id")
         .executeTakeFirst();
 
       if (!existing) {
@@ -129,14 +160,16 @@ export const cities = {
       }
 
       const city = await database
-        .updateTable('cities')
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
-        .where('id', '=', cityId)
+        .updateTable("cities")
+        .set({ ...data, updated_at: new Date() })
+        .where("id", "=", cityId)
         .returningAll()
         .executeTakeFirst();
 
       if (!city) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update city" });
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to update city",
+        });
       }
 
       return city;
@@ -148,16 +181,15 @@ export const cities = {
       summary: "Delete a city",
       description: "Soft delete a city by its ID",
       path: "/cities/{cityId}",
-      tags: ["City"]
+      tags: ["City"],
     })
     .input(z.object({ cityId: z.string().uuid() }))
-    .output(z.object({ success: z.boolean() }))
+    .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
-        .selectFrom('cities')
-        .where('id', '=', input.cityId)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("cities")
+        .where("id", "=", input.cityId)
+        .select("id")
         .executeTakeFirst();
 
       if (!existing) {
@@ -165,11 +197,25 @@ export const cities = {
       }
 
       await database
-        .updateTable('cities')
-        .set({ deleted_at: new Date() })
-        .where('id', '=', input.cityId)
+        .deleteFrom("cities")
+        .where("id", "=", input.cityId)
         .execute();
+    }),
 
-      return { success: true };
+  deleteBulk: publicProcedure
+    .route({
+      method: "DELETE",
+      summary: "Delete multiple cities",
+      description: "Delete multiple existing cities by their IDs",
+      path: "/cities/bulk",
+      tags: ["City"],
+    })
+    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .output(z.void())
+    .handler(async ({ input }) => {
+      await database
+        .deleteFrom("cities")
+        .where("id", "in", input.ids)
+        .execute();
     }),
 };

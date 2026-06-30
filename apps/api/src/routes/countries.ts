@@ -1,9 +1,14 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { CountrySchema, CreateCountrySchema, UpdateCountrySchema, GetCountriesSchema } from "../models/countries";
+import {
+  CountrySchema,
+  CreateCountrySchema,
+  UpdateCountrySchema,
+  GetCountriesSchema,
+} from "../models/countries";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 export const countries = {
   getAll: publicProcedure
@@ -12,41 +17,39 @@ export const countries = {
       summary: "List all countries",
       description: "Get all countries with optional search",
       path: "/countries",
-      tags: ["Country"]
+      tags: ["Country"],
     })
     .input(GetCountriesSchema)
     .output(z.array(CountrySchema))
     .handler(async ({ input }) => {
-      const { search } = input;
+      const { name } = input;
 
-      let query = database.selectFrom('countries').where('deleted_at', 'is', null);
+      let query = database.selectFrom("countries");
 
-      if (search) {
-        const p = `%${search.trim()}%`;
-        query = query.where('name', 'ilike', p);
+      if (name) {
+        const p = `%${name.trim()}%`;
+        query = query.where("name", "ilike", p);
       }
 
-      return await query
-        .selectAll()
-        .orderBy('name', 'asc')
-        .execute();
+      const results = await query.selectAll().orderBy("name", "asc").execute();
+
+      return results;
     }),
 
-  getOne: publicProcedure
+  getById: publicProcedure
     .route({
       method: "GET",
-      summary: "Get one country",
+      summary: "Get a specific country",
       description: "Get a country by its ID",
       path: "/countries/{countryId}",
-      tags: ["Country"]
+      tags: ["Country"],
     })
     .input(z.object({ countryId: z.string().uuid() }))
     .output(CountrySchema)
     .handler(async ({ input }) => {
       const data = await database
-        .selectFrom('countries')
-        .where('id', '=', input.countryId)
-        .where('deleted_at', 'is', null)
+        .selectFrom("countries")
+        .where("id", "=", input.countryId)
         .selectAll()
         .executeTakeFirst();
 
@@ -63,37 +66,39 @@ export const countries = {
       summary: "Create a country",
       description: "Create a new country",
       path: "/countries",
-      tags: ["Country"]
+      tags: ["Country"],
     })
     .input(CreateCountrySchema)
     .output(CountrySchema)
     .handler(async ({ input }) => {
       const existing = await database
-        .selectFrom('countries')
-        .where('name', 'ilike', input.name)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("countries")
+        .where("name", "ilike", input.name)
+        .select("id")
         .executeTakeFirst();
 
       if (existing) {
-        throw new ORPCError("CONFLICT", { message: "A country with this name already exists" });
+        throw new ORPCError("CONFLICT", {
+          message: "A country with this name already exists",
+        });
       }
 
       const { metadata, ...rest } = input;
 
       const country = await database
-        .insertInto('countries')
+        .insertInto("countries")
         .values({
-          ...rest,
-          id: uuidv4(),
+          ...input,
+          id: randomUUID(),
           updated_at: new Date(),
-          metadata: metadata as any,
-        })
+        } as any)
         .returningAll()
         .executeTakeFirst();
 
       if (!country) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create country" });
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to create country",
+        });
       }
 
       return country;
@@ -101,22 +106,23 @@ export const countries = {
 
   update: publicProcedure
     .route({
-      method: "PATCH",
+      method: "PUT",
       summary: "Update a country",
       description: "Update an existing country by its ID",
       path: "/countries/{countryId}",
-      tags: ["Country"]
+      tags: ["Country"],
     })
-    .input(z.object({ countryId: z.string().uuid() }).merge(UpdateCountrySchema))
+    .input(
+      z.object({ countryId: z.string().uuid() }).merge(UpdateCountrySchema),
+    )
     .output(CountrySchema)
     .handler(async ({ input }) => {
       const { countryId, metadata, ...rest } = input;
 
       const existing = await database
-        .selectFrom('countries')
-        .where('id', '=', countryId)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("countries")
+        .where("id", "=", countryId)
+        .select("id")
         .executeTakeFirst();
 
       if (!existing) {
@@ -124,14 +130,16 @@ export const countries = {
       }
 
       const country = await database
-        .updateTable('countries')
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
-        .where('id', '=', countryId)
+        .updateTable("countries")
+        .set({ ...data, updated_at: new Date() } as any)
+        .where("id", "=", countryId)
         .returningAll()
         .executeTakeFirst();
 
       if (!country) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update country" });
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to update country",
+        });
       }
 
       return country;
@@ -143,16 +151,15 @@ export const countries = {
       summary: "Delete a country",
       description: "Soft delete a country by its ID",
       path: "/countries/{countryId}",
-      tags: ["Country"]
+      tags: ["Country"],
     })
     .input(z.object({ countryId: z.string().uuid() }))
-    .output(z.object({ success: z.boolean() }))
+    .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
-        .selectFrom('countries')
-        .where('id', '=', input.countryId)
-        .where('deleted_at', 'is', null)
-        .select('id')
+        .selectFrom("countries")
+        .where("id", "=", input.countryId)
+        .select("id")
         .executeTakeFirst();
 
       if (!existing) {
@@ -160,11 +167,25 @@ export const countries = {
       }
 
       await database
-        .updateTable('countries')
-        .set({ deleted_at: new Date() })
-        .where('id', '=', input.countryId)
+        .deleteFrom("countries")
+        .where("id", "=", input.countryId)
         .execute();
+    }),
 
-      return { success: true };
+  deleteBulk: publicProcedure
+    .route({
+      method: "DELETE",
+      summary: "Delete multiple countries",
+      description: "Delete multiple existing countries by their IDs",
+      path: "/countries/bulk",
+      tags: ["Country"],
+    })
+    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .output(z.void())
+    .handler(async ({ input }) => {
+      await database
+        .deleteFrom("countries")
+        .where("id", "in", input.ids)
+        .execute();
     }),
 };
