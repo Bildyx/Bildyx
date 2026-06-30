@@ -5,30 +5,54 @@ export const SeniorityLevelEnum = z.enum(["C_LEVEL", "DIRECTOR", "ELECTED", "INT
 
 export const JobSchema = z.object({
   id: z.string().uuid(),
-  title: z.string(),
-  serialNumber: z.string(),
-  category: JobCategoryEnum.nullable(),
-  description: z.string().nullable(),
-  seniority_level: SeniorityLevelEnum.nullable(),
-  is_elected: z.boolean(),
-  is_regulated: z.boolean(),
-  start_year: z.number().int().nullable(),
-  industry_id: z.string().uuid().nullable(),
-  country_id: z.string().uuid().nullable(),
-  products: z.array(z.string()).nullable(),
-  tools_and_tech: z.array(z.string()).nullable(),
-  tags: z.array(z.string()).nullable(),
-  metadata: z.unknown().nullable(),
-  deleted_at: z.date().nullable(),
-  created_at: z.date(),
-  updated_at: z.date(),
+  title: z.string().trim().min(1),
+  serialNumber: z.string().trim().min(1),
+  category: JobCategoryEnum.nullable().optional(),
+  description: z.string().nullable().optional(),
+  seniority_level: SeniorityLevelEnum.nullable().optional(),
+  is_elected: z.boolean().optional().default(false),
+  is_regulated: z.boolean().optional().default(false),
+  start_year: z.number().int().nullable().optional(),
+  industry_id: z.string().uuid().nullable().optional(),
+  country_id: z.string().uuid().nullable().optional(),
+  products: z.preprocess((val) => {
+    if (Array.isArray(val)) {
+      const filtered = val.filter((v) => v !== "");
+      return filtered.length === 0 ? null : filtered;
+    }
+    return val === "" ? null : val;
+  }, z.array(z.string()).nullable().optional()),
+  tools_and_tech: z.preprocess((val) => {
+    if (Array.isArray(val)) {
+      const filtered = val.filter((v) => v !== "");
+      return filtered.length === 0 ? null : filtered;
+    }
+    return val === "" ? null : val;
+  }, z.array(z.string()).nullable().optional()),
+  tags: z.preprocess((val) => {
+    if (Array.isArray(val)) {
+      const filtered = val.filter((v) => v !== "");
+      return filtered.length === 0 ? null : filtered;
+    }
+    return val === "" ? null : val;
+  }, z.array(z.string()).nullable().optional()),
+  metadata: z.any().nullable().optional(),
+  deleted_at: z
+    .date()
+    .nullable()
+    .optional()
+    .default(null as any),
+  created_at: z.date().default(new Date()),
+  updated_at: z.date().default(new Date()),
 });
 
 export const CreateJobSchema = JobSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
-  deleted_at: true,
+  serialNumber: true,
+}).extend({
+  serialNumber: z.string().trim().min(1),
 });
 
 export const UpdateJobSchema = CreateJobSchema.partial();

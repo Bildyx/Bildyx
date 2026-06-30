@@ -9,6 +9,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+<<<<<<<<< Temporary merge branch 1
 model Industry {
   id            String      @id @default(uuid()) @db.Uuid
   serial_number String?     @unique
@@ -713,6 +714,478 @@ enum JobOfferStatus {
   FILLED
 }
 
+=========
+model audit_logs {
+  id         String   @id @db.Uuid
+  user_id    String   @db.Uuid
+  action     String
+  ip_address String?
+  metadata   Json?
+  created_at DateTime @default(now())
+  users      users    @relation(fields: [user_id], references: [id], onDelete: SetDefault)
+
+  @@index([action])
+  @@index([created_at])
+  @@index([user_id])
+}
+
+model City {
+  id                       String   @id @default(uuid()) @db.Uuid
+  serialNumber             String?  @unique @map("serial_number")
+  name                     String   @map("city_name")
+  population               String?
+  numberOfMultinationalHQs Int?     @map("number_of_multinational_hqs")
+  numberOfAirports         Int?     @map("number_of_airports")
+  largestCompanies         String[] @map("largest_companies")
+  medianSalary             String?  @map("median_salary")
+  costOfLiving             String?  @map("cost_of_living")
+  medianHomePrice          String?  @map("median_home_price")
+  averageRent              String?  @map("average_rent")
+  temperatures             String?
+  climate                  String?
+  interestingFact          String?  @map("interesting_fact")
+  degreeHolders            String?  @map("degree_holders")
+  numberOfUniversities     Int?     @map("number_of_universities")
+  numberOfNationalities    String?  @map("number_of_nationalities")
+  languages                String[]
+  peopleDescription        String?  @map("people_description")
+
+  countryId String?  @map("country_id") @db.Uuid
+  country   Country? @relation("CountryCities", fields: [countryId], references: [id])
+
+  capitalOf Country[] @relation("CountryCapital")
+
+  mainIndustries  Industry[]
+  topUniversities University[]
+
+  candidatesInCity     Candidate[]           @relation("CandidateCurrentCity")
+  candidateExperiences CandidateExperience[]
+  teamOffices          TeamOffice[]
+  jobOffers            JobOffer[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([countryId])
+  @@map("cities")
+}
+
+model Country {
+  id                            String   @id @default(uuid()) @db.Uuid
+  serialNumber                  String?  @unique @map("serial_number")
+  name                          String   @map("country_name")
+  qualityOfLife                 String?  @map("quality_of_life")
+  temperatures                  String?
+  climate                       String?
+  crimeRate                     String?  @map("crime_rate")
+  incomeInequality              String?  @map("income_inequality")
+  workLifeBalance               String?  @map("work_life_balance")
+  population                    String?
+  currency                      String?
+  largestCompanies              String[] @map("largest_companies")
+  numberOfMultinationalHQs      Int?     @map("number_of_multinational_hqs")
+  medianSalary                  String?  @map("median_salary")
+  personalIncomeTax             String?  @map("personal_income_tax")
+  costOfLiving                  String?  @map("cost_of_living")
+  medianHomePrice               String?  @map("median_home_price")
+  averageRent                   String?  @map("average_rent")
+  interestingFact               String?  @map("interesting_fact")
+  citizenshipProcess            String?  @map("citizenship_process")
+  workPermit                    String?  @map("work_permit")
+  globalCompetitivenessIndex    String?  @map("global_competitiveness_index")
+  levelOfGlobalization          String?  @map("level_of_globalization")
+  numberOfInternationalStudents String?  @map("number_of_international_students")
+  numberOfForeignCompanies      String?  @map("number_of_foreign_companies")
+  numberOfTourists              String?  @map("number_of_tourists")
+  numberOfAirports              Int?     @map("number_of_airports")
+  qualityOfEducation            String?  @map("quality_of_education")
+  degreeHolders                 String?  @map("degree_holders")
+  numberOfUniversities          Int?     @map("number_of_universities")
+  ethnicGroups                  String[] @map("ethnic_groups")
+  languages                     String[]
+  religion                      String[]
+  culturalValues                String?  @map("cultural_values")
+  peopleDescription             String?  @map("people_description")
+
+  cities City[] @relation("CountryCities")
+
+  capitalCityId String? @map("capital_city_id") @db.Uuid
+  capital       City?   @relation("CountryCapital", fields: [capitalCityId], references: [id])
+
+  mainIndustries  Industry[]
+  topUniversities University[]
+
+  candidatesFromCountry Candidate[] @relation("CandidateOriginCountry")
+  jobOffers             JobOffer[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([capitalCityId])
+  @@map("countries")
+}
+
+model University {
+  id             String  @id @default(uuid()) @db.Uuid
+  serialNumber   String? @unique @map("serial_number")
+  name           String
+  established    Int?
+  type           String?
+  location       String?
+  totalStudents  Int?    @map("total_students")
+  undergraduates Int?
+  postgraduates  Int?
+  notes          String?
+
+  cities    City[]
+  countries Country[]
+
+  candidateEducations CandidateEducation[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("universities")
+}
+
+model Fact {
+  id           String  @id @default(uuid()) @db.Uuid
+  serialNumber String? @unique @map("serial_number")
+  hashtag1     String? @map("hashtag_1")
+  icon1        String? @map("icon_1")
+  hashtag2     String? @map("hashtag_2")
+  title        String?
+  story        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("facts")
+}
+
+// =============================================================================
+// COUCHE 2 — AUTH & PROFILS (Supabase Auth)
+// Profile.id = auth.users.id (UUID Supabase)
+// =============================================================================
+
+model Profile {
+  id             String   @id @db.Uuid
+  email          String   @unique
+  role           UserRole
+  firstName      String?  @map("first_name")
+  lastName       String?  @map("last_name")
+  avatarUrl      String?  @map("avatar_url")
+  phone          String?
+  marketingOptIn Boolean  @default(false) @map("marketing_opt_in")
+
+  candidate     Candidate?
+  companyMember CompanyMember?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("profiles")
+}
+
+// =============================================================================
+// COUCHE 3 — CANDIDATS & MICRORESUME
+// Le MicroResume = l'ensemble des "cartes" attachées à un candidat.
+// Chaque table Candidate* correspond à un type de carte modulaire.
+// =============================================================================
+
+model Candidate {
+  id           String          @id @default(uuid()) @db.Uuid
+  profileId    String          @unique @map("profile_id") @db.Uuid
+  profile      Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  headline     String?
+  bio          String?
+  availability Availability?
+  status       CandidateStatus @default(ACTIVE)
+
+  currentCityId   String?  @map("current_city_id") @db.Uuid
+  currentCity     City?    @relation("CandidateCurrentCity", fields: [currentCityId], references: [id])
+  originCountryId String?  @map("origin_country_id") @db.Uuid
+  originCountry   Country? @relation("CandidateOriginCountry", fields: [originCountryId], references: [id])
+
+  skills         CandidateSkill[]
+  languages      CandidateLanguage[]
+  educations     CandidateEducation[]
+  certifications CandidateCertification[]
+  experiences    CandidateExperience[]
+  products       CandidateProduct[]
+
+  proposalCandidates ProposalCandidate[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([currentCityId])
+  @@index([originCountryId])
+  @@index([status])
+  @@map("candidates")
+}
+
+model CandidateSkill {
+  id                String            @id @default(uuid()) @db.Uuid
+  candidateId       String            @map("candidate_id") @db.Uuid
+  candidate         Candidate         @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  skillId           String            @map("skill_id") @db.Uuid
+  skill             Skill             @relation(fields: [skillId], references: [id])
+  proficiency       ProficiencyLevel?
+  yearsOfExperience Int?              @map("years_of_experience")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([candidateId, skillId])
+  @@index([skillId])
+  @@map("candidate_skills")
+}
+
+model CandidateLanguage {
+  id          String           @id @default(uuid()) @db.Uuid
+  candidateId String           @map("candidate_id") @db.Uuid
+  candidate   Candidate        @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  language    String
+  proficiency ProficiencyLevel
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([candidateId, language])
+  @@map("candidate_languages")
+}
+
+model CandidateEducation {
+  id           String      @id @default(uuid()) @db.Uuid
+  candidateId  String      @map("candidate_id") @db.Uuid
+  candidate    Candidate   @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  universityId String?     @map("university_id") @db.Uuid
+  university   University? @relation(fields: [universityId], references: [id])
+  schoolName   String?     @map("school_name")
+  degree       String?
+  fieldOfStudy String?     @map("field_of_study")
+  startYear    Int?        @map("start_year")
+  endYear      Int?        @map("end_year")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([candidateId])
+  @@index([universityId])
+  @@map("candidate_educations")
+}
+
+model CandidateCertification {
+  id              String        @id @default(uuid()) @db.Uuid
+  candidateId     String        @map("candidate_id") @db.Uuid
+  candidate       Candidate     @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  certificationId String        @map("certification_id") @db.Uuid
+  certification   Certification @relation(fields: [certificationId], references: [id])
+  dateObtained    DateTime?     @map("date_obtained") @db.Date
+  expiryDate      DateTime?     @map("expiry_date") @db.Date
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([candidateId, certificationId])
+  @@index([certificationId])
+  @@map("candidate_certifications")
+}
+
+model CandidateExperience {
+  id          String    @id @default(uuid()) @db.Uuid
+  candidateId String    @map("candidate_id") @db.Uuid
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  companyId   String?  @map("company_id") @db.Uuid
+  company     Company? @relation(fields: [companyId], references: [id])
+  companyName String?  @map("company_name")
+
+  jobId String? @map("job_id") @db.Uuid
+  job   Job?    @relation(fields: [jobId], references: [id])
+  title String?
+
+  description String?
+  impact      String?
+  startDate   DateTime? @map("start_date") @db.Date
+  endDate     DateTime? @map("end_date") @db.Date
+  isCurrent   Boolean   @default(false) @map("is_current")
+
+  cityId String? @map("city_id") @db.Uuid
+  city   City?   @relation(fields: [cityId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([candidateId])
+  @@index([companyId])
+  @@index([jobId])
+  @@map("candidate_experiences")
+}
+
+model CandidateProduct {
+  id          String    @id @default(uuid()) @db.Uuid
+  candidateId String    @map("candidate_id") @db.Uuid
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  productId   String    @map("product_id") @db.Uuid
+  product     Product   @relation(fields: [productId], references: [id])
+  context     String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([candidateId, productId])
+  @@index([productId])
+  @@map("candidate_products")
+}
+
+// =============================================================================
+// COUCHE 4 — ENTREPRISES CLIENTES & TEAMS
+// CompanyAccount = compte client actif (recrute), lié à une Company de référence.
+// =============================================================================
+
+model CompanyAccount {
+  id           String   @id @default(uuid()) @db.Uuid
+  companyId    String?  @map("company_id") @db.Uuid
+  company      Company? @relation(fields: [companyId], references: [id])
+  contactEmail String   @map("contact_email")
+  isActive     Boolean  @default(true) @map("is_active")
+
+  members   CompanyMember[]
+  teams     Team[]
+  jobOffers JobOffer[]
+  proposals Proposal[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([companyId])
+  @@map("company_accounts")
+}
+
+model CompanyMember {
+  id               String            @id @default(uuid()) @db.Uuid
+  profileId        String            @unique @map("profile_id") @db.Uuid
+  profile          Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  companyAccountId String            @map("company_account_id") @db.Uuid
+  companyAccount   CompanyAccount    @relation(fields: [companyAccountId], references: [id], onDelete: Cascade)
+  role             CompanyMemberRole @default(MEMBER)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([companyAccountId])
+  @@map("company_members")
+}
+
+model Team {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyAccountId  String         @map("company_account_id") @db.Uuid
+  companyAccount    CompanyAccount @relation(fields: [companyAccountId], references: [id], onDelete: Cascade)
+  name              String
+  whoWeAre          String?        @map("who_we_are")
+  whatWeAreGreatAt  String?        @map("what_we_are_great_at")
+  teamCulture       String?        @map("team_culture")
+  howWeWorkTogether String?        @map("how_we_work_together")
+  notForYouIf       String?        @map("not_for_you_if")
+
+  members  TeamMember[]
+  offices  TeamOffice[]
+  products TeamProduct[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([companyAccountId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teamId    String  @map("team_id") @db.Uuid
+  team      Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  name      String
+  jobTitle  String? @map("job_title")
+  photoUrl  String? @map("photo_url")
+  sortOrder Int     @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([teamId])
+  @@map("team_members")
+}
+
+model TeamOffice {
+  id     String @id @default(uuid()) @db.Uuid
+  teamId String @map("team_id") @db.Uuid
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  cityId String @map("city_id") @db.Uuid
+  city   City   @relation(fields: [cityId], references: [id])
+
+  @@unique([teamId, cityId])
+  @@index([cityId])
+  @@map("team_offices")
+}
+
+model TeamProduct {
+  id        String  @id @default(uuid()) @db.Uuid
+  teamId    String  @map("team_id") @db.Uuid
+  team      Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id") @db.Uuid
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([teamId, productId])
+  @@index([productId])
+  @@map("team_products")
+}
+
+// =============================================================================
+// COUCHE 5 — OFFRES D'EMPLOI & RECRUTEMENT (Proposals / Inbox)
+// =============================================================================
+
+model JobOffer {
+  id               String         @id @default(uuid()) @db.Uuid
+  companyAccountId String         @map("company_account_id") @db.Uuid
+  companyAccount   CompanyAccount @relation(fields: [companyAccountId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+
+  jobId String? @map("job_id") @db.Uuid
+  job   Job?    @relation(fields: [jobId], references: [id])
+
+  cityId    String?  @map("city_id") @db.Uuid
+  city      City?    @relation(fields: [cityId], references: [id])
+  countryId String?  @map("country_id") @db.Uuid
+  country   Country? @relation(fields: [countryId], references: [id])
+
+  salaryMin      Int?            @map("salary_min")
+  salaryMax      Int?            @map("salary_max")
+  salaryCurrency String?         @map("salary_currency")
+  employmentType EmploymentType? @map("employment_type")
+  seniority      Seniority?
+  remoteType     RemoteType?     @map("remote_type")
+  status         JobOfferStatus  @default(DRAFT)
+
+  requiredSkills    JobOfferSkill[]
+  requiredLanguages JobOfferLanguage[]
+  requiredProducts  Product[]
+
+  proposals Proposal[]
+
+  publishedAt DateTime? @map("published_at")
+  closedAt    DateTime? @map("closed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([companyAccountId])
+  @@index([status])
+}
+
+enum CertificationCategory {
+  TECHNICAL
+  PROFESSIONAL
+  PROJECTMANAGEMENT
+  VENDORPRODUCT
+  LANGUAGE
+  OTHER
+}
+
+>>>>>>>>> Temporary merge branch 2
 enum ContractType {
   FULL_TIME
   PART_TIME
@@ -722,6 +1195,7 @@ enum ContractType {
   OTHER
 }
 
+<<<<<<<<< Temporary merge branch 1
 enum RemotePolicy {
   ON_SITE
   HYBRID
@@ -803,6 +1277,20 @@ enum SkillCategory {
   FRAMEWORK
   METHODOLOGY
   OTHER
+=========
+enum CostOfLiving {
+  LOW
+  MEDIAN
+  HIGH
+}
+
+enum DegreeLevel {
+  HIGH_SCHOOL
+  ASSOCIATE
+  BACHELOR
+  MASTER
+  PHD
+>>>>>>>>> Temporary merge branch 2
 }
 
 enum DifficultyLevel {
@@ -812,6 +1300,7 @@ enum DifficultyLevel {
   EXPERT
 }
 
+<<<<<<<<< Temporary merge branch 1
 enum CertificationCategory {
   PROFESSIONAL
   TECHNICAL
@@ -858,15 +1347,180 @@ enum PricingModel {
   ONE_TIME
   OPEN_SOURCE
   ENTERPRISE
+=========
+enum EducationLevel {
+  NONE
+  HIGH_SCHOOL
+  BACHELOR
+  MASTER
+  PHD
   OTHER
 }
 
-enum UserRole {
-  CANDIDATE
-  COMPANY
-  ADMIN
+enum EmployeeCountRange {
+  RANGE_1_10
+  RANGE_11_50
+  RANGE_51_200
+  RANGE_201_1000
+  RANGE_1001_5000
+  RANGE_5000_PLUS
 }
 
+enum GovernmentType {
+  REPUBLIC
+  CONSTITUTIONAL_MONARCHY
+  ABSOLUTE_MONARCHY
+  FEDERATION
+  PARLIAMENTARY
+  COMMUNIST
+  THEOCRACY
+  MILITARY_JUNTA
+  OTHER
+}
+
+enum JobAdStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  FILLED
+}
+
+enum JobCategory {
+  PRIVATE_SECTOR
+  PUBLIC_SECTOR
+  GOVERNMENT
+  NGO
+  MILITARY
+  ACADEMIC
+  OTHER
+}
+
+enum Language {
+  AFRIKAANS
+  ALBANIAN
+  AMHARIC
+  ARABIC
+  ARMENIAN
+  AZERBAIJANI
+  BASQUE
+  BELARUSIAN
+  BENGALI
+  BOSNIAN
+  BULGARIAN
+  BURMESE
+  CATALAN
+  CEBUANO
+  CHINESE_MANDARIN
+  CHINESE_CANTONESE
+  CROATIAN
+  CZECH
+  DANISH
+  DUTCH
+  ENGLISH
+  ESPERANTO
+  ESTONIAN
+  FILIPINO
+  FINNISH
+  FRENCH
+  GALICIAN
+  GEORGIAN
+  GERMAN
+  GREEK
+  GUJARATI
+  HAITIAN_CREOLE
+  HAUSA
+  HEBREW
+  HINDI
+  HUNGARIAN
+  ICELANDIC
+  IGBO
+  INDONESIAN
+  IRISH
+  ITALIAN
+  JAPANESE
+  JAVANESE
+  KANNADA
+  KAZAKH
+  KHMER
+  KOREAN
+  KURDISH
+  KYRGYZ
+  LAO
+  LATIN
+  LATVIAN
+  LITHUANIAN
+  LUXEMBOURGISH
+  MACEDONIAN
+  MALAGASY
+  MALAY
+  MALAYALAM
+  MALTESE
+  MAORI
+  MARATHI
+  MONGOLIAN
+  NEPALI
+  NORWEGIAN
+  PASHTO
+  PERSIAN
+  POLISH
+  PORTUGUESE
+  PUNJABI
+  ROMANIAN
+  RUSSIAN
+  SAMOAN
+  SERBIAN
+  SHONA
+  SINDHI
+  SINHALA
+  SLOVAK
+  SLOVENIAN
+  SOMALI
+  SPANISH
+  SUNDANESE
+  SWAHILI
+  SWEDISH
+  TAJIK
+  TAMIL
+  TATAR
+  TELUGU
+  THAI
+  TIBETAN
+  TURKISH
+  TURKMEN
+  UKRAINIAN
+  URDU
+  UZBEK
+  VIETNAMESE
+  WELSH
+  WOLOF
+  XHOSA
+  YIDDISH
+  YORUBA
+  ZULU
+}
+
+enum OrganizationSubType {
+  ORGANIZATION
+  GOVERNMENT
+  RESEARCH_INSTITUTE
+  UNIVERSITY
+  INTERNATIONAL_ORGANIZATION
+  NGO
+  NON_PROFIT
+  SOCIETY
+  CLUB
+  ARMY
+>>>>>>>>> Temporary merge branch 2
+  OTHER
+}
+
+enum QualityOfLife {
+  LOW
+  MEDIAN
+  HIGH
+}
+
+<<<<<<<<< Temporary merge branch 1
 enum UserStatus {
   ACTIVE
   SUSPENDED
@@ -953,18 +1607,79 @@ enum RemoteType {
 }
 
 enum Seniority {
+=========
+enum RemotePolicy {
+  ON_SITE
+  HYBRID
+  FULL_REMOTE
+}
+
+enum SeniorityLevel {
+>>>>>>>>> Temporary merge branch 2
   INTERN
   JUNIOR
   MID
   SENIOR
   LEAD
-  MANAGER
   DIRECTOR
-  VP
   C_LEVEL
+  ELECTED
+  OTHER
 }
 
+<<<<<<<<< Temporary merge branch 1
 enum SkillType {
   TECHNICAL
   SOFT
+=========
+enum SkillCategory {
+  TECHNICAL
+  SOFT
+  LANGUAGE
+  TOOL
+  FRAMEWORK
+  METHODOLOGY
+  OTHER
+}
+
+enum SkillImportance {
+  REQUIRED
+  PREFERRED
+  NICE_TO_HAVE
+}
+
+enum SubjectCategory {
+  SOFTWARE
+  HARDWARE
+  SERVICE
+  PLATFORM
+  API
+  PHYSICAL_PRODUCT
+  OTHER
+}
+
+enum UniversityType {
+  UNIVERSITY
+  GRANDE_ECOLE
+  INSTITUTE
+  ACADEMY
+  ONLINE
+  OTHER
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+  SUPER_ADMIN
+  CANDIDATE
+  ORGANISATION
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+  PENDING_VERIFICATION
+>>>>>>>>> Temporary merge branch 2
 }
