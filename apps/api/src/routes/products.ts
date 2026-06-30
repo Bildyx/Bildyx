@@ -87,7 +87,11 @@ export const products = {
         .where("deleted_at", "is", null);
 
       if (input.organization_id) {
-        checkQuery = checkQuery.where("organization_id", "=", input.organization_id);
+        checkQuery = checkQuery.where(
+          "organization_id",
+          "=",
+          input.organization_id,
+        );
       } else {
         checkQuery = checkQuery.where("organization_id", "is", null);
       }
@@ -96,7 +100,8 @@ export const products = {
 
       if (existing) {
         throw new ORPCError("CONFLICT", {
-          message: "A product with this name already exists for this organization",
+          message:
+            "A product with this name already exists for this organization",
         });
       }
 
@@ -198,7 +203,7 @@ export const products = {
       method: "DELETE",
       summary: "Delete multiple products",
       description: "Soft delete multiple existing products by their IDs",
-      path: "/products/bulk",
+      path: "/products",
       tags: ["Product"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))

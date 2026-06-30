@@ -247,7 +247,7 @@ describe("Certifications API Endpoints", () => {
     });
   });
 
-  describe("DELETE /certifications/bulk (DeleteBulk)", () => {
+  describe("DELETE /certifications (DeleteBulk)", () => {
     test("should successfully bulk delete certifications by IDs", async () => {
       const res = await callProcedure(certifications.deleteBulk, {
         ids: [createdCertId2],

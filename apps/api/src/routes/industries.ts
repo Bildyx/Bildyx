@@ -175,7 +175,7 @@ export const industries = {
       method: "DELETE",
       summary: "Delete multiple industries",
       description: "Delete multiple existing industries by their IDs",
-      path: "/industries/bulk",
+      path: "/industries",
       tags: ["Industry"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))

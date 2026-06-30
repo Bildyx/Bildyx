@@ -91,7 +91,7 @@ describe("Degrees API Endpoints", () => {
           name: "",
           serialNumber: "DEG-01",
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -101,7 +101,7 @@ describe("Degrees API Endpoints", () => {
           name: "Computer Science",
           serialNumber: "",
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -131,7 +131,7 @@ describe("Degrees API Endpoints", () => {
           serialNumber: "DEG-02",
           university_id: testUniversityId,
         }),
-        (err: any) => err instanceof ORPCError && err.code === "CONFLICT"
+        (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
     });
 
@@ -209,7 +209,7 @@ describe("Degrees API Endpoints", () => {
         callProcedure(degrees.getById, {
           degreeId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -230,7 +230,7 @@ describe("Degrees API Endpoints", () => {
           degreeId: randomUUID(),
           name: "Updated Name",
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -261,7 +261,7 @@ describe("Degrees API Endpoints", () => {
         callProcedure(degrees.delete, {
           degreeId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -281,7 +281,7 @@ describe("Degrees API Endpoints", () => {
     });
   });
 
-  describe("DELETE /degrees/bulk (DeleteBulk)", () => {
+  describe("DELETE /degrees (DeleteBulk)", () => {
     test("should successfully bulk delete degrees by IDs", async () => {
       // Create one more degree to test bulk delete
       const extraDegree = await callProcedure(degrees.create, {

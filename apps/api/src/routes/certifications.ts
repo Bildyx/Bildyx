@@ -211,7 +211,7 @@ export const certifications = {
       method: "DELETE",
       summary: "Delete multiple certifications",
       description: "Delete multiple existing certifications by their IDs",
-      path: "/certifications/bulk",
+      path: "/certifications",
       tags: ["Certification"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))

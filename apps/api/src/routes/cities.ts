@@ -204,7 +204,7 @@ export const cities = {
       method: "DELETE",
       summary: "Delete multiple cities",
       description: "Delete multiple existing cities by their IDs",
-      path: "/cities/bulk",
+      path: "/cities",
       tags: ["City"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))

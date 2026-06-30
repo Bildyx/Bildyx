@@ -177,7 +177,7 @@ export const countries = {
       method: "DELETE",
       summary: "Delete multiple countries",
       description: "Delete multiple existing countries by their IDs",
-      path: "/countries/bulk",
+      path: "/countries",
       tags: ["Country"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))

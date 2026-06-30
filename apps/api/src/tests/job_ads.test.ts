@@ -65,7 +65,10 @@ describe("Job Ads API Endpoints", () => {
         await database.deleteFrom("jobs").where("id", "=", testJobId).execute();
       }
       if (testOrgId) {
-        await database.deleteFrom("organizations").where("id", "=", testOrgId).execute();
+        await database
+          .deleteFrom("organizations")
+          .where("id", "=", testOrgId)
+          .execute();
       }
       // Hard delete any remaining job ads created in tests
       await database.deleteFrom("job_ads").execute();
@@ -84,7 +87,7 @@ describe("Job Ads API Endpoints", () => {
           serialNumber: "JAD-CREATE-01",
           organization_id: testOrgId,
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -95,7 +98,7 @@ describe("Job Ads API Endpoints", () => {
           serialNumber: "  ",
           organization_id: testOrgId,
         }),
-        (err: any) => err.name === "ZodError"
+        (err: any) => err.name === "ZodError",
       );
     });
 
@@ -172,7 +175,7 @@ describe("Job Ads API Endpoints", () => {
         callProcedure(job_ads.getById, {
           jobAdId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -225,7 +228,7 @@ describe("Job Ads API Endpoints", () => {
         callProcedure(job_ads.delete, {
           jobAdId: randomUUID(),
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
@@ -239,7 +242,7 @@ describe("Job Ads API Endpoints", () => {
         callProcedure(job_ads.getById, {
           jobAdId: createdJobAdId2,
         }),
-        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND"
+        (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 
       // Verify that it is no longer returned in getAll
@@ -251,7 +254,7 @@ describe("Job Ads API Endpoints", () => {
     });
   });
 
-  describe("DELETE /job-ads/bulk (DeleteBulk)", () => {
+  describe("DELETE /job-ads (DeleteBulk)", () => {
     test("should successfully bulk soft delete job ads", async () => {
       // Create another one to test bulk delete
       const extra = await callProcedure(job_ads.create, {

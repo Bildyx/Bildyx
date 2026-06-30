@@ -1,7 +1,12 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { JobSchema, CreateJobSchema, UpdateJobSchema, GetJobsSchema } from "../models/jobs";
+import {
+  JobSchema,
+  CreateJobSchema,
+  UpdateJobSchema,
+  GetJobsSchema,
+} from "../models/jobs";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 
@@ -17,7 +22,8 @@ export const jobs = {
     .input(GetJobsSchema)
     .output(z.array(JobSchema))
     .handler(async ({ input }) => {
-      const { search, category, seniority_level, industry_id, country_id } = input;
+      const { search, category, seniority_level, industry_id, country_id } =
+        input;
 
       let query = database.selectFrom("jobs");
 
@@ -182,10 +188,7 @@ export const jobs = {
         throw new ORPCError("NOT_FOUND", { message: "Job not found" });
       }
 
-      await database
-        .deleteFrom("jobs")
-        .where("id", "=", input.jobId)
-        .execute();
+      await database.deleteFrom("jobs").where("id", "=", input.jobId).execute();
     }),
 
   deleteBulk: publicProcedure
@@ -193,15 +196,12 @@ export const jobs = {
       method: "DELETE",
       summary: "Delete multiple jobs",
       description: "Delete multiple existing jobs by their IDs",
-      path: "/jobs/bulk",
+      path: "/jobs",
       tags: ["Job"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))
     .output(z.void())
     .handler(async ({ input }) => {
-      await database
-        .deleteFrom("jobs")
-        .where("id", "in", input.ids)
-        .execute();
+      await database.deleteFrom("jobs").where("id", "in", input.ids).execute();
     }),
 };

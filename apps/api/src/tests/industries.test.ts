@@ -210,7 +210,7 @@ describe("Industries API Endpoints", () => {
     });
   });
 
-  describe("DELETE /industries/bulk (DeleteBulk)", () => {
+  describe("DELETE /industries (DeleteBulk)", () => {
     test("should successfully bulk delete industries by IDs", async () => {
       // Create one more industry to test bulk delete
       const extraIndustry = await callProcedure(industries.create, {

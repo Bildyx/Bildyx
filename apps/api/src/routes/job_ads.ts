@@ -281,7 +281,7 @@ export const job_ads = {
       method: "DELETE",
       summary: "Delete multiple job ads",
       description: "Soft delete multiple existing job ads by their IDs",
-      path: "/job-ads/bulk",
+      path: "/job-ads",
       tags: ["JobAd"],
     })
     .input(z.object({ ids: z.array(z.string().uuid()) }))
