@@ -15,7 +15,7 @@ export const cities = {
     .route({
       method: "GET",
       summary: "List all cities",
-      description: "Get all cities with optional search and country filter",
+      description: "Get all cities with optional filters",
       path: "/cities",
       tags: ["City"],
     })
@@ -55,9 +55,8 @@ export const cities = {
         .selectAll()
         .executeTakeFirst();
 
-      if (!data) {
+      if (!data)
         throw new ORPCError("NOT_FOUND", { message: "City not found" });
-      }
 
       return data;
     }),
@@ -155,9 +154,8 @@ export const cities = {
         .select("id")
         .executeTakeFirst();
 
-      if (!existing) {
+      if (!existing)
         throw new ORPCError("NOT_FOUND", { message: "City not found" });
-      }
 
       const city = await database
         .updateTable("cities")
@@ -192,9 +190,8 @@ export const cities = {
         .select("id")
         .executeTakeFirst();
 
-      if (!existing) {
+      if (!existing)
         throw new ORPCError("NOT_FOUND", { message: "City not found" });
-      }
 
       await database
         .deleteFrom("cities")

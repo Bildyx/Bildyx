@@ -53,9 +53,8 @@ export const industries = {
         .selectAll()
         .executeTakeFirst();
 
-      if (!data) {
+      if (!data)
         throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
-      }
 
       return data;
     }),
@@ -126,9 +125,8 @@ export const industries = {
         .select("id")
         .executeTakeFirst();
 
-      if (!existing) {
+      if (!existing)
         throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
-      }
 
       const industry = await database
         .updateTable("industries")
@@ -163,9 +161,8 @@ export const industries = {
         .select("id")
         .executeTakeFirst();
 
-      if (!existing) {
+      if (!existing)
         throw new ORPCError("NOT_FOUND", { message: "Industry not found" });
-      }
 
       await database
         .deleteFrom("industries")
