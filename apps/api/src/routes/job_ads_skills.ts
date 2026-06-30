@@ -1,7 +1,12 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
-import { JobAdSkillSchema, CreateJobAdSkillSchema, UpdateJobAdSkillSchema, GetJobAdSkillsSchema } from "../models/job_ad_skills";
+import {
+  JobAdSkillSchema,
+  CreateJobAdSkillSchema,
+  UpdateJobAdSkillSchema,
+  GetJobAdSkillsSchema,
+} from "../models/job_ads_skills";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 
@@ -110,7 +115,9 @@ export const job_ads_skills = {
       tags: ["JobAdSkill"],
     })
     .input(
-      z.object({ jobAdSkillId: z.string().uuid() }).merge(UpdateJobAdSkillSchema),
+      z
+        .object({ jobAdSkillId: z.string().uuid() })
+        .merge(UpdateJobAdSkillSchema),
     )
     .output(JobAdSkillSchema)
     .handler(async ({ input }) => {
