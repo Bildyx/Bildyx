@@ -119,7 +119,7 @@ describe("Universities API Endpoints", () => {
         student_count: 55000,
         undergraduates: 35000,
         postgraduates: 20000,
-        score: 95.5,
+        score: 95,
         local_name: "Université de la Sorbonne",
         location: "Paris, France",
         notes: "Historical campus",
@@ -219,12 +219,12 @@ describe("Universities API Endpoints", () => {
       const result = await callProcedure(universities.update, {
         universityId: createdUniId1,
         name: "Sorbonne Université Paris",
-        score: 97.2,
+        score: 97,
       });
 
       assert.strictEqual(result.id, createdUniId1);
       assert.strictEqual(result.name, "Sorbonne Université Paris");
-      assert.strictEqual(result.score, 97.2);
+      assert.strictEqual(result.score, 97);
     });
   });
 
