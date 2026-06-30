@@ -3,7 +3,7 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import { DegreeSchema, CreateDegreeSchema, UpdateDegreeSchema, GetDegreesSchema } from "../models/degrees";
 import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 export const degrees = {
   getAll: publicProcedure 
@@ -100,7 +100,7 @@ export const degrees = {
         .insertInto('degrees')
         .values({
           ...rest,
-          id: uuidv4(),
+          id: randomUUID(),
           updated_at: new Date(),
           metadata: metadata as any,
         })
