@@ -227,7 +227,7 @@ export const SeniorityLevelEnum = z.enum([
 // ---------------------------------------------------------------------------
 
 export const OrganizationTypeEnum = z.enum([
-  "ORGANIZATION",
+  "COMPANY",
   "GOVERNMENT",
   "RESEARCH_INSTITUTE",
   "UNIVERSITY",

@@ -152,7 +152,7 @@ describe("Job Ads API Endpoints", () => {
 
     test("should successfully search job ads by title query", async () => {
       const results = await callProcedure(job_ads.getAll, {
-        search: "Node.js",
+        name: "Node.js",
       });
 
       assert.strictEqual(results.length, 1);
@@ -189,7 +189,7 @@ describe("Job Ads API Endpoints", () => {
     });
   });
 
-  describe("PUT /job-ads/{jobAdId} (Update)", () => {
+  describe("PATCH /job-ads/{jobAdId} (Update)", () => {
     test("should successfully update job ad fields", async () => {
       const result = await callProcedure(job_ads.update, {
         jobAdId: createdJobAdId1,
@@ -205,8 +205,10 @@ describe("Job Ads API Endpoints", () => {
 
   describe("PATCH /job-ads/{jobAdId}/publish & close (Workflow)", () => {
     test("should successfully publish a job ad", async () => {
-      const result = await callProcedure(job_ads.publish, {
+      const result = await callProcedure(job_ads.update, {
         jobAdId: createdJobAdId1,
+        status: "PUBLISHED",
+        published_at: new Date(),
       });
 
       assert.strictEqual(result.status, "PUBLISHED");
@@ -214,8 +216,9 @@ describe("Job Ads API Endpoints", () => {
     });
 
     test("should successfully close a job ad", async () => {
-      const result = await callProcedure(job_ads.close, {
+      const result = await callProcedure(job_ads.update, {
         jobAdId: createdJobAdId1,
+        status: "CLOSED",
       });
 
       assert.strictEqual(result.status, "CLOSED");
@@ -266,7 +269,7 @@ describe("Job Ads API Endpoints", () => {
       const idsToDelete = [createdJobAdId1, extra.id];
 
       await callProcedure(job_ads.deleteBulk, {
-        ids: idsToDelete,
+        jobAdIds: idsToDelete,
       });
 
       // Verify they are no longer returned in getAll

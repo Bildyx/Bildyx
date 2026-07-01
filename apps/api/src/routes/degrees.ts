@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   DegreeSchema,
-  CreateDegreeSchema,
-  UpdateDegreeSchema,
+  PostDegreeSchema,
+  PutDegreeSchema,
   GetDegreesSchema,
+  GetDegreeSchema,
+  DeleteDegreeSchema,
+  DeleteDegreesBulkSchema,
 } from "../models/degrees";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -15,35 +18,26 @@ export const degrees = {
     .route({
       method: "GET",
       summary: "List all degrees",
-      description:
-        "Get all degrees with optional search, level, university, and country filters",
+      description: "Get all degrees with optional search and level filters",
       path: "/degrees",
       tags: ["Degree"],
     })
     .input(GetDegreesSchema)
     .output(z.array(DegreeSchema))
     .handler(async ({ input }) => {
-      const { search, level, university_id, country_id } = input;
+      const { name, level } = input;
 
       let query = database.selectFrom("degrees");
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
-          eb("name", "ilike", p).or("field", "ilike", p),
+          eb("name", "ilike", p).or("area", "ilike", p),
         );
       }
 
       if (level) {
         query = query.where("level", "=", level);
-      }
-
-      if (university_id) {
-        query = query.where("university_id", "=", university_id);
-      }
-
-      if (country_id) {
-        query = query.where("country_id", "=", country_id);
       }
 
       return await query.selectAll().orderBy("name", "asc").execute();
@@ -57,7 +51,7 @@ export const degrees = {
       path: "/degrees/{degreeId}",
       tags: ["Degree"],
     })
-    .input(z.object({ degreeId: z.string().uuid() }))
+    .input(GetDegreeSchema)
     .output(DegreeSchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -81,28 +75,18 @@ export const degrees = {
       path: "/degrees",
       tags: ["Degree"],
     })
-    .input(CreateDegreeSchema)
+    .input(PostDegreeSchema)
     .output(DegreeSchema)
     .handler(async ({ input }) => {
-      let checkQuery = database
+      const existing = await database
         .selectFrom("degrees")
-        .where("name", "ilike", input.name);
-
-      if (input.university_id) {
-        checkQuery = checkQuery.where(
-          "university_id",
-          "=",
-          input.university_id,
-        );
-      } else {
-        checkQuery = checkQuery.where("university_id", "is", null);
-      }
-
-      const existing = await checkQuery.select("id").executeTakeFirst();
+        .where("name", "ilike", input.name)
+        .select("id")
+        .executeTakeFirst();
 
       if (existing) {
         throw new ORPCError("CONFLICT", {
-          message: "A degree with this name already exists for this university",
+          message: "A degree with this name already exists",
         });
       }
 
@@ -130,13 +114,13 @@ export const degrees = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a degree",
       description: "Update an existing degree by its ID",
       path: "/degrees/{degreeId}",
       tags: ["Degree"],
     })
-    .input(z.object({ degreeId: z.string().uuid() }).merge(UpdateDegreeSchema))
+    .input(z.object({ degreeId: z.string().uuid() }).merge(PutDegreeSchema))
     .output(DegreeSchema)
     .handler(async ({ input }) => {
       const { degreeId, metadata, ...rest } = input;
@@ -175,7 +159,7 @@ export const degrees = {
       path: "/degrees/{degreeId}",
       tags: ["Degree"],
     })
-    .input(z.object({ degreeId: z.string().uuid() }))
+    .input(DeleteDegreeSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -202,12 +186,12 @@ export const degrees = {
       path: "/degrees",
       tags: ["Degree"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteDegreesBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .deleteFrom("degrees")
-        .where("id", "in", input.ids)
+        .where("id", "in", input.degreeIds)
         .execute();
     }),
 };

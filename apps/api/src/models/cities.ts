@@ -23,36 +23,44 @@ export const CitySchema = z.object({
   number_of_nationalities: z.number().int().min(0).nullable().optional(),
   language: LanguageSchema.nullable().optional(),
   people_description: z.string().nullable().optional(),
-  // Coordonnées géographiques : latitude [-90, 90], longitude [-180, 180]
   latitude: z.number().min(-90).max(90).nullable().optional(),
   longitude: z.number().min(-180).max(180).nullable().optional(),
   metadata: z.any().nullable().optional(),
-  deleted_at: z
-    .date()
-    .nullable()
-    .optional()
-    .default(null as any),
-  created_at: z.date().default(new Date()),
-  updated_at: z.date().default(new Date()),
+  deleted_at: z.date().nullable().optional(),
+  created_at: z.date(),
+  updated_at: z.date(),
 });
 
-export const CreateCitySchema = CitySchema.omit({
+// GET
+export const GetCitiesSchema = z.object({
+  name: z.string().optional(),
+  country_id: z.string().uuid().optional(),
+});
+
+export const GetCitySchema = z.object({
+  cityId: z.string().uuid(),
+});
+
+// POST
+export const PostCitySchema = CitySchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
   deleted_at: true,
-  serialNumber: true,
-}).extend({
-  serialNumber: z.string().trim().min(1),
 });
 
-export const UpdateCitySchema = CreateCitySchema.partial();
+// PATCH
+export const PutCitySchema = PostCitySchema.partial();
 
-export const GetCitiesSchema = z.object({
-  search: z.string().optional(),
-  country_id: z.string().uuid().optional(),
+// DELETE
+export const DeleteCitySchema = z.object({
+  cityId: z.string().uuid(),
+});
+
+export const DeleteCitiesBulkSchema = z.object({
+  cityIds: z.array(z.string().uuid()),
 });
 
 export type City = z.infer<typeof CitySchema>;
-export type CreateCity = z.infer<typeof CreateCitySchema>;
-export type UpdateCity = z.infer<typeof UpdateCitySchema>;
+export type PostCity = z.infer<typeof PostCitySchema>;
+export type PutCity = z.infer<typeof PutCitySchema>;

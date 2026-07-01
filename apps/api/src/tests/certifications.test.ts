@@ -136,9 +136,9 @@ describe("Certifications API Endpoints", () => {
 
       assert.ok(Array.isArray(res));
       assert.ok(res.length >= 2);
-      const ids = res.map((c: any) => c.id);
-      assert.ok(ids.includes(createdCertId1));
-      assert.ok(ids.includes(createdCertId2));
+      const certificationIds = res.map((c: any) => c.id);
+      assert.ok(certificationIds.includes(createdCertId1));
+      assert.ok(certificationIds.includes(createdCertId2));
     });
 
     test("should filter certifications by name search", async () => {
@@ -192,7 +192,7 @@ describe("Certifications API Endpoints", () => {
     });
   });
 
-  describe("PUT /certifications/{certificationId} (Update)", () => {
+  describe("PATCH /certifications/{certificationId} (Update)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(certifications.update, {
@@ -250,7 +250,7 @@ describe("Certifications API Endpoints", () => {
   describe("DELETE /certifications (DeleteBulk)", () => {
     test("should successfully bulk delete certifications by IDs", async () => {
       const res = await callProcedure(certifications.deleteBulk, {
-        ids: [createdCertId2],
+        certificationIds: [createdCertId2],
       });
 
       assert.ok(Array.isArray(res));

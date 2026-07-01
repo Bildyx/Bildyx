@@ -22,42 +22,51 @@ export const UniversitySchema = z.object({
   city_id: z.string().uuid().nullable().optional(),
   is_public: z.boolean().nullable().optional(),
   student_count: z.number().int().min(0).nullable().optional(),
-  undergraduates: z.number().int().min(0).nullable().optional(),
-  postgraduates: z.number().int().min(0).nullable().optional(),
-  score: z.number().int().min(0).nullable().optional(),
+  metadata: z.any().nullable().optional(),
+  deleted_at: z.date().nullable().optional().default(null),
+  created_at: z.date(),
+  updated_at: z.date(),
   local_name: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   established: z.string().nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z
-    .date()
-    .nullable()
-    .optional()
-    .default(null as any),
-  created_at: z.date().default(new Date()),
-  updated_at: z.date().default(new Date()),
+  score: z.number().int().min(0).nullable().optional(),
+  undergraduates: z.number().int().min(0).nullable().optional(),
+  postgraduates: z.number().int().min(0).nullable().optional(),
 });
 
-export const CreateUniversitySchema = UniversitySchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
-  serialNumber: true,
-}).extend({
-  serialNumber: z.string().trim().min(1),
-});
-
-export const UpdateUniversitySchema = CreateUniversitySchema.partial();
-
+// GET
 export const GetUniversitiesSchema = z.object({
-  search: z.string().optional(),
+  name: z.string().optional(),
   type: UniversityTypeEnum.optional(),
   country_id: z.string().uuid().optional(),
   city_id: z.string().uuid().optional(),
 });
 
+export const GetUniversitySchema = z.object({
+  universityId: z.string().uuid(),
+});
+
+// POST
+export const PostUniversitySchema = UniversitySchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+});
+
+// PATCH
+export const PutUniversitySchema = PostUniversitySchema.partial();
+
+// DELETE
+export const DeleteUniversitySchema = z.object({
+  universityId: z.string().uuid(),
+});
+
+export const DeleteUniversitiesBulkSchema = z.object({
+  universityIds: z.array(z.string().uuid()),
+});
+
 export type University = z.infer<typeof UniversitySchema>;
-export type CreateUniversity = z.infer<typeof CreateUniversitySchema>;
-export type UpdateUniversity = z.infer<typeof UpdateUniversitySchema>;
+export type PostUniversity = z.infer<typeof PostUniversitySchema>;
+export type PutUniversity = z.infer<typeof PutUniversitySchema>;

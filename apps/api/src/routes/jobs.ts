@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   JobSchema,
-  CreateJobSchema,
-  UpdateJobSchema,
+  PostJobSchema,
+  PutJobSchema,
   GetJobsSchema,
+  GetJobSchema,
+  DeleteJobSchema,
+  DeleteJobsBulkSchema,
 } from "../models/jobs";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -22,13 +25,12 @@ export const jobs = {
     .input(GetJobsSchema)
     .output(z.array(JobSchema))
     .handler(async ({ input }) => {
-      const { search, category, seniority_level, industry_id, country_id } =
-        input;
+      const { name, category, seniority_level, industry_id } = input;
 
       let query = database.selectFrom("jobs");
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
           eb("title", "ilike", p).or("description", "ilike", p),
         );
@@ -46,10 +48,6 @@ export const jobs = {
         query = query.where("industry_id", "=", industry_id);
       }
 
-      if (country_id) {
-        query = query.where("country_id", "=", country_id);
-      }
-
       return await query.selectAll().orderBy("title", "asc").execute();
     }),
 
@@ -61,7 +59,7 @@ export const jobs = {
       path: "/jobs/{jobId}",
       tags: ["Job"],
     })
-    .input(z.object({ jobId: z.string().uuid() }))
+    .input(GetJobSchema)
     .output(JobSchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -85,7 +83,7 @@ export const jobs = {
       path: "/jobs",
       tags: ["Job"],
     })
-    .input(CreateJobSchema)
+    .input(PostJobSchema)
     .output(JobSchema)
     .handler(async ({ input }) => {
       let checkQuery = database
@@ -130,13 +128,13 @@ export const jobs = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a job",
       description: "Update an existing job by its ID",
       path: "/jobs/{jobId}",
       tags: ["Job"],
     })
-    .input(z.object({ jobId: z.string().uuid() }).merge(UpdateJobSchema))
+    .input(z.object({ jobId: z.string().uuid() }).merge(PutJobSchema))
     .output(JobSchema)
     .handler(async ({ input }) => {
       const { jobId, metadata, ...rest } = input;
@@ -175,7 +173,7 @@ export const jobs = {
       path: "/jobs/{jobId}",
       tags: ["Job"],
     })
-    .input(z.object({ jobId: z.string().uuid() }))
+    .input(DeleteJobSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -199,9 +197,12 @@ export const jobs = {
       path: "/jobs",
       tags: ["Job"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteJobsBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
-      await database.deleteFrom("jobs").where("id", "in", input.ids).execute();
+      await database
+        .deleteFrom("jobs")
+        .where("id", "in", input.jobIds)
+        .execute();
     }),
 };

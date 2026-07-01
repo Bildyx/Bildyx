@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { JobCategoryEnum, SeniorityLevelEnum } from "./utils/enums";
+import { zNullableUUID, zStringArray } from "./utils/preprocessors";
 
 const currentYear = () => new Date().getFullYear();
 
@@ -12,67 +13,52 @@ export const JobSchema = z.object({
   seniority_level: SeniorityLevelEnum.nullable().optional(),
   is_elected: z.boolean().optional().default(false),
   is_regulated: z.boolean().optional().default(false),
-  start_year: z
-    .number()
-    .int()
-    .min(0)
-    .max(currentYear())
-    .nullable()
-    .optional(),
-  industry_id: z.string().uuid().nullable().optional(),
-  country_id: z.string().uuid().nullable().optional(),
-  products: z.preprocess((val) => {
-    if (Array.isArray(val)) {
-      const filtered = val.filter((v) => v !== "");
-      return filtered.length === 0 ? null : filtered;
-    }
-    return val === "" ? null : val;
-  }, z.array(z.string()).nullable().optional()),
-  tools_and_tech: z.preprocess((val) => {
-    if (Array.isArray(val)) {
-      const filtered = val.filter((v) => v !== "");
-      return filtered.length === 0 ? null : filtered;
-    }
-    return val === "" ? null : val;
-  }, z.array(z.string()).nullable().optional()),
-  tags: z.preprocess((val) => {
-    if (Array.isArray(val)) {
-      const filtered = val.filter((v) => v !== "");
-      return filtered.length === 0 ? null : filtered;
-    }
-    return val === "" ? null : val;
-  }, z.array(z.string()).nullable().optional()),
-  score: z.number().int().min(0).nullable().optional(),
+  start_year: z.number().int().min(0).max(currentYear()).nullable().optional(),
+  industry_id: zNullableUUID(),
+  country_id: zNullableUUID(),
+  products: zStringArray(),
+  tools_and_tech: zStringArray(),
+  tags: zStringArray(),
   metadata: z.any().nullable().optional(),
-  deleted_at: z
-    .date()
-    .nullable()
-    .optional()
-    .default(null as any),
-  created_at: z.date().default(new Date()),
-  updated_at: z.date().default(new Date()),
+  deleted_at: z.date().nullable().optional().default(null),
+  created_at: z.date(),
+  updated_at: z.date(),
+  score: z.number().int().min(0).nullable().optional(),
 });
 
-export const CreateJobSchema = JobSchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
-  serialNumber: true,
-}).extend({
-  serialNumber: z.string().trim().min(1),
-});
-
-export const UpdateJobSchema = CreateJobSchema.partial();
-
+// GET
 export const GetJobsSchema = z.object({
-  search: z.string().optional(),
+  name: z.string().optional(),
   category: JobCategoryEnum.optional(),
   seniority_level: SeniorityLevelEnum.optional(),
   industry_id: z.string().uuid().optional(),
   country_id: z.string().uuid().optional(),
 });
 
+export const GetJobSchema = z.object({
+  jobId: z.string().uuid(),
+});
+
+// POST
+export const PostJobSchema = JobSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+});
+
+// PATCH
+export const PutJobSchema = PostJobSchema.partial();
+
+// DELETE
+export const DeleteJobSchema = z.object({
+  jobId: z.string().uuid(),
+});
+
+export const DeleteJobsBulkSchema = z.object({
+  jobIds: z.array(z.string().uuid()),
+});
+
 export type Job = z.infer<typeof JobSchema>;
-export type CreateJob = z.infer<typeof CreateJobSchema>;
-export type UpdateJob = z.infer<typeof UpdateJobSchema>;
+export type PostJob = z.infer<typeof PostJobSchema>;
+export type PutJob = z.infer<typeof PutJobSchema>;

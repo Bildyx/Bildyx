@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   OrganizationSchema,
-  CreateOrganizationSchema,
-  UpdateOrganizationSchema,
+  PostOrganizationSchema,
+  PutOrganizationSchema,
   GetOrganizationsSchema,
+  GetOrganizationSchema,
+  DeleteOrganizationSchema,
+  DeleteOrganizationsBulkSchema,
 } from "../models/organizations";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -22,14 +25,14 @@ export const organizations = {
     .input(GetOrganizationsSchema)
     .output(z.array(OrganizationSchema))
     .handler(async ({ input }) => {
-      const { search, type } = input;
+      const { name, type } = input;
 
       let query = database
         .selectFrom("organizations")
         .where("deleted_at", "is", null);
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
           eb("name", "ilike", p).or("mission", "ilike", p),
         );
@@ -50,7 +53,7 @@ export const organizations = {
       path: "/organizations/{organizationId}",
       tags: ["Organization"],
     })
-    .input(z.object({ organizationId: z.string().uuid() }))
+    .input(GetOrganizationSchema)
     .output(OrganizationSchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -75,7 +78,7 @@ export const organizations = {
       path: "/organizations",
       tags: ["Organization"],
     })
-    .input(CreateOrganizationSchema)
+    .input(PostOrganizationSchema)
     .output(OrganizationSchema)
     .handler(async ({ input }) => {
       const existing = await database
@@ -115,7 +118,7 @@ export const organizations = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update an organization",
       description: "Update an existing organization by its ID",
       path: "/organizations/{organizationId}",
@@ -124,7 +127,7 @@ export const organizations = {
     .input(
       z
         .object({ organizationId: z.string().uuid() })
-        .merge(UpdateOrganizationSchema),
+        .merge(PutOrganizationSchema),
     )
     .output(OrganizationSchema)
     .handler(async ({ input }) => {
@@ -165,7 +168,7 @@ export const organizations = {
       path: "/organizations/{organizationId}",
       tags: ["Organization"],
     })
-    .input(z.object({ organizationId: z.string().uuid() }))
+    .input(DeleteOrganizationSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -194,13 +197,13 @@ export const organizations = {
       path: "/organizations",
       tags: ["Organization"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteOrganizationsBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .updateTable("organizations")
         .set({ deleted_at: new Date() })
-        .where("id", "in", input.ids)
+        .where("id", "in", input.organizationIds)
         .execute();
     }),
 };

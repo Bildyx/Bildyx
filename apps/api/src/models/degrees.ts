@@ -5,44 +5,47 @@ export const DegreeSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
   serialNumber: z.string().trim().min(1),
-  university_id: z.string().uuid().nullable().optional(),
   level: DegreeLevelEnum.nullable().optional(),
-  field: z.string().nullable().optional(),
-  // Float dans la DB (ex: 1.5 ans), mais toujours positif
+  area: z.string().nullable().optional(),
   duration_years: z.number().min(0).nullable().optional(),
   description: z.string().nullable().optional(),
-  language_of_instruction: z.string().nullable().optional(),
-  country_id: z.string().uuid().nullable().optional(),
-  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
-  deleted_at: z
-    .date()
-    .nullable()
-    .optional()
-    .default(null as any),
-  created_at: z.date().default(new Date()),
-  updated_at: z.date().default(new Date()),
+  deleted_at: z.date().nullable().optional().default(null),
+  created_at: z.date(),
+  updated_at: z.date(),
+  score: z.number().int().min(0).nullable().optional(),
 });
 
-export const CreateDegreeSchema = DegreeSchema.omit({
+// GET
+export const GetDegreesSchema = z.object({
+  name: z.string().optional(),
+  level: DegreeLevelEnum.optional(),
+});
+
+export const GetDegreeSchema = z.object({
+  degreeId: z.string().uuid(),
+});
+
+// POST
+export const PostDegreeSchema = DegreeSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
   deleted_at: true,
-  serialNumber: true,
-}).extend({
-  serialNumber: z.string().trim().min(1),
 });
 
-export const UpdateDegreeSchema = CreateDegreeSchema.partial();
+// PATCH
+export const PutDegreeSchema = PostDegreeSchema.partial();
 
-export const GetDegreesSchema = z.object({
-  search: z.string().optional(),
-  level: DegreeLevelEnum.optional(),
-  university_id: z.string().uuid().optional(),
-  country_id: z.string().uuid().optional(),
+// DELETE
+export const DeleteDegreeSchema = z.object({
+  degreeId: z.string().uuid(),
+});
+
+export const DeleteDegreesBulkSchema = z.object({
+  degreeIds: z.array(z.string().uuid()),
 });
 
 export type Degree = z.infer<typeof DegreeSchema>;
-export type CreateDegree = z.infer<typeof CreateDegreeSchema>;
-export type UpdateDegree = z.infer<typeof UpdateDegreeSchema>;
+export type PostDegree = z.infer<typeof PostDegreeSchema>;
+export type PutDegree = z.infer<typeof PutDegreeSchema>;

@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   JobAdSkillSchema,
-  CreateJobAdSkillSchema,
-  UpdateJobAdSkillSchema,
+  PostJobAdSkillSchema,
+  PutJobAdSkillSchema,
   GetJobAdSkillsSchema,
+  GetJobAdSkillSchema,
+  DeleteJobAdSkillSchema,
+  DeleteJobAdSkillsBulkSchema,
 } from "../models/job_ads_skills";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -75,7 +78,7 @@ export const job_ads_skills = {
       path: "/job-ad-skills",
       tags: ["JobAdSkill"],
     })
-    .input(CreateJobAdSkillSchema)
+    .input(PostJobAdSkillSchema)
     .output(JobAdSkillSchema)
     .handler(async ({ input }) => {
       const existing = await database
@@ -108,16 +111,14 @@ export const job_ads_skills = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a job ad skill",
       description: "Update the importance of a skill for a job ad",
       path: "/job-ad-skills/{jobAdSkillId}",
       tags: ["JobAdSkill"],
     })
     .input(
-      z
-        .object({ jobAdSkillId: z.string().uuid() })
-        .merge(UpdateJobAdSkillSchema),
+      z.object({ jobAdSkillId: z.string().uuid() }).merge(PutJobAdSkillSchema),
     )
     .output(JobAdSkillSchema)
     .handler(async ({ input }) => {
@@ -157,7 +158,7 @@ export const job_ads_skills = {
       path: "/job-ad-skills/{jobAdSkillId}",
       tags: ["JobAdSkill"],
     })
-    .input(z.object({ jobAdSkillId: z.string().uuid() }))
+    .input(DeleteJobAdSkillSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -184,12 +185,12 @@ export const job_ads_skills = {
       path: "/job-ad-skills",
       tags: ["JobAdSkill"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteJobAdSkillsBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .deleteFrom("job_ad_skills")
-        .where("id", "in", input.ids)
+        .where("id", "in", input.jobAdSkillIds)
         .execute();
     }),
 };

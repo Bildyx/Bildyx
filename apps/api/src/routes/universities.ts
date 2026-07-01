@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   UniversitySchema,
-  CreateUniversitySchema,
-  UpdateUniversitySchema,
+  PostUniversitySchema,
+  PutUniversitySchema,
   GetUniversitiesSchema,
+  GetUniversitySchema,
+  DeleteUniversitySchema,
+  DeleteUniversitiesBulkSchema,
 } from "../models/universities";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -22,14 +25,14 @@ export const universities = {
     .input(GetUniversitiesSchema)
     .output(z.array(UniversitySchema))
     .handler(async ({ input }) => {
-      const { search, type, country_id, city_id } = input;
+      const { name, type, country_id, city_id } = input;
 
       let query = database
         .selectFrom("universities")
         .where("deleted_at", "is", null);
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
           eb("name", "ilike", p).or("local_name", "ilike", p),
         );
@@ -56,7 +59,7 @@ export const universities = {
       path: "/universities/{universityId}",
       tags: ["University"],
     })
-    .input(z.object({ universityId: z.string().uuid() }))
+    .input(GetUniversitySchema)
     .output(UniversitySchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -81,7 +84,7 @@ export const universities = {
       path: "/universities",
       tags: ["University"],
     })
-    .input(CreateUniversitySchema)
+    .input(PostUniversitySchema)
     .output(UniversitySchema)
     .handler(async ({ input }) => {
       const existing = await database
@@ -121,16 +124,14 @@ export const universities = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a university",
       description: "Update an existing university by its ID",
       path: "/universities/{universityId}",
       tags: ["University"],
     })
     .input(
-      z
-        .object({ universityId: z.string().uuid() })
-        .merge(UpdateUniversitySchema),
+      z.object({ universityId: z.string().uuid() }).merge(PutUniversitySchema),
     )
     .output(UniversitySchema)
     .handler(async ({ input }) => {
@@ -171,7 +172,7 @@ export const universities = {
       path: "/universities/{universityId}",
       tags: ["University"],
     })
-    .input(z.object({ universityId: z.string().uuid() }))
+    .input(DeleteUniversitySchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -200,13 +201,13 @@ export const universities = {
       path: "/universities",
       tags: ["University"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteUniversitiesBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .updateTable("universities")
         .set({ deleted_at: new Date() })
-        .where("id", "in", input.ids)
+        .where("id", "in", input.universityIds)
         .execute();
     }),
 };

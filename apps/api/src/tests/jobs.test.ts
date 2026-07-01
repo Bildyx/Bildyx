@@ -163,7 +163,7 @@ describe("Jobs API Endpoints", () => {
 
     test("should successfully search jobs by title or description query", async () => {
       const results = await callProcedure(jobs.getAll, {
-        search: "Fullstack",
+        name: "Fullstack",
       });
 
       assert.ok(Array.isArray(results));
@@ -231,7 +231,7 @@ describe("Jobs API Endpoints", () => {
     });
   });
 
-  describe("PUT /jobs/{jobId} (Update)", () => {
+  describe("PATCH /jobs/{jobId} (Update)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(jobs.update, {
@@ -302,7 +302,7 @@ describe("Jobs API Endpoints", () => {
       const idsToDelete = [createdJobId1, extraJob.id];
 
       await callProcedure(jobs.deleteBulk, {
-        ids: idsToDelete,
+        jobIds: idsToDelete,
       });
 
       // Verify DB

@@ -170,7 +170,7 @@ describe("Organizations API Endpoints", () => {
 
     test("should search organizations by name or mission query", async () => {
       const results = await callProcedure(organizations.getAll, {
-        search: "initiatives",
+        name: "initiatives",
       });
 
       assert.strictEqual(results.length, 1);
@@ -207,7 +207,7 @@ describe("Organizations API Endpoints", () => {
     });
   });
 
-  describe("PUT /organizations/{organizationId} (Update)", () => {
+  describe("PATCH /organizations/{organizationId} (Update)", () => {
     test("should successfully update organization fields", async () => {
       const result = await callProcedure(organizations.update, {
         organizationId: createdOrgId1,
@@ -264,7 +264,7 @@ describe("Organizations API Endpoints", () => {
       const idsToDelete = [createdOrgId1, extra.id];
 
       await callProcedure(organizations.deleteBulk, {
-        ids: idsToDelete,
+        organizationIds: idsToDelete,
       });
 
       // Verify they are no longer returned in getAll

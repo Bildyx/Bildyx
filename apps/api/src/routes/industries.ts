@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   IndustrySchema,
-  CreateIndustrySchema,
-  UpdateIndustrySchema,
+  PostIndustrySchema,
+  PutIndustrySchema,
   GetIndustriesSchema,
+  GetIndustrySchema,
+  DeleteIndustrySchema,
+  DeleteIndustriesBulkSchema,
 } from "../models/industries";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -15,19 +18,19 @@ export const industries = {
     .route({
       method: "GET",
       summary: "List all industries",
-      description: "Get all industries with optional search",
+      description: "Get all industries with optional name",
       path: "/industries",
       tags: ["Industry"],
     })
     .input(GetIndustriesSchema)
     .output(z.array(IndustrySchema))
     .handler(async ({ input }) => {
-      const { search } = input;
+      const { name } = input;
 
       let query = database.selectFrom("industries");
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
           eb("name", "ilike", p).or("description", "ilike", p),
         );
@@ -44,7 +47,7 @@ export const industries = {
       path: "/industries/{industryId}",
       tags: ["Industry"],
     })
-    .input(z.object({ industryId: z.string().uuid() }))
+    .input(GetIndustrySchema)
     .output(IndustrySchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -67,7 +70,7 @@ export const industries = {
       path: "/industries",
       tags: ["Industry"],
     })
-    .input(CreateIndustrySchema)
+    .input(PostIndustrySchema)
     .output(IndustrySchema)
     .handler(async ({ input }) => {
       const existing = await database
@@ -106,15 +109,13 @@ export const industries = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update an industry",
       description: "Update an existing industry by its ID",
       path: "/industries/{industryId}",
       tags: ["Industry"],
     })
-    .input(
-      z.object({ industryId: z.string().uuid() }).merge(UpdateIndustrySchema),
-    )
+    .input(z.object({ industryId: z.string().uuid() }).merge(PutIndustrySchema))
     .output(IndustrySchema)
     .handler(async ({ input }) => {
       const { industryId, metadata, ...rest } = input;
@@ -152,7 +153,7 @@ export const industries = {
       path: "/industries/{industryId}",
       tags: ["Industry"],
     })
-    .input(z.object({ industryId: z.string().uuid() }))
+    .input(DeleteIndustrySchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -178,12 +179,12 @@ export const industries = {
       path: "/industries",
       tags: ["Industry"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteIndustriesBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .deleteFrom("industries")
-        .where("id", "in", input.ids)
+        .where("id", "in", input.industryIds)
         .execute();
     }),
 };

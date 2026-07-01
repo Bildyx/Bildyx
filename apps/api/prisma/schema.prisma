@@ -10,25 +10,23 @@ datasource db {
 }
 
 model Industry {
-  id                    String         @id @default(uuid()) @db.Uuid
-  name                  String
-  serialNumber          String         @unique
-  description           String?
-  iconUrl               String?        @map("icon_url")
-  color                 String?
-  metadata              Json?
-  deletedAt             DateTime?      @map("deleted_at")
-  createdAt             DateTime       @default(now()) @map("created_at")
-  updatedAt             DateTime       @updatedAt @map("updated_at")
-  score                 Int?
-  jobs                  Job[]
-  skills                Skill[]
-  mainIndustryCities    City[]         @relation("CityMainIndustries")
-  mainIndustryCountries Country[]      @relation("CountryMainIndustries")
-  organizations         Organization[] @relation("OrganizationIndustries")
-  products              Subject[]      @relation("ProductIndustries")
-  industries_A          Industry[]     @relation("RelatedIndustries")
-  industries_B          Industry[]     @relation("RelatedIndustries")
+  id                 String         @id @default(uuid()) @db.Uuid
+  name               String
+  serialNumber       String         @unique
+  description        String?
+  iconUrl            String?        @map("icon_url")
+  color              String?
+  metadata           Json?
+  deletedAt          DateTime?      @map("deleted_at")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+  score              Int?
+  jobs               Job[]
+  mainIndustryCities City[]         @relation("CityMainIndustries")
+  organizations      Organization[] @relation("OrganizationIndustries")
+  products           subjects[]     @relation("ProductIndustries")
+  industries_A       Industry[]     @relation("RelatedIndustries")
+  industries_B       Industry[]     @relation("RelatedIndustries")
 
   @@map("industries")
 }
@@ -55,6 +53,7 @@ model Country {
   crimeRate                     String?         @map("crime_rate")
   incomeInequality              String?         @map("income_inequality")
   workLifeBalance               String?         @map("work_life_balance")
+  main_industries               String?
   numberOfMultinationalHqs      Int?            @map("number_of_multinational_hqs")
   medianSalary                  Int?            @map("median_salary")
   costOfLiving                  CostOfLiving?   @map("cost_of_living")
@@ -73,6 +72,7 @@ model Country {
   qualityOfEducation            String?         @map("quality_of_education")
   degreeHolders                 String?         @map("degree_holders")
   numberOfUniversities          Int?            @map("number_of_universities")
+  top_universities              String?
   ethnicGroups                  String[]        @map("ethnic_groups")
   religion                      String[]
   culturalValues                String?         @map("cultural_values")
@@ -82,100 +82,97 @@ model Country {
   createdAt                     DateTime        @default(now()) @map("created_at")
   updatedAt                     DateTime        @updatedAt @map("updated_at")
   cities                        City[]
-  degrees                       Degree[]
   jobAds                        JobAd[]
-  jobs                          Job[]
   universities                  University[]
   userProfiles                  UserProfile[]   @relation("UserProfileCountry")
   largestOrganizations          Organization[]  @relation("CountryLargestOrganizations")
-  mainIndustries                Industry[]      @relation("CountryMainIndustries")
-  topUniversities               University[]    @relation("CountryTopUniversities")
 
   @@map("countries")
 }
 
 model City {
-  id                                         String         @id @default(uuid()) @db.Uuid
-  name                                       String
-  serialNumber                               String         @unique
-  countryId                                  String         @map("country_id") @db.Uuid
-  isCapital                                  Boolean        @default(false) @map("is_capital")
-  stateProvince                              String?        @map("state_province")
-  population                                 Int?
-  numberOfMultinationalHqs                   Int?           @map("number_of_multinational_hqs")
-  numberOfAirports                           Int?           @map("number_of_airports")
-  medianSalary                               Int?           @map("median_salary")
-  costOfLiving                               CostOfLiving?  @map("cost_of_living")
-  medianHomePrice                            Int?           @map("median_home_price")
-  averageRent                                Int?           @map("average_rent")
-  temperatures                               String?
-  climate                                    String?
-  interestingFact                            String?        @map("interesting_fact")
-  degreeHolders                              String?        @map("degree_holders")
-  numberOfUniversities                       Int?           @map("number_of_universities")
-  numberOfNationalities                      Int?           @map("number_of_nationalities")
-  language                                   Language?
-  peopleDescription                          String?        @map("people_description")
-  latitude                                   Float?
-  longitude                                  Float?
-  metadata                                   Json?
-  deletedAt                                  DateTime?      @map("deleted_at")
-  createdAt                                  DateTime       @default(now()) @map("created_at")
-  updatedAt                                  DateTime       @updatedAt @map("updated_at")
-  country                                    Country        @relation(fields: [countryId], references: [id])
-  jobAds                                     JobAd[]
-  organizations_organizations_cityIdTocities Organization[] @relation("organizations_cityIdTocities")
-  universities                               University[]
-  userProfiles                               UserProfile[]
-  largestOrganizations                       Organization[] @relation("CityLargestOrganizations")
-  mainIndustries                             Industry[]     @relation("CityMainIndustries")
-  topUniversities                            University[]   @relation("CityTopUniversities")
-  organizations_working_area                 Organization[] @relation("working_area")
+  id                                          String         @id @default(uuid()) @db.Uuid
+  name                                        String
+  serialNumber                                String         @unique
+  countryId                                   String         @map("country_id") @db.Uuid
+  isCapital                                   Boolean        @default(false) @map("is_capital")
+  stateProvince                               String?        @map("state_province")
+  population                                  Int?
+  numberOfMultinationalHqs                    Int?           @map("number_of_multinational_hqs")
+  numberOfAirports                            Int?           @map("number_of_airports")
+  largest_organization                        String?
+  medianSalary                                Int?           @map("median_salary")
+  costOfLiving                                CostOfLiving?  @map("cost_of_living")
+  medianHomePrice                             Int?           @map("median_home_price")
+  averageRent                                 Int?           @map("average_rent")
+  temperatures                                String?
+  climate                                     String?
+  interestingFact                             String?        @map("interesting_fact")
+  degreeHolders                               String?        @map("degree_holders")
+  numberOfUniversities                        Int?           @map("number_of_universities")
+  top_universities                            String?
+  numberOfNationalities                       Int?           @map("number_of_nationalities")
+  language                                    Language?
+  peopleDescription                           String?        @map("people_description")
+  latitude                                    Float?
+  longitude                                   Float?
+  metadata                                    Json?
+  deletedAt                                   DateTime?      @map("deleted_at")
+  createdAt                                   DateTime       @default(now()) @map("created_at")
+  updatedAt                                   DateTime       @updatedAt @map("updated_at")
+  country                                     Country        @relation(fields: [countryId], references: [id])
+  jobAds                                      JobAd[]
+  organizations_organizations_city_idTocities Organization[] @relation("organizations_city_idTocities")
+  universities                                University[]
+  userProfiles                                UserProfile[]
+  mainIndustries                              Industry[]     @relation("CityMainIndustries")
+  organizations_working_area                  Organization[] @relation("working_area")
 
   @@index([countryId])
   @@map("cities")
 }
 
 model Organization {
-  id                                  String               @id @default(uuid()) @db.Uuid
-  name                                String
-  slug                                String               @unique
-  type                                OrganizationSubType?
-  legalStatus                         String?              @map("legal_status")
-  category                            String?
-  ownership                           String?
-  mission                             String?
-  knownFor                            String[]             @map("known_for")
-  activities                          String[]
-  project                             String?
-  researchAreas                       String[]             @map("research_areas")
-  products                            String[]
-  services                            String[]
-  partnerships                        String[]
-  budget                              String?
-  founded                             String?
-  founder                             String?
-  equipments                          String?
-  score                               Int?
-  numberOfEmployees                   EmployeeCountRange?
-  numberOfSubsidiaries                Int?
-  parentOrganizationId                String?              @map("parent_organization_id") @db.Uuid
-  metadata                            Json?
-  deletedAt                           DateTime?            @map("deleted_at")
-  createdAt                           DateTime             @default(now()) @map("created_at")
-  updatedAt                           DateTime             @updatedAt @map("updated_at")
-  cityId                              String?              @db.Uuid
-  issuedCertifications                Certification[]      @relation("CertificationIssuer")
-  jobAds                              JobAd[]
-  cities_organizations_cityIdTocities City?                @relation("organizations_cityIdTocities", fields: [cityId], references: [id])
-  parentOrganization                  Organization?        @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
-  childAgencies                       Organization[]       @relation("OrganizationHierarchy")
-  subjects                            Subject[]
-  userProfiles                        UserProfile[]        @relation("UserCurrentOrganization")
-  largestOrganizationCities           City[]               @relation("CityLargestOrganizations")
-  largestOrganizationCountries        Country[]            @relation("CountryLargestOrganizations")
-  industries                          Industry[]           @relation("OrganizationIndustries")
-  cities_working_area                 City[]               @relation("working_area")
+  id                                   String                 @id @default(uuid()) @db.Uuid
+  name                                 String
+  slug                                 String                 @unique
+  type                                 OrganizationSubType?
+  legalStatus                          String?                @map("legal_status")
+  category                             String?
+  ownership                            String?
+  mission                              String?
+  knownFor                             String[]               @map("known_for")
+  activities                           String[]
+  project                              String?
+  researchAreas                        String[]               @map("research_areas")
+  products                             String[]
+  services                             String[]
+  partnerships                         String[]
+  budget                               String?
+  founded                              String?
+  founder                              String?
+  equipments                           String?
+  score                                Int?
+  city_id                              String?                @db.Uuid
+  numberOfEmployees                    EmployeeCountRange?
+  numberOfSubsidiaries                 Int?
+  parentOrganizationId                 String?                @map("parent_organization_id") @db.Uuid
+  metadata                             Json?
+  deletedAt                            DateTime?              @map("deleted_at")
+  createdAt                            DateTime               @default(now()) @map("created_at")
+  updatedAt                            DateTime               @updatedAt @map("updated_at")
+  issuedCertifications                 Certification[]        @relation("CertificationIssuer")
+  jobAds                               JobAd[]
+  military_capabilities                military_capabilities?
+  cities_organizations_city_idTocities City?                  @relation("organizations_city_idTocities", fields: [city_id], references: [id])
+  parentOrganization                   Organization?          @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
+  childAgencies                        Organization[]         @relation("OrganizationHierarchy")
+  subjects                             subjects[]
+  userProfiles                         UserProfile[]          @relation("UserCurrentOrganization")
+  users                                User?
+  largestOrganizationCountries         Country[]              @relation("CountryLargestOrganizations")
+  industries                           Industry[]             @relation("OrganizationIndustries")
+  cities_working_area                  City[]                 @relation("working_area")
 
   @@index([parentOrganizationId])
   @@index([type])
@@ -189,11 +186,7 @@ model Job {
   category       JobCategory?
   description    String?
   seniorityLevel SeniorityLevel? @map("seniority_level")
-  isElected      Boolean         @default(false) @map("is_elected")
-  isRegulated    Boolean         @default(false) @map("is_regulated")
-  startYear      Int?            @map("start_year")
   industryId     String?         @map("industry_id") @db.Uuid
-  countryId      String?         @map("country_id") @db.Uuid
   products       String[]
   toolsAndTech   String[]        @map("tools_and_tech")
   tags           String[]
@@ -203,12 +196,10 @@ model Job {
   updatedAt      DateTime        @updatedAt @map("updated_at")
   score          Int?
   jobAds         JobAd[]
-  country        Country?        @relation(fields: [countryId], references: [id])
   industry       Industry?       @relation(fields: [industryId], references: [id])
   userProfiles   UserProfile[]   @relation("UserCurrentJob")
 
   @@index([industryId])
-  @@index([countryId])
   @@index([category])
   @@index([seniorityLevel])
   @@map("jobs")
@@ -223,7 +214,7 @@ model Skill {
   categories          String[]
   description         String?
   iconUrl             String?          @map("icon_url")
-  industryId          String?          @map("industry_id") @db.Uuid
+  industry            String?
   difficulty          DifficultyLevel?
   usedIn              String[]         @map("used_in")
   jobs                String[]
@@ -237,9 +228,7 @@ model Skill {
   updatedAt           DateTime         @updatedAt @map("updated_at")
   score               Int?
   JobAdSkills         JobAdSkill[]
-  industry            Industry?        @relation(fields: [industryId], references: [id])
 
-  @@index([industryId])
   @@index([category])
   @@map("skills")
 }
@@ -263,6 +252,7 @@ model Certification {
   updatedAt              DateTime               @updatedAt @map("updated_at")
   score                  Int?
   issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
+  user_certifications    user_certifications[]
 
   @@index([issuingOrganizationId])
   @@index([category])
@@ -270,35 +260,31 @@ model Certification {
 }
 
 model University {
-  id              String          @id @default(uuid()) @db.Uuid
+  id              String            @id @default(uuid()) @db.Uuid
   name            String
-  serialNumber    String          @unique
+  serialNumber    String            @unique
   type            UniversityType?
   description     String?
-  websiteUrl      String?         @map("website_url")
-  logoUrl         String?         @map("logo_url")
-  foundedYear     Int?            @map("founded_year")
-  countryId       String?         @map("country_id") @db.Uuid
-  cityId          String?         @map("city_id") @db.Uuid
-  isPublic        Boolean?        @map("is_public")
-  studentCount    Int?            @map("student_count")
+  websiteUrl      String?           @map("website_url")
+  logoUrl         String?           @map("logo_url")
+  countryId       String?           @map("country_id") @db.Uuid
+  cityId          String?           @map("city_id") @db.Uuid
+  studentCount    Int?              @map("student_count")
   metadata        Json?
-  deletedAt       DateTime?       @map("deleted_at")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
-  scoreUniversity Float?          @map("score_university")
-  localName       String?         @map("local_name")
+  deletedAt       DateTime?         @map("deleted_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  scoreUniversity Float?            @map("score_university")
+  localName       String?           @map("local_name")
   location        String?
   notes           String?
   established     String?
   score           Int?
   undergraduates  Int?
   postgraduates   Int?
-  degrees         Degree[]
-  city            City?           @relation(fields: [cityId], references: [id])
-  country         Country?        @relation(fields: [countryId], references: [id])
-  topOfCities     City[]          @relation("CityTopUniversities")
-  topOfCountries  Country[]       @relation("CountryTopUniversities")
+  city            City?             @relation(fields: [cityId], references: [id])
+  country         Country?          @relation(fields: [countryId], references: [id])
+  user_educations user_educations[]
 
   @@index([countryId])
   @@index([cityId])
@@ -307,56 +293,22 @@ model University {
 }
 
 model Degree {
-  id                    String       @id @default(uuid()) @db.Uuid
-  name                  String
-  serialNumber          String       @unique
-  universityId          String?      @map("university_id") @db.Uuid
-  level                 DegreeLevel?
-  field                 String?
-  durationYears         Float?       @map("duration_years")
-  description           String?
-  languageOfInstruction String?      @map("language_of_instruction")
-  countryId             String?      @map("country_id") @db.Uuid
-  metadata              Json?
-  deletedAt             DateTime?    @map("deleted_at")
-  createdAt             DateTime     @default(now()) @map("created_at")
-  updatedAt             DateTime     @updatedAt @map("updated_at")
-  score                 Int?
-  countries             Country?     @relation(fields: [countryId], references: [id])
-  university            University?  @relation(fields: [universityId], references: [id])
+  id              String            @id @default(uuid()) @db.Uuid
+  name            String
+  serialNumber    String            @unique
+  level           DegreeLevel?
+  area            String?
+  durationYears   Float?            @map("duration_years")
+  description     String?
+  metadata        Json?
+  deletedAt       DateTime?         @map("deleted_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  score           Int?
+  user_educations user_educations[]
 
-  @@index([universityId])
   @@index([level])
-  @@index([countryId])
   @@map("degrees")
-}
-
-/// Produit / Service / Solution
-model Subject {
-  id               String           @id @default(uuid()) @db.Uuid
-  name             String
-  serialNumber     String           @unique
-  type             String?
-  description      String?
-  shortDescription String?          @map("short_description")
-  category         SubjectCategory?
-  competitors      String[]
-  funFact          String?          @map("fun_fact")
-  organizationId   String?          @map("organization_id") @db.Uuid
-  websiteUrl       String?          @map("website_url")
-  logoUrl          String?          @map("logo_url")
-  tags             String[]
-  metadata         Json?
-  deletedAt        DateTime?        @map("deleted_at")
-  createdAt        DateTime         @default(now()) @map("created_at")
-  updatedAt        DateTime         @updatedAt @map("updated_at")
-  score            Int?
-  organization     Organization?    @relation(fields: [organizationId], references: [id])
-  industries       Industry[]       @relation("ProductIndustries")
-
-  @@index([organizationId])
-  @@index([category])
-  @@map("products")
 }
 
 model JobAd {
@@ -424,8 +376,7 @@ model User {
   lastName               String?       @map("last_name")
   displayName            String?       @map("display_name")
   avatarUrl              String?       @map("avatar_url")
-  /// When the account represents a organisation, this stores the name.
-  organisationName       String?       @map("organisation_name")
+  organization_id        String?       @unique @db.Uuid
   /// Indicates whether the user has opted in to receive marketing communications.
   marketingOptIn         Boolean       @default(false) @map("marketing_opt_in")
   /// One‑time code sent to the user for email verification. Null when verification completed.
@@ -453,6 +404,7 @@ model User {
   audit_logs             AuditLog[]
   profile                UserProfile?
   sessions               UserSession[]
+  organizations          Organization? @relation(fields: [organization_id], references: [id])
 
   @@index([status])
   @@index([role])
@@ -477,28 +429,30 @@ model UserSession {
 
 /// Profil public user
 model UserProfile {
-  id                    String        @id @default(uuid()) @db.Uuid
-  userId                String        @unique @map("user_id") @db.Uuid
+  id                    String                @id @default(uuid()) @db.Uuid
+  userId                String                @unique @map("user_id") @db.Uuid
   biography             String?
-  countryId             String?       @map("country_id") @db.Uuid
-  cityId                String?       @map("city_id") @db.Uuid
-  linkedinUrl           String?       @map("linkedin_url")
-  githubUrl             String?       @map("github_url")
-  websiteUrl            String?       @map("website_url")
-  locale                String?       @default("fr")
+  countryId             String?               @map("country_id") @db.Uuid
+  cityId                String?               @map("city_id") @db.Uuid
+  linkedinUrl           String?               @map("linkedin_url")
+  githubUrl             String?               @map("github_url")
+  websiteUrl            String?               @map("website_url")
+  locale                String?               @default("fr")
   timezone              String?
-  isPublic              Boolean       @default(true) @map("is_public")
-  currentJobId          String?       @map("current_job_id") @db.Uuid
-  currentJobStartedAt   DateTime?     @map("current_job_started_at")
-  currentOrganizationId String?       @map("current_organization_id") @db.Uuid
+  isPublic              Boolean               @default(true) @map("is_public")
+  currentJobId          String?               @map("current_job_id") @db.Uuid
+  currentJobStartedAt   DateTime?             @map("current_job_started_at")
+  currentOrganizationId String?               @map("current_organization_id") @db.Uuid
   metadata              Json?
-  createdAt             DateTime      @default(now()) @map("created_at")
-  updatedAt             DateTime      @updatedAt @map("updated_at")
-  city                  City?         @relation(fields: [cityId], references: [id])
-  country               Country?      @relation("UserProfileCountry", fields: [countryId], references: [id])
-  currentJob            Job?          @relation("UserCurrentJob", fields: [currentJobId], references: [id])
-  currentOrganization   Organization? @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
-  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime              @default(now()) @map("created_at")
+  updatedAt             DateTime              @updatedAt @map("updated_at")
+  user_certifications   user_certifications[]
+  user_educations       user_educations[]
+  city                  City?                 @relation(fields: [cityId], references: [id])
+  country               Country?              @relation("UserProfileCountry", fields: [countryId], references: [id])
+  currentJob            Job?                  @relation("UserCurrentJob", fields: [currentJobId], references: [id])
+  currentOrganization   Organization?         @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([countryId])
   @@index([cityId])
@@ -515,12 +469,114 @@ model AuditLog {
   ipAddress String?  @map("ip_address")
   metadata  Json?
   createdAt DateTime @default(now()) @map("created_at")
-  users     User     @relation(fields: [userId], references: [id], onDelete: SetDefault)
+  users     User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model majors {
+  id              String            @id @db.Uuid
+  name            String
+  serial_number   String            @unique
+  area            String?
+  description     String?
+  metadata        Json?
+  deleted_at      DateTime?
+  created_at      DateTime          @default(now())
+  updated_at      DateTime
+  score           Int?
+  user_educations user_educations[]
+}
+
+model military_capabilities {
+  id                                   String       @id @db.Uuid
+  organization_id                      String       @unique @db.Uuid
+  number_of_active_navy_personnel      Int?
+  number_of_destroyers                 Int?
+  number_of_submarines_diesel          Int?
+  number_of_submarines_nuclear         Int?
+  number_of_naval_shipyards            Int?
+  number_of_maritime_patrol_aircraft   Int?
+  number_of_stealth_fleet              Int?
+  number_of_surveillance_radars        Int?
+  number_of_aircrafts                  Int?
+  number_of_fighter_jets               Int?
+  number_of_helicopters                Int?
+  number_of_drones                     Int?
+  number_of_tanker_planes              Int?
+  number_of_transport_planes           Int?
+  number_of_communication_satellites   Int?
+  number_of_missile_warning_satellites Int?
+  number_of_navigation_satellites      Int?
+  number_of_spy_satellites             Int?
+  number_of_satellite_jamming_systems  Int?
+  number_of_surveillance_telescopes    Int?
+  number_of_operational_spaceplanes    Int?
+  number_of_space_launch_sites         Int?
+  number_of_space_operations_squadrons Int?
+  number_of_space_personnel            Int?
+  updated_at                           DateTime
+  organizations                        Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+}
+
+model subjects {
+  id                String           @id @db.Uuid
+  name              String
+  serialNumber      String           @unique
+  type              String?
+  description       String?
+  short_description String?
+  category          SubjectCategory?
+  competitors       String[]
+  fun_fact          String?
+  organization_id   String?          @db.Uuid
+  website_url       String?
+  logo_url          String?
+  tags              String[]
+  metadata          Json?
+  deleted_at        DateTime?
+  created_at        DateTime         @default(now())
+  updated_at        DateTime
+  score             Int?
+  organizations     Organization?    @relation(fields: [organization_id], references: [id])
+  industries        Industry[]       @relation("ProductIndustries")
+
+  @@index([category])
+  @@index([organization_id])
+}
+
+model user_certifications {
+  id               String        @id @db.Uuid
+  user_profile_id  String        @db.Uuid
+  certification_id String        @db.Uuid
+  obtained_at      DateTime?
+  expires_at       DateTime?
+  certifications   Certification @relation(fields: [certification_id], references: [id])
+  user_profiles    UserProfile   @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_profile_id, certification_id])
+  @@index([certification_id])
+}
+
+model user_educations {
+  id              String      @id @db.Uuid
+  user_profile_id String      @db.Uuid
+  university_id   String?     @db.Uuid
+  degree_id       String?     @db.Uuid
+  major_id        String?     @db.Uuid
+  start_year      Int?
+  end_year        Int?
+  graduated       Boolean     @default(false)
+  degrees         Degree?     @relation(fields: [degree_id], references: [id])
+  majors          majors?     @relation(fields: [major_id], references: [id])
+  universities    University? @relation(fields: [university_id], references: [id])
+  user_profiles   UserProfile @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+
+  @@index([university_id])
+  @@index([user_profile_id])
 }
 
 enum CostOfLiving {
@@ -699,7 +755,7 @@ enum SkillImportance {
 }
 
 enum OrganizationSubType {
-  ORGANIZATION
+  COMPANY
   GOVERNMENT
   RESEARCH_INSTITUTE
   UNIVERSITY

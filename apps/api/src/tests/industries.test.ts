@@ -122,7 +122,7 @@ describe("Industries API Endpoints", () => {
 
     test("should successfully search industries by name query", async () => {
       const results = await callProcedure(industries.getAll, {
-        search: "Software",
+        name: "Software",
       });
 
       assert.ok(Array.isArray(results));
@@ -152,7 +152,7 @@ describe("Industries API Endpoints", () => {
     });
   });
 
-  describe("PUT /industries/{industryId} (Update)", () => {
+  describe("PATCH /industries/{industryId} (Update)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(industries.update, {
@@ -221,7 +221,7 @@ describe("Industries API Endpoints", () => {
       const idsToDelete = [createdIndustryId1, extraIndustry.id];
 
       await callProcedure(industries.deleteBulk, {
-        ids: idsToDelete,
+        industryIds: idsToDelete,
       });
 
       // Verify DB

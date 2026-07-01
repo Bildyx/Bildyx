@@ -2,34 +2,37 @@ import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
-  ProductSchema,
-  CreateProductSchema,
-  UpdateProductSchema,
-  GetProductsSchema,
-} from "../models/products";
+  SubjectSchema,
+  PostSubjectSchema,
+  PutSubjectSchema,
+  GetSubjectsSchema,
+  GetSubjectSchema,
+  DeleteSubjectSchema,
+  DeleteSubjectsBulkSchema,
+} from "../models/subjects";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 
-export const products = {
+export const subjects = {
   getAll: publicProcedure
     .route({
       method: "GET",
-      summary: "List all products",
-      description: "Get all products with optional filters",
-      path: "/products",
-      tags: ["Product"],
+      summary: "List all subjects",
+      description: "Get all subjects with optional filters",
+      path: "/subjects",
+      tags: ["Subject"],
     })
-    .input(GetProductsSchema)
-    .output(z.array(ProductSchema))
+    .input(GetSubjectsSchema)
+    .output(z.array(SubjectSchema))
     .handler(async ({ input }) => {
-      const { search, category, organization_id } = input;
+      const { name, category, organization_id } = input;
 
       let query = database
-        .selectFrom("products")
+        .selectFrom("subjects")
         .where("deleted_at", "is", null);
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
           eb("name", "ilike", p).or("description", "ilike", p),
         );
@@ -48,23 +51,23 @@ export const products = {
   getById: publicProcedure
     .route({
       method: "GET",
-      summary: "Get one product",
-      description: "Get a product by its ID",
-      path: "/products/{productId}",
-      tags: ["Product"],
+      summary: "Get one subject",
+      description: "Get a subject by its ID",
+      path: "/subjects/{subjectId}",
+      tags: ["Subject"],
     })
-    .input(z.object({ productId: z.string().uuid() }))
-    .output(ProductSchema)
+    .input(GetSubjectSchema)
+    .output(SubjectSchema)
     .handler(async ({ input }) => {
       const data = await database
-        .selectFrom("products")
-        .where("id", "=", input.productId)
+        .selectFrom("subjects")
+        .where("id", "=", input.subjectId)
         .where("deleted_at", "is", null)
         .selectAll()
         .executeTakeFirst();
 
       if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Product not found" });
+        throw new ORPCError("NOT_FOUND", { message: "Subject not found" });
       }
 
       return data;
@@ -73,16 +76,16 @@ export const products = {
   create: publicProcedure
     .route({
       method: "POST",
-      summary: "Create a product",
-      description: "Create a new product",
-      path: "/products",
-      tags: ["Product"],
+      summary: "Create a subject",
+      description: "Create a new subject",
+      path: "/subjects",
+      tags: ["Subject"],
     })
-    .input(CreateProductSchema)
-    .output(ProductSchema)
+    .input(PostSubjectSchema)
+    .output(SubjectSchema)
     .handler(async ({ input }) => {
       let checkQuery = database
-        .selectFrom("products")
+        .selectFrom("subjects")
         .where("name", "ilike", input.name)
         .where("deleted_at", "is", null);
 
@@ -101,14 +104,14 @@ export const products = {
       if (existing) {
         throw new ORPCError("CONFLICT", {
           message:
-            "A product with this name already exists for this organization",
+            "A subject with this name already exists for this organization",
         });
       }
 
       const { metadata, ...rest } = input;
 
-      const product = await database
-        .insertInto("products")
+      const subject = await database
+        .insertInto("subjects")
         .values({
           ...rest,
           id: randomUUID(),
@@ -118,101 +121,99 @@ export const products = {
         .returningAll()
         .executeTakeFirst();
 
-      if (!product) {
+      if (!subject) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to create product",
+          message: "Failed to create subject",
         });
       }
 
-      return product;
+      return subject;
     }),
 
   update: publicProcedure
     .route({
-      method: "PUT",
-      summary: "Update a product",
-      description: "Update an existing product by its ID",
-      path: "/products/{productId}",
-      tags: ["Product"],
+      method: "PATCH",
+      summary: "Update a subject",
+      description: "Update an existing subject by its ID",
+      path: "/subjects/{subjectId}",
+      tags: ["Subject"],
     })
-    .input(
-      z.object({ productId: z.string().uuid() }).merge(UpdateProductSchema),
-    )
-    .output(ProductSchema)
+    .input(z.object({ subjectId: z.string().uuid() }).merge(PutSubjectSchema))
+    .output(SubjectSchema)
     .handler(async ({ input }) => {
-      const { productId, metadata, ...rest } = input;
+      const { subjectId, metadata, ...rest } = input;
 
       const existing = await database
-        .selectFrom("products")
-        .where("id", "=", productId)
+        .selectFrom("subjects")
+        .where("id", "=", subjectId)
         .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Product not found" });
+        throw new ORPCError("NOT_FOUND", { message: "Subject not found" });
       }
 
-      const product = await database
-        .updateTable("products")
+      const subject = await database
+        .updateTable("subjects")
         .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
-        .where("id", "=", productId)
+        .where("id", "=", subjectId)
         .returningAll()
         .executeTakeFirst();
 
-      if (!product) {
+      if (!subject) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to update product",
+          message: "Failed to update subject",
         });
       }
 
-      return product;
+      return subject;
     }),
 
   delete: publicProcedure
     .route({
       method: "DELETE",
-      summary: "Delete a product",
-      description: "Soft delete a product by its ID",
-      path: "/products/{productId}",
-      tags: ["Product"],
+      summary: "Delete a subject",
+      description: "Soft delete a subject by its ID",
+      path: "/subjects/{subjectId}",
+      tags: ["Subject"],
     })
-    .input(z.object({ productId: z.string().uuid() }))
+    .input(DeleteSubjectSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
-        .selectFrom("products")
-        .where("id", "=", input.productId)
+        .selectFrom("subjects")
+        .where("id", "=", input.subjectId)
         .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Product not found" });
+        throw new ORPCError("NOT_FOUND", { message: "Subject not found" });
       }
 
       await database
-        .updateTable("products")
+        .updateTable("subjects")
         .set({ deleted_at: new Date() })
-        .where("id", "=", input.productId)
+        .where("id", "=", input.subjectId)
         .execute();
     }),
 
   deleteBulk: publicProcedure
     .route({
       method: "DELETE",
-      summary: "Delete multiple products",
-      description: "Soft delete multiple existing products by their IDs",
-      path: "/products",
-      tags: ["Product"],
+      summary: "Delete multiple subjects",
+      description: "Soft delete multiple existing subjects by their IDs",
+      path: "/subjects",
+      tags: ["Subject"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteSubjectsBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
-        .updateTable("products")
+        .updateTable("subjects")
         .set({ deleted_at: new Date() })
-        .where("id", "in", input.ids)
+        .where("id", "in", input.subjectIds)
         .execute();
     }),
 };

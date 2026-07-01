@@ -78,8 +78,9 @@ app.use((req, res) => {
         <script>
           Scalar.createApiReference('#app', {
             url: '/spec.json',
+            orderSchemaPropertiesBy: 'preserve',
             operationsSorter: (a, b) => {
-              const methods = ['get', 'post', 'put', 'patch', 'delete'];
+              const methods = ['get', 'post', 'patch', 'patch', 'delete'];
               const diff = methods.indexOf(a.method.toLowerCase()) - methods.indexOf(b.method.toLowerCase());
               if (diff !== 0) return diff;
               return a.path.localeCompare(b.path);

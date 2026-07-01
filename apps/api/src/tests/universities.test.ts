@@ -168,7 +168,7 @@ describe("Universities API Endpoints", () => {
 
     test("should search universities by name or local_name query", async () => {
       const results = await callProcedure(universities.getAll, {
-        search: "Sorbonne",
+        name: "Sorbonne",
       });
 
       assert.strictEqual(results.length, 1);
@@ -214,7 +214,7 @@ describe("Universities API Endpoints", () => {
     });
   });
 
-  describe("PUT /universities/{universityId} (Update)", () => {
+  describe("PATCH /universities/{universityId} (Update)", () => {
     test("should successfully update university fields", async () => {
       const result = await callProcedure(universities.update, {
         universityId: createdUniId1,
@@ -271,7 +271,7 @@ describe("Universities API Endpoints", () => {
       const idsToDelete = [createdUniId1, extra.id];
 
       await callProcedure(universities.deleteBulk, {
-        ids: idsToDelete,
+        universityIds: idsToDelete,
       });
 
       // Verify they are no longer returned in getAll

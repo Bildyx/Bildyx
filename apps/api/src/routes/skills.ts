@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   SkillSchema,
-  CreateSkillSchema,
-  UpdateSkillSchema,
+  PostSkillSchema,
+  PutSkillSchema,
   GetSkillsSchema,
+  GetSkillSchema,
+  DeleteSkillSchema,
+  DeleteSkillsBulkSchema,
 } from "../models/skills";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -22,12 +25,12 @@ export const skills = {
     .input(GetSkillsSchema)
     .output(z.array(SkillSchema))
     .handler(async ({ input }) => {
-      const { search, category, difficulty, industry_id } = input;
+      const { name, category, difficulty } = input;
 
       let query = database.selectFrom("skills").where("deleted_at", "is", null);
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
           eb("name", "ilike", p).or("description", "ilike", p),
         );
@@ -38,9 +41,6 @@ export const skills = {
       }
       if (difficulty) {
         query = query.where("difficulty", "=", difficulty);
-      }
-      if (industry_id) {
-        query = query.where("industry_id", "=", industry_id);
       }
 
       return await query.selectAll().orderBy("name", "asc").execute();
@@ -54,7 +54,7 @@ export const skills = {
       path: "/skills/{skillId}",
       tags: ["Skill"],
     })
-    .input(z.object({ skillId: z.string().uuid() }))
+    .input(GetSkillSchema)
     .output(SkillSchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -79,7 +79,7 @@ export const skills = {
       path: "/skills",
       tags: ["Skill"],
     })
-    .input(CreateSkillSchema)
+    .input(PostSkillSchema)
     .output(SkillSchema)
     .handler(async ({ input }) => {
       const existing = await database
@@ -119,13 +119,13 @@ export const skills = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a skill",
       description: "Update an existing skill by its ID",
       path: "/skills/{skillId}",
       tags: ["Skill"],
     })
-    .input(z.object({ skillId: z.string().uuid() }).merge(UpdateSkillSchema))
+    .input(z.object({ skillId: z.string().uuid() }).merge(PutSkillSchema))
     .output(SkillSchema)
     .handler(async ({ input }) => {
       const { skillId, metadata, ...rest } = input;
@@ -165,7 +165,7 @@ export const skills = {
       path: "/skills/{skillId}",
       tags: ["Skill"],
     })
-    .input(z.object({ skillId: z.string().uuid() }))
+    .input(DeleteSkillSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -194,13 +194,13 @@ export const skills = {
       path: "/skills",
       tags: ["Skill"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteSkillsBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .updateTable("skills")
         .set({ deleted_at: new Date() })
-        .where("id", "in", input.ids)
+        .where("id", "in", input.skillIds)
         .execute();
     }),
 };

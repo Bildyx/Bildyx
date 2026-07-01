@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   JobAdSchema,
-  CreateJobAdSchema,
-  UpdateJobAdSchema,
+  PostJobAdSchema,
+  PutJobAdSchema,
   GetJobAdsSchema,
+  GetJobAdSchema,
+  DeleteJobAdSchema,
+  DeleteJobAdsBulkSchema,
 } from "../models/job_ads";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -23,7 +26,7 @@ export const job_ads = {
     .output(z.array(JobAdSchema))
     .handler(async ({ input }) => {
       const {
-        search,
+        name,
         organization_id,
         job_id,
         contract_type,
@@ -37,8 +40,8 @@ export const job_ads = {
         .selectFrom("job_ads")
         .where("deleted_at", "is", null);
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where((eb) =>
           eb("title", "ilike", p).or("description", "ilike", p),
         );
@@ -77,7 +80,7 @@ export const job_ads = {
       path: "/job-ads/{jobAdId}",
       tags: ["JobAd"],
     })
-    .input(z.object({ jobAdId: z.string().uuid() }))
+    .input(GetJobAdSchema)
     .output(JobAdSchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -102,7 +105,7 @@ export const job_ads = {
       path: "/job-ads",
       tags: ["JobAd"],
     })
-    .input(CreateJobAdSchema)
+    .input(PostJobAdSchema)
     .output(JobAdSchema)
     .handler(async ({ input }) => {
       const { metadata, ...rest } = input;
@@ -129,13 +132,13 @@ export const job_ads = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a job ad",
       description: "Update an existing job ad by its ID",
       path: "/job-ads/{jobAdId}",
       tags: ["JobAd"],
     })
-    .input(z.object({ jobAdId: z.string().uuid() }).merge(UpdateJobAdSchema))
+    .input(z.object({ jobAdId: z.string().uuid() }).merge(PutJobAdSchema))
     .output(JobAdSchema)
     .handler(async ({ input }) => {
       const { jobAdId, metadata, ...rest } = input;
@@ -167,86 +170,6 @@ export const job_ads = {
       return job_ad;
     }),
 
-  publish: publicProcedure
-    .route({
-      method: "PATCH",
-      summary: "Publish a job ad",
-      description: "Publish a job ad by its ID",
-      path: "/job-ads/{jobAdId}/publish",
-      tags: ["JobAd"],
-    })
-    .input(z.object({ jobAdId: z.string().uuid() }))
-    .output(JobAdSchema)
-    .handler(async ({ input }) => {
-      const existing = await database
-        .selectFrom("job_ads")
-        .where("id", "=", input.jobAdId)
-        .where("deleted_at", "is", null)
-        .select("id")
-        .executeTakeFirst();
-
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Job ad not found" });
-      }
-
-      const job_ad = await database
-        .updateTable("job_ads")
-        .set({
-          status: "PUBLISHED",
-          published_at: new Date(),
-          updated_at: new Date(),
-        })
-        .where("id", "=", input.jobAdId)
-        .returningAll()
-        .executeTakeFirst();
-
-      if (!job_ad) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to publish job ad",
-        });
-      }
-
-      return job_ad;
-    }),
-
-  close: publicProcedure
-    .route({
-      method: "PATCH",
-      summary: "Close a job ad",
-      description: "Close a job ad by its ID",
-      path: "/job-ads/{jobAdId}/close",
-      tags: ["JobAd"],
-    })
-    .input(z.object({ jobAdId: z.string().uuid() }))
-    .output(JobAdSchema)
-    .handler(async ({ input }) => {
-      const existing = await database
-        .selectFrom("job_ads")
-        .where("id", "=", input.jobAdId)
-        .where("deleted_at", "is", null)
-        .select("id")
-        .executeTakeFirst();
-
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Job ad not found" });
-      }
-
-      const job_ad = await database
-        .updateTable("job_ads")
-        .set({ status: "CLOSED", updated_at: new Date() })
-        .where("id", "=", input.jobAdId)
-        .returningAll()
-        .executeTakeFirst();
-
-      if (!job_ad) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to close job ad",
-        });
-      }
-
-      return job_ad;
-    }),
-
   delete: publicProcedure
     .route({
       method: "DELETE",
@@ -255,7 +178,7 @@ export const job_ads = {
       path: "/job-ads/{jobAdId}",
       tags: ["JobAd"],
     })
-    .input(z.object({ jobAdId: z.string().uuid() }))
+    .input(DeleteJobAdSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -284,13 +207,13 @@ export const job_ads = {
       path: "/job-ads",
       tags: ["JobAd"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteJobAdsBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .updateTable("job_ads")
         .set({ deleted_at: new Date() })
-        .where("id", "in", input.ids)
+        .where("id", "in", input.jobAdIds)
         .execute();
     }),
 };

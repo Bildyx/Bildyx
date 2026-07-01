@@ -144,7 +144,7 @@ describe("Cities API Endpoints", () => {
 
     test("should successfully search cities by name query", async () => {
       const results = await callProcedure(cities.getAll, {
-        search: "Angeles",
+        name: "Angeles",
       });
 
       assert.ok(Array.isArray(results));
@@ -253,7 +253,7 @@ describe("Cities API Endpoints", () => {
       const idsToDelete = [createdCityId1, extraCity.id];
 
       await callProcedure(cities.deleteBulk, {
-        ids: idsToDelete,
+        cityIds: idsToDelete,
       });
 
       // Verify DB

@@ -3,8 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   GetCertificationsSchema,
+  GetCertificationSchema,
   CertificationSchema,
   PostCertificationSchema,
+  PutCertificationSchema,
+  DeleteCertificationSchema,
+  DeleteCertificationsBulkSchema,
 } from "../models/certifications";
 import { z } from "zod";
 import { randomUUID } from "crypto";
@@ -89,7 +93,7 @@ export const certifications = {
       path: "/certifications/{certificationId}",
       tags: ["Certification"],
     })
-    .input(z.object({ certificationId: z.string().uuid() }))
+    .input(GetCertificationSchema)
     .output(CertificationSchema)
     .handler(async ({ input }) => {
       const { certificationId } = input;
@@ -140,19 +144,19 @@ export const certifications = {
       return cert;
     }),
 
-  // 5. Mettre à jour une certification (remplacement complet)
+  // 5. Mettre à jour une certification
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a certification",
-      description: "Replace an existing certification completely by its ID",
+      description: "Update an existing certification by its ID",
       path: "/certifications/{certificationId}",
       tags: ["Certification"],
     })
     .input(
       z
         .object({ certificationId: z.string().uuid() })
-        .merge(PostCertificationSchema),
+        .merge(PutCertificationSchema),
     )
     .output(CertificationSchema)
     .handler(async ({ input }) => {
@@ -186,7 +190,7 @@ export const certifications = {
       path: "/certifications/{certificationId}",
       tags: ["Certification"],
     })
-    .input(z.object({ certificationId: z.string().uuid() }))
+    .input(DeleteCertificationSchema)
     .output(CertificationSchema)
     .handler(async ({ input }) => {
       const { certificationId } = input;
@@ -215,18 +219,18 @@ export const certifications = {
       path: "/certifications",
       tags: ["Certification"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteCertificationsBulkSchema)
     .output(z.array(CertificationSchema))
     .handler(async ({ input }) => {
-      const { ids } = input;
+      const { certificationIds } = input;
 
-      if (ids.length === 0) {
+      if (certificationIds.length === 0) {
         return [];
       }
 
       const certs = await database
         .deleteFrom("certifications")
-        .where("id", "in", ids)
+        .where("id", "in", certificationIds)
         .returningAll()
         .execute();
 

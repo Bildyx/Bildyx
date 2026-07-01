@@ -87,11 +87,13 @@ describe("Job Ad Skills API Endpoints", () => {
   after(async () => {
     // Clean up test items
     try {
-      const ids = [createdJobAdSkillId1, createdJobAdSkillId2].filter(Boolean);
-      if (ids.length > 0) {
+      const jobAdSkillIds = [createdJobAdSkillId1, createdJobAdSkillId2].filter(
+        Boolean,
+      );
+      if (jobAdSkillIds.length > 0) {
         await database
           .deleteFrom("job_ad_skills")
-          .where("id", "in", ids)
+          .where("id", "in", jobAdSkillIds)
           .execute();
       }
       if (testSkillId1) {
@@ -196,7 +198,7 @@ describe("Job Ad Skills API Endpoints", () => {
     });
   });
 
-  describe("PUT /job-ad-skills/{jobAdSkillId} (Update)", () => {
+  describe("PATCH /job-ad-skills/{jobAdSkillId} (Update)", () => {
     test("should successfully update importance", async () => {
       const result = await callProcedure(job_ads_skills.update, {
         jobAdSkillId: createdJobAdSkillId1,
@@ -254,7 +256,7 @@ describe("Job Ad Skills API Endpoints", () => {
       const idsToDelete = [createdJobAdSkillId1, extra.id];
 
       await callProcedure(job_ads_skills.deleteBulk, {
-        ids: idsToDelete,
+        jobAdSkillIds: idsToDelete,
       });
 
       // Verify DB

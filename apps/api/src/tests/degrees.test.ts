@@ -1,7 +1,6 @@
 import { test, describe, before, after } from "node:test";
 import assert from "node:assert";
 import { degrees } from "../routes/degrees";
-import { countries } from "../routes/countries";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
@@ -13,8 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 describe("Degrees API Endpoints", () => {
-  let testCountryId: string;
-  let testUniversityId: string;
   let createdDegreeId1: string;
   let createdDegreeId2: string;
 
@@ -32,49 +29,16 @@ describe("Degrees API Endpoints", () => {
       const schemaSql = fs.readFileSync(schemaPath, "utf8");
       await pgliteClient.exec(schemaSql);
     }
-
-    // Create a mock country
-    const country = await callProcedure(countries.create, {
-      name: "Degree Test Country",
-      serialNumber: "DTC-01",
-      iso_code: "DT",
-    });
-    testCountryId = country.id;
-
-    // Create a mock university directly in DB
-    testUniversityId = randomUUID();
-    await database
-      .insertInto("universities")
-      .values({
-        id: testUniversityId,
-        name: "Degree Test University",
-        serialNumber: "DTU-01",
-        country_id: testCountryId,
-        updated_at: new Date(),
-      })
-      .execute();
   });
 
   after(async () => {
-    // Clean up test degrees, university, and country
+    // Clean up test degrees
     try {
       const degreeIds = [createdDegreeId1, createdDegreeId2].filter(Boolean);
       if (degreeIds.length > 0) {
         await database
           .deleteFrom("degrees")
           .where("id", "in", degreeIds)
-          .execute();
-      }
-      if (testUniversityId) {
-        await database
-          .deleteFrom("universities")
-          .where("id", "=", testUniversityId)
-          .execute();
-      }
-      if (testCountryId) {
-        await database
-          .deleteFrom("countries")
-          .where("id", "=", testCountryId)
           .execute();
       }
     } catch (e) {
@@ -109,27 +73,22 @@ describe("Degrees API Endpoints", () => {
       const result = await callProcedure(degrees.create, {
         name: "Computer Science",
         serialNumber: "DEG-01",
-        university_id: testUniversityId,
         level: "BACHELOR",
-        field: "Computer Science and IT",
+        area: "Computer Science and IT",
         duration_years: 3.5,
-        language_of_instruction: "English",
-        country_id: testCountryId,
       });
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Computer Science");
       assert.strictEqual(result.serialNumber, "DEG-01");
-      assert.strictEqual(result.university_id, testUniversityId);
       createdDegreeId1 = result.id;
     });
 
-    test("should throw CONFLICT when creating a degree with an existing name for the same university", async () => {
+    test("should throw CONFLICT when creating a degree with an existing name", async () => {
       await assert.rejects(
         callProcedure(degrees.create, {
           name: "Computer Science",
           serialNumber: "DEG-02",
-          university_id: testUniversityId,
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -139,9 +98,7 @@ describe("Degrees API Endpoints", () => {
       const result = await callProcedure(degrees.create, {
         name: "Mechanical Engineering",
         serialNumber: "DEG-03",
-        university_id: testUniversityId,
         level: "MASTER",
-        country_id: testCountryId,
       });
 
       assert.ok(result.id);
@@ -162,9 +119,9 @@ describe("Degrees API Endpoints", () => {
       assert.ok(names.includes("Mechanical Engineering"));
     });
 
-    test("should successfully search degrees by name or field query", async () => {
+    test("should successfully search degrees by name or area query", async () => {
       const results = await callProcedure(degrees.getAll, {
-        search: "Computer",
+        name: "Computer",
       });
 
       assert.ok(Array.isArray(results));
@@ -182,24 +139,6 @@ describe("Degrees API Endpoints", () => {
       const levels = results.map((r: any) => r.level);
       assert.ok(levels.includes("BACHELOR"));
       assert.ok(!levels.includes("MASTER"));
-    });
-
-    test("should filter degrees by university_id", async () => {
-      const results = await callProcedure(degrees.getAll, {
-        university_id: testUniversityId,
-      });
-
-      assert.ok(Array.isArray(results));
-      assert.ok(results.length >= 2);
-    });
-
-    test("should filter degrees by country_id", async () => {
-      const results = await callProcedure(degrees.getAll, {
-        country_id: testCountryId,
-      });
-
-      assert.ok(Array.isArray(results));
-      assert.ok(results.length >= 2);
     });
   });
 
@@ -223,7 +162,7 @@ describe("Degrees API Endpoints", () => {
     });
   });
 
-  describe("PUT /degrees/{degreeId} (Update)", () => {
+  describe("PATCH /degrees/{degreeId} (Update)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(degrees.update, {
@@ -287,13 +226,12 @@ describe("Degrees API Endpoints", () => {
       const extraDegree = await callProcedure(degrees.create, {
         name: "Aeronautics",
         serialNumber: "DEG-99",
-        university_id: testUniversityId,
       });
 
       const idsToDelete = [createdDegreeId1, extraDegree.id];
 
       await callProcedure(degrees.deleteBulk, {
-        ids: idsToDelete,
+        degreeIds: idsToDelete,
       });
 
       // Verify DB

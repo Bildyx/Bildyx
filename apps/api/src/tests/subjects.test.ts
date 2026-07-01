@@ -1,6 +1,6 @@
 import { test, describe, before, after } from "node:test";
 import assert from "node:assert";
-import { products } from "../routes/products";
+import { subjects } from "../routes/subjects";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
@@ -11,10 +11,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe("Products API Endpoints", () => {
+describe("Subjects API Endpoints", () => {
   let testOrgId: string;
-  let createdProductId1: string;
-  let createdProductId2: string;
+  let createdSubjectId1: string;
+  let createdSubjectId2: string;
 
   const callProcedure = async (procedure: any, input?: any) => {
     const schema = procedure["~orpc"]?.inputSchema;
@@ -38,8 +38,8 @@ describe("Products API Endpoints", () => {
       .insertInto("organizations")
       .values({
         id: testOrgId,
-        name: "Test Org for Products",
-        slug: "test-org-products-slug",
+        name: "Test Org for Subjects",
+        slug: "test-org-subjects-slug",
         updated_at: new Date(),
       })
       .execute();
@@ -48,8 +48,8 @@ describe("Products API Endpoints", () => {
   after(async () => {
     // Clean up test items
     try {
-      // Hard delete any remaining products created in tests first
-      await database.deleteFrom("products").execute();
+      // Hard delete any remaining subjects created in tests first
+      await database.deleteFrom("subjects").execute();
       if (testOrgId) {
         await database
           .deleteFrom("organizations")
@@ -63,12 +63,12 @@ describe("Products API Endpoints", () => {
     }
   });
 
-  describe("POST /products (Create)", () => {
+  describe("POST /subjects (Create)", () => {
     test("should throw ZodError when name is empty or missing", async () => {
       await assert.rejects(
-        callProcedure(products.create, {
+        callProcedure(subjects.create, {
           name: "",
-          serialNumber: "PRD-TEST-01",
+          serialNumber: "SUB-TEST-01",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -76,18 +76,18 @@ describe("Products API Endpoints", () => {
 
     test("should throw ZodError when serialNumber is empty or missing", async () => {
       await assert.rejects(
-        callProcedure(products.create, {
-          name: "Test Software",
+        callProcedure(subjects.create, {
+          name: "Test Subject",
           serialNumber: "   ",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should successfully create a product", async () => {
-      const result = await callProcedure(products.create, {
+    test("should successfully create a subject", async () => {
+      const result = await callProcedure(subjects.create, {
         name: "Analytics Platform",
-        serialNumber: "PRD-TEST-01",
+        serialNumber: "SUB-TEST-01",
         category: "SOFTWARE",
         description: "An analytics service",
         organization_id: testOrgId,
@@ -102,160 +102,160 @@ describe("Products API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Analytics Platform");
-      assert.strictEqual(result.serialNumber, "PRD-TEST-01");
+      assert.strictEqual(result.serialNumber, "SUB-TEST-01");
       assert.strictEqual(result.category, "SOFTWARE");
       assert.strictEqual(result.organization_id, testOrgId);
-      createdProductId1 = result.id;
+      createdSubjectId1 = result.id;
     });
 
-    test("should throw CONFLICT when creating a product with the same name for the same organization", async () => {
+    test("should throw CONFLICT when creating a subject with the same name for the same organization", async () => {
       await assert.rejects(
-        callProcedure(products.create, {
+        callProcedure(subjects.create, {
           name: "Analytics Platform",
-          serialNumber: "PRD-TEST-02",
+          serialNumber: "SUB-TEST-02",
           organization_id: testOrgId,
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
     });
 
-    test("should successfully create a second product", async () => {
-      const result = await callProcedure(products.create, {
+    test("should successfully create a second subject", async () => {
+      const result = await callProcedure(subjects.create, {
         name: "Developer API Gateway",
-        serialNumber: "PRD-TEST-02",
+        serialNumber: "SUB-TEST-02",
         category: "API",
       });
 
       assert.ok(result.id);
       assert.strictEqual(result.category, "API");
       assert.strictEqual(result.organization_id, null);
-      createdProductId2 = result.id;
+      createdSubjectId2 = result.id;
     });
   });
 
-  describe("GET /products (GetAll)", () => {
-    test("should successfully return all non-deleted products", async () => {
-      const results = await callProcedure(products.getAll, {});
+  describe("GET /subjects (GetAll)", () => {
+    test("should successfully return all non-deleted subjects", async () => {
+      const results = await callProcedure(subjects.getAll, {});
 
       assert.ok(Array.isArray(results));
       assert.strictEqual(results.length, 2);
     });
 
-    test("should search products by name or description query", async () => {
-      const results = await callProcedure(products.getAll, {
-        search: "Gateway",
+    test("should search subjects by name or description query", async () => {
+      const results = await callProcedure(subjects.getAll, {
+        name: "Gateway",
       });
 
       assert.strictEqual(results.length, 1);
-      assert.strictEqual(results[0].id, createdProductId2);
+      assert.strictEqual(results[0].id, createdSubjectId2);
     });
 
-    test("should filter products by category", async () => {
-      const results = await callProcedure(products.getAll, {
+    test("should filter subjects by category", async () => {
+      const results = await callProcedure(subjects.getAll, {
         category: "SOFTWARE",
       });
 
       assert.strictEqual(results.length, 1);
-      assert.strictEqual(results[0].id, createdProductId1);
+      assert.strictEqual(results[0].id, createdSubjectId1);
     });
 
-    test("should filter products by organization_id", async () => {
-      const results = await callProcedure(products.getAll, {
+    test("should filter subjects by organization_id", async () => {
+      const results = await callProcedure(subjects.getAll, {
         organization_id: testOrgId,
       });
 
       assert.strictEqual(results.length, 1);
-      assert.strictEqual(results[0].id, createdProductId1);
+      assert.strictEqual(results[0].id, createdSubjectId1);
     });
   });
 
-  describe("GET /products/{productId} (GetById)", () => {
+  describe("GET /subjects/{subjectId} (GetById)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
-        callProcedure(products.getById, {
-          productId: randomUUID(),
+        callProcedure(subjects.getById, {
+          subjectId: randomUUID(),
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
-    test("should successfully return the product by its ID", async () => {
-      const result = await callProcedure(products.getById, {
-        productId: createdProductId1,
+    test("should successfully return the subject by its ID", async () => {
+      const result = await callProcedure(subjects.getById, {
+        subjectId: createdSubjectId1,
       });
 
-      assert.strictEqual(result.id, createdProductId1);
+      assert.strictEqual(result.id, createdSubjectId1);
       assert.strictEqual(result.name, "Analytics Platform");
     });
   });
 
-  describe("PUT /products/{productId} (Update)", () => {
-    test("should successfully update product fields", async () => {
-      const result = await callProcedure(products.update, {
-        productId: createdProductId1,
+  describe("PATCH /subjects/{subjectId} (Update)", () => {
+    test("should successfully update subject fields", async () => {
+      const result = await callProcedure(subjects.update, {
+        subjectId: createdSubjectId1,
         name: "Enterprise Analytics Platform",
         type: "Enterprise SaaS",
       });
 
-      assert.strictEqual(result.id, createdProductId1);
+      assert.strictEqual(result.id, createdSubjectId1);
       assert.strictEqual(result.name, "Enterprise Analytics Platform");
       assert.strictEqual(result.type, "Enterprise SaaS");
     });
   });
 
-  describe("DELETE /products/{productId} (Delete)", () => {
+  describe("DELETE /subjects/{subjectId} (Delete)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
-        callProcedure(products.delete, {
-          productId: randomUUID(),
+        callProcedure(subjects.delete, {
+          subjectId: randomUUID(),
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
-    test("should successfully soft delete a product by ID", async () => {
-      await callProcedure(products.delete, {
-        productId: createdProductId2,
+    test("should successfully soft delete a subject by ID", async () => {
+      await callProcedure(subjects.delete, {
+        subjectId: createdSubjectId2,
       });
 
       // Verify no longer returned by getById
       await assert.rejects(
-        callProcedure(products.getById, {
-          productId: createdProductId2,
+        callProcedure(subjects.getById, {
+          subjectId: createdSubjectId2,
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 
       // Verify no longer returned in getAll
-      const results = await callProcedure(products.getAll, {});
+      const results = await callProcedure(subjects.getAll, {});
       const remainingIds = results.map((r: any) => r.id);
-      assert.ok(!remainingIds.includes(createdProductId2));
+      assert.ok(!remainingIds.includes(createdSubjectId2));
 
-      createdProductId2 = ""; // Mark as cleaned up
+      createdSubjectId2 = ""; // Mark as cleaned up
     });
   });
 
-  describe("DELETE /products (DeleteBulk)", () => {
-    test("should successfully bulk soft delete products", async () => {
+  describe("DELETE /subjects (DeleteBulk)", () => {
+    test("should successfully bulk soft delete subjects", async () => {
       // Create another one to test bulk delete
-      const extra = await callProcedure(products.create, {
-        name: "Temporary product to delete",
-        serialNumber: "PRD-BULK-DEL",
+      const extra = await callProcedure(subjects.create, {
+        name: "Temporary subject to delete",
+        serialNumber: "SUB-BULK-DEL",
       });
 
-      const idsToDelete = [createdProductId1, extra.id];
+      const idsToDelete = [createdSubjectId1, extra.id];
 
-      await callProcedure(products.deleteBulk, {
-        ids: idsToDelete,
+      await callProcedure(subjects.deleteBulk, {
+        subjectIds: idsToDelete,
       });
 
       // Verify they are no longer returned in getAll
-      const results = await callProcedure(products.getAll, {});
+      const results = await callProcedure(subjects.getAll, {});
       const remainingIds = results.map((r: any) => r.id);
-      assert.ok(!remainingIds.includes(createdProductId1));
+      assert.ok(!remainingIds.includes(createdSubjectId1));
       assert.ok(!remainingIds.includes(extra.id));
 
-      createdProductId1 = ""; // Mark as cleaned up
+      createdSubjectId1 = ""; // Mark as cleaned up
     });
   });
 });

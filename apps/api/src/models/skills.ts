@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { DifficultyLevelEnum, SkillCategoryEnum } from "./utils/enums";
-
-const arrayPreprocessor = z.preprocess((val) => {
-  if (Array.isArray(val)) {
-    const filtered = val.filter((v) => v !== "");
-    return filtered.length === 0 ? null : filtered;
-  }
-  return val === "" ? null : val;
-}, z.array(z.string()).nullable().optional());
+import { zStringArray } from "./utils/preprocessors";
 
 export const SkillSchema = z.object({
   id: z.string().uuid(),
@@ -15,47 +8,56 @@ export const SkillSchema = z.object({
   serialNumber: z.string().trim().min(1),
   type: z.string().nullable().optional(),
   category: SkillCategoryEnum.nullable().optional(),
-  categories: arrayPreprocessor,
+  categories: zStringArray(),
   description: z.string().nullable().optional(),
   icon_url: z.string().nullable().optional(),
   industry_id: z.string().uuid().nullable().optional(),
   difficulty: DifficultyLevelEnum.nullable().optional(),
-  used_in: arrayPreprocessor,
-  jobs: arrayPreprocessor,
-  product_categories: arrayPreprocessor,
-  common_fields_of_study: arrayPreprocessor,
-  related_abilities: arrayPreprocessor,
+  used_in: zStringArray(),
+  jobs: zStringArray(),
+  product_categories: zStringArray(),
+  common_fields_of_study: zStringArray(),
+  related_abilities: zStringArray(),
   time_to_master: z.string().nullable().optional(),
-  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
-  deleted_at: z
-    .date()
-    .nullable()
-    .optional()
-    .default(null as any),
-  created_at: z.date().default(new Date()),
-  updated_at: z.date().default(new Date()),
+  deleted_at: z.date().nullable().optional().default(null),
+  created_at: z.date(),
+  updated_at: z.date(),
+  score: z.number().int().min(0).nullable().optional(),
 });
 
-export const CreateSkillSchema = SkillSchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
-  serialNumber: true,
-}).extend({
-  serialNumber: z.string().trim().min(1),
-});
-
-export const UpdateSkillSchema = CreateSkillSchema.partial();
-
+// GET
 export const GetSkillsSchema = z.object({
-  search: z.string().optional(),
+  name: z.string().optional(),
   category: SkillCategoryEnum.optional(),
   difficulty: DifficultyLevelEnum.optional(),
   industry_id: z.string().uuid().optional(),
 });
 
+export const GetSkillSchema = z.object({
+  skillId: z.string().uuid(),
+});
+
+// POST
+export const PostSkillSchema = SkillSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+});
+
+// PATCH
+export const PutSkillSchema = PostSkillSchema.partial();
+
+// DELETE
+export const DeleteSkillSchema = z.object({
+  skillId: z.string().uuid(),
+});
+
+export const DeleteSkillsBulkSchema = z.object({
+  skillIds: z.array(z.string().uuid()),
+});
+
 export type Skill = z.infer<typeof SkillSchema>;
-export type CreateSkill = z.infer<typeof CreateSkillSchema>;
-export type UpdateSkill = z.infer<typeof UpdateSkillSchema>;
+export type PostSkill = z.infer<typeof PostSkillSchema>;
+export type PutSkill = z.infer<typeof PutSkillSchema>;

@@ -150,7 +150,7 @@ describe("Countries API Endpoints", () => {
     });
   });
 
-  describe("PUT /countries/{countryId} (Update)", () => {
+  describe("PATCH /countries/{countryId} (Update)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(countries.update, {
@@ -219,7 +219,7 @@ describe("Countries API Endpoints", () => {
       const idsToDelete = [createdCountryId1, extraCountry.id];
 
       await callProcedure(countries.deleteBulk, {
-        ids: idsToDelete,
+        countryIds: idsToDelete,
       });
 
       // Verify DB

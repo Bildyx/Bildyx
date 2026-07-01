@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   CitySchema,
-  CreateCitySchema,
-  UpdateCitySchema,
+  PostCitySchema,
+  PutCitySchema,
   GetCitiesSchema,
+  GetCitySchema,
+  DeleteCitySchema,
+  DeleteCitiesBulkSchema,
 } from "../models/cities";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -22,12 +25,12 @@ export const cities = {
     .input(GetCitiesSchema)
     .output(z.array(CitySchema))
     .handler(async ({ input }) => {
-      const { search, country_id } = input;
+      const { name, country_id } = input;
 
       let query = database.selectFrom("cities");
 
-      if (search) {
-        const p = `%${search.trim()}%`;
+      if (name) {
+        const p = `%${name.trim()}%`;
         query = query.where("name", "ilike", p);
       }
 
@@ -46,7 +49,7 @@ export const cities = {
       path: "/cities/{cityId}",
       tags: ["City"],
     })
-    .input(z.object({ cityId: z.string().uuid() }))
+    .input(GetCitySchema)
     .output(CitySchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -89,7 +92,7 @@ export const cities = {
       path: "/cities",
       tags: ["City"],
     })
-    .input(CreateCitySchema)
+    .input(PostCitySchema)
     .output(CitySchema)
     .handler(async ({ input }) => {
       const existing = await database
@@ -137,13 +140,13 @@ export const cities = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a city",
       description: "Update an existing city by its ID",
       path: "/cities/{cityId}",
       tags: ["City"],
     })
-    .input(z.object({ cityId: z.string().uuid() }).merge(UpdateCitySchema))
+    .input(z.object({ cityId: z.string().uuid() }).merge(PutCitySchema))
     .output(CitySchema)
     .handler(async ({ input }) => {
       const { cityId, metadata, ...data } = input;
@@ -181,7 +184,7 @@ export const cities = {
       path: "/cities/{cityId}",
       tags: ["City"],
     })
-    .input(z.object({ cityId: z.string().uuid() }))
+    .input(DeleteCitySchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -207,12 +210,12 @@ export const cities = {
       path: "/cities",
       tags: ["City"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteCitiesBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .deleteFrom("cities")
-        .where("id", "in", input.ids)
+        .where("id", "in", input.cityIds)
         .execute();
     }),
 };

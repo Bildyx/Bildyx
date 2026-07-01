@@ -3,9 +3,12 @@ import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
   CountrySchema,
-  CreateCountrySchema,
-  UpdateCountrySchema,
+  PostCountrySchema,
+  PutCountrySchema,
   GetCountriesSchema,
+  GetCountrySchema,
+  DeleteCountrySchema,
+  DeleteCountriesBulkSchema,
 } from "../models/countries";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -44,7 +47,7 @@ export const countries = {
       path: "/countries/{countryId}",
       tags: ["Country"],
     })
-    .input(z.object({ countryId: z.string().uuid() }))
+    .input(GetCountrySchema)
     .output(CountrySchema)
     .handler(async ({ input }) => {
       const data = await database
@@ -68,7 +71,7 @@ export const countries = {
       path: "/countries",
       tags: ["Country"],
     })
-    .input(CreateCountrySchema)
+    .input(PostCountrySchema)
     .output(CountrySchema)
     .handler(async ({ input }) => {
       const existing = await database
@@ -106,15 +109,13 @@ export const countries = {
 
   update: publicProcedure
     .route({
-      method: "PUT",
+      method: "PATCH",
       summary: "Update a country",
       description: "Update an existing country by its ID",
       path: "/countries/{countryId}",
       tags: ["Country"],
     })
-    .input(
-      z.object({ countryId: z.string().uuid() }).merge(UpdateCountrySchema),
-    )
+    .input(z.object({ countryId: z.string().uuid() }).merge(PutCountrySchema))
     .output(CountrySchema)
     .handler(async ({ input }) => {
       const { countryId, metadata, ...data } = input;
@@ -153,7 +154,7 @@ export const countries = {
       path: "/countries/{countryId}",
       tags: ["Country"],
     })
-    .input(z.object({ countryId: z.string().uuid() }))
+    .input(DeleteCountrySchema)
     .output(z.void())
     .handler(async ({ input }) => {
       const existing = await database
@@ -180,12 +181,12 @@ export const countries = {
       path: "/countries",
       tags: ["Country"],
     })
-    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .input(DeleteCountriesBulkSchema)
     .output(z.void())
     .handler(async ({ input }) => {
       await database
         .deleteFrom("countries")
-        .where("id", "in", input.ids)
+        .where("id", "in", input.countryIds)
         .execute();
     }),
 };

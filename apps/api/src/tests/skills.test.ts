@@ -146,7 +146,7 @@ describe("Skills API Endpoints", () => {
 
     test("should search skills by name or description query", async () => {
       const results = await callProcedure(skills.getAll, {
-        search: "typing",
+        name: "typing",
       });
 
       assert.strictEqual(results.length, 1);
@@ -192,7 +192,7 @@ describe("Skills API Endpoints", () => {
     });
   });
 
-  describe("PUT /skills/{skillId} (Update)", () => {
+  describe("PATCH /skills/{skillId} (Update)", () => {
     test("should successfully update skill fields", async () => {
       const result = await callProcedure(skills.update, {
         skillId: createdSkillId1,
@@ -249,7 +249,7 @@ describe("Skills API Endpoints", () => {
       const idsToDelete = [createdSkillId1, extra.id];
 
       await callProcedure(skills.deleteBulk, {
-        ids: idsToDelete,
+        skillIds: idsToDelete,
       });
 
       // Verify they are no longer returned in getAll
