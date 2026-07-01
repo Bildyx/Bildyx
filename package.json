@@ -9,8 +9,35 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@prisma/client": "^7.8.0",
-    "dotenv": "^17.4.2"
+    "@fortawesome/fontawesome-free": "6.7.2",
+    "@fortawesome/fontawesome-svg-core": "6.7.2",
+    "@fortawesome/free-brands-svg-icons": "6.7.2",
+    "@fortawesome/free-regular-svg-icons": "6.7.2",
+    "@fortawesome/free-solid-svg-icons": "6.7.2",
+    "@prisma/client": "^6.19.3",
+    "@types/prismjs": "1.26.5",
+    "autoprefixer": "10.4.21",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dayjs": "^1.11.21",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.2",
+    "fontkit": "^2.0.4",
+    "http-server": "14.1.1",
+    "image-size": "2.0.2",
+    "linebreak": "^1.1.0",
+    "mathjax-full": "3.2.1",
+    "nanoid": "^5.1.15",
+    "nodemailer": "^9.0.1",
+    "postcss": "^8.5.15",
+    "pptxgenjs": "4.0.0",
+    "prismjs": "1.30.0",
+    "sharp": "0.34.1",
+    "skia-canvas": "^3.0.6",
+    "tailwindcss": "4.1.10",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

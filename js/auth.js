@@ -1,575 +1,514 @@
-/* =========================================================
-   Bildyx - Authentication debug logic
-   No database is connected yet.
+/*
+ * Authentication utilities and form handlers
+ *
+ * This module centralises all the JavaScript logic shared across the
+ * authentication pages: sign up, log in, forgot password, reset
+ * password and verify email. It provides helper functions for
+ * sanitising input, validating email addresses, scoring passwords,
+ * generating simple math captchas, rate limiting login attempts and
+ * capturing form submissions into localStorage for debug purposes.
+ *
+ * Each page conditionally binds event listeners only if the
+ * corresponding elements exist to avoid errors on pages where the
+ * elements are absent. The debug panel and toast notifications are
+ * available on all pages.
+ */
 
-   Handles:
-   - client-side validation
-   - demo captcha
-   - demo login rate limiting
-   - dynamic left panel content
-   - debug output with localStorage
-   ========================================================= */
-
-/* ---------- State ---------- */
-
+// Maintain a global state for captchas and login attempts. Captcha
+// answers are stored by name to allow multiple captchas on the same
+// page (e.g. signup vs login). Attempts are persisted in
+// localStorage so the rate limit survives page reloads.
 const state = {
-    captchas: {},
-    attempts: JSON.parse(localStorage.getItem("bildyx_attempts") || "{}")
+  captchas: {},
+  attempts: JSON.parse(localStorage.getItem('bildyx_attempts') || '{}')
 };
 
-/* ---------- DOM helpers ---------- */
-
+// Shortcuts for querying the DOM. `$` returns the first match, and
+// `$$` returns an array of all matches. An optional root element can
+// be passed to scope the search.
 const $ = (selector, root = document) => root.querySelector(selector);
-const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
-/* ---------- Branding content ---------- */
-
-const brandContent = {
-    company: {
-        title: `"Right Teams. Right<br>Candidates."`,
-        features: [
-            {
-                title: "For Companies",
-                text: "Build profile and present your teams to potential candidates."
-            },
-            {
-                title: "For Job Seekers",
-                text: "Create a powerful microresume in minutes. Use Microresume as elevator pitch to potential employers."
-            }
-        ]
-    },
-    job_seeker: {
-        title: "Create your<br>microresume and<br>get discovered.",
-        features: [
-            {
-                title: "Stand out fast",
-                text: "Turn your experience into a short, sharp microresume recruiters can review in minutes."
-            },
-            {
-                title: "Show team fit",
-                text: "Highlight the kind of teams, products, and work style that match what you want next."
-            }
-        ]
-    }
-};
-
-/* ---------- UI helpers ---------- */
-
+// Display a toast notification with a given message. The toast
+// element should exist in the DOM with the id 'toast'. It becomes
+// visible for 2.6 seconds and then hides itself.
 function toast(message) {
-    const el = $("#toast");
-
-    if (!el) {
-        return;
-    }
-
-    el.textContent = message;
-    el.classList.add("show");
-
-    setTimeout(() => {
-        el.classList.remove("show");
-    }, 2600);
+  const el = $('#toast');
+  if (!el) return;
+  el.textContent = message;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2600);
 }
 
+// Sanitise a value to prevent XSS by escaping special HTML
+// characters. Always apply sanitisation before outputting user data.
 function sanitize(value) {
-    return String(value || "").replace(/[<>'"&]/g, character => ({
-        "<": "&lt;",
-        ">": "&gt;",
-        "'": "&#39;",
-        '"': "&quot;",
-        "&": "&amp;"
-    }[character]));
+  return String(value || '').replace(/[<>'"&]/g, c => {
+    return {
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;',
+      '&': '&amp;'
+    }[c];
+  });
 }
 
+// Validate an email address using a simple regular expression. This
+// regex checks for a basic "local@domain.tld" pattern and rejects
+// obvious invalid addresses.
 function validEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
-function passwordScore(password) {
-    return [
-        password.length >= 8,
-        /[A-Z]/.test(password),
-        /[a-z]/.test(password),
-        /\d/.test(password),
-        /[^A-Za-z0-9]/.test(password)
-    ].filter(Boolean).length;
+// Score a password based on length and character variety. Returns a
+// value between 0 and 5 inclusive. This is used to drive a meter
+// element that visually indicates password strength.
+function passwordScore(pwd) {
+  const checks = [
+    pwd.length >= 8,
+    /[A-Z]/.test(pwd),
+    /[a-z]/.test(pwd),
+    /\d/.test(pwd),
+    /[^A-Za-z0-9]/.test(pwd)
+  ];
+  return checks.filter(Boolean).length;
 }
 
+// Display or clear an error message for a given input. The function
+// finds the closest parent with the class 'field' to locate the
+// corresponding error element. It also toggles the 'invalid' class on
+// the input wrapper for styling.
 function setError(input, message) {
-    if (!input) {
-        return;
+  const field = input?.closest('.field');
+  const wrap = input?.closest('.input-wrap');
+  if (wrap) {
+    wrap.classList.toggle('invalid', Boolean(message));
+  }
+  if (field) {
+    const errorEl = $('.error', field);
+    if (errorEl) {
+      errorEl.textContent = message || '';
     }
-
-    const field = input.closest(".field");
-    const wrap = input.closest(".input-wrap");
-
-    if (wrap) {
-        wrap.classList.toggle("invalid", Boolean(message));
-    }
-
-    if (field) {
-        const error = $(".error", field);
-
-        if (error) {
-            error.textContent = message || "";
-        }
-    }
+  }
 }
 
-/* ---------- Dynamic left panel ---------- */
+// Animate a button to show a loading state with a dot animation. The
+// button is disabled during the animation. The function returns a
+// cleanup function that stops the animation and restores the button's
+// original state.
+function startButtonLoading(button) {
+  const originalText = button.textContent;
+  let dots = 0;
 
-function updateBrandPanel(type) {
-    const panel = $("#brandPanel");
-    const title = $("#brandTitle");
-    const featureCards = $$(".brand-feature");
-    const data = brandContent[type] || brandContent.company;
+  button.disabled = true;
+  button.textContent = ".";
 
-    if (panel) {
-        panel.classList.toggle("job-seeker", type === "job_seeker");
-    }
+  const interval = setInterval(() => {
+    dots = (dots + 1) % 4;
+    button.textContent = ".".repeat(dots || 1);
+  }, 350);
 
-    if (title) {
-        title.innerHTML = data.title;
-    }
-
-    featureCards.forEach((card, index) => {
-        const feature = data.features[index];
-
-        if (!feature) {
-            return;
-        }
-
-        const featureTitle = $(".brand-feature-title", card);
-        const featureText = $(".brand-feature-text", card);
-
-        if (featureTitle) {
-            featureTitle.textContent = feature.title;
-        }
-
-        if (featureText) {
-            featureText.textContent = feature.text;
-        }
-    });
+  return () => {
+    clearInterval(interval);
+    button.disabled = false;
+    button.textContent = originalText;
+  };
 }
 
-/* ---------- Captcha ---------- */
-
+// Generate a simple addition captcha. Captchas are stored in
+// `state.captchas` keyed by name so that multiple forms can have
+// independent challenges. The associated DOM elements are located via
+// the `data-captcha` attribute.
 function generateCaptcha(name) {
-    const box = document.querySelector(`[data-captcha="${name}"]`);
-
-    if (!box) {
-        return;
-    }
-
-    const a = Math.floor(Math.random() * 8) + 2;
-    const b = Math.floor(Math.random() * 8) + 2;
-
-    state.captchas[name] = a + b;
-
-    $(".captcha-question", box).textContent = `${a} + ${b} = ?`;
-    $(".captcha-answer", box).value = "";
-
-    if (box.nextElementSibling) {
-        box.nextElementSibling.textContent = "";
-    }
+  const a = Math.floor(Math.random() * 8) + 2;
+  const b = Math.floor(Math.random() * 8) + 2;
+  state.captchas[name] = a + b;
+  const box = document.querySelector(`[data-captcha="${name}"]`);
+  if (!box) return;
+  $('.captcha-question', box).textContent = `${a} + ${b} = ?`;
+  $('.captcha-answer', box).value = '';
+  // Clear any lingering error message next to the box
+  const errorEl = box.nextElementSibling;
+  if (errorEl) errorEl.textContent = '';
 }
 
+// Validate a captcha answer against the stored value. Displays an
+// inline error message when incorrect. Returns true if correct.
 function checkCaptcha(name) {
-    const box = document.querySelector(`[data-captcha="${name}"]`);
-
-    if (!box) {
-        return true;
-    }
-
-    const answer = Number($(".captcha-answer", box).value);
-    const ok = answer === state.captchas[name];
-
-    if (box.nextElementSibling) {
-        box.nextElementSibling.textContent = ok ? "" : "Captcha is incorrect.";
-    }
-
-    return ok;
+  const box = document.querySelector(`[data-captcha="${name}"]`);
+  if (!box) return true;
+  const answer = Number($('.captcha-answer', box).value);
+  const ok = answer === state.captchas[name];
+  const errorEl = box.nextElementSibling;
+  if (errorEl) {
+    errorEl.textContent = ok ? '' : 'Captcha is incorrect.';
+  }
+  return ok;
 }
 
-/* ---------- Local demo rate limit ---------- */
-
+// Determine whether the user has exceeded the allowed number of
+// login attempts in the past 10 minutes. Blocks login when there
+// have been 5 or more attempts. Attempts are stored per email to
+// avoid blocking all users.
 function tooManyAttempts(email) {
-    const now = Date.now();
-    const key = email.toLowerCase();
-
-    const rows = (state.attempts[key] || []).filter(time => {
-        return now - time < 10 * 60 * 1000;
-    });
-
-    state.attempts[key] = rows;
-    localStorage.setItem("bildyx_attempts", JSON.stringify(state.attempts));
-
-    return rows.length >= 5;
+  const now = Date.now();
+  const key = email.toLowerCase();
+  const rows = (state.attempts[key] || []).filter(t => now - t < 10 * 60 * 1000);
+  state.attempts[key] = rows;
+  localStorage.setItem('bildyx_attempts', JSON.stringify(state.attempts));
+  return rows.length >= 5;
 }
 
+// Record a login attempt timestamp for rate limiting.
 function addAttempt(email) {
-    const key = email.toLowerCase();
-
-    state.attempts[key] = state.attempts[key] || [];
-    state.attempts[key].push(Date.now());
-
-    localStorage.setItem("bildyx_attempts", JSON.stringify(state.attempts));
+  const key = email.toLowerCase();
+  state.attempts[key] = state.attempts[key] || [];
+  state.attempts[key].push(Date.now());
+  localStorage.setItem('bildyx_attempts', JSON.stringify(state.attempts));
 }
 
-/* ---------- Debug ---------- */
-
+// Write debug information to the on‑page console and persist a
+// redacted version of it in localStorage. Sensitive fields such as
+// passwords are masked. The debug output is shown in the element
+// with id 'debugOutput' if present.
 function debug(payload) {
-    const safePayload = JSON.parse(JSON.stringify(payload, (key, value) => {
-        if (key.toLowerCase().includes("password")) {
-            return "[hidden for security]";
-        }
-
-        return value;
-    }));
-
-    const output = $("#debugOutput");
-
-    if (output) {
-        output.textContent = JSON.stringify(safePayload, null, 2);
-    }
-
-    localStorage.setItem("bildyx_last_debug", JSON.stringify(safePayload));
+  const safePayload = JSON.parse(JSON.stringify(payload, (key, value) => {
+    return key.toLowerCase().includes('password') ? '[hidden for security]' : value;
+  }));
+  const out = $('#debugOutput');
+  if (out) {
+    out.textContent = JSON.stringify(safePayload, null, 2);
+  }
+  localStorage.setItem('bildyx_last_debug', JSON.stringify(safePayload));
 }
 
-/* ---------- Tabs ---------- */
+/*
+ * Event bindings
+ *
+ * The following code attaches event listeners to the authentication
+ * forms. Each binding is conditional on the existence of the
+ * corresponding element so that this script can be safely loaded on
+ * pages that do not contain all forms (e.g. forgot password). When
+ * elements are present, handlers perform client-side validation,
+ * enforce captcha checks, apply rate limiting on login and emit
+ * debug events instead of sending real requests.
+ */
 
-$$(".tab, .link-btn").forEach(button => {
-    button.addEventListener("click", () => {
-        const target = button.dataset.target;
-
-        if (!target) {
-            return;
-        }
-
-        $$(".tab").forEach(tab => {
-            const active = tab.dataset.target === target;
-
-            tab.classList.toggle("active", active);
-            tab.setAttribute("aria-selected", active);
-        });
-
-        $$(".auth-form").forEach(form => {
-            form.classList.toggle("active", form.id === target);
-        });
+// Tab navigation on the combined login/signup page: switch between
+// forms when clicking the tabs or the small link buttons.
+$$('.tab, .link-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    const target = button.dataset.target;
+    // Only handle tabs that define a target
+    if (!target) return;
+    $$('.tab').forEach(tab => {
+      const active = tab.dataset.target === target;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', active);
     });
+    $$('.auth-form').forEach(form => {
+      form.classList.toggle('active', form.id === target);
+    });
+  });
 });
 
-/* ---------- Password visibility ---------- */
-
-$$(".toggle-password").forEach(button => {
-    button.addEventListener("click", () => {
-        const input = button.previousElementSibling;
-
-        if (!input) {
-            return;
-        }
-
-        input.type = input.type === "password" ? "text" : "password";
-    });
+// Toggle password visibility on any field with the 'toggle-password'
+// button. Switches between text and password types and swaps the
+// emoji accordingly. Guard against missing inputs.
+$$('.toggle-password').forEach(button => {
+  button.addEventListener('click', () => {
+    const input = button.previousElementSibling;
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+    button.textContent = input.type === 'password' ? '👁' : '🙈';
+  });
 });
 
-/* ---------- Captcha refresh ---------- */
-
-$$(".captcha-refresh").forEach(button => {
-    button.addEventListener("click", () => {
-        const box = button.closest(".captcha-box");
-
-        if (box) {
-            generateCaptcha(box.dataset.captcha);
-        }
-    });
+// Refresh captchas on click. Each refresh button lives inside a
+// captcha box so we walk up to find the name.
+$$('.captcha-refresh').forEach(button => {
+  button.addEventListener('click', () => {
+    const box = button.closest('.captcha-box');
+    if (box) {
+      const name = box.dataset.captcha;
+      generateCaptcha(name);
+    }
+  });
 });
 
-/* ---------- Account type switch ---------- */
+// Pre-generate common captchas for pages that contain these boxes.
+['signup', 'login', 'forgot', 'reset'].forEach(name => generateCaptcha(name));
 
-function updateAccountTypeUI() {
-    const checked = $('input[name="accountType"]:checked');
-
-    if (!checked) {
-        return;
-    }
-
-    const type = checked.value;
-    const isCompany = type === "company";
-
-    $$(".account-option").forEach(label => {
-        label.classList.toggle("active", label.querySelector("input").checked);
-    });
-
-    $$(".company-only").forEach(element => {
-        element.classList.toggle("hidden", !isCompany);
-    });
-
-    $$(".seeker-only").forEach(element => {
-        element.classList.toggle("hidden", isCompany);
-    });
-
-    const submitButton = $(".submit-btn", $("#signup-form"));
-
-    if (submitButton) {
-        submitButton.textContent = isCompany
-            ? "Create Company Account"
-            : "Create Job Seeker Account";
-    }
-
-    const subtitle = $("#signupSubtitle");
-
-    if (subtitle) {
-        subtitle.textContent = isCompany
-            ? "Select your account type to get started."
-            : "Choose the job seeker path to build your microresume.";
-    }
-
-    const emailLabel = $("#signupEmailLabel");
-    const emailInput = $("#signupEmail");
-
-    if (emailLabel && emailInput) {
-        emailLabel.textContent = isCompany ? "Work Email" : "Email";
-        emailInput.placeholder = isCompany ? "name@company.com" : "jane@example.com";
-    }
-
-    updateBrandPanel(type);
-}
-
+// Account type switcher on sign up page: toggles between company
+// and job seeker fields and updates the submit button label.
 $$('input[name="accountType"]').forEach(radio => {
-    radio.addEventListener("change", updateAccountTypeUI);
+  radio.addEventListener('change', () => {
+    // Highlight the selected card
+    $$('.account-option').forEach(option => {
+      option.classList.toggle('active', option.querySelector('input').checked);
+    });
+    const isCompany = $('input[name="accountType"]:checked').value === 'company';
+    $('.company-only')?.classList.toggle('hidden', !isCompany);
+    $('.seeker-only')?.classList.toggle('hidden', isCompany);
+    const submitBtn = $('.submit-btn', $('#signup-form'));
+    if (submitBtn) {
+      submitBtn.textContent = isCompany ? 'Create Company Account' : 'Create Job Seeker Account';
+    }
+  });
 });
 
-/* ---------- Password meter ---------- */
-
-const signupPassword = $("#signupPassword");
-
+// Strength meter for the sign up page. Update the meter value as the
+// user types. Use Math.min to clamp the score to the meter’s max.
+const signupPassword = $('#signupPassword');
 if (signupPassword) {
-    signupPassword.addEventListener("input", event => {
-        const meter = $(".password-meter");
-
-        if (meter) {
-            meter.value = Math.min(4, passwordScore(event.target.value));
-        }
-    });
+  signupPassword.addEventListener('input', e => {
+    const meter = $('.password-meter');
+    if (meter) meter.value = Math.min(4, passwordScore(e.target.value));
+  });
 }
 
-/* ---------- Sign up submit ---------- */
+// Base URL for all authentication API endpoints.  If you host the
+// server at a different root (e.g. behind a proxy), update this
+// constant accordingly.  A relative path works for the default
+// http-server setup used in this project.
+const API_BASE = "http://localhost:3000/api/auth";
+console.log("AUTH FILE LOADED", API_BASE);
 
-const signupForm = $("#signup-form");
-
+// Sign up form submission: validate fields, captcha and terms.  On
+// success, POST to the backend to create a new profile.  The
+// verification code will be emailed by the server; the client
+// navigates to the verification page to let the user input the
+// code.
+const signupForm = $('#signup-form');
 if (signupForm) {
-    signupForm.addEventListener("submit", event => {
-        event.preventDefault();
-
-        let ok = true;
-
-        const type = $('input[name="accountType"]:checked').value;
-        const isCompany = type === "company";
-
-        const companyNameInput = $("#companyName");
-        const firstNameInput = $("#firstName");
-        const lastNameInput = $("#lastName");
-        const desiredRoleInput = $("#desiredRole");
-        const emailInput = $("#signupEmail");
-        const passwordInput = $("#signupPassword");
-
-        if (isCompany) {
-            if (companyNameInput.value.trim().length < 3) {
-                setError(companyNameInput, "Minimum 3 characters.");
-                ok = false;
-            } else {
-                setError(companyNameInput, "");
-            }
-        } else {
-            if (firstNameInput.value.trim().length < 2) {
-                setError(firstNameInput, "Minimum 2 characters.");
-                ok = false;
-            } else {
-                setError(firstNameInput, "");
-            }
-
-            if (lastNameInput.value.trim().length < 2) {
-                setError(lastNameInput, "Minimum 2 characters.");
-                ok = false;
-            } else {
-                setError(lastNameInput, "");
-            }
-
-            if (desiredRoleInput.value.trim().length < 3) {
-                setError(desiredRoleInput, "Minimum 3 characters.");
-                ok = false;
-            } else {
-                setError(desiredRoleInput, "");
-            }
-        }
-
-        if (!validEmail(emailInput.value)) {
-            setError(emailInput, "Enter a valid email.");
-            ok = false;
-        } else {
-            setError(emailInput, "");
-        }
-
-        if (passwordInput.value.length < 8) {
-            setError(passwordInput, "Password must contain at least 8 characters.");
-            ok = false;
-        } else {
-            setError(passwordInput, "");
-        }
-
-        if (!checkCaptcha("signup")) {
-            ok = false;
-        }
-
-        if (!$("#terms").checked) {
-            toast("Please accept the Terms and Privacy Policy.");
-            ok = false;
-        }
-
-        if (!ok) {
-            return;
-        }
-
-        const displayName = isCompany
-            ? companyNameInput.value.trim()
-            : `${firstNameInput.value.trim()} ${lastNameInput.value.trim()}`;
-
-        const payload = {
-            action: "SIGN_UP_DEBUG",
-            createdAt: new Date().toISOString(),
-            accountType: type,
-            displayName: sanitize(displayName),
-            companyName: isCompany ? sanitize(companyNameInput.value.trim()) : undefined,
-            firstName: !isCompany ? sanitize(firstNameInput.value.trim()) : undefined,
-            lastName: !isCompany ? sanitize(lastNameInput.value.trim()) : undefined,
-            desiredRole: !isCompany ? sanitize(desiredRoleInput.value.trim()) : undefined,
-            email: sanitize(emailInput.value.trim()),
-            passwordLength: passwordInput.value.length,
-            marketing: $("#marketing").checked,
-            status: "validated_not_sent_no_database"
-        };
-
-        debug(payload);
-        toast("Debug sign up validated. No database connected.");
-
-        generateCaptcha("signup");
-        signupForm.reset();
-
-        const meter = $(".password-meter");
-
-        if (meter) {
-            meter.value = 0;
-        }
-
-        updateAccountTypeUI();
+  signupForm.addEventListener('submit', async e => {
+    console.log("SIGNUP CLICKED");
+    e.preventDefault();
+    let ok = true;
+    const type = $('input[name="accountType"]:checked').value;
+    // Determine which name field(s) to validate
+    const companyInput = $('#companyName');
+    const firstNameInput = $('#firstName');
+    const lastNameInput = $('#lastName');
+    // Validate names according to account type
+    if (type === 'company') {
+      if (!companyInput || companyInput.value.trim().length < 3) {
+        setError(companyInput, 'Minimum 3 characters.');
+        ok = false;
+      } else {
+        setError(companyInput, '');
+      }
+    } else {
+      if (!firstNameInput || firstNameInput.value.trim().length < 2) {
+        setError(firstNameInput, 'Minimum 2 characters.');
+        ok = false;
+      } else {
+        setError(firstNameInput, '');
+      }
+      if (!lastNameInput || lastNameInput.value.trim().length < 2) {
+        setError(lastNameInput, 'Minimum 2 characters.');
+        ok = false;
+      } else {
+        setError(lastNameInput, '');
+      }
+    }
+    // Validate email
+    const emailInput = $('#signupEmail');
+    if (!emailInput || !validEmail(emailInput.value)) {
+      setError(emailInput, 'Enter a valid email.');
+      ok = false;
+    } else {
+      setError(emailInput, '');
+    }
+    // Validate password
+    const passwordInput = $('#signupPassword');
+    if (!passwordInput || passwordInput.value.length < 8) {
+      setError(passwordInput, 'Password must contain at least 8 characters.');
+      ok = false;
+    } else {
+      setError(passwordInput, '');
+    }
+    // Captcha must be correct
+    if (!checkCaptcha('signup')) ok = false;
+    // Terms checkbox must be checked
+    const terms = $('#terms');
+    if (terms && !terms.checked) {
+      toast('Please accept the Terms and Privacy Policy.');
+      ok = false;
+    }
+    console.log("SIGNUP VALIDATION RESULT", {
+      ok,
+      type,
+      companyName: companyInput?.value,
+      firstName: firstNameInput?.value,
+      lastName: lastNameInput?.value,
+      email: emailInput?.value,
+      passwordLength: passwordInput?.value.length,
+      captchaExpected: state.captchas.signup,
+      captchaValue: document.querySelector('[data-captcha="signup"] .captcha-answer')?.value,
+      termsChecked: terms?.checked
     });
+    if (!ok) return;
+    // Compose request body
+    const body = {
+      accountType: type,
+      email: emailInput.value.trim(),
+      password: passwordInput.value,
+      marketing: $('#marketing')?.checked
+    };
+    if (type === 'company') {
+      body.companyName = companyInput.value.trim();
+    } else {
+      body.firstName = firstNameInput.value.trim();
+      body.lastName = lastNameInput.value.trim();
+    }
+    let stopLoading;
+
+    try {
+      stopLoading = startButtonLoading(signupForm.querySelector(".submit-btn"));
+
+      const resp = await fetch(`${API_BASE}/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      console.log("RESPONSE STATUS", resp.status);
+
+      const data = await resp.json().catch(() => ({}));
+
+      console.log("RESPONSE DATA", data);
+      if (resp.status === 200) {
+        // Persist email for verification page; used to prefill the UI
+        localStorage.setItem('bildyx_signup_email', body.email);
+        // Navigate to verification page with email query param
+        window.location.href = `verify-email.html?email=${encodeURIComponent(body.email)}`;
+      } else {
+        toast(data.error || 'Sign up failed');
+      }
+    } catch (err) {
+      console.error(err);
+      toast('Could not connect to server');
+    } finally {
+      if (stopLoading) stopLoading();
+    }
+  });
 }
 
-/* ---------- Login submit ---------- */
-
-const loginForm = $("#login-form");
-
+// Login form submission: validate email, password, captcha and apply
+// rate limiting. Logs debug data instead of submitting to a server.
+const loginForm = $('#login-form');
 if (loginForm) {
-    loginForm.addEventListener("submit", event => {
-        event.preventDefault();
+  loginForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    let ok = true;
+    const emailInput = $('#loginEmail');
+    const passwordInput = $('#loginPassword');
+    const email = emailInput?.value.trim() || '';
+    // Validate email
+    if (!validEmail(email)) {
+      setError(emailInput, 'Enter a valid email.');
+      ok = false;
+    } else {
+      setError(emailInput, '');
+    }
+    // Validate password
+    if (!passwordInput || passwordInput.value.length === 0) {
+      setError(passwordInput, 'Password is required.');
+      ok = false;
+    } else {
+      setError(passwordInput, '');
+    }
+    // Captcha must be correct
+    if (!checkCaptcha('login')) ok = false;
+    if (!ok) return;
+    // Apply client-side rate limiting: block after too many attempts in a short period
+    if (tooManyAttempts(email)) {
+      toast('Too many login attempts. Try again later.');
+      return;
+    }
+    let stopLoading;
+    try {
+      stopLoading = startButtonLoading(loginForm.querySelector(".submit-btn"));
 
-        let ok = true;
-
-        const email = $("#loginEmail").value.trim();
-        const passwordInput = $("#loginPassword");
-
-        if (!validEmail(email)) {
-            setError($("#loginEmail"), "Enter a valid email.");
-            ok = false;
-        } else {
-            setError($("#loginEmail"), "");
-        }
-
-        if (passwordInput.value.length < 1) {
-            setError(passwordInput, "Password is required.");
-            ok = false;
-        } else {
-            setError(passwordInput, "");
-        }
-
-        if (!checkCaptcha("login")) {
-            ok = false;
-        }
-
-        if (!ok) {
-            return;
-        }
-
-        if (tooManyAttempts(email)) {
-            toast("Too many login attempts. Try again later.");
-
-            debug({
-                action: "LOGIN_BLOCKED_DEBUG",
-                email: sanitize(email),
-                reason: "rate_limit_5_attempts_10_minutes"
-            });
-
-            return;
-        }
-
+      const resp = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: passwordInput.value })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.status === 200) {
+        // Login successful: redirect to generic page
+        window.location.href = 'generic.html';
+      } else {
+        // Record attempt on failure
         addAttempt(email);
-
-        debug({
-            action: "LOGIN_DEBUG",
-            createdAt: new Date().toISOString(),
-            email: sanitize(email),
-            passwordLength: passwordInput.value.length,
-            status: "validated_not_sent_no_database",
-            security: "local demo rate limit active"
-        });
-
-        toast("Debug login validated. No database connected.");
-
-        generateCaptcha("login");
-        loginForm.reset();
-    });
+        toast(data.error || 'Invalid credentials');
+      }
+    } catch (err) {
+      console.error(err);
+      toast('Could not connect to server');
+    } finally {
+      if (stopLoading) stopLoading();
+    }
+  });
 }
 
-/* ---------- Debug panel ---------- */
-
-const debugToggle = $("#debugToggle");
-
+// Toggle debug panel visibility
+const debugToggle = $('#debugToggle');
 if (debugToggle) {
-    debugToggle.addEventListener("click", () => {
-        $("#debugContent").classList.toggle("open");
-    });
+  debugToggle.addEventListener('click', () => {
+    $('#debugContent')?.classList.toggle('open');
+  });
 }
 
-const clearDebug = $("#clearDebug");
-
+// Clear debug history
+const clearDebug = $('#clearDebug');
 if (clearDebug) {
-    clearDebug.addEventListener("click", () => {
-        localStorage.removeItem("bildyx_last_debug");
-        $("#debugOutput").textContent = "Waiting for form submission...";
-        toast("Debug cleared");
-    });
+  clearDebug.addEventListener('click', () => {
+    localStorage.removeItem('bildyx_last_debug');
+    const out = $('#debugOutput');
+    if (out) out.textContent = 'Waiting for form submission...';
+    toast('Debug cleared');
+  });
 }
 
-const fakeSuccess = $("#fakeSuccess");
-
+// Fake success action to demonstrate debug panel usage
+const fakeSuccess = $('#fakeSuccess');
 if (fakeSuccess) {
-    fakeSuccess.addEventListener("click", () => {
-        debug({
-            action: "FAKE_SUCCESS",
-            createdAt: new Date().toISOString(),
-            message: "This simulates a successful server response."
-        });
+  fakeSuccess.addEventListener('click', () => {
+    debug({
+      action: 'FAKE_SUCCESS',
+      createdAt: new Date().toISOString(),
+      message: 'This simulates a successful server response.'
     });
+    toast('Debug: fake success emitted.');
+  });
 }
 
-/* ---------- Initialisation ---------- */
+// Forgot password link inside the login form: capture the click
+// event to record debug information. The actual navigation happens via
+// the href attribute so we do not preventDefault here.
+const forgotPasswordLink = $('#forgotPassword');
+if (forgotPasswordLink) {
+  forgotPasswordLink.addEventListener('click', e => {
+    // Only act if the user has entered an email; otherwise it's not useful
+    const emailValue = $('#loginEmail')?.value || '';
+    debug({
+      action: 'FORGOT_PASSWORD_CLICKED',
+      email: sanitize(emailValue),
+      status: 'debug_only'
+    });
+    // A toast is sufficient feedback for the user
+    toast('Password reset page can be connected later.');
+  });
+}
 
-["signup", "login", "forgot", "reset"].forEach(generateCaptcha);
-
-updateAccountTypeUI();
-
-const last = localStorage.getItem("bildyx_last_debug");
-
-if (last && $("#debugOutput")) {
-    $("#debugOutput").textContent = JSON.stringify(JSON.parse(last), null, 2);
+// On page load, restore the last debug output if available. This
+// helps when switching between pages to see what was last submitted.
+const last = localStorage.getItem('bildyx_last_debug');
+if (last) {
+  const out = $('#debugOutput');
+  if (out) out.textContent = JSON.stringify(JSON.parse(last), null, 2);
 }
