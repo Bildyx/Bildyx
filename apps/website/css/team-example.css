@@ -1,0 +1,519 @@
+/* Team example page only. No existing stylesheet needs to be changed. */
+
+.team-example-page {
+    --te-blue: #2948ef;
+    --te-blue-dark: #1e3bd5;
+    --te-text: #0f1729;
+    --te-muted: #64708a;
+    --te-paper: #f6f7f9;
+    --te-line: #c8d2ff;
+    --te-slot-line: #d8deea;
+    background: var(--te-blue);
+    color: var(--te-text);
+}
+
+.team-example-page .site-footer {
+    margin-top: 12px;
+}
+
+.te-page,
+.te-page *,
+.te-page *::before,
+.te-page *::after {
+    box-sizing: border-box;
+}
+
+.te-page {
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--te-blue);
+}
+
+.te-company-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: var(--te-blue);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.te-layout {
+    width: min(1680px, calc(100% - 32px));
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 190px;
+    align-items: start;
+    gap: 0;
+}
+
+.te-company-rail {
+    min-height: 720px;
+    padding: 14px 16px 40px;
+    color: #fff;
+}
+
+.te-company-card-slot {
+    width: 100%;
+    min-height: 450px;
+    border-radius: 24px;
+}
+
+.te-company-rail__title {
+    margin: 26px 0 34px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.te-archive-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 64px;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.te-content {
+    min-width: 0;
+    padding: 0 22px 46px;
+    background: var(--te-paper);
+}
+
+.te-team-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 255px;
+    min-height: 565px;
+    margin-top: 0;
+    border: 1px solid var(--te-line);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.te-team-main {
+    padding: 24px 20px 20px;
+}
+
+.te-team-main > h2,
+.te-section > h2 {
+    margin: 0 0 18px;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.te-team-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.te-team-tab,
+.te-profile-button,
+.te-product-chip {
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
+.te-team-tab {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #f0f2f6;
+    color: #526078;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.te-team-tab.is-active {
+    background: var(--te-blue);
+    color: #fff;
+}
+
+.te-members {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.te-member-card {
+    min-height: 86px;
+    display: grid;
+    place-items: center;
+    padding: 8px;
+    text-align: center;
+    border-radius: 12px;
+    background: #f1f2f5;
+}
+
+.te-member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #d7dbe4;
+}
+
+.te-member-name {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.te-member-role {
+    color: #68738a;
+    font-size: 0.61rem;
+}
+
+.te-subsection {
+    margin-top: 18px;
+}
+
+.te-subsection h3 {
+    margin: 0 0 10px;
+    font-size: 0.77rem;
+    font-weight: 800;
+}
+
+.te-offices,
+.te-products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.te-office {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 62px;
+    color: #56627a;
+    font-size: 0.62rem;
+}
+
+.te-office-dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #e3e6ed;
+    border: 1px solid #d2d7e1;
+}
+
+.te-office.is-active .te-office-dot {
+    outline: 2px solid var(--te-blue);
+    outline-offset: 2px;
+}
+
+.te-office.is-active {
+    color: var(--te-blue);
+}
+
+.te-product-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    border: 1px solid #dde2eb;
+    border-radius: 999px;
+    background: #fff;
+    color: #58657e;
+    font-size: 0.67rem;
+}
+
+.te-product-chip.is-active {
+    background: var(--te-blue);
+    color: #fff;
+    border-color: var(--te-blue);
+}
+
+.te-team-profile {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 18px 18px;
+    color: #fff;
+    background: var(--te-blue);
+}
+
+.te-team-profile h2 {
+    margin: 0 0 14px;
+    font-size: 0.95rem;
+}
+
+.te-team-badge {
+    align-self: flex-start;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.te-profile-points {
+    margin-top: 16px;
+}
+
+.te-profile-point {
+    margin-bottom: 14px;
+}
+
+.te-profile-point h3 {
+    margin: 0 0 5px;
+    font-size: 0.77rem;
+}
+
+.te-profile-point p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.66rem;
+    line-height: 1.55;
+}
+
+.te-profile-point.is-warning h3 {
+    color: #ffcfda;
+}
+
+.te-profile-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.te-profile-button {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 700;
+}
+
+.te-profile-button.is-active {
+    background: #fff;
+    color: var(--te-blue);
+}
+
+.te-tip-card {
+    margin: 36px 0 0 22px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #fff;
+    color: var(--te-blue);
+    box-shadow: 0 10px 30px rgba(10, 20, 80, 0.08);
+}
+
+.te-tip-card strong {
+    display: flex;
+    gap: 8px;
+    font-size: 0.72rem;
+}
+
+.te-tip-card p {
+    margin: 12px 0 0;
+    font-size: 0.72rem;
+    font-style: italic;
+    line-height: 1.65;
+}
+
+.te-section {
+    padding: 38px 40px 28px;
+}
+
+.te-carousel {
+    position: relative;
+    min-height: 430px;
+    display: flex;
+    align-items: center;
+}
+
+.te-carousel-track {
+    width: 100%;
+    display: flex;
+    gap: 26px;
+    overflow: hidden;
+    padding: 0 22px;
+}
+
+.te-carousel-track--two > * {
+    flex: 0 0 calc(50% - 13px);
+}
+
+.te-carousel-arrow {
+    position: absolute;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #e0e4eb;
+    border-radius: 50%;
+    background: #fff;
+    color: #5e6980;
+    cursor: pointer;
+}
+
+.te-carousel-arrow--left {
+    left: 0;
+}
+
+.te-carousel-arrow--right {
+    right: 0;
+}
+
+.te-backend-slot {
+    background: #fff;
+    border: 1px solid var(--te-slot-line);
+    box-shadow: 0 8px 22px rgba(22, 40, 100, 0.04);
+}
+
+.te-product-card-slot,
+.te-brand-card-slot {
+    width: min(420px, 100%);
+    height: 540px;
+    flex: 0 0 min(420px, 100%);
+    border-radius: 34px;
+}
+
+.te-section-pill {
+    display: inline-flex;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: #e9edff;
+    color: var(--te-blue);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.te-media-carousel {
+    min-height: 330px;
+}
+
+.te-media-slot {
+    width: calc(100% - 44px);
+    height: 310px;
+    margin: 0 22px;
+    border-radius: 18px;
+}
+
+.te-media-slot--short {
+    height: 220px;
+}
+
+@media (max-width: 1320px) {
+    .te-layout {
+        grid-template-columns: 220px minmax(0, 1fr);
+    }
+
+    .te-tip-card {
+        grid-column: 2;
+        margin: 18px 22px 0;
+    }
+
+    .te-company-card-slot {
+        min-height: 390px;
+    }
+}
+
+@media (max-width: 980px) {
+    .te-layout {
+        width: min(100% - 20px, 900px);
+        grid-template-columns: 1fr;
+    }
+
+    .te-company-rail {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .te-company-card-slot {
+        min-height: 250px;
+        grid-row: span 2;
+    }
+
+    .te-company-rail__title {
+        margin: 0;
+        text-align: left;
+    }
+
+    .te-archive-link {
+        margin: 0;
+    }
+
+    .te-content {
+        padding: 0 0 34px;
+    }
+
+    .te-tip-card {
+        grid-column: 1;
+        margin: 16px 0 28px;
+    }
+}
+
+@media (max-width: 760px) {
+    .te-team-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .te-team-profile {
+        min-height: 470px;
+    }
+
+    .te-members {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .te-carousel-track--two > * {
+        flex-basis: 100%;
+    }
+
+    .te-section {
+        padding-inline: 16px;
+    }
+}
+
+@media (max-width: 520px) {
+    .te-layout {
+        width: 100%;
+    }
+
+    .te-company-rail {
+        grid-template-columns: 1fr;
+        padding-inline: 16px;
+    }
+
+    .te-company-card-slot {
+        width: min(280px, 100%);
+        min-height: 360px;
+        justify-self: center;
+        grid-row: auto;
+    }
+
+    .te-company-rail__title,
+    .te-archive-link {
+        justify-self: center;
+    }
+
+    .te-team-main {
+        padding-inline: 12px;
+    }
+
+    .te-product-card-slot,
+    .te-brand-card-slot {
+        height: 430px;
+        border-radius: 24px;
+    }
+
+    .te-media-slot {
+        height: 240px;
+    }
+}

@@ -24,7 +24,9 @@ echo str_replace('</head>', "    {$teamsStylesheet}\n</head>", $sharedHeader);
                 <p class="wt-hero__lead">Job seekers care less about logos and perks and more about the people they'll work with every day. Teams—not companies—are the true magnets for top talent.</p>
                 <div class="wt-button-row">
                     <a class="wt-button wt-button--primary" href="generic.php?page=create-profile">Create Profile <span aria-hidden="true">→</span></a>
-                    <a class="wt-button wt-button--secondary" href="#team-example">See Team Example</a>
+                    <a class="wt-button wt-button--secondary" href="team-example.php">
+                        See Team Example
+                    </a>
                 </div>
             </div>
 
