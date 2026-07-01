@@ -31,7 +31,9 @@ echo str_replace('</head>', "    {$microresumeStylesheet}\n</head>", $sharedHead
 
                 <div class="mr-actions">
                     <a class="mr-button mr-button--primary" href="generic.php?page=login">Log in</a>
-                    <a class="mr-button mr-button--primary" href="generic.php?page=microresume-example">See MicroResume example</a>
+                    <a class="mr-button mr-button--primary" href="microresume-example.php">
+                        See MicroResume example
+                    </a>
                 </div>
                 <p class="mr-note">Designed to sit on top of your existing resume — not replace it.</p>
             </div>
