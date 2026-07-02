@@ -4,37 +4,45 @@ import fs from "node:fs";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log(process.cwd());
-  console.log(fs.existsSync("data/degrees.csv"));
-  const csv = fs.readFileSync("data/degrees.csv", "utf8");
+function readCsv<T>(file: string): T[] {
+  const csv = fs.readFileSync(`data/${file}`, "utf8");
 
-  const records = parse(csv, {
+  return parse(csv, {
     columns: true,
-    delimiter: ";",
+    delimiter: ",",
     skip_empty_lines: true,
-  });
+  }) as T[];
+}
 
-  const degrees: Prisma.DegreeCreateManyInput[] = records.map((r: any) => ({
+async function main() {
+  
+  //Degrees
+  type DegreeCsv = {
+    name: string;
+    serial_number: string;
+    area?: string;
+    description?: string;
+  };
+
+  const degreesCsv = readCsv<DegreeCsv>("degrees_rows.csv");
+
+  const degrees: Prisma.DegreeCreateManyInput[] = degreesCsv.map((r) => ({
     name: r.name,
     serialNumber: r.serial_number,
     area: r.area || null,
     description: r.description || null,
   }));
 
-  const result = await prisma.degree.createMany({
+  const degreesResult = await prisma.degree.createMany({
     data: degrees,
     skipDuplicates: true,
   });
 
-  console.log(`${result.count} raws imported.`);
+  console.log(`Degrees rows imported : ${degreesResult.count}`);
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
+  .catch(console.error)
   .finally(async () => {
     await prisma.$disconnect();
   });
