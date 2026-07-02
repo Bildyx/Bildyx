@@ -65,7 +65,7 @@ CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'SUSPENDED', 'DELETED', 'PENDING_VER
 CREATE TABLE "industries" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "description" TEXT,
     "icon_url" TEXT,
     "color" TEXT,
@@ -82,7 +82,7 @@ CREATE TABLE "industries" (
 CREATE TABLE "countries" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "iso_code" CHAR(2),
     "capital_name" TEXT,
     "flag_url" TEXT,
@@ -137,7 +137,7 @@ CREATE TABLE "countries" (
 CREATE TABLE "cities" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "country_id" UUID NOT NULL,
     "is_capital" BOOLEAN NOT NULL DEFAULT false,
     "state_province" TEXT,
@@ -239,7 +239,7 @@ CREATE TABLE "military_capabilities" (
 CREATE TABLE "jobs" (
     "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "category" "JobCategory",
     "description" TEXT,
     "seniority_level" "SeniorityLevel",
@@ -260,7 +260,7 @@ CREATE TABLE "jobs" (
 CREATE TABLE "skills" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "type" TEXT,
     "category" "SkillCategory",
     "categories" TEXT[],
@@ -287,7 +287,7 @@ CREATE TABLE "skills" (
 CREATE TABLE "certifications" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "issuing_organization_id" UUID,
     "description" TEXT,
     "level" TEXT,
@@ -310,7 +310,7 @@ CREATE TABLE "certifications" (
 CREATE TABLE "universities" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "type" "UniversityType",
     "description" TEXT,
     "website_url" TEXT,
@@ -338,7 +338,7 @@ CREATE TABLE "universities" (
 CREATE TABLE "degrees" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "level" "DegreeLevel",
     "area" TEXT,
     "duration_years" DOUBLE PRECISION,
@@ -356,7 +356,7 @@ CREATE TABLE "degrees" (
 CREATE TABLE "subjects" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "type" TEXT,
     "description" TEXT,
     "short_description" TEXT,
@@ -396,7 +396,7 @@ CREATE TABLE "majors" (
 CREATE TABLE "job_ads" (
     "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
-    "serialNumber" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
     "organization_id" UUID NOT NULL,
     "job_id" UUID,
     "description" TEXT,
@@ -586,16 +586,16 @@ CREATE TABLE "_working_area" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "industries_serialNumber_key" ON "industries"("serialNumber");
+CREATE UNIQUE INDEX "industries_serial_number_key" ON "industries"("serial_number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "countries_serialNumber_key" ON "countries"("serialNumber");
+CREATE UNIQUE INDEX "countries_serial_number_key" ON "countries"("serial_number");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "countries_iso_code_key" ON "countries"("iso_code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "cities_serialNumber_key" ON "cities"("serialNumber");
+CREATE UNIQUE INDEX "cities_serial_number_key" ON "cities"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "cities_country_id_idx" ON "cities"("country_id");
@@ -613,7 +613,7 @@ CREATE INDEX "organizations_type_idx" ON "organizations"("type");
 CREATE UNIQUE INDEX "military_capabilities_organization_id_key" ON "military_capabilities"("organization_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "jobs_serialNumber_key" ON "jobs"("serialNumber");
+CREATE UNIQUE INDEX "jobs_serial_number_key" ON "jobs"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "jobs_industry_id_idx" ON "jobs"("industry_id");
@@ -625,13 +625,13 @@ CREATE INDEX "jobs_category_idx" ON "jobs"("category");
 CREATE INDEX "jobs_seniority_level_idx" ON "jobs"("seniority_level");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "skills_serialNumber_key" ON "skills"("serialNumber");
+CREATE UNIQUE INDEX "skills_serial_number_key" ON "skills"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "skills_category_idx" ON "skills"("category");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "certifications_serialNumber_key" ON "certifications"("serialNumber");
+CREATE UNIQUE INDEX "certifications_serial_number_key" ON "certifications"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "certifications_issuing_organization_id_idx" ON "certifications"("issuing_organization_id");
@@ -640,7 +640,7 @@ CREATE INDEX "certifications_issuing_organization_id_idx" ON "certifications"("i
 CREATE INDEX "certifications_category_idx" ON "certifications"("category");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "universities_serialNumber_key" ON "universities"("serialNumber");
+CREATE UNIQUE INDEX "universities_serial_number_key" ON "universities"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "universities_country_id_idx" ON "universities"("country_id");
@@ -652,13 +652,13 @@ CREATE INDEX "universities_city_id_idx" ON "universities"("city_id");
 CREATE INDEX "universities_type_idx" ON "universities"("type");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "degrees_serialNumber_key" ON "degrees"("serialNumber");
+CREATE UNIQUE INDEX "degrees_serial_number_key" ON "degrees"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "degrees_level_idx" ON "degrees"("level");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "subjects_serialNumber_key" ON "subjects"("serialNumber");
+CREATE UNIQUE INDEX "subjects_serial_number_key" ON "subjects"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "subjects_organization_id_idx" ON "subjects"("organization_id");
@@ -670,7 +670,7 @@ CREATE INDEX "subjects_category_idx" ON "subjects"("category");
 CREATE UNIQUE INDEX "majors_serial_number_key" ON "majors"("serial_number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "job_ads_serialNumber_key" ON "job_ads"("serialNumber");
+CREATE UNIQUE INDEX "job_ads_serial_number_key" ON "job_ads"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "job_ads_organization_id_idx" ON "job_ads"("organization_id");

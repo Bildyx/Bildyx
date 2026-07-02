@@ -298,7 +298,7 @@ enum UserStatus {
 model Industry {
   id                String     @id @default(uuid()) @db.Uuid
   name              String
-  serialNumber      String     @unique
+  serialNumber      String     @unique @map("serial_number")
   description       String?
   relatedIndustries Industry[] @relation("RelatedIndustries")
   relatedTo         Industry[] @relation("RelatedIndustries")
@@ -321,7 +321,7 @@ model Industry {
 model Country {
   id                            String          @id @default(uuid()) @db.Uuid
   name                          String
-  serialNumber                  String          @unique
+  serialNumber                  String          @unique @map("serial_number")
   isoCode                       String?         @unique @map("iso_code") @db.Char(2)
   capitalName                   String?         @map("capital_name")
   flagUrl                       String?         @map("flag_url")
@@ -381,7 +381,7 @@ model Country {
 model City {
   id                       String        @id @default(uuid()) @db.Uuid
   name                     String
-  serialNumber             String        @unique
+  serialNumber             String        @unique @map("serial_number")
   countryId                String        @map("country_id") @db.Uuid
   country                  Country       @relation(fields: [countryId], references: [id])
   isCapital                Boolean       @default(false) @map("is_capital")
@@ -519,7 +519,7 @@ model MilitaryCapabilities {
 model Job {
   id             String          @id @default(uuid()) @db.Uuid
   title          String
-  serialNumber   String          @unique
+  serialNumber   String          @unique @map("serial_number")
   category       JobCategory?
   description    String?
   seniorityLevel SeniorityLevel? @map("seniority_level")
@@ -546,7 +546,7 @@ model Job {
 model Skill {
   id                  String           @id @default(uuid()) @db.Uuid
   name                String
-  serialNumber        String           @unique
+  serialNumber        String           @unique @map("serial_number")
   type                String?
   category            SkillCategory?
   categories          String[]
@@ -575,7 +575,7 @@ model Skill {
 model Certification {
   id                     String                 @id @default(uuid()) @db.Uuid
   name                   String
-  serialNumber           String                 @unique
+  serialNumber           String                 @unique @map("serial_number")
   issuingOrganizationId  String?                @map("issuing_organization_id") @db.Uuid
   issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
   description            String?
@@ -602,7 +602,7 @@ model Certification {
 model University {
   id              String          @id @default(uuid()) @db.Uuid
   name            String
-  serialNumber    String          @unique
+  serialNumber    String          @unique @map("serial_number")
   type            UniversityType?
   description     String?
   websiteUrl      String?         @map("website_url")
@@ -637,7 +637,7 @@ model University {
 model Degree {
   id            String       @id @default(uuid()) @db.Uuid
   name          String
-  serialNumber  String       @unique
+  serialNumber  String       @unique @map("serial_number")
   level         DegreeLevel?
   area          String?
   durationYears Float?       @map("duration_years")
@@ -658,7 +658,7 @@ model Degree {
 model Subject {
   id               String           @id @default(uuid()) @db.Uuid
   name             String
-  serialNumber     String           @unique
+  serialNumber     String           @unique @map("serial_number")
   type             String?
   description      String?
   shortDescription String?          @map("short_description")
@@ -703,7 +703,7 @@ model Major {
 model JobAd {
   id                      String          @id @default(uuid()) @db.Uuid
   title                   String
-  serialNumber            String          @unique
+  serialNumber            String          @unique @map("serial_number")
   organizationId          String          @map("organization_id") @db.Uuid
   organization            Organization    @relation(fields: [organizationId], references: [id])
   jobId                   String?         @map("job_id") @db.Uuid

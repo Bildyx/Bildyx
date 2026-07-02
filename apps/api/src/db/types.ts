@@ -491,7 +491,7 @@ export interface Certifications {
   name: string;
   products: string[] | null;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   updated_at: Timestamp;
   validity_duration_months: number | null;
   website_url: string | null;
@@ -522,7 +522,7 @@ export interface Cities {
   number_of_universities: number | null;
   people_description: string | null;
   population: number | null;
-  serialNumber: string;
+  serial_number: string;
   state_province: string | null;
   temperatures: string | null;
   top_universities: string | null;
@@ -573,7 +573,7 @@ export interface Countries {
   quality_of_education: string | null;
   quality_of_life: Qualityoflife | null;
   religion: string[] | null;
-  serialNumber: string;
+  serial_number: string;
   temperatures: string | null;
   top_universities: string | null;
   updated_at: Timestamp;
@@ -592,7 +592,7 @@ export interface Degrees {
   metadata: Json | null;
   name: string;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   updated_at: Timestamp;
 }
 
@@ -663,7 +663,7 @@ export interface Industries {
   metadata: Json | null;
   name: string;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   updated_at: Timestamp;
 }
 
@@ -686,7 +686,7 @@ export interface JobAds {
   required_education_level: Educationlevel | null;
   required_years_experience: number | null;
   salary_range: string | null;
-  serialNumber: string;
+  serial_number: string;
   status: Generated<Jobadstatus>;
   tags: string[] | null;
   title: string;
@@ -711,7 +711,7 @@ export interface Jobs {
   products: string[] | null;
   score: number | null;
   seniority_level: Senioritylevel | null;
-  serialNumber: string;
+  serial_number: string;
   tags: string[] | null;
   title: string;
   tools_and_tech: string[] | null;
@@ -838,7 +838,7 @@ export interface Skills {
   product_categories: string[] | null;
   related_abilities: string[] | null;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   time_to_master: string | null;
   type: string | null;
   updated_at: Timestamp;
@@ -955,7 +955,7 @@ export interface Subjects {
   name: string;
   organization_id: string | null;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   short_description: string | null;
   tags: string[] | null;
   type: string | null;
@@ -980,7 +980,7 @@ export interface Universities {
   postgraduates: number | null;
   score: number | null;
   score_university: number | null;
-  serialNumber: string;
+  serial_number: string;
   student_count: number | null;
   type: Universitytype | null;
   undergraduates: number | null;
