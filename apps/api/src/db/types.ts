@@ -35,11 +35,13 @@ export type Certificationcategory = "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "PRO
 
 export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "OTHER" | "PART_TIME";
 
-export type Costofliving = "HIGH" | "LOW" | "MEDIAN";
+export type Costofliving = "HIGH" | "LOW" | "MEDIUM";
 
 export type Degreelevel = "ASSOCIATE" | "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "PHD";
 
 export type Difficultylevel = "ADVANCED" | "BEGINNER" | "EXPERT" | "INTERMEDIATE";
+
+export type Educationfieldtype = "MAJOR" | "MINOR";
 
 export type Educationlevel = "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "NONE" | "OTHER" | "PHD";
 
@@ -75,7 +77,7 @@ export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type Organizationsubtype = "ARMY" | "CLUB" | "COMPANY" | "GOVERNMENT" | "INTERNATIONAL_ORGANIZATION" | "NGO" | "NON_PROFIT" | "OTHER" | "RESEARCH_INSTITUTE" | "SOCIETY" | "UNIVERSITY";
 
-export type Qualityoflife = "HIGH" | "LOW" | "MEDIAN";
+export type Qualityoflife = "HIGH" | "LOW" | "MEDIUM";
 
 export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
@@ -93,7 +95,7 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
 
-export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANISATION" | "SUPER_ADMIN" | "USER";
+export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANIZATION" | "SUPER_ADMIN" | "USER";
 
 export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
 
@@ -654,7 +656,6 @@ export interface ExtensionsPgStatStatementsInfo {
 }
 
 export interface Industries {
-  color: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   description: string | null;
@@ -718,19 +719,6 @@ export interface Jobs {
   updated_at: Timestamp;
 }
 
-export interface Majors {
-  area: string | null;
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
-  description: string | null;
-  id: string;
-  metadata: Json | null;
-  name: string;
-  score: number | null;
-  serial_number: string;
-  updated_at: Timestamp;
-}
-
 export interface MilitaryCapabilities {
   id: string;
   number_of_active_navy_personnel: number | null;
@@ -764,7 +752,6 @@ export interface MilitaryCapabilities {
 export interface Organizations {
   activities: string[] | null;
   budget: string | null;
-  category: string | null;
   city_id: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
@@ -942,6 +929,19 @@ export interface StorageVectorIndexes {
   updated_at: Generated<Timestamp>;
 }
 
+export interface StudyFields {
+  area: string | null;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  description: string | null;
+  id: string;
+  metadata: Json | null;
+  name: string;
+  score: number | null;
+  serial_number: string;
+  updated_at: Timestamp;
+}
+
 export interface Subjects {
   category: Subjectcategory | null;
   competitors: string[] | null;
@@ -972,7 +972,6 @@ export interface Universities {
   established: string | null;
   id: string;
   local_name: string | null;
-  location: string | null;
   logo_url: string | null;
   metadata: Json | null;
   name: string;
@@ -996,12 +995,18 @@ export interface UserCertifications {
   user_profile_id: string;
 }
 
+export interface UserEducationFields {
+  id: string;
+  study_field_Id: string;
+  type: Educationfieldtype;
+  user_education_id: string;
+}
+
 export interface UserEducations {
   degree_id: string | null;
   end_year: number | null;
   graduated: Generated<boolean>;
   id: string;
-  major_id: string | null;
   start_year: number | null;
   university_id: string | null;
   user_profile_id: string;
@@ -1132,7 +1137,6 @@ export interface DB {
   job_ad_skills: JobAdSkills;
   job_ads: JobAds;
   jobs: Jobs;
-  majors: Majors;
   military_capabilities: MilitaryCapabilities;
   organizations: Organizations;
   "realtime.messages": RealtimeMessages;
@@ -1147,9 +1151,11 @@ export interface DB {
   "storage.s3_multipart_uploads": StorageS3MultipartUploads;
   "storage.s3_multipart_uploads_parts": StorageS3MultipartUploadsParts;
   "storage.vector_indexes": StorageVectorIndexes;
+  StudyFields: StudyFields;
   subjects: Subjects;
   universities: Universities;
   user_certifications: UserCertifications;
+  user_education_fields: UserEducationFields;
   user_educations: UserEducations;
   user_profiles: UserProfiles;
   user_sessions: UserSessions;

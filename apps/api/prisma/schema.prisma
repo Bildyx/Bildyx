@@ -13,16 +13,20 @@ datasource db {
 // layer 2 : Users
 
 // Enums
+enum EducationFieldType {
+  MAJOR
+  MINOR
+}
 
 enum CostOfLiving {
   LOW
-  MEDIAN
+  MEDIUM
   HIGH
 }
 
 enum QualityOfLife {
   LOW
-  MEDIAN
+  MEDIUM
   HIGH
 }
 
@@ -283,7 +287,7 @@ enum UserRole {
   ADMIN
   SUPER_ADMIN
   CANDIDATE
-  ORGANISATION
+  ORGANIZATION
 }
 
 enum UserStatus {
@@ -303,12 +307,11 @@ model Industry {
   relatedIndustries Industry[] @relation("RelatedIndustries")
   relatedTo         Industry[] @relation("RelatedIndustries")
   iconUrl           String?    @map("icon_url")
-  color             String?
   metadata          Json?
+  score             Int?
   deletedAt         DateTime?  @map("deleted_at")
   createdAt         DateTime   @default(now()) @map("created_at")
   updatedAt         DateTime   @updatedAt @map("updated_at")
-  score             Int?
 
   jobs               Job[]
   organizations      Organization[] @relation("OrganizationIndustries")
@@ -427,7 +430,6 @@ model Organization {
   slug          String               @unique
   type          OrganizationSubType?
   legalStatus   String?              @map("legal_status")
-  category      String?
   ownership     String?
   mission       String?
   knownFor      String[]             @map("known_for")
@@ -529,10 +531,10 @@ model Job {
   toolsAndTech   String[]        @map("tools_and_tech")
   tags           String[]
   metadata       Json?
+  score          Int?
   deletedAt      DateTime?       @map("deleted_at")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
-  score          Int?
 
   jobAds       JobAd[]
   userProfiles UserProfile[] @relation("UserCurrentJob")
@@ -560,11 +562,12 @@ model Skill {
   commonFieldsOfStudy String[]         @map("common_fields_of_study")
   relatedAbilities    String[]         @map("related_abilities")
   timeToMaster        String?          @map("time_to_master")
+  score               Int?
   metadata            Json?
   deletedAt           DateTime?        @map("deleted_at")
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
-  score               Int?
+
 
   jobAdSkills JobAdSkill[]
 
@@ -586,11 +589,11 @@ model Certification {
   validityDurationMonths Int?                   @map("validity_duration_months")
   difficulty             DifficultyLevel?
   websiteUrl             String?                @map("website_url")
+  score                  Int?
   metadata               Json?
   deletedAt              DateTime?              @map("deleted_at")
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime               @updatedAt @map("updated_at")
-  score                  Int?
 
   userCertifications UserCertification[]
 
@@ -613,18 +616,16 @@ model University {
   city            City?           @relation(fields: [cityId], references: [id])
   studentCount    Int?            @map("student_count")
   metadata        Json?
-  deletedAt       DateTime?       @map("deleted_at")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
   scoreUniversity Float?          @map("score_university")
   localName       String?         @map("local_name")
-  location        String?
   notes           String?
   established     String?
   score           Int?
-
   undergraduates Int?
   postgraduates  Int?
+  deletedAt       DateTime?       @map("deleted_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
 
   userEducations UserEducation[]
 
@@ -642,11 +643,12 @@ model Degree {
   area          String?
   durationYears Float?       @map("duration_years")
   description   String?
+  score         Int?
   metadata      Json?
   deletedAt     DateTime?    @map("deleted_at")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
-  score         Int?
+
 
   userEducations UserEducation[]
 
@@ -670,11 +672,12 @@ model Subject {
   websiteUrl       String?          @map("website_url")
   logoUrl          String?          @map("logo_url")
   tags             String[]
+  score            Int?
   metadata         Json?
   deletedAt        DateTime?        @map("deleted_at")
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
-  score            Int?
+
 
   industries Industry[] @relation("ProductIndustries")
 
@@ -683,21 +686,21 @@ model Subject {
   @@map("subjects")
 }
 
-model Major {
+model StudyField {
   id           String    @id @default(uuid()) @db.Uuid
   name         String
   serialNumber String    @unique @map("serial_number")
   area         String?
   description  String?
+  score        Int?
   metadata     Json?
   deletedAt    DateTime? @map("deleted_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
-  score        Int?
 
-  userEducations UserEducation[]
+  userEducationFields UserEducationField[]
 
-  @@map("majors")
+  @@map("StudyFields")
 }
 
 model JobAd {
@@ -768,22 +771,14 @@ model User {
   lastName               String?       @map("last_name")
   displayName            String?       @map("display_name")
   avatarUrl              String?       @map("avatar_url")
-  /// When the account represents a organisation, this links to the Organisation entity.
   organizationId         String?       @unique @map("organization_id") @db.Uuid
   organization           Organization? @relation("OrganizationAccount", fields: [organizationId], references: [id])
-  /// Indicates whether the user has opted in to receive marketing communications.
   marketingOptIn         Boolean       @default(false) @map("marketing_opt_in")
-  /// One‑time code sent to the user for email verification. Null when verification completed.
   verificationCode       String?       @map("verification_code")
-  /// Expiration timestamp for the verification code.
   verificationExpiresAt  DateTime?     @map("verification_expires_at")
-  /// Last time a verification email was sent, used to throttle re‑sends.
   lastVerificationSentAt DateTime?     @map("last_verification_sent_at")
-  /// One‑time token used for password reset flows. Null when unused or expired.
   resetToken             String?       @map("reset_token")
-  /// Expiration timestamp for the password reset token.
   resetExpiresAt         DateTime?     @map("reset_expires_at")
-  /// Last time a password reset email was sent, used to throttle re‑sends.
   lastResetSentAt        DateTime?     @map("last_reset_sent_at")
   role                   UserRole      @default(USER)
   status                 UserStatus    @default(PENDING_VERIFICATION)
@@ -890,19 +885,39 @@ model UserCertification {
 /// Parcours académique d'un utilisateur
 model UserEducation {
   id            String      @id @default(uuid()) @db.Uuid
+
   userProfileId String      @map("user_profile_id") @db.Uuid
   userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
   universityId  String?     @map("university_id") @db.Uuid
   university    University? @relation(fields: [universityId], references: [id])
+
   degreeId      String?     @map("degree_id") @db.Uuid
   degree        Degree?     @relation(fields: [degreeId], references: [id])
-  majorId       String?     @map("major_id") @db.Uuid
-  major         Major?      @relation(fields: [majorId], references: [id])
+
   startYear     Int?        @map("start_year")
   endYear       Int?        @map("end_year")
   graduated     Boolean     @default(false)
 
+  fields UserEducationField[]
+
   @@index([userProfileId])
   @@index([universityId])
   @@map("user_educations")
+}
+model UserEducationField {
+  id String @id @default(uuid()) @db.Uuid
+
+  userEducationId String @map("user_education_id") @db.Uuid
+  userEducation   UserEducation @relation(fields: [userEducationId], references: [id], onDelete: Cascade)
+
+  studyFieldId String @map("study_field_Id") @db.Uuid
+  studyField   StudyField  @relation(fields: [studyFieldId], references: [id])
+
+  type EducationFieldType
+
+  @@unique([userEducationId, studyFieldId])
+  @@index([studyFieldId])
+  @@index([type])
+  @@map("user_education_fields")
 }

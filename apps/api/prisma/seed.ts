@@ -1,48 +1,48 @@
-import { PrismaClient, Prisma } from "@prisma/client";
-import { parse } from "csv-parse/sync";
-import fs from "node:fs";
+import { PrismaClient } from "@prisma/client";
+
+import { seedIndustries } from "./seeds/seeds_industries";
+import { seedCountries } from "./seeds/seeds_countries";
+import { seedCities } from "./seeds/seeds_cities";
+import { seedOrganizations } from "./seeds/seeds_organizations";
+import { seedJobs } from "./seeds/seeds_jobs";
+import { seedSkills } from "./seeds/seeds_skills";
+import { seedCertifications } from "./seeds/seeds_certifications";
+import { seedUniversities } from "./seeds/seeds_universities";
+import { seedDegrees } from "./seeds/seeds_degrees";
+import { seedSubjects } from "./seeds/seeds_subjects";
+import { seedStudyFields } from "./seeds/seeds_studyFields";
 
 const prisma = new PrismaClient();
 
-function readCsv<T>(file: string): T[] {
-  const csv = fs.readFileSync(`data/${file}`, "utf8");
-
-  return parse(csv, {
-    columns: true,
-    delimiter: ",",
-    skip_empty_lines: true,
-  }) as T[];
-}
-
 async function main() {
-  
-  //Degrees
-  type DegreeCsv = {
-    name: string;
-    serial_number: string;
-    area?: string;
-    description?: string;
-  };
+  console.log("Seeding database...\n");
 
-  const degreesCsv = readCsv<DegreeCsv>("degrees_rows.csv");
+  // Ordre important a cause des foreign keys :
+  // industries -> countries -> cities -> organizations
+  //   -> jobs / certifications / universities / subjects (dependent des precedents)
+  // skills / degrees / studyFields n'ont pas de dependances, peuvent etre
+  // placés n'importe où, mais laissés en fin ici par simplicité.
 
-  const degrees: Prisma.DegreeCreateManyInput[] = degreesCsv.map((r) => ({
-    name: r.name,
-    serialNumber: r.serial_number,
-    area: r.area || null,
-    description: r.description || null,
-  }));
+  await seedIndustries(prisma);
+  await seedCountries(prisma);
+  await seedCities(prisma);
+  await seedOrganizations(prisma);
+  await seedJobs(prisma);
+  await seedCertifications(prisma);
+  await seedUniversities(prisma);
+  await seedSubjects(prisma);
+  await seedSkills(prisma);
+  await seedDegrees(prisma);
+  await seedStudyFields(prisma);
 
-  const degreesResult = await prisma.degree.createMany({
-    data: degrees,
-    skipDuplicates: true,
-  });
-
-  console.log(`Degrees rows imported : ${degreesResult.count}`);
+  console.log("\nSeed completed successfully.");
 }
 
 main()
-  .catch(console.error)
+  .catch((e) => {
+    console.error("Seed failed:", e);
+    process.exit(1);
+  })
   .finally(async () => {
     await prisma.$disconnect();
   });

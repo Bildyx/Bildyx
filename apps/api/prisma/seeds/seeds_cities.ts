@@ -1,0 +1,103 @@
+import { PrismaClient, Prisma, CostOfLiving, Language } from "@prisma/client";
+import {
+  readCsv,
+  toJson,
+  toDate,
+  toInt,
+  toFloat,
+  toBool,
+  parseEnum,
+} from "../seed-utils";
+
+type CityCsv = {
+  id: string;
+  name: string;
+  serial_number: string;
+  country_id: string;
+  is_capital?: string;
+  state_province?: string;
+  population?: string;
+  number_of_multinational_hqs?: string;
+  number_of_airports?: string;
+  largest_organization?: string;
+  median_salary?: string;
+  cost_of_living?: string;
+  median_home_price?: string;
+  average_rent?: string;
+  temperatures?: string;
+  climate?: string;
+  interesting_fact?: string;
+  degree_holders?: string;
+  number_of_universities?: string;
+  top_universities?: string;
+  number_of_nationalities?: string;
+  language?: string;
+  latitude?: string;
+  longitude?: string;
+  metadata?: string;
+  deleted_at?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export async function seedCities(prisma: PrismaClient) {
+  const rows = readCsv<CityCsv>("cities_rows.csv");
+
+  const data: Prisma.CityCreateManyInput[] = rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    serialNumber: r.serial_number,
+
+    countryId: r.country_id,
+
+    isCapital: toBool(r.is_capital),
+    stateProvince: r.state_province || null,
+
+    population: toInt(r.population),
+
+    numberOfMultinationalHqs: toInt(r.number_of_multinational_hqs),
+    numberOfAirports: toInt(r.number_of_airports),
+
+    largestOrganizations: r.largest_organization || null,
+
+    medianSalary: toInt(r.median_salary),
+    costOfLiving: parseEnum(r.cost_of_living, CostOfLiving),
+    medianHomePrice: toInt(r.median_home_price),
+    averageRent: toInt(r.average_rent),
+
+    temperatures: r.temperatures || null,
+    climate: r.climate || null,
+    interestingFact: r.interesting_fact || null,
+    degreeHolders: r.degree_holders || null,
+
+    numberOfUniversities: toInt(r.number_of_universities),
+    topUniversities: r.top_universities || null,
+
+    numberOfNationalities: toInt(r.number_of_nationalities),
+
+    language: parseEnum(r.language, Language),
+
+    // NOTE: "peopleDescription" existe dans le schema City mais n'est pas
+    // present dans cities_rows.csv -> laisse a null.
+
+    latitude: toFloat(r.latitude),
+    longitude: toFloat(r.longitude),
+
+    metadata: toJson(r.metadata),
+
+    deletedAt: toDate(r.deleted_at, false),
+    createdAt: toDate(r.created_at, true) as Date,
+    updatedAt: toDate(r.updated_at, true) as Date,
+  }));
+
+  const result = await prisma.city.createMany({
+    data,
+    skipDuplicates: true,
+  });
+
+  console.log(`Cities rows imported: ${result.count}`);
+
+  // NOTE: la relation M2M "mainIndustries" (Industry[]) n'est pas seedée ici.
+
+  return result.count;
+}
