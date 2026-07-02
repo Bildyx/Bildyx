@@ -1,10 +1,18 @@
 (() => {
-  const mount = (selector, html) => {
-    const target = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    if (!target) return false;
-    target.innerHTML = html;
-    return true;
-  };
+  'use strict';
 
-  window.BildyxCompanyArchives = { mount };
+  window.BildyxCompanyArchives = {
+    mount(slotName, html) {
+      const slot = document.querySelector(`[data-card-slot="${slotName}"]`);
+      if (!slot) return false;
+      slot.innerHTML = html;
+      return true;
+    },
+    clear(slotName) {
+      const slot = document.querySelector(`[data-card-slot="${slotName}"]`);
+      if (!slot) return false;
+      slot.replaceChildren();
+      return true;
+    }
+  };
 })();
