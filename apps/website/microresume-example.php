@@ -69,7 +69,9 @@ echo str_replace('</head>', "    {$exampleStylesheet}\n</head>", $sharedHeader);
             <h2 id="mre-experiences-title">Experiences</h2>
 
             <div class="mre-entry-heading">
-                <div class="mre-entry-icon" aria-hidden="true">⌂</div>
+                <div class="mre-entry-icon">
+                    <img src="images/city-seattle.png" alt="Seattle">
+                </div>
                 <div>
                     <strong>Jan 2015–Now</strong>
                     <span>Seattle, Washington</span>

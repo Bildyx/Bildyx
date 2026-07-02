@@ -172,7 +172,7 @@ echo str_replace('</head>', "    {$teamsStylesheet}\n</head>", $sharedHeader);
     <section class="wt-candidate-section" aria-labelledby="wt-candidate-title">
         <div class="wt-container wt-candidate-grid">
             <figure class="wt-candidate-media">
-                <img src="images/candidate-browser.jpg" alt="Professional browsing team profiles" />
+                <img src="images/candidate-browser.png" alt="Professional browsing team profiles" />
             </figure>
 
             <div class="wt-candidate-copy">

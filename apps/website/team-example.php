@@ -5,10 +5,6 @@ $pageScript = 'js/team-example.js';
 $bodyClass = 'team-example-page';
 $showMainNav = false;
 
-/*
- * Le header partagé reste inchangé.
- * Cette page ajoute uniquement sa propre feuille CSS.
- */
 ob_start();
 require __DIR__ . '/includes/header.php';
 $sharedHeader = ob_get_clean();
@@ -29,7 +25,7 @@ echo str_replace('</head>', "    {$teamExampleStylesheet}\n</head>", $sharedHead
             </div>
 
             <h1 class="te-company-rail__title">Parent Company</h1>
-            <a class="te-archive-link" href="generic.php?page=company-archives">
+            <a class="te-archive-link" href="company-archives.php">
                 <span aria-hidden="true">▣</span>
                 Company Archives
             </a>
@@ -76,12 +72,7 @@ echo str_replace('</head>', "    {$teamExampleStylesheet}\n</head>", $sharedHead
                 <div class="te-carousel" data-carousel="portfolio">
                     <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous product">←</button>
                     <div class="te-carousel-track" id="portfolio-track">
-                        <div
-                            id="portfolio-card-1"
-                            class="te-backend-slot te-product-card-slot"
-                            data-card-slot="portfolio-card"
-                            aria-label="Product or service card reserved for backend content">
-                        </div>
+                        <div id="portfolio-card-1" class="te-backend-slot te-product-card-slot" data-card-slot="portfolio-card"></div>
                     </div>
                     <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next product">→</button>
                 </div>
@@ -92,16 +83,8 @@ echo str_replace('</head>', "    {$teamExampleStylesheet}\n</head>", $sharedHead
                 <div class="te-carousel" data-carousel="brands">
                     <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous brand">←</button>
                     <div class="te-carousel-track te-carousel-track--two" id="brands-track">
-                        <div
-                            id="brand-card-1"
-                            class="te-backend-slot te-brand-card-slot"
-                            data-card-slot="brand-card">
-                        </div>
-                        <div
-                            id="brand-card-2"
-                            class="te-backend-slot te-brand-card-slot"
-                            data-card-slot="brand-card">
-                        </div>
+                        <div id="brand-card-1" class="te-backend-slot te-brand-card-slot" data-card-slot="brand-card"></div>
+                        <div id="brand-card-2" class="te-backend-slot te-brand-card-slot" data-card-slot="brand-card"></div>
                     </div>
                     <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next brand">→</button>
                 </div>
@@ -111,12 +94,7 @@ echo str_replace('</head>', "    {$teamExampleStylesheet}\n</head>", $sharedHead
                 <span class="te-section-pill" id="te-photos-title">Photos</span>
                 <div class="te-carousel te-media-carousel" data-carousel="photos">
                     <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous photo">←</button>
-                    <div
-                        id="photos-slot"
-                        class="te-backend-slot te-media-slot"
-                        data-card-slot="photos"
-                        aria-label="Photo carousel reserved for backend content">
-                    </div>
+                    <div id="photos-slot" class="te-backend-slot te-media-slot" data-card-slot="photos"></div>
                     <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next photo">→</button>
                 </div>
             </section>
@@ -125,12 +103,7 @@ echo str_replace('</head>', "    {$teamExampleStylesheet}\n</head>", $sharedHead
                 <span class="te-section-pill" id="te-partners-title">Partners</span>
                 <div class="te-carousel te-media-carousel" data-carousel="partners">
                     <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous partner">←</button>
-                    <div
-                        id="partners-slot"
-                        class="te-backend-slot te-media-slot te-media-slot--short"
-                        data-card-slot="partners"
-                        aria-label="Partners carousel reserved for backend content">
-                    </div>
+                    <div id="partners-slot" class="te-backend-slot te-media-slot te-media-slot--short" data-card-slot="partners"></div>
                     <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next partner">→</button>
                 </div>
             </section>

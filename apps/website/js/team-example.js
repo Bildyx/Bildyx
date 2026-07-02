@@ -1,155 +1,317 @@
 (() => {
-    'use strict';
+    "use strict";
+
+    const memberImages = {
+        michael: "images/michael.png",
+        amelia: "images/amelia.png",
+        carlos: "images/carlos.png",
+        hana: "images/hana.png",
+        ethan: "images/ethan.png",
+        naomi: "images/naomi.png",
+        clara: "images/clara.png",
+        omar: "images/omar.png",
+        priya: "images/priya.png",
+        akira: "images/akira.png",
+        elena: "images/elena.png",
+        diego: "images/diego.png"
+    };
+
+    const officeImages = {
+        "Tokyo": "images/city-tokyo.png",
+        "New York": "images/city-new-york.png",
+        "Istanbul": "images/city-istanbul.png",
+        "Seattle": "images/city-seattle.png",
+        "Kuala Lumpur": "images/city-kuala-lumpur.png",
+        "San Francisco": "images/city-san-francisco.png"
+    };
 
     const teams = {
         alpha: {
-            label: 'Team Alpha',
+            label: "Team Alpha",
             members: [
-                ['Michael', 'VP Marketing'], ['Amelia', 'Product Manager'], ['Carlos', 'Lead Engineer'], ['Hana', 'UX Designer'],
-                ['Ethan', 'Data Analyst'], ['Naomi', 'QA Lead'], ['Clara', 'Scrum Master'], ['Omar', 'DevOps Engineer'],
-                ['Priya', 'Backend Developer'], ['Akira', 'Frontend Developer'], ['Elena', 'Operations Manager'], ['Diego', 'Customer Success']
+                { name: "Michael", role: "VP Marketing" },
+                { name: "Amelia", role: "Product Manager" },
+                { name: "Carlos", role: "Lead Engineer" },
+                { name: "Hana", role: "UX Designer" },
+                { name: "Ethan", role: "Data Analyst" },
+                { name: "Naomi", role: "QA Lead" },
+                { name: "Clara", role: "Scrum Master" },
+                { name: "Omar", role: "DevOps Engineer" },
+                { name: "Priya", role: "Backend Developer" },
+                { name: "Akira", role: "Frontend Developer" },
+                { name: "Elena", role: "Operations Manager" },
+                { name: "Diego", role: "Customer Success" }
             ],
-            products: ['Marketing Software', 'ERP Systems', 'Sales Software', 'Cloud Infrastructure', 'Data Analytics'],
+            products: [
+                "Marketing Software",
+                "ERP Systems",
+                "Sales Software",
+                "Cloud Infrastructure",
+                "Data Analytics"
+            ],
             people: [
-                ['♙ Who We Are', 'A mix of senior and emerging talent from startups and global tech. Some with traditional degrees, others self-taught.'],
-                ["☆ What We're Great At", 'Strong in system design and fast shipping. We value clean code and clear UX.'],
-                ['♡ Team Culture', 'Collaborative, low politics. Friendly, not forced. Occasional dinners, strong boundaries.'],
-                ['◇ How We Work Together', 'Hybrid across three cities. Async-first, minimal meetings. Slack and Notion for most communication.'],
-                ['△ This team is NOT for you if...', 'You prefer rigid routines or dislike shifting priorities mid-sprint.', true]
+                {
+                    title: "♟ Who We Are",
+                    text: "A mix of senior and emerging talent from startups and global tech. Some with traditional degrees, others self-taught."
+                },
+                {
+                    title: "☆ What We're Great At",
+                    text: "Strong in system design and fast shipping. We value clean code and clear UX."
+                },
+                {
+                    title: "♡ Team Culture",
+                    text: "Collaborative, low politics. Friendly, not forced. Occasional dinners, strong boundaries."
+                },
+                {
+                    title: "◇ How We Work Together",
+                    text: "Hybrid across three cities. Async-first, minimal meetings. Slack and Notion for most communication."
+                },
+                {
+                    title: "△ This team is NOT for you if...",
+                    text: "You prefer rigid routines or dislike shifting priorities mid-sprint.",
+                    warning: true
+                }
             ],
             operate: [
-                ["◇ How We're Led", 'Clear ownership, high trust, and direct feedback.'],
-                ['☆ What We Are Solving Now', 'Scaling the platform while keeping the user experience simple.'],
-                ['▣ A Typical Day', 'Deep work blocks, short syncs, and protected time for collaboration.'],
-                ['♡ What We Value', 'Curiosity, accountability, and kindness under pressure.'],
-                ['↗ Growth Here', 'Mentorship, internal mobility, and visible impact.']
+                {
+                    title: "◇ How We're Led",
+                    text: "Clear ownership, high trust, and direct feedback."
+                },
+                {
+                    title: "☆ What We Are Solving Now",
+                    text: "Scaling the platform while keeping the user experience simple."
+                },
+                {
+                    title: "▣ A Typical Day",
+                    text: "Deep work blocks, short syncs, and protected time for collaboration."
+                },
+                {
+                    title: "♡ What We Value",
+                    text: "Curiosity, accountability, and kindness under pressure."
+                },
+                {
+                    title: "↗ Growth Here",
+                    text: "Mentorship, internal mobility, and visible impact."
+                }
             ]
         },
+
         beta: {
-            label: 'Team Beta',
+            label: "Team Beta",
             members: [
-                ['Elena', 'Engineering Manager'], ['Omar', 'Senior Backend Dev'], ['Hana', 'Product Designer'], ['Diego', 'Mobile Developer'],
-                ['Naomi', 'Data Engineer'], ['Akira', 'ML Engineer'], ['Clara', 'Technical Writer'], ['Michael', 'Growth Lead']
+                { name: "Elena", role: "Engineering Manager" },
+                { name: "Omar", role: "Senior Backend Dev" },
+                { name: "Hana", role: "Product Designer" },
+                { name: "Diego", role: "Mobile Developer" },
+                { name: "Naomi", role: "Data Engineer" },
+                { name: "Akira", role: "ML Engineer" },
+                { name: "Clara", role: "Technical Writer" },
+                { name: "Michael", role: "Growth Lead" }
             ],
-            products: ['Search Engine Software', 'Data Analytics', 'AI Software'],
+            products: [
+                "Search Engine Software",
+                "Data Analytics",
+                "AI Software"
+            ],
             people: [
-                ['♙ Who We Are', 'Backend-heavy engineers with ML expertise, distributed across two time zones.'],
-                ["☆ What We're Great At", 'Reliable data pipelines, model delivery, and fast experiments.'],
-                ['♡ Team Culture', 'Data-driven, candid, and generous with knowledge.'],
-                ['◇ How We Work Together', 'Mostly remote with written decisions and focused weekly syncs.'],
-                ['△ This team is NOT for you if...', 'You need constant guidance or avoid ambiguity.', true]
+                {
+                    title: "♟ Who We Are",
+                    text: "Backend-heavy engineers with ML expertise, distributed across two time zones."
+                },
+                {
+                    title: "☆ What We're Great At",
+                    text: "Reliable data pipelines, model delivery, and fast experiments."
+                },
+                {
+                    title: "♡ Team Culture",
+                    text: "Data-driven, candid, and generous with knowledge."
+                },
+                {
+                    title: "◇ How We Work Together",
+                    text: "Mostly remote with written decisions and focused weekly syncs."
+                },
+                {
+                    title: "△ This team is NOT for you if...",
+                    text: "You need constant guidance or avoid ambiguity.",
+                    warning: true
+                }
             ],
             operate: [
-                ["◇ How We're Led", 'Flat hierarchy with strong technical direction.'],
-                ['☆ What We Are Solving Now', 'Recommendation quality, model latency, and reusable data tooling.'],
-                ['▣ A Typical Day', 'Training reviews, pairing, and independent research blocks.'],
-                ['♡ What We Value', 'Reproducibility, intellectual honesty, and useful documentation.'],
-                ['↗ Growth Here', 'Conference support, paper reading groups, and clear IC tracks.']
+                {
+                    title: "◇ How We're Led",
+                    text: "Flat hierarchy with strong technical direction."
+                },
+                {
+                    title: "☆ What We Are Solving Now",
+                    text: "Recommendation quality, model latency, and reusable data tooling."
+                },
+                {
+                    title: "▣ A Typical Day",
+                    text: "Training reviews, pairing, and independent research blocks."
+                },
+                {
+                    title: "♡ What We Value",
+                    text: "Reproducibility, intellectual honesty, and useful documentation."
+                },
+                {
+                    title: "↗ Growth Here",
+                    text: "Conference support, paper reading groups, and clear IC tracks."
+                }
             ]
-        },
-        gamma: null,
-        delta: null
+        }
     };
 
-    teams.gamma = {...teams.alpha, label: 'Team Gamma'};
-    teams.delta = {...teams.beta, label: 'Team Delta'};
+    teams.gamma = { ...teams.alpha, label: "Team Gamma" };
+    teams.delta = { ...teams.beta, label: "Team Delta" };
 
-    const offices = ['Tokyo', 'New York', 'Istanbul', 'Seattle', 'Kuala Lumpur', 'San Francisco'];
-    let currentTeam = 'alpha';
-    let currentMode = 'people';
+    const offices = [
+        "Tokyo",
+        "New York",
+        "Istanbul",
+        "Seattle",
+        "Kuala Lumpur",
+        "San Francisco"
+    ];
 
-    const membersEl = document.getElementById('teMembers');
-    const officesEl = document.getElementById('teOffices');
-    const productsEl = document.getElementById('teProducts');
-    const badgeEl = document.getElementById('teTeamBadge');
-    const pointsEl = document.getElementById('teProfilePoints');
+    let currentTeam = "alpha";
+    let currentMode = "people";
 
-    const renderMembers = (members) => {
-        membersEl.innerHTML = members.map(([name, role]) => `
-            <article class="te-member-card">
-                <span class="te-member-avatar" aria-hidden="true"></span>
-                <div>
-                    <div class="te-member-name">${name}</div>
-                    <div class="te-member-role">${role}</div>
-                </div>
-            </article>
-        `).join('');
-    };
+    const membersElement = document.getElementById("teMembers");
+    const officesElement = document.getElementById("teOffices");
+    const productsElement = document.getElementById("teProducts");
+    const badgeElement = document.getElementById("teTeamBadge");
+    const pointsElement = document.getElementById("teProfilePoints");
 
-    const renderOffices = () => {
-        officesEl.innerHTML = offices.map((office, index) => `
-            <div class="te-office${index === 3 ? ' is-active' : ''}">
-                <span class="te-office-dot" aria-hidden="true"></span>
-                <span>${office}</span>
-            </div>
-        `).join('');
-    };
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
 
-    const renderProducts = (products) => {
-        productsEl.innerHTML = products.map((product, index) => `
-            <button class="te-product-chip${index === 0 ? ' is-active' : ''}" type="button">
-                <span aria-hidden="true">▣</span>${product}
+    function renderMembers(members) {
+        if (!membersElement) return;
+
+        membersElement.innerHTML = members.map((member) => {
+            const imageKey = member.name.toLowerCase();
+            const imageSource = memberImages[imageKey];
+
+            return `
+                <article class="te-member-card">
+                    <div class="te-member-avatar">
+                        <img src="${escapeHtml(imageSource)}" alt="${escapeHtml(member.name)}" loading="lazy">
+                    </div>
+                    <div class="te-member-content">
+                        <div class="te-member-name">${escapeHtml(member.name)}</div>
+                        <div class="te-member-role">${escapeHtml(member.role)}</div>
+                    </div>
+                </article>
+            `;
+        }).join("");
+    }
+
+    function renderOffices() {
+        if (!officesElement) return;
+
+        officesElement.innerHTML = offices.map((office) => {
+            const activeClass = office === "Seattle" ? " is-active" : "";
+
+            return `
+                <article class="te-office${activeClass}">
+                    <div class="te-office-dot">
+                        <img src="${escapeHtml(officeImages[office])}" alt="${escapeHtml(office)}" loading="lazy">
+                    </div>
+                    <span>${escapeHtml(office)}</span>
+                </article>
+            `;
+        }).join("");
+    }
+
+    function renderProducts(products) {
+        if (!productsElement) return;
+
+        productsElement.innerHTML = products.map((product, index) => `
+            <button class="te-product-chip${index === 0 ? " is-active" : ""}" type="button">
+                <span aria-hidden="true">▣</span>
+                ${escapeHtml(product)}
             </button>
-        `).join('');
-    };
+        `).join("");
+    }
 
-    const renderProfile = () => {
+    function renderProfile() {
         const team = teams[currentTeam];
-        const points = team[currentMode];
-        badgeEl.textContent = team.label;
-        pointsEl.innerHTML = points.map(([title, text, warning]) => `
-            <section class="te-profile-point${warning ? ' is-warning' : ''}">
-                <h3>${title}</h3>
-                <p>${text}</p>
+        if (!team || !badgeElement || !pointsElement) return;
+
+        badgeElement.textContent = team.label;
+        pointsElement.innerHTML = team[currentMode].map((point) => `
+            <section class="te-profile-point${point.warning ? " is-warning" : ""}">
+                <h3>${escapeHtml(point.title)}</h3>
+                <p>${escapeHtml(point.text)}</p>
             </section>
-        `).join('');
-    };
+        `).join("");
+    }
 
-    const renderTeam = () => {
+    function renderTeam() {
         const team = teams[currentTeam];
+        if (!team) return;
+
         renderMembers(team.members);
         renderProducts(team.products);
         renderProfile();
-    };
+    }
 
-    document.querySelectorAll('.te-team-tab').forEach((button) => {
-        button.addEventListener('click', () => {
-            currentTeam = button.dataset.team;
-            document.querySelectorAll('.te-team-tab').forEach((tab) => {
-                const active = tab === button;
-                tab.classList.toggle('is-active', active);
-                tab.setAttribute('aria-selected', String(active));
+    document.querySelectorAll(".te-team-tab").forEach((button) => {
+        button.addEventListener("click", () => {
+            const requestedTeam = button.dataset.team;
+            if (!teams[requestedTeam]) return;
+
+            currentTeam = requestedTeam;
+
+            document.querySelectorAll(".te-team-tab").forEach((tab) => {
+                const isActive = tab === button;
+                tab.classList.toggle("is-active", isActive);
+                tab.setAttribute("aria-selected", String(isActive));
             });
+
             renderTeam();
         });
     });
 
-    document.querySelectorAll('.te-profile-button').forEach((button) => {
-        button.addEventListener('click', () => {
-            currentMode = button.dataset.profileMode;
-            document.querySelectorAll('.te-profile-button').forEach((profileButton) => {
-                const active = profileButton === button;
-                profileButton.classList.toggle('is-active', active);
-                profileButton.setAttribute('aria-pressed', String(active));
+    document.querySelectorAll(".te-profile-button").forEach((button) => {
+        button.addEventListener("click", () => {
+            const requestedMode = button.dataset.profileMode;
+            if (!["people", "operate"].includes(requestedMode)) return;
+
+            currentMode = requestedMode;
+
+            document.querySelectorAll(".te-profile-button").forEach((profileButton) => {
+                const isActive = profileButton === button;
+                profileButton.classList.toggle("is-active", isActive);
+                profileButton.setAttribute("aria-pressed", String(isActive));
             });
+
             renderProfile();
         });
     });
 
-    // Backend helper: inject a generated card or carousel into any reserved slot.
     window.BildyxTeamExample = {
         mountCard(slotId, html) {
             const slot = document.getElementById(slotId);
             if (!slot) return false;
+
             slot.innerHTML = html;
-            slot.classList.add('has-content');
+            slot.classList.add("has-content");
             return true;
         },
+
         clearCard(slotId) {
             const slot = document.getElementById(slotId);
             if (!slot) return false;
+
             slot.replaceChildren();
-            slot.classList.remove('has-content');
+            slot.classList.remove("has-content");
             return true;
         }
     };

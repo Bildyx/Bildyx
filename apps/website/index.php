@@ -13,7 +13,7 @@ require __DIR__ . '/includes/header.php';
                     <h1>Create Team Profile</h1>
                     <p>Showcase your organization's collective talent. Manage team credentials and verified profiles in one place.</p>
                     <a href="why-teams.php" class="primary-button">
-                        <span class="button-icon" aria-hidden="true">▣</span>
+                        <span class="button-icon" aria-hidden="true"><img src="images/bildyx-icon.png" alt="Bildyx" /></span>
                         Create Team Profile
                     </a>
                 </div>
