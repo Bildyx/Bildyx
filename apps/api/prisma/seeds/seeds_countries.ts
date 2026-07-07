@@ -71,7 +71,7 @@ type CountryCsv = {
 };
 
 export async function seedCountries(prisma: PrismaClient) {
-  const rows = readCsv<CountryCsv>("countries_rows.csv");
+  const rows = readCsv<CountryCsv>("countries.csv");
 
   const data: Prisma.CountryCreateManyInput[] = rows.map((r) => ({
     id: r.id,

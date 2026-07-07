@@ -41,7 +41,7 @@ type CityCsv = {
 };
 
 export async function seedCities(prisma: PrismaClient) {
-  const rows = readCsv<CityCsv>("cities_rows.csv");
+  const rows = readCsv<CityCsv>("cities.csv");
 
   const data: Prisma.CityCreateManyInput[] = rows.map((r) => ({
     id: r.id,

@@ -29,7 +29,7 @@ type SubjectCsv = {
 };
 
 export async function seedSubjects(prisma: PrismaClient) {
-  const rows = readCsv<SubjectCsv>("subjects_rows.csv");
+  const rows = readCsv<SubjectCsv>("subjects.csv");
 
   const data: Prisma.SubjectCreateManyInput[] = rows.map((r) => ({
     id: r.id,

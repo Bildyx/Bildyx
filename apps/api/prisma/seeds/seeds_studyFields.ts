@@ -15,7 +15,7 @@ type StudyFieldCsv = {
 };
 
 export async function seedStudyFields(prisma: PrismaClient) {
-  const rows = readCsv<StudyFieldCsv>("study_fields_rows.csv");
+  const rows = readCsv<StudyFieldCsv>("study_fields.csv");
 
   const data: Prisma.StudyFieldsCreateManyInput[] = rows.map((r) => ({
     id: r.id,

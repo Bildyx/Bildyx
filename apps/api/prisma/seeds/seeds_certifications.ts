@@ -33,7 +33,7 @@ type CertificationCsv = {
 };
 
 export async function seedCertifications(prisma: PrismaClient) {
-  const rows = readCsv<CertificationCsv>("certifications_rows.csv");
+  const rows = readCsv<CertificationCsv>("certifications.csv");
 
   const data: Prisma.CertificationCreateManyInput[] = rows.map((r) => ({
     id: r.id,

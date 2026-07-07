@@ -31,7 +31,7 @@ type JobCsv = {
 };
 
 export async function seedJobs(prisma: PrismaClient) {
-  const rows = readCsv<JobCsv>("jobs_rows.csv");
+  const rows = readCsv<JobCsv>("jobs.csv");
 
   const data: Prisma.JobCreateManyInput[] = rows.map((r) => ({
     id: r.id,

@@ -17,7 +17,7 @@ type DegreeCsv = {
 };
 
 export async function seedDegrees(prisma: PrismaClient) {
-  const rows = readCsv<DegreeCsv>("degrees_rows.csv");
+  const rows = readCsv<DegreeCsv>("degrees.csv");
 
   const data: Prisma.DegreeCreateManyInput[] = rows.map((r) => ({
     id: r.id,

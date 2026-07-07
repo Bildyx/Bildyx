@@ -15,7 +15,7 @@ type IndustryCsv = {
 };
 
 export async function seedIndustries(prisma: PrismaClient) {
-  const rows = readCsv<IndustryCsv>("industries_rows.csv");
+  const rows = readCsv<IndustryCsv>("industries.csv");
 
   const data: Prisma.IndustryCreateManyInput[] = rows.map((r) => ({
     id: r.id,

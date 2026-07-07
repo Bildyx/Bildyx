@@ -33,7 +33,7 @@ type UniversityCsv = {
 };
 
 export async function seedUniversities(prisma: PrismaClient) {
-  const rows = readCsv<UniversityCsv>("universities_rows.csv");
+  const rows = readCsv<UniversityCsv>("universities.csv");
 
   const data: Prisma.UniversityCreateManyInput[] = rows.map((r) => ({
     id: r.id,

@@ -70,7 +70,7 @@ type OrganizationCsv = {
 };
 
 export async function seedOrganizations(prisma: PrismaClient) {
-  const rows = readCsv<OrganizationCsv>("organizations_rows.csv");
+  const rows = readCsv<OrganizationCsv>("organizations.csv");
 
   const data: Prisma.OrganizationCreateManyInput[] = rows.map((r) => ({
     id: r.id,

@@ -19,7 +19,7 @@ type DegreeCsv = {
 };
 
 async function main() {
-  const degreesCsv = readCsv<DegreeCsv>("degrees_rows.csv");
+  const degreesCsv = readCsv<DegreeCsv>("degrees.csv");
 
   const degrees: Prisma.DegreeCreateManyInput[] = degreesCsv.map((r) => ({
     id: r.id,

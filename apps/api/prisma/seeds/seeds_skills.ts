@@ -37,7 +37,7 @@ type SkillCsv = {
 };
 
 export async function seedSkills(prisma: PrismaClient) {
-  const rows = readCsv<SkillCsv>("skills_rows.csv");
+  const rows = readCsv<SkillCsv>("skills.csv");
 
   const data: Prisma.SkillCreateManyInput[] = rows.map((r) => ({
     id: r.id,
