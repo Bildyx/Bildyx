@@ -38,6 +38,7 @@ TARGET_MODELS = [
     "StudyFields",
     "MilitaryCapabilities",
     "Degree",
+    "Subject",
 ]
 
 # Auto-managed columns: never filled in manually.
@@ -154,7 +155,9 @@ def table_name_for(model_name: str, body: str) -> str:
     return map_match.group(1) if map_match else camel_to_snake(model_name)
 
 
-def write_workbook(table_name: str, fields: list[dict], enums: dict, output_dir: Path) -> Path:
+def write_workbook(
+    table_name: str, fields: list[dict], enums: dict, output_dir: Path
+) -> Path:
     wb = Workbook()
     ws = wb.active
     ws.title = table_name[:31]
@@ -199,6 +202,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing .xlsx files instead of skipping them",
+    )
     args = parser.parse_args()
 
     schema_text = args.schema.read_text()
@@ -213,13 +221,20 @@ def main():
             continue
 
         body = model_bodies[model_name]
+        table_name = table_name_for(model_name, body)
+        output_path = args.output / f"{table_name}.xlsx"
+        if output_path.exists() and not args.force:
+            print(
+                f"Skipping {model_name}: {output_path} already exists (use --force to overwrite)"
+            )
+            continue
+
         fields = parse_model_fields(body, model_names)
         if not fields:
             print(f"Skipping {model_name}: no fillable fields found")
             continue
 
-        table_name = table_name_for(model_name, body)
-        output_path = write_workbook(table_name, fields, enums, args.output)
+        write_workbook(table_name, fields, enums, args.output)
         print(f"{model_name} -> {output_path} ({len(fields)} columns)")
 
 

@@ -14,7 +14,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_INPUT = SCRIPT_DIR.parent / "data" / "excel"
+DEFAULT_INPUT = SCRIPT_DIR.parent / "data" / "excel_templates"
 DEFAULT_OUTPUT = SCRIPT_DIR.parent / "data"
 
 
@@ -42,8 +42,18 @@ def convert(input_dir: Path, output_dir: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Directory containing .xlsx files")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Directory to write .csv files to")
+    parser.add_argument(
+        "--input",
+        type=Path,
+        default=DEFAULT_INPUT,
+        help="Directory containing .xlsx files",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=DEFAULT_OUTPUT,
+        help="Directory to write .csv files to",
+    )
     args = parser.parse_args()
 
     convert(args.input.resolve(), args.output.resolve())
