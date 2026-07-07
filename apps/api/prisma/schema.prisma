@@ -308,6 +308,81 @@ model Degree {
   @@map("degrees")
 }
 
+model MilitaryCapabilities {
+  id                                   String       @id @db.Uuid
+  organization_id                      String       @unique @db.Uuid
+  number_of_active_navy_personnel      Int?
+  number_of_destroyers                 Int?
+  number_of_submarines_diesel          Int?
+  number_of_submarines_nuclear         Int?
+  number_of_naval_shipyards            Int?
+  number_of_maritime_patrol_aircraft   Int?
+  number_of_stealth_fleet              Int?
+  number_of_surveillance_radars        Int?
+  number_of_aircrafts                  Int?
+  number_of_fighter_jets               Int?
+  number_of_helicopters                Int?
+  number_of_drones                     Int?
+  number_of_tanker_planes              Int?
+  number_of_transport_planes           Int?
+  number_of_communication_satellites   Int?
+  number_of_missile_warning_satellites Int?
+  number_of_navigation_satellites      Int?
+  number_of_spy_satellites             Int?
+  number_of_satellite_jamming_systems  Int?
+  number_of_surveillance_telescopes    Int?
+  number_of_operational_spaceplanes    Int?
+  number_of_space_launch_sites         Int?
+  number_of_space_operations_squadrons Int?
+  number_of_space_personnel            Int?
+  updated_at                           DateTime
+  organizations                        Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  @@map("military_capabilities")
+}
+
+model Subject {
+  id                String           @id @db.Uuid
+  name              String
+  serial_number     String           @unique
+  type              String?
+  description       String?
+  short_description String?
+  category          SubjectCategory?
+  competitors       String[]
+  vendors           String[]
+  fun_fact          String?
+  organization_id   String?          @db.Uuid
+  website_url       String?
+  logo_url          String?
+  tags              String[]
+  score             Int?
+  metadata          Json?
+  deleted_at        DateTime?
+  created_at        DateTime         @default(now())
+  updated_at        DateTime
+  organizations     Organization?    @relation(fields: [organization_id], references: [id])
+  industries        Industry[]       @relation("ProductIndustries")
+
+  @@index([category])
+  @@index([organization_id])
+  @@map("subjects")
+}
+
+model StudyFields {
+  id                    String                @id @db.Uuid
+  name                  String
+  serial_number         String                @unique
+  area                  String?
+  description           String?
+  score                 Int?
+  metadata              Json?
+  deleted_at            DateTime?
+  created_at            DateTime              @default(now())
+  updated_at            DateTime
+  user_education_fields UserEducationFields[]
+}
+
 model JobAd {
   id                      String          @id @default(uuid()) @db.Uuid
   title                   String
@@ -458,83 +533,6 @@ model UserProfile {
   @@map("user_profiles")
 }
 
-/// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
-model AuditLog {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  action    String
-  ipAddress String?  @map("ip_address")
-  metadata  Json?
-  createdAt DateTime @default(now()) @map("created_at")
-  users     User     @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([action])
-  @@index([createdAt])
-  @@map("audit_logs")
-}
-
-model MilitaryCapabilities {
-  id                                   String       @id @db.Uuid
-  organization_id                      String       @unique @db.Uuid
-  number_of_active_navy_personnel      Int?
-  number_of_destroyers                 Int?
-  number_of_submarines_diesel          Int?
-  number_of_submarines_nuclear         Int?
-  number_of_naval_shipyards            Int?
-  number_of_maritime_patrol_aircraft   Int?
-  number_of_stealth_fleet              Int?
-  number_of_surveillance_radars        Int?
-  number_of_aircrafts                  Int?
-  number_of_fighter_jets               Int?
-  number_of_helicopters                Int?
-  number_of_drones                     Int?
-  number_of_tanker_planes              Int?
-  number_of_transport_planes           Int?
-  number_of_communication_satellites   Int?
-  number_of_missile_warning_satellites Int?
-  number_of_navigation_satellites      Int?
-  number_of_spy_satellites             Int?
-  number_of_satellite_jamming_systems  Int?
-  number_of_surveillance_telescopes    Int?
-  number_of_operational_spaceplanes    Int?
-  number_of_space_launch_sites         Int?
-  number_of_space_operations_squadrons Int?
-  number_of_space_personnel            Int?
-  updated_at                           DateTime
-  organizations                        Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-
-  @@map("military_capabilities")
-}
-
-model Subject {
-  id                String           @id @db.Uuid
-  name              String
-  serial_number     String           @unique
-  type              String?
-  description       String?
-  short_description String?
-  category          SubjectCategory?
-  competitors       String[]
-  vendors           String[]
-  fun_fact          String?
-  organization_id   String?          @db.Uuid
-  website_url       String?
-  logo_url          String?
-  tags              String[]
-  score             Int?
-  metadata          Json?
-  deleted_at        DateTime?
-  created_at        DateTime         @default(now())
-  updated_at        DateTime
-  organizations     Organization?    @relation(fields: [organization_id], references: [id])
-  industries        Industry[]       @relation("ProductIndustries")
-
-  @@index([category])
-  @@index([organization_id])
-  @@map("subjects")
-}
-
 model UserCertifications {
   id               String        @id @db.Uuid
   user_profile_id  String        @db.Uuid
@@ -567,20 +565,6 @@ model UserEducations {
   @@map("user_educations")
 }
 
-model StudyFields {
-  id                    String                @id @db.Uuid
-  name                  String
-  serial_number         String                @unique
-  area                  String?
-  description           String?
-  score                 Int?
-  metadata              Json?
-  deleted_at            DateTime?
-  created_at            DateTime              @default(now())
-  updated_at            DateTime
-  user_education_fields UserEducationFields[]
-}
-
 model UserEducationFields {
   id                String             @id @db.Uuid
   user_education_id String             @db.Uuid
@@ -593,6 +577,22 @@ model UserEducationFields {
   @@index([study_field_Id])
   @@index([type])
   @@map("user_education_fields")
+}
+
+/// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  action    String
+  ipAddress String?  @map("ip_address")
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  users     User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
 
 enum CostOfLiving {
