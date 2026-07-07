@@ -1,0 +1,2 @@
+title;serial_number;category;description;seniority_level;industry_id;products;tools_and_tech;tags;metadata;score
+text (required);text (required);enum (optional): PRIVATE_SECTOR | PUBLIC_SECTOR | GOVERNMENT | NGO | MILITARY | ACADEMIC | OTHER;text (optional);enum (optional): INTERN | JUNIOR | MID | SENIOR | LEAD | DIRECTOR | C_LEVEL | ELECTED | OTHER;UUID of related record (optional);String list, comma-separated (optional);String list, comma-separated (optional);String list, comma-separated (optional);JSON (optional);number (optional)

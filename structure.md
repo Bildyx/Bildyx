@@ -20,9 +20,11 @@ apps/
 │   │   ├── models/        # Zod schemas per resource, field names match snake_case DB columns
 │   │   └── routes/        # Express routes per resource
 │   ├── scripts/
-│   │   └── generate_excel_templates.py  # Generates .xlsx import templates from schema.prisma
+│   │   ├── generate_excel_templates.py  # Generates .xlsx import templates from schema.prisma
+│   │   └── excel_to_csv.py              # Converts apps/api/data/excel/*.xlsx into apps/api/data/*.csv
 │   └── data/
-│       ├── *.csv                 # Legacy/manual data exports
+│       ├── *.csv                 # Legacy/manual data exports + CSVs generated from data/excel
+│       ├── excel/                 # Filled-in .xlsx data files (converted to CSV via excel_to_csv.py)
 │       └── excel_templates/      # Generated .xlsx templates (one per reference model)
 └── website/               # Marketing site (PHP/HTML/CSS/JS)
 Files/                      # Legacy hand-curated business data templates (csv/excel), unrelated to DB schema column names
@@ -46,3 +48,4 @@ Excel import template generator added and working for all 11 target reference mo
 
 ## Recent Changes
 - [2026-07-07] Added `apps/api/scripts/generate_excel_templates.py`: parses `schema.prisma`, excludes relation fields and auto-managed columns (id/created_at/updated_at/deleted_at), adds enum dropdowns and type hints, outputs one `.xlsx` per model to `apps/api/data/excel_templates/`.
+- [2026-07-07] Added `apps/api/scripts/excel_to_csv.py`: converts every `.xlsx` in `apps/api/data/excel/` to a `.csv` in `apps/api/data/` (active sheet only). Paths are computed from `__file__`, not hardcoded, so it works on any machine.

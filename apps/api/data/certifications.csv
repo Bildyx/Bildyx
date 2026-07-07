@@ -1,0 +1,2 @@
+name;serial_number;issuing_organization_id;description;level;category;products;jobs;validity_duration_months;difficulty;website_url;score;metadata
+text (required);text (required);UUID of related record (optional);text (optional);text (optional);enum (optional): TECHNICAL | PROFESSIONAL | PROJECTMANAGEMENT | VENDORPRODUCT | LANGUAGE | OTHER;String list, comma-separated (optional);String list, comma-separated (optional);number (optional);enum (optional): BEGINNER | INTERMEDIATE | ADVANCED | EXPERT;text (optional);number (optional);JSON (optional)
