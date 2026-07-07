@@ -1,0 +1,346 @@
+/* Mission page only */
+
+.mission-page {
+    background: #ffffff;
+}
+
+.mission-main {
+    background: #ffffff;
+    min-height: 100vh;
+}
+
+.mission-hero {
+    min-height: 300px;
+    padding: 72px 20px 86px;
+    background: #2946ee;
+    color: #ffffff;
+    text-align: center;
+}
+
+.mission-hero__eyebrow,
+.mission-section-label {
+    display: inline-block;
+    font-size: 0.72rem;
+    line-height: 1;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.mission-hero__eyebrow {
+    margin-bottom: 22px;
+    color: rgba(255,255,255,.75);
+}
+
+.mission-hero h1 {
+    margin: 0 0 22px;
+    font-size: clamp(3rem, 6vw, 4.7rem);
+    line-height: .95;
+    letter-spacing: -0.055em;
+    font-weight: 800;
+}
+
+.mission-hero p {
+    max-width: 620px;
+    margin: 0 auto;
+    color: rgba(255,255,255,.92);
+    font-size: 1.08rem;
+    line-height: 1.55;
+}
+
+.mission-frame {
+    width: min(850px, calc(100% - 40px));
+    margin: 62px auto 86px;
+    border: 2px solid #2448ff;
+    border-radius: 34px;
+    padding: 14px;
+    background: #ffffff;
+}
+
+.mission-inner {
+    border: 1.5px solid #2448ff;
+    border-radius: 28px;
+    padding: 48px 50px 54px;
+    background: #ffffff;
+}
+
+.mission-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    max-width: 620px;
+    margin: 0 auto 72px;
+}
+
+.mission-stat {
+    text-align: center;
+    padding: 0 52px;
+}
+
+.mission-stat + .mission-stat {
+    border-left: 1px solid #d7dde8;
+}
+
+.mission-icon,
+.mission-card__icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #071550;
+    overflow: hidden;
+}
+
+.mission-icon img,
+.mission-card__icon img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    display: block;
+}
+
+.mission-stat h2 {
+    margin: 20px 0 4px;
+    color: #08122d;
+    font-size: 2.55rem;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+}
+
+.mission-stat strong {
+    display: block;
+    color: #08122d;
+    font-size: .98rem;
+    margin-bottom: 14px;
+}
+
+.mission-stat p {
+    color: #667085;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.mission-work {
+    margin-bottom: 72px;
+}
+
+.mission-section-label {
+    display: block;
+    text-align: center;
+    margin-bottom: 38px;
+    color: #667085;
+}
+
+.mission-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.mission-card {
+    min-height: 260px;
+    padding: 34px 34px;
+    border-radius: 14px;
+    background: #f1f2f5;
+    color: #08122d;
+}
+
+.mission-card--dark {
+    background: #071550;
+    color: #ffffff;
+}
+
+.mission-card--danger {
+    background: #fdeaea;
+    color: #ff3c3c;
+}
+
+.mission-card__icon {
+    margin-bottom: 28px;
+    background: #071550;
+}
+
+.mission-card__icon--dark {
+    background: rgba(255,255,255,.11);
+}
+
+.mission-card__icon--danger {
+    background: #ff3c3c;
+}
+
+.mission-number {
+    display: block;
+    color: #2448ff;
+    font-size: .82rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.mission-card--dark .mission-number,
+.mission-card--dark p,
+.mission-card--dark li {
+    color: #ffffff;
+}
+
+.mission-card--danger .mission-number,
+.mission-card--danger strong {
+    color: #ff3c3c;
+}
+
+.mission-card h3 {
+    margin: 0 0 18px;
+    font-size: 1.35rem;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+}
+
+.mission-card p,
+.mission-card li {
+    color: #667085;
+    line-height: 1.65;
+    margin: 0;
+}
+
+.mission-card ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 14px;
+}
+
+.mission-card strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: .95rem;
+}
+
+.mission-no-search {
+    display: grid;
+    grid-template-columns: .8fr 1.2fr;
+    align-items: center;
+    gap: 34px;
+    border: 1.5px solid #2448ff;
+    border-radius: 20px;
+    padding: 38px 46px;
+}
+
+.mission-no-search h2 {
+    margin: 0 0 16px;
+    color: #2946ee;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+}
+
+.mission-no-search p {
+    color: #667085;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.mission-no-search__rows {
+    display: grid;
+    gap: 24px;
+}
+
+.mission-row {
+    display: grid;
+    grid-template-columns: 26px 88px 34px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+}
+
+.mission-row__bad,
+.mission-row strong {
+    color: #ff3c3c;
+}
+
+.mission-row__bad {
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.mission-row__arrow {
+    color: #ff3c3c;
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+.mission-row strong {
+    line-height: 1.15;
+}
+
+.mission-row p {
+    color: #08122d;
+    line-height: 1.45;
+}
+
+@media (max-width: 850px) {
+    .mission-frame {
+        width: min(100% - 24px, 850px);
+        margin-top: 38px;
+    }
+
+    .mission-inner {
+        padding: 34px 24px 38px;
+    }
+
+    .mission-stats,
+    .mission-card-grid,
+    .mission-no-search {
+        grid-template-columns: 1fr;
+    }
+
+    .mission-stat {
+        padding: 0 12px 34px;
+    }
+
+    .mission-stat + .mission-stat {
+        border-left: 0;
+        border-top: 1px solid #d7dde8;
+        padding-top: 34px;
+    }
+
+    .mission-no-search {
+        gap: 24px;
+        padding: 28px 24px;
+    }
+}
+
+@media (max-width: 520px) {
+    .mission-hero {
+        padding: 54px 18px 64px;
+        min-height: auto;
+    }
+
+    .mission-frame {
+        border-radius: 24px;
+        padding: 9px;
+    }
+
+    .mission-inner {
+        border-radius: 18px;
+        padding: 28px 18px 32px;
+    }
+
+    .mission-card {
+        padding: 28px 24px;
+    }
+
+    .mission-row {
+        grid-template-columns: 24px 1fr;
+    }
+
+    .mission-row__arrow {
+        display: none;
+    }
+
+    .mission-row p {
+        grid-column: 2;
+    }
+}
