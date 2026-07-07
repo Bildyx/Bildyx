@@ -7,7 +7,7 @@ export function readCsv<T>(file: string): T[] {
 
   return parse(csv, {
     columns: true,
-    delimiter: ",",
+    delimiter: ";",
     skip_empty_lines: true,
   }) as T[];
 }
