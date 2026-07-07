@@ -960,6 +960,7 @@ export interface Subjects {
   tags: string[] | null;
   type: string | null;
   updated_at: Timestamp;
+  vendors: string[] | null;
   website_url: string | null;
 }
 
