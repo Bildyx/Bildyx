@@ -1,7 +1,31 @@
 import { publicProcedure } from "../oRPC";
-import { teams } from "./teams";
+import { certifications } from "./certifications";
+import { cities } from "./cities";
+import { countries } from "./countries";
+import { degrees } from "./degrees";
+import { industries } from "./industries";
+import { jobs } from "./jobs";
+import { job_ads } from "./job_ads";
+import { job_ads_skills } from "./job_ads_skills";
+import { subjects } from "./subjects";
+import { skills } from "./skills";
+import { universities } from "./universities";
+import { organizations } from "./organizations";
+import { military_capabilities } from "./military_capabilities";
 
 export const router = publicProcedure.router({
-  teams,
+  certifications,
+  cities,
+  countries,
+  degrees,
+  industries,
+  jobs,
+  job_ads,
+  job_ads_skills,
+  subjects,
+  skills,
+  universities,
+  organizations,
+  military_capabilities,
 });
 export type Router = typeof router;
