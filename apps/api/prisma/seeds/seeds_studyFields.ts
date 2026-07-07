@@ -25,8 +25,7 @@ export async function seedStudyFields(prisma: PrismaClient) {
     area: r.area || null,
     description: r.description || null,
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 

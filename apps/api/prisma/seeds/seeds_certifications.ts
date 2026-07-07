@@ -59,8 +59,7 @@ export async function seedCertifications(prisma: PrismaClient) {
 
     websiteUrl: r.website_url || null,
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 

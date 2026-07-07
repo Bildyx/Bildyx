@@ -5,13 +5,13 @@
 
 import type { ColumnType } from "kysely";
 
-export type ArrayType<T> =
-  ArrayTypeImpl<T> extends (infer U)[] ? U[] : ArrayTypeImpl<T>;
+export type ArrayType<T> = ArrayTypeImpl<T> extends (infer U)[]
+  ? U[]
+  : ArrayTypeImpl<T>;
 
-export type ArrayTypeImpl<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S[], I[], U[]>
-    : T[];
+export type ArrayTypeImpl<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S[], I[], U[]>
+  : T[];
 
 export type AuthAalLevel = "aal1" | "aal2" | "aal3";
 
@@ -21,11 +21,7 @@ export type AuthFactorStatus = "unverified" | "verified";
 
 export type AuthFactorType = "phone" | "totp" | "webauthn";
 
-export type AuthOauthAuthorizationStatus =
-  | "approved"
-  | "denied"
-  | "expired"
-  | "pending";
+export type AuthOauthAuthorizationStatus = "approved" | "denied" | "expired" | "pending";
 
 export type AuthOauthClientType = "confidential" | "public";
 
@@ -33,95 +29,35 @@ export type AuthOauthRegistrationType = "dynamic" | "manual";
 
 export type AuthOauthResponseType = "code";
 
-export type AuthOneTimeTokenType =
-  | "confirmation_token"
-  | "email_change_token_current"
-  | "email_change_token_new"
-  | "phone_change_token"
-  | "reauthentication_token"
-  | "recovery_token";
+export type AuthOneTimeTokenType = "confirmation_token" | "email_change_token_current" | "email_change_token_new" | "phone_change_token" | "reauthentication_token" | "recovery_token";
 
-export type Certificationcategory =
-  | "LANGUAGE"
-  | "OTHER"
-  | "PROFESSIONAL"
-  | "PROJECTMANAGEMENT"
-  | "TECHNICAL"
-  | "VENDORPRODUCT";
+export type Certificationcategory = "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "PROJECTMANAGEMENT" | "TECHNICAL" | "VENDORPRODUCT";
 
-export type Contracttype =
-  | "APPRENTICESHIP"
-  | "FREELANCE"
-  | "FULL_TIME"
-  | "INTERNSHIP"
-  | "OTHER"
-  | "PART_TIME";
+export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "OTHER" | "PART_TIME";
 
 export type Costofliving = "HIGH" | "LOW" | "MEDIUM";
 
-export type Degreelevel =
-  | "ASSOCIATE"
-  | "BACHELOR"
-  | "HIGH_SCHOOL"
-  | "MASTER"
-  | "PHD";
+export type Degreelevel = "ASSOCIATE" | "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "PHD";
 
-export type Difficultylevel =
-  | "ADVANCED"
-  | "BEGINNER"
-  | "EXPERT"
-  | "INTERMEDIATE";
+export type Difficultylevel = "ADVANCED" | "BEGINNER" | "EXPERT" | "INTERMEDIATE";
 
 export type Educationfieldtype = "MAJOR" | "MINOR";
 
-export type Educationlevel =
-  | "BACHELOR"
-  | "HIGH_SCHOOL"
-  | "MASTER"
-  | "NONE"
-  | "OTHER"
-  | "PHD";
+export type Educationlevel = "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "NONE" | "OTHER" | "PHD";
 
-export type Employeecountrange =
-  | "RANGE_1_10"
-  | "RANGE_1001_5000"
-  | "RANGE_11_50"
-  | "RANGE_201_1000"
-  | "RANGE_5000_PLUS"
-  | "RANGE_51_200";
+export type Employeecountrange = "RANGE_1_10" | "RANGE_1001_5000" | "RANGE_11_50" | "RANGE_201_1000" | "RANGE_5000_PLUS" | "RANGE_51_200";
 
-export type Generated<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
 
-export type Governmenttype =
-  | "ABSOLUTE_MONARCHY"
-  | "COMMUNIST"
-  | "CONSTITUTIONAL_MONARCHY"
-  | "FEDERATION"
-  | "MILITARY_JUNTA"
-  | "OTHER"
-  | "PARLIAMENTARY"
-  | "REPUBLIC"
-  | "THEOCRACY";
+export type Governmenttype = "ABSOLUTE_MONARCHY" | "COMMUNIST" | "CONSTITUTIONAL_MONARCHY" | "FEDERATION" | "MILITARY_JUNTA" | "OTHER" | "PARLIAMENTARY" | "REPUBLIC" | "THEOCRACY";
 
-export type Int8 = ColumnType<
-  string,
-  bigint | number | string,
-  bigint | number | string
->;
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
 export type Jobadstatus = "CLOSED" | "DRAFT" | "FILLED" | "PUBLISHED";
 
-export type Jobcategory =
-  | "ACADEMIC"
-  | "GOVERNMENT"
-  | "MILITARY"
-  | "NGO"
-  | "OTHER"
-  | "PRIVATE_SECTOR"
-  | "PUBLIC_SECTOR";
+export type Jobcategory = "ACADEMIC" | "GOVERNMENT" | "MILITARY" | "NGO" | "OTHER" | "PRIVATE_SECTOR" | "PUBLIC_SECTOR";
 
 export type Json = JsonValue;
 
@@ -135,184 +71,33 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
-export type Language =
-  | "AFRIKAANS"
-  | "ALBANIAN"
-  | "AMHARIC"
-  | "ARABIC"
-  | "ARMENIAN"
-  | "AZERBAIJANI"
-  | "BASQUE"
-  | "BELARUSIAN"
-  | "BENGALI"
-  | "BOSNIAN"
-  | "BULGARIAN"
-  | "BURMESE"
-  | "CATALAN"
-  | "CEBUANO"
-  | "CHINESE_CANTONESE"
-  | "CHINESE_MANDARIN"
-  | "CROATIAN"
-  | "CZECH"
-  | "DANISH"
-  | "DUTCH"
-  | "ENGLISH"
-  | "ESPERANTO"
-  | "ESTONIAN"
-  | "FILIPINO"
-  | "FINNISH"
-  | "FRENCH"
-  | "GALICIAN"
-  | "GEORGIAN"
-  | "GERMAN"
-  | "GREEK"
-  | "GUJARATI"
-  | "HAITIAN_CREOLE"
-  | "HAUSA"
-  | "HEBREW"
-  | "HINDI"
-  | "HUNGARIAN"
-  | "ICELANDIC"
-  | "IGBO"
-  | "INDONESIAN"
-  | "IRISH"
-  | "ITALIAN"
-  | "JAPANESE"
-  | "JAVANESE"
-  | "KANNADA"
-  | "KAZAKH"
-  | "KHMER"
-  | "KOREAN"
-  | "KURDISH"
-  | "KYRGYZ"
-  | "LAO"
-  | "LATIN"
-  | "LATVIAN"
-  | "LITHUANIAN"
-  | "LUXEMBOURGISH"
-  | "MACEDONIAN"
-  | "MALAGASY"
-  | "MALAY"
-  | "MALAYALAM"
-  | "MALTESE"
-  | "MAORI"
-  | "MARATHI"
-  | "MONGOLIAN"
-  | "NEPALI"
-  | "NORWEGIAN"
-  | "PASHTO"
-  | "PERSIAN"
-  | "POLISH"
-  | "PORTUGUESE"
-  | "PUNJABI"
-  | "ROMANIAN"
-  | "RUSSIAN"
-  | "SAMOAN"
-  | "SERBIAN"
-  | "SHONA"
-  | "SINDHI"
-  | "SINHALA"
-  | "SLOVAK"
-  | "SLOVENIAN"
-  | "SOMALI"
-  | "SPANISH"
-  | "SUNDANESE"
-  | "SWAHILI"
-  | "SWEDISH"
-  | "TAJIK"
-  | "TAMIL"
-  | "TATAR"
-  | "TELUGU"
-  | "THAI"
-  | "TIBETAN"
-  | "TURKISH"
-  | "TURKMEN"
-  | "UKRAINIAN"
-  | "URDU"
-  | "UZBEK"
-  | "VIETNAMESE"
-  | "WELSH"
-  | "WOLOF"
-  | "XHOSA"
-  | "YIDDISH"
-  | "YORUBA"
-  | "ZULU";
+export type Language = "AFRIKAANS" | "ALBANIAN" | "AMHARIC" | "ARABIC" | "ARMENIAN" | "AZERBAIJANI" | "BASQUE" | "BELARUSIAN" | "BENGALI" | "BOSNIAN" | "BULGARIAN" | "BURMESE" | "CATALAN" | "CEBUANO" | "CHINESE_CANTONESE" | "CHINESE_MANDARIN" | "CROATIAN" | "CZECH" | "DANISH" | "DUTCH" | "ENGLISH" | "ESPERANTO" | "ESTONIAN" | "FILIPINO" | "FINNISH" | "FRENCH" | "GALICIAN" | "GEORGIAN" | "GERMAN" | "GREEK" | "GUJARATI" | "HAITIAN_CREOLE" | "HAUSA" | "HEBREW" | "HINDI" | "HUNGARIAN" | "ICELANDIC" | "IGBO" | "INDONESIAN" | "IRISH" | "ITALIAN" | "JAPANESE" | "JAVANESE" | "KANNADA" | "KAZAKH" | "KHMER" | "KOREAN" | "KURDISH" | "KYRGYZ" | "LAO" | "LATIN" | "LATVIAN" | "LITHUANIAN" | "LUXEMBOURGISH" | "MACEDONIAN" | "MALAGASY" | "MALAY" | "MALAYALAM" | "MALTESE" | "MAORI" | "MARATHI" | "MONGOLIAN" | "NEPALI" | "NORWEGIAN" | "PASHTO" | "PERSIAN" | "POLISH" | "PORTUGUESE" | "PUNJABI" | "ROMANIAN" | "RUSSIAN" | "SAMOAN" | "SERBIAN" | "SHONA" | "SINDHI" | "SINHALA" | "SLOVAK" | "SLOVENIAN" | "SOMALI" | "SPANISH" | "SUNDANESE" | "SWAHILI" | "SWEDISH" | "TAJIK" | "TAMIL" | "TATAR" | "TELUGU" | "THAI" | "TIBETAN" | "TURKISH" | "TURKMEN" | "UKRAINIAN" | "URDU" | "UZBEK" | "VIETNAMESE" | "WELSH" | "WOLOF" | "XHOSA" | "YIDDISH" | "YORUBA" | "ZULU";
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type Organizationsubtype =
-  | "ARMY"
-  | "CLUB"
-  | "COMPANY"
-  | "GOVERNMENT"
-  | "INTERNATIONAL_ORGANIZATION"
-  | "NGO"
-  | "NON_PROFIT"
-  | "OTHER"
-  | "RESEARCH_INSTITUTE"
-  | "SOCIETY"
-  | "UNIVERSITY";
+export type Organizationsubtype = "ARMY" | "CLUB" | "COMPANY" | "GOVERNMENT" | "INTERNATIONAL_ORGANIZATION" | "NGO" | "NON_PROFIT" | "OTHER" | "RESEARCH_INSTITUTE" | "SOCIETY" | "UNIVERSITY";
 
 export type Qualityoflife = "HIGH" | "LOW" | "MEDIUM";
 
 export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
-export type Senioritylevel =
-  | "C_LEVEL"
-  | "DIRECTOR"
-  | "ELECTED"
-  | "INTERN"
-  | "JUNIOR"
-  | "LEAD"
-  | "MID"
-  | "OTHER"
-  | "SENIOR";
+export type Senioritylevel = "C_LEVEL" | "DIRECTOR" | "ELECTED" | "INTERN" | "JUNIOR" | "LEAD" | "MID" | "OTHER" | "SENIOR";
 
-export type Skillcategory =
-  | "FRAMEWORK"
-  | "LANGUAGE"
-  | "METHODOLOGY"
-  | "OTHER"
-  | "SOFT"
-  | "TECHNICAL"
-  | "TOOL";
+export type Skillcategory = "FRAMEWORK" | "LANGUAGE" | "METHODOLOGY" | "OTHER" | "SOFT" | "TECHNICAL" | "TOOL";
 
 export type Skillimportance = "NICE_TO_HAVE" | "PREFERRED" | "REQUIRED";
 
 export type StorageBuckettype = "ANALYTICS" | "STANDARD" | "VECTOR";
 
-export type Subjectcategory =
-  | "API"
-  | "HARDWARE"
-  | "OTHER"
-  | "PHYSICAL_PRODUCT"
-  | "PLATFORM"
-  | "SERVICE"
-  | "SOFTWARE";
+export type Subjectcategory = "API" | "HARDWARE" | "OTHER" | "PHYSICAL_PRODUCT" | "PLATFORM" | "SERVICE" | "SOFTWARE";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export type Universitytype =
-  | "ACADEMY"
-  | "GRANDE_ECOLE"
-  | "INSTITUTE"
-  | "ONLINE"
-  | "OTHER"
-  | "UNIVERSITY";
+export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
 
-export type Userrole =
-  | "ADMIN"
-  | "CANDIDATE"
-  | "MODERATOR"
-  | "ORGANIZATION"
-  | "SUPER_ADMIN"
-  | "USER";
+export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANIZATION" | "SUPER_ADMIN" | "USER";
 
-export type Userstatus =
-  | "ACTIVE"
-  | "DELETED"
-  | "PENDING_VERIFICATION"
-  | "SUSPENDED";
+export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
 
 export interface _CityMainIndustries {
   A: string;

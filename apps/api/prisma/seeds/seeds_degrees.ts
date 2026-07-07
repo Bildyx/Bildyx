@@ -32,8 +32,7 @@ export async function seedDegrees(prisma: PrismaClient) {
 
     description: r.description || null,
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 

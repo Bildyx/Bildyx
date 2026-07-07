@@ -9,7 +9,7 @@
 
             <div class="footer-column">
                 <h2>About us</h2>
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=company">Company</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>company.php">Company</a>
                 <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=mission">Mission</a>
                 <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=contact">Contact</a>
             </div>

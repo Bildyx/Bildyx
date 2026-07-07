@@ -63,8 +63,7 @@ export async function seedSkills(prisma: PrismaClient) {
 
     timeToMaster: r.time_to_master || null,
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 

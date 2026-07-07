@@ -31,7 +31,7 @@ type SubjectCsv = {
 export async function seedSubjects(prisma: PrismaClient) {
   const rows = readCsv<SubjectCsv>("subjects_rows.csv");
 
-  const data: Prisma.subjectsCreateManyInput[] = rows.map((r) => ({
+  const data: Prisma.SubjectCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
     serial_number: r.serial_number,
@@ -54,8 +54,7 @@ export async function seedSubjects(prisma: PrismaClient) {
 
     tags: toStringArray(r.tags),
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 
@@ -65,7 +64,7 @@ export async function seedSubjects(prisma: PrismaClient) {
   }));
 
   // NOTE: depend de organizations.ts (organization_id) -> a seeder avant.
-  const result = await prisma.subjects.createMany({
+  const result = await prisma.subject.createMany({
     data,
     skipDuplicates: true,
   });

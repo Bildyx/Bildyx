@@ -27,8 +27,7 @@ export async function seedIndustries(prisma: PrismaClient) {
 
     metadata: toJson(r.metadata),
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     deletedAt: toDate(r.deleted_at, false),
     createdAt: toDate(r.created_at, true) as Date,

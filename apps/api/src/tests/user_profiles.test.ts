@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe("UserProfiles API Endpoints", () => {
+describe("UserProfiles API Endpoints", { concurrency: 1 }, () => {
   let testUserId1: string;
   let testUserId2: string;
   let createdProfileId1: string;
@@ -64,6 +64,9 @@ describe("UserProfiles API Endpoints", () => {
       console.error("Cleanup error in test teardown:", err);
     } finally {
       await database.destroy();
+      if (pgliteClient) {
+        await pgliteClient.close();
+      }
     }
   });
 

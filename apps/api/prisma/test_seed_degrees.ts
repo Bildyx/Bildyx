@@ -1,18 +1,7 @@
 import { PrismaClient, Prisma, DegreeLevel } from "@prisma/client";
-import { parse } from "csv-parse/sync";
-import fs from "node:fs";
+import { readCsv, toDate, toInt, toFloat, toJson, parseEnum } from "./seed-utils";
 
 const prisma = new PrismaClient();
-
-function readCsv<T>(file: string): T[] {
-  const csv = fs.readFileSync(`data/${file}`, "utf8");
-
-  return parse(csv, {
-    columns: true,
-    delimiter: ",",
-    skip_empty_lines: true,
-  }) as T[];
-}
 
 type DegreeCsv = {
   id: string;
@@ -29,12 +18,6 @@ type DegreeCsv = {
   updated_at?: string;
 };
 
-function parseLevel(level?: string): DegreeLevel | null {
-  if (!level) return null;
-
-  return DegreeLevel[level as keyof typeof DegreeLevel] ?? null;
-}
-
 async function main() {
   const degreesCsv = readCsv<DegreeCsv>("degrees_rows.csv");
 
@@ -43,41 +26,21 @@ async function main() {
     name: r.name,
     serial_number: r.serial_number,
 
-    level: parseLevel(r.level),
+    level: parseEnum(r.level, DegreeLevel),
 
     area: r.area || null,
 
-    durationYears:
-      r.duration_years && r.duration_years !== ""
-        ? Number(r.duration_years)
-        : null,
+    durationYears: toFloat(r.duration_years),
 
     description: r.description || null,
 
-    score:
-      r.score && r.score !== ""
-        ? Number(r.score)
-        : null,
+    score: toInt(r.score),
 
-    metadata:
-      r.metadata && r.metadata.trim() !== ""
-        ? JSON.parse(r.metadata)
-        : Prisma.JsonNull,
+    metadata: toJson(r.metadata),
 
-    deletedAt:
-      r.deleted_at && r.deleted_at !== ""
-        ? new Date(r.deleted_at)
-        : null,
-
-    createdAt:
-      r.created_at && r.created_at !== ""
-        ? new Date(r.created_at)
-        : new Date(),
-
-    updatedAt:
-      r.updated_at && r.updated_at !== ""
-        ? new Date(r.updated_at)
-        : new Date(),
+    deletedAt: toDate(r.deleted_at, false),
+    createdAt: toDate(r.created_at, true) as Date,
+    updatedAt: toDate(r.updated_at, true) as Date,
   }));
 
   const result = await prisma.degree.createMany({
