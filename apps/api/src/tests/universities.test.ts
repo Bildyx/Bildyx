@@ -41,7 +41,7 @@ describe("Universities API Endpoints", () => {
       .values({
         id: testCountryId,
         name: "Test Country for Uni",
-        serialNumber: "CNT-UNI-01",
+        serial_number: "CNT-UNI-01",
         updated_at: new Date(),
       })
       .execute();
@@ -52,7 +52,7 @@ describe("Universities API Endpoints", () => {
       .values({
         id: testCityId,
         name: "Test City for Uni",
-        serialNumber: "CTY-UNI-01",
+        serial_number: "CTY-UNI-01",
         country_id: testCountryId,
         updated_at: new Date(),
       })
@@ -88,17 +88,17 @@ describe("Universities API Endpoints", () => {
       await assert.rejects(
         callProcedure(universities.create, {
           name: "",
-          serialNumber: "UNI-CREATE-01",
+          serial_number: "UNI-CREATE-01",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is empty or missing", async () => {
+    test("should throw ZodError when serial_number is empty or missing", async () => {
       await assert.rejects(
         callProcedure(universities.create, {
           name: "Sorbonne University",
-          serialNumber: "   ",
+          serial_number: "   ",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -107,7 +107,7 @@ describe("Universities API Endpoints", () => {
     test("should successfully create a university", async () => {
       const result = await callProcedure(universities.create, {
         name: "Sorbonne University",
-        serialNumber: "UNI-CREATE-01",
+        serial_number: "UNI-CREATE-01",
         type: "UNIVERSITY",
         description: "Prestigious university in France",
         website_url: "https://sorbonne.edu",
@@ -128,7 +128,7 @@ describe("Universities API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Sorbonne University");
-      assert.strictEqual(result.serialNumber, "UNI-CREATE-01");
+      assert.strictEqual(result.serial_number, "UNI-CREATE-01");
       assert.strictEqual(result.type, "UNIVERSITY");
       assert.strictEqual(result.country_id, testCountryId);
       assert.strictEqual(result.city_id, testCityId);
@@ -139,7 +139,7 @@ describe("Universities API Endpoints", () => {
       await assert.rejects(
         callProcedure(universities.create, {
           name: "Sorbonne University",
-          serialNumber: "UNI-CREATE-02",
+          serial_number: "UNI-CREATE-02",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -148,7 +148,7 @@ describe("Universities API Endpoints", () => {
     test("should successfully create a second university", async () => {
       const result = await callProcedure(universities.create, {
         name: "Polytechnique Grande Ecole",
-        serialNumber: "UNI-CREATE-02",
+        serial_number: "UNI-CREATE-02",
         type: "GRANDE_ECOLE",
       });
 
@@ -265,7 +265,7 @@ describe("Universities API Endpoints", () => {
       // Create another one to test bulk delete
       const extra = await callProcedure(universities.create, {
         name: "Temporary university to delete",
-        serialNumber: "UNI-BULK-DEL",
+        serial_number: "UNI-BULK-DEL",
       });
 
       const idsToDelete = [createdUniId1, extra.id];

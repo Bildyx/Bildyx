@@ -52,13 +52,13 @@ describe("Countries API Endpoints", () => {
     test("should throw ZodError when name is missing", async () => {
       await assert.rejects(
         callProcedure(countries.create, {
-          serialNumber: "FR-01",
+          serial_number: "FR-01",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is missing", async () => {
+    test("should throw ZodError when serial_number is missing", async () => {
       await assert.rejects(
         callProcedure(countries.create, {
           name: "France",
@@ -70,14 +70,14 @@ describe("Countries API Endpoints", () => {
     test("should successfully create a country", async () => {
       const result = await callProcedure(countries.create, {
         name: "France",
-        serialNumber: "FR-01",
+        serial_number: "FR-01",
         iso_code: "FR",
         calling_code: "+33",
       });
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "France");
-      assert.strictEqual(result.serialNumber, "FR-01");
+      assert.strictEqual(result.serial_number, "FR-01");
       createdCountryId1 = result.id;
     });
 
@@ -85,7 +85,7 @@ describe("Countries API Endpoints", () => {
       await assert.rejects(
         callProcedure(countries.create, {
           name: "France",
-          serialNumber: "FR-02",
+          serial_number: "FR-02",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -94,7 +94,7 @@ describe("Countries API Endpoints", () => {
     test("should successfully create a second country", async () => {
       const result = await callProcedure(countries.create, {
         name: "Germany",
-        serialNumber: "DE-01",
+        serial_number: "DE-01",
         iso_code: "DE",
         calling_code: "+49",
       });
@@ -146,7 +146,7 @@ describe("Countries API Endpoints", () => {
 
       assert.strictEqual(result.id, createdCountryId1);
       assert.strictEqual(result.name, "France");
-      assert.strictEqual(result.serialNumber, "FR-01");
+      assert.strictEqual(result.serial_number, "FR-01");
     });
   });
 
@@ -213,7 +213,7 @@ describe("Countries API Endpoints", () => {
       // Create one more country to test bulk delete
       const extraCountry = await callProcedure(countries.create, {
         name: "Spain",
-        serialNumber: "ES-01",
+        serial_number: "ES-01",
       });
 
       const idsToDelete = [createdCountryId1, extraCountry.id];

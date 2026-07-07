@@ -6,7 +6,7 @@ const currentYear = () => new Date().getFullYear();
 export const UniversitySchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   type: UniversityTypeEnum.nullable().optional(),
   description: z.string().nullable().optional(),
   website_url: z.string().nullable().optional(),

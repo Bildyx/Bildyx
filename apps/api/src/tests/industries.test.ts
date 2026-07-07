@@ -55,17 +55,17 @@ describe("Industries API Endpoints", () => {
       await assert.rejects(
         callProcedure(industries.create, {
           name: "",
-          serialNumber: "IND-01",
+          serial_number: "IND-01",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is missing or empty", async () => {
+    test("should throw ZodError when serial_number is missing or empty", async () => {
       await assert.rejects(
         callProcedure(industries.create, {
           name: "Software Engineering",
-          serialNumber: "",
+          serial_number: "",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -74,14 +74,14 @@ describe("Industries API Endpoints", () => {
     test("should successfully create an industry", async () => {
       const result = await callProcedure(industries.create, {
         name: "Software Engineering",
-        serialNumber: "IND-01",
+        serial_number: "IND-01",
         description: "IT and Software services",
         color: "#007acc",
       });
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Software Engineering");
-      assert.strictEqual(result.serialNumber, "IND-01");
+      assert.strictEqual(result.serial_number, "IND-01");
       createdIndustryId1 = result.id;
     });
 
@@ -89,7 +89,7 @@ describe("Industries API Endpoints", () => {
       await assert.rejects(
         callProcedure(industries.create, {
           name: "Software Engineering",
-          serialNumber: "IND-02",
+          serial_number: "IND-02",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -98,7 +98,7 @@ describe("Industries API Endpoints", () => {
     test("should successfully create a second industry", async () => {
       const result = await callProcedure(industries.create, {
         name: "Biotechnology",
-        serialNumber: "IND-03",
+        serial_number: "IND-03",
         description: "Bio research and medical services",
       });
 
@@ -215,7 +215,7 @@ describe("Industries API Endpoints", () => {
       // Create one more industry to test bulk delete
       const extraIndustry = await callProcedure(industries.create, {
         name: "Aerospace",
-        serialNumber: "IND-99",
+        serial_number: "IND-99",
       });
 
       const idsToDelete = [createdIndustryId1, extraIndustry.id];

@@ -14,7 +14,7 @@ import {
 export const CountrySchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   iso_code: zNullableString(),
   capital_name: z.string().nullable().optional(),
   flag_url: z.string().nullable().optional(),

@@ -53,17 +53,17 @@ describe("Degrees API Endpoints", () => {
       await assert.rejects(
         callProcedure(degrees.create, {
           name: "",
-          serialNumber: "DEG-01",
+          serial_number: "DEG-01",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is missing or empty", async () => {
+    test("should throw ZodError when serial_number is missing or empty", async () => {
       await assert.rejects(
         callProcedure(degrees.create, {
           name: "Computer Science",
-          serialNumber: "",
+          serial_number: "",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -72,7 +72,7 @@ describe("Degrees API Endpoints", () => {
     test("should successfully create a degree", async () => {
       const result = await callProcedure(degrees.create, {
         name: "Computer Science",
-        serialNumber: "DEG-01",
+        serial_number: "DEG-01",
         level: "BACHELOR",
         area: "Computer Science and IT",
         duration_years: 3.5,
@@ -80,7 +80,7 @@ describe("Degrees API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Computer Science");
-      assert.strictEqual(result.serialNumber, "DEG-01");
+      assert.strictEqual(result.serial_number, "DEG-01");
       createdDegreeId1 = result.id;
     });
 
@@ -88,7 +88,7 @@ describe("Degrees API Endpoints", () => {
       await assert.rejects(
         callProcedure(degrees.create, {
           name: "Computer Science",
-          serialNumber: "DEG-02",
+          serial_number: "DEG-02",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -97,7 +97,7 @@ describe("Degrees API Endpoints", () => {
     test("should successfully create a second degree", async () => {
       const result = await callProcedure(degrees.create, {
         name: "Mechanical Engineering",
-        serialNumber: "DEG-03",
+        serial_number: "DEG-03",
         level: "MASTER",
       });
 
@@ -225,7 +225,7 @@ describe("Degrees API Endpoints", () => {
       // Create one more degree to test bulk delete
       const extraDegree = await callProcedure(degrees.create, {
         name: "Aeronautics",
-        serialNumber: "DEG-99",
+        serial_number: "DEG-99",
       });
 
       const idsToDelete = [createdDegreeId1, extraDegree.id];

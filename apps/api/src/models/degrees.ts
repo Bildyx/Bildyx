@@ -4,7 +4,7 @@ import { DegreeLevelEnum } from "./utils/enums";
 export const DegreeSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   level: DegreeLevelEnum.nullable().optional(),
   area: z.string().nullable().optional(),
   duration_years: z.number().min(0).nullable().optional(),

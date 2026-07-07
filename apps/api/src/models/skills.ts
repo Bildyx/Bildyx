@@ -5,7 +5,7 @@ import { zStringArray } from "./utils/preprocessors";
 export const SkillSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   type: z.string().nullable().optional(),
   category: SkillCategoryEnum.nullable().optional(),
   categories: zStringArray(),

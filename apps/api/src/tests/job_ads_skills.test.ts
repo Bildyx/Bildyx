@@ -56,7 +56,7 @@ describe("Job Ad Skills API Endpoints", () => {
       .values({
         id: testJobAdId,
         title: "Test Job Ad",
-        serialNumber: "JAD-TEST-01",
+        serial_number: "JAD-TEST-01",
         organization_id: testOrgId,
         updated_at: new Date(),
       })
@@ -68,7 +68,7 @@ describe("Job Ad Skills API Endpoints", () => {
       .values({
         id: testSkillId1,
         name: "Test Skill 1",
-        serialNumber: "SKL-TEST-01",
+        serial_number: "SKL-TEST-01",
         updated_at: new Date(),
       })
       .execute();
@@ -78,7 +78,7 @@ describe("Job Ad Skills API Endpoints", () => {
       .values({
         id: testSkillId2,
         name: "Test Skill 2",
-        serialNumber: "SKL-TEST-02",
+        serial_number: "SKL-TEST-02",
         updated_at: new Date(),
       })
       .execute();

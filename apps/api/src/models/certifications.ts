@@ -5,7 +5,7 @@ import { zNullableUUID } from "./utils/preprocessors";
 export const CertificationSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1).nullable(),
+  serial_number: z.string().trim().min(1).nullable(),
   issuing_organization_id: zNullableUUID(),
   description: z.string().nullable().optional(),
   level: z.string().nullable().optional(),
@@ -35,7 +35,7 @@ export const GetCertificationSchema = z.object({
 // POST
 export const PostCertificationSchema = z.object({
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   issuing_organization_id: zNullableUUID(),
   description: z.string().nullable().optional(),
   level: z.string().nullable().optional(),

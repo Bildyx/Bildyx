@@ -10,7 +10,7 @@ import { zNullableUUID, zStringArray } from "./utils/preprocessors";
 export const JobAdSchema = z.object({
   id: z.string().uuid(),
   title: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   organization_id: z.string().uuid(),
   job_id: zNullableUUID(),
   description: z.string().nullable().optional(),
