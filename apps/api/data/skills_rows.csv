@@ -1,1 +1,1 @@
-id,name,serial_number,type,category,categories,description,icon_url,industry,difficulty,used_in,jobs,product_categories,common_fields_of_study,related_abilities,time_to_master,score,metadata,deleted_at,created_at,updated_at
+id;name;serial_number;type;category;categories;description;icon_url;industry;difficulty;used_in;jobs;product_categories;common_fields_of_study;related_abilities;time_to_master;score;metadata;deleted_at;created_at;updated_at

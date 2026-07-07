@@ -1,1 +1,1 @@
-id,name,serial_number,description,icon_url,metadata,score,deleted_at,created_at,updated_at
+id;name;serial_number;description;icon_url;metadata;score;deleted_at;created_at;updated_at
