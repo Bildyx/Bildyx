@@ -1,5 +1,4 @@
 name;serial_number;level;area;duration_years;description;score;metadata
-text (required);text (required);enum (optional): HIGH_SCHOOL | ASSOCIATE | BACHELOR | MASTER | PHD;text (optional);number (optional);text (optional);number (optional);JSON (optional)
 Master in Philosophy and English Literature;DEG-000001;Master;Literature & Philosophy;2;Focuses on literary and philosophical texts. Develops analytical and interpretive skills. Studies cultural theory. Emphasises critical reading. Prepares for academic careers.;;
 Master in Philosophy and Mathematics;DEG-000002;Master;Mathematical Philosophy;2;Focuses on logic and mathematical reasoning. Develops analytical and abstract thinking. Studies formal systems. Emphasises theoretical inquiry. Prepares for research careers.;;
 Master in Philosophy and Public Policy;DEG-000003;Master;Policy Studies;2;Focuses on ethical foundations of policy-making. Develops analytical and governance skills. Studies public systems. Emphasises decision frameworks. Prepares for policy roles.;;

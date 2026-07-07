@@ -1,2 +1,1 @@
 name;serial_number;type;description;website_url;logo_url;country_id;city_id;student_count;metadata;score_university;local_name;notes;established;score;undergraduates;postgraduates
-text (required);text (required);enum (optional): UNIVERSITY | GRANDE_ECOLE | INSTITUTE | ACADEMY | ONLINE | OTHER;text (optional);text (optional);text (optional);UUID of related record (optional);UUID of related record (optional);number (optional);JSON (optional);number (optional);text (optional);text (optional);text (optional);number (optional);number (optional);number (optional)

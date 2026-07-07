@@ -1,2 +1,1 @@
 name;serial_number;description;icon_url;metadata;score
-text (required);text (required);text (optional);text (optional);JSON (optional);number (optional)
