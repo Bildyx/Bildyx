@@ -309,7 +309,7 @@ model Degree {
 }
 
 model MilitaryCapabilities {
-  id                                   String       @id @db.Uuid
+  id                                   String       @id @default(uuid()) @db.Uuid
   organization_id                      String       @unique @db.Uuid
   number_of_active_navy_personnel      Int?
   number_of_destroyers                 Int?
@@ -342,7 +342,7 @@ model MilitaryCapabilities {
 }
 
 model Subject {
-  id                String           @id @db.Uuid
+  id                String           @id @default(uuid()) @db.Uuid
   name              String
   serial_number     String           @unique
   type              String?
@@ -370,7 +370,7 @@ model Subject {
 }
 
 model StudyFields {
-  id                    String                @id @db.Uuid
+  id                    String                @id @default(uuid()) @db.Uuid
   name                  String
   serial_number         String                @unique
   area                  String?
@@ -534,7 +534,7 @@ model UserProfile {
 }
 
 model UserCertifications {
-  id               String        @id @db.Uuid
+  id               String        @id @default(uuid()) @db.Uuid
   user_profile_id  String        @db.Uuid
   certification_id String        @db.Uuid
   obtained_at      DateTime?
@@ -548,7 +548,7 @@ model UserCertifications {
 }
 
 model UserEducations {
-  id                    String                @id @db.Uuid
+  id                    String                @id @default(uuid()) @db.Uuid
   user_profile_id       String                @db.Uuid
   university_id         String?               @db.Uuid
   degree_id             String?               @db.Uuid
@@ -566,7 +566,7 @@ model UserEducations {
 }
 
 model UserEducationFields {
-  id                String             @id @db.Uuid
+  id                String             @id @default(uuid()) @db.Uuid
   user_education_id String             @db.Uuid
   study_field_Id    String             @db.Uuid
   type              EducationFieldType
