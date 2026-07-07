@@ -11,7 +11,6 @@ import { subjects } from "./subjects";
 import { skills } from "./skills";
 import { universities } from "./universities";
 import { organizations } from "./organizations";
-import { majors } from "./majors";
 import { military_capabilities } from "./military_capabilities";
 
 export const router = publicProcedure.router({
@@ -27,7 +26,6 @@ export const router = publicProcedure.router({
   skills,
   universities,
   organizations,
-  majors,
   military_capabilities,
 });
 export type Router = typeof router;

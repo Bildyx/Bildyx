@@ -12,15 +12,14 @@ datasource db {
 model Industry {
   id                 String         @id @default(uuid()) @db.Uuid
   name               String
-  serialNumber       String         @unique
+  serial_number      String         @unique
   description        String?
   iconUrl            String?        @map("icon_url")
-  color              String?
   metadata           Json?
+  score              Int?
   deletedAt          DateTime?      @map("deleted_at")
   createdAt          DateTime       @default(now()) @map("created_at")
   updatedAt          DateTime       @updatedAt @map("updated_at")
-  score              Int?
   jobs               Job[]
   mainIndustryCities City[]         @relation("CityMainIndustries")
   organizations      Organization[] @relation("OrganizationIndustries")
@@ -34,7 +33,7 @@ model Industry {
 model Country {
   id                            String          @id @default(uuid()) @db.Uuid
   name                          String
-  serialNumber                  String          @unique
+  serial_number                 String          @unique
   isoCode                       String?         @unique @map("iso_code") @db.Char(2)
   capitalName                   String?         @map("capital_name")
   flagUrl                       String?         @map("flag_url")
@@ -93,7 +92,7 @@ model Country {
 model City {
   id                                          String         @id @default(uuid()) @db.Uuid
   name                                        String
-  serialNumber                                String         @unique
+  serial_number                               String         @unique
   countryId                                   String         @map("country_id") @db.Uuid
   isCapital                                   Boolean        @default(false) @map("is_capital")
   stateProvince                               String?        @map("state_province")
@@ -138,7 +137,6 @@ model Organization {
   slug                                 String                 @unique
   type                                 OrganizationSubType?
   legalStatus                          String?                @map("legal_status")
-  category                             String?
   ownership                            String?
   mission                              String?
   knownFor                             String[]               @map("known_for")
@@ -182,7 +180,7 @@ model Organization {
 model Job {
   id             String          @id @default(uuid()) @db.Uuid
   title          String
-  serialNumber   String          @unique
+  serial_number  String          @unique
   category       JobCategory?
   description    String?
   seniorityLevel SeniorityLevel? @map("seniority_level")
@@ -191,10 +189,10 @@ model Job {
   toolsAndTech   String[]        @map("tools_and_tech")
   tags           String[]
   metadata       Json?
+  score          Int?
   deletedAt      DateTime?       @map("deleted_at")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
-  score          Int?
   jobAds         JobAd[]
   industry       Industry?       @relation(fields: [industryId], references: [id])
   userProfiles   UserProfile[]   @relation("UserCurrentJob")
@@ -208,7 +206,7 @@ model Job {
 model Skill {
   id                  String           @id @default(uuid()) @db.Uuid
   name                String
-  serialNumber        String           @unique
+  serial_number       String           @unique
   type                String?
   category            SkillCategory?
   categories          String[]
@@ -222,11 +220,11 @@ model Skill {
   commonFieldsOfStudy String[]         @map("common_fields_of_study")
   relatedAbilities    String[]         @map("related_abilities")
   timeToMaster        String?          @map("time_to_master")
+  score               Int?
   metadata            Json?
   deletedAt           DateTime?        @map("deleted_at")
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
-  score               Int?
   JobAdSkills         JobAdSkill[]
 
   @@index([category])
@@ -236,7 +234,7 @@ model Skill {
 model Certification {
   id                     String                 @id @default(uuid()) @db.Uuid
   name                   String
-  serialNumber           String                 @unique
+  serial_number          String                 @unique
   issuingOrganizationId  String?                @map("issuing_organization_id") @db.Uuid
   description            String?
   level                  String?
@@ -246,11 +244,11 @@ model Certification {
   validityDurationMonths Int?                   @map("validity_duration_months")
   difficulty             DifficultyLevel?
   websiteUrl             String?                @map("website_url")
+  score                  Int?
   metadata               Json?
   deletedAt              DateTime?              @map("deleted_at")
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime               @updatedAt @map("updated_at")
-  score                  Int?
   issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
   user_certifications    user_certifications[]
 
@@ -262,7 +260,7 @@ model Certification {
 model University {
   id              String            @id @default(uuid()) @db.Uuid
   name            String
-  serialNumber    String            @unique
+  serial_number   String            @unique
   type            UniversityType?
   description     String?
   websiteUrl      String?           @map("website_url")
@@ -271,17 +269,16 @@ model University {
   cityId          String?           @map("city_id") @db.Uuid
   studentCount    Int?              @map("student_count")
   metadata        Json?
-  deletedAt       DateTime?         @map("deleted_at")
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
   scoreUniversity Float?            @map("score_university")
   localName       String?           @map("local_name")
-  location        String?
   notes           String?
   established     String?
   score           Int?
   undergraduates  Int?
   postgraduates   Int?
+  deletedAt       DateTime?         @map("deleted_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
   city            City?             @relation(fields: [cityId], references: [id])
   country         Country?          @relation(fields: [countryId], references: [id])
   user_educations user_educations[]
@@ -295,16 +292,16 @@ model University {
 model Degree {
   id              String            @id @default(uuid()) @db.Uuid
   name            String
-  serialNumber    String            @unique
+  serial_number   String            @unique
   level           DegreeLevel?
   area            String?
   durationYears   Float?            @map("duration_years")
   description     String?
+  score           Int?
   metadata        Json?
   deletedAt       DateTime?         @map("deleted_at")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
-  score           Int?
   user_educations user_educations[]
 
   @@index([level])
@@ -314,7 +311,7 @@ model Degree {
 model JobAd {
   id                      String          @id @default(uuid()) @db.Uuid
   title                   String
-  serialNumber            String          @unique
+  serial_number           String          @unique
   organizationId          String          @map("organization_id") @db.Uuid
   jobId                   String?         @map("job_id") @db.Uuid
   description             String?
@@ -477,20 +474,6 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model majors {
-  id              String            @id @db.Uuid
-  name            String
-  serial_number   String            @unique
-  area            String?
-  description     String?
-  metadata        Json?
-  deleted_at      DateTime?
-  created_at      DateTime          @default(now())
-  updated_at      DateTime
-  score           Int?
-  user_educations user_educations[]
-}
-
 model military_capabilities {
   id                                   String       @id @db.Uuid
   organization_id                      String       @unique @db.Uuid
@@ -525,7 +508,7 @@ model military_capabilities {
 model subjects {
   id                String           @id @db.Uuid
   name              String
-  serialNumber      String           @unique
+  serial_number     String           @unique
   type              String?
   description       String?
   short_description String?
@@ -536,11 +519,11 @@ model subjects {
   website_url       String?
   logo_url          String?
   tags              String[]
+  score             Int?
   metadata          Json?
   deleted_at        DateTime?
   created_at        DateTime         @default(now())
   updated_at        DateTime
-  score             Int?
   organizations     Organization?    @relation(fields: [organization_id], references: [id])
   industries        Industry[]       @relation("ProductIndustries")
 
@@ -562,32 +545,58 @@ model user_certifications {
 }
 
 model user_educations {
-  id              String      @id @db.Uuid
-  user_profile_id String      @db.Uuid
-  university_id   String?     @db.Uuid
-  degree_id       String?     @db.Uuid
-  major_id        String?     @db.Uuid
-  start_year      Int?
-  end_year        Int?
-  graduated       Boolean     @default(false)
-  degrees         Degree?     @relation(fields: [degree_id], references: [id])
-  majors          majors?     @relation(fields: [major_id], references: [id])
-  universities    University? @relation(fields: [university_id], references: [id])
-  user_profiles   UserProfile @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+  id                    String                  @id @db.Uuid
+  user_profile_id       String                  @db.Uuid
+  university_id         String?                 @db.Uuid
+  degree_id             String?                 @db.Uuid
+  start_year            Int?
+  end_year              Int?
+  graduated             Boolean                 @default(false)
+  user_education_fields user_education_fields[]
+  degrees               Degree?                 @relation(fields: [degree_id], references: [id])
+  universities          University?             @relation(fields: [university_id], references: [id])
+  user_profiles         UserProfile             @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
 
   @@index([university_id])
   @@index([user_profile_id])
 }
 
+model StudyFields {
+  id                    String                  @id @db.Uuid
+  name                  String
+  serial_number         String                  @unique
+  area                  String?
+  description           String?
+  score                 Int?
+  metadata              Json?
+  deleted_at            DateTime?
+  created_at            DateTime                @default(now())
+  updated_at            DateTime
+  user_education_fields user_education_fields[]
+}
+
+model user_education_fields {
+  id                String             @id @db.Uuid
+  user_education_id String             @db.Uuid
+  study_field_Id    String             @db.Uuid
+  type              EducationFieldType
+  StudyFields       StudyFields        @relation(fields: [study_field_Id], references: [id])
+  user_educations   user_educations    @relation(fields: [user_education_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_education_id, study_field_Id])
+  @@index([study_field_Id])
+  @@index([type])
+}
+
 enum CostOfLiving {
   LOW
-  MEDIAN
+  MEDIUM
   HIGH
 }
 
 enum QualityOfLife {
   LOW
-  MEDIAN
+  MEDIUM
   HIGH
 }
 
@@ -848,7 +857,7 @@ enum UserRole {
   ADMIN
   SUPER_ADMIN
   CANDIDATE
-  ORGANISATION
+  ORGANIZATION
 }
 
 enum UserStatus {
@@ -856,4 +865,9 @@ enum UserStatus {
   SUSPENDED
   DELETED
   PENDING_VERIFICATION
+}
+
+enum EducationFieldType {
+  MAJOR
+  MINOR
 }
