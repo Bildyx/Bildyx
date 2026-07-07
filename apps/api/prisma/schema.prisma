@@ -503,6 +503,8 @@ model MilitaryCapabilities {
   number_of_space_personnel            Int?
   updated_at                           DateTime
   organizations                        Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  @@map("military_capabilities")
 }
 
 model Subject {
@@ -530,6 +532,7 @@ model Subject {
 
   @@index([category])
   @@index([organization_id])
+  @@map("subjects")
 }
 
 model UserCertifications {
@@ -543,6 +546,7 @@ model UserCertifications {
 
   @@unique([user_profile_id, certification_id])
   @@index([certification_id])
+  @@map("user_certifications")
 }
 
 model UserEducations {
@@ -560,6 +564,7 @@ model UserEducations {
 
   @@index([university_id])
   @@index([user_profile_id])
+  @@map("user_educations")
 }
 
 model StudyFields {
@@ -587,6 +592,7 @@ model UserEducationFields {
   @@unique([user_education_id, study_field_Id])
   @@index([study_field_Id])
   @@index([type])
+  @@map("user_education_fields")
 }
 
 enum CostOfLiving {
