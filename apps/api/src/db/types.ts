@@ -35,11 +35,13 @@ export type Certificationcategory = "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "PRO
 
 export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "OTHER" | "PART_TIME";
 
-export type Costofliving = "HIGH" | "LOW" | "MEDIAN";
+export type Costofliving = "HIGH" | "LOW" | "MEDIUM";
 
 export type Degreelevel = "ASSOCIATE" | "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "PHD";
 
 export type Difficultylevel = "ADVANCED" | "BEGINNER" | "EXPERT" | "INTERMEDIATE";
+
+export type Educationfieldtype = "MAJOR" | "MINOR";
 
 export type Educationlevel = "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "NONE" | "OTHER" | "PHD";
 
@@ -75,7 +77,7 @@ export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type Organizationsubtype = "ARMY" | "CLUB" | "COMPANY" | "GOVERNMENT" | "INTERNATIONAL_ORGANIZATION" | "NGO" | "NON_PROFIT" | "OTHER" | "RESEARCH_INSTITUTE" | "SOCIETY" | "UNIVERSITY";
 
-export type Qualityoflife = "HIGH" | "LOW" | "MEDIAN";
+export type Qualityoflife = "HIGH" | "LOW" | "MEDIUM";
 
 export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
@@ -93,7 +95,7 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
 
-export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANISATION" | "SUPER_ADMIN" | "USER";
+export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANIZATION" | "SUPER_ADMIN" | "USER";
 
 export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
 
@@ -522,7 +524,7 @@ export interface Cities {
   number_of_universities: number | null;
   people_description: string | null;
   population: number | null;
-  serialNumber: string;
+  serial_number: string;
   state_province: string | null;
   temperatures: string | null;
   top_universities: string | null;
@@ -573,7 +575,7 @@ export interface Countries {
   quality_of_education: string | null;
   quality_of_life: Qualityoflife | null;
   religion: string[] | null;
-  serialNumber: string;
+  serial_number: string;
   temperatures: string | null;
   top_universities: string | null;
   updated_at: Timestamp;
@@ -654,7 +656,6 @@ export interface ExtensionsPgStatStatementsInfo {
 }
 
 export interface Industries {
-  color: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   description: string | null;
@@ -686,7 +687,7 @@ export interface JobAds {
   required_education_level: Educationlevel | null;
   required_years_experience: number | null;
   salary_range: string | null;
-  serialNumber: string;
+  serial_number: string;
   status: Generated<Jobadstatus>;
   tags: string[] | null;
   title: string;
@@ -972,7 +973,6 @@ export interface Universities {
   established: string | null;
   id: string;
   local_name: string | null;
-  location: string | null;
   logo_url: string | null;
   metadata: Json | null;
   name: string;
