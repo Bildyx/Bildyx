@@ -23,7 +23,7 @@ model Industry {
   jobs               Job[]
   mainIndustryCities City[]         @relation("CityMainIndustries")
   organizations      Organization[] @relation("OrganizationIndustries")
-  products           subjects[]     @relation("ProductIndustries")
+  products           Subject[]      @relation("ProductIndustries")
   industries_A       Industry[]     @relation("RelatedIndustries")
   industries_B       Industry[]     @relation("RelatedIndustries")
 
@@ -132,17 +132,17 @@ model City {
 }
 
 model Organization {
-  id                                   String                 @id @default(uuid()) @db.Uuid
+  id                                   String                @id @default(uuid()) @db.Uuid
   name                                 String
-  slug                                 String                 @unique
+  slug                                 String                @unique
   type                                 OrganizationSubType?
-  legalStatus                          String?                @map("legal_status")
+  legalStatus                          String?               @map("legal_status")
   ownership                            String?
   mission                              String?
-  knownFor                             String[]               @map("known_for")
+  knownFor                             String[]              @map("known_for")
   activities                           String[]
   project                              String?
-  researchAreas                        String[]               @map("research_areas")
+  researchAreas                        String[]              @map("research_areas")
   products                             String[]
   services                             String[]
   partnerships                         String[]
@@ -151,26 +151,26 @@ model Organization {
   founder                              String?
   equipments                           String?
   score                                Int?
-  city_id                              String?                @db.Uuid
+  city_id                              String?               @db.Uuid
   numberOfEmployees                    EmployeeCountRange?
   numberOfSubsidiaries                 Int?
-  parentOrganizationId                 String?                @map("parent_organization_id") @db.Uuid
+  parentOrganizationId                 String?               @map("parent_organization_id") @db.Uuid
   metadata                             Json?
-  deletedAt                            DateTime?              @map("deleted_at")
-  createdAt                            DateTime               @default(now()) @map("created_at")
-  updatedAt                            DateTime               @updatedAt @map("updated_at")
-  issuedCertifications                 Certification[]        @relation("CertificationIssuer")
+  deletedAt                            DateTime?             @map("deleted_at")
+  createdAt                            DateTime              @default(now()) @map("created_at")
+  updatedAt                            DateTime              @updatedAt @map("updated_at")
+  issuedCertifications                 Certification[]       @relation("CertificationIssuer")
   jobAds                               JobAd[]
-  military_capabilities                military_capabilities?
-  cities_organizations_city_idTocities City?                  @relation("organizations_city_idTocities", fields: [city_id], references: [id])
-  parentOrganization                   Organization?          @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
-  childAgencies                        Organization[]         @relation("OrganizationHierarchy")
-  subjects                             subjects[]
-  userProfiles                         UserProfile[]          @relation("UserCurrentOrganization")
+  military_capabilities                MilitaryCapabilities?
+  cities_organizations_city_idTocities City?                 @relation("organizations_city_idTocities", fields: [city_id], references: [id])
+  parentOrganization                   Organization?         @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
+  childAgencies                        Organization[]        @relation("OrganizationHierarchy")
+  subjects                             Subject[]
+  userProfiles                         UserProfile[]         @relation("UserCurrentOrganization")
   users                                User?
-  largestOrganizationCountries         Country[]              @relation("CountryLargestOrganizations")
-  industries                           Industry[]             @relation("OrganizationIndustries")
-  cities_working_area                  City[]                 @relation("working_area")
+  largestOrganizationCountries         Country[]             @relation("CountryLargestOrganizations")
+  industries                           Industry[]            @relation("OrganizationIndustries")
+  cities_working_area                  City[]                @relation("working_area")
 
   @@index([parentOrganizationId])
   @@index([type])
@@ -250,7 +250,7 @@ model Certification {
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime               @updatedAt @map("updated_at")
   issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
-  user_certifications    user_certifications[]
+  user_certifications    UserCertifications[]
 
   @@index([issuingOrganizationId])
   @@index([category])
@@ -258,30 +258,30 @@ model Certification {
 }
 
 model University {
-  id              String            @id @default(uuid()) @db.Uuid
+  id              String           @id @default(uuid()) @db.Uuid
   name            String
-  serial_number   String            @unique
+  serial_number   String           @unique
   type            UniversityType?
   description     String?
-  websiteUrl      String?           @map("website_url")
-  logoUrl         String?           @map("logo_url")
-  countryId       String?           @map("country_id") @db.Uuid
-  cityId          String?           @map("city_id") @db.Uuid
-  studentCount    Int?              @map("student_count")
+  websiteUrl      String?          @map("website_url")
+  logoUrl         String?          @map("logo_url")
+  countryId       String?          @map("country_id") @db.Uuid
+  cityId          String?          @map("city_id") @db.Uuid
+  studentCount    Int?             @map("student_count")
   metadata        Json?
-  scoreUniversity Float?            @map("score_university")
-  localName       String?           @map("local_name")
+  scoreUniversity Float?           @map("score_university")
+  localName       String?          @map("local_name")
   notes           String?
   established     String?
   score           Int?
   undergraduates  Int?
   postgraduates   Int?
-  deletedAt       DateTime?         @map("deleted_at")
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
-  city            City?             @relation(fields: [cityId], references: [id])
-  country         Country?          @relation(fields: [countryId], references: [id])
-  user_educations user_educations[]
+  deletedAt       DateTime?        @map("deleted_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  city            City?            @relation(fields: [cityId], references: [id])
+  country         Country?         @relation(fields: [countryId], references: [id])
+  user_educations UserEducations[]
 
   @@index([countryId])
   @@index([cityId])
@@ -290,19 +290,19 @@ model University {
 }
 
 model Degree {
-  id              String            @id @default(uuid()) @db.Uuid
+  id              String           @id @default(uuid()) @db.Uuid
   name            String
-  serial_number   String            @unique
+  serial_number   String           @unique
   level           DegreeLevel?
   area            String?
-  durationYears   Float?            @map("duration_years")
+  durationYears   Float?           @map("duration_years")
   description     String?
   score           Int?
   metadata        Json?
-  deletedAt       DateTime?         @map("deleted_at")
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
-  user_educations user_educations[]
+  deletedAt       DateTime?        @map("deleted_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  user_educations UserEducations[]
 
   @@index([level])
   @@map("degrees")
@@ -426,30 +426,30 @@ model UserSession {
 
 /// Profil public user
 model UserProfile {
-  id                    String                @id @default(uuid()) @db.Uuid
-  userId                String                @unique @map("user_id") @db.Uuid
+  id                    String               @id @default(uuid()) @db.Uuid
+  userId                String               @unique @map("user_id") @db.Uuid
   biography             String?
-  countryId             String?               @map("country_id") @db.Uuid
-  cityId                String?               @map("city_id") @db.Uuid
-  linkedinUrl           String?               @map("linkedin_url")
-  githubUrl             String?               @map("github_url")
-  websiteUrl            String?               @map("website_url")
-  locale                String?               @default("fr")
+  countryId             String?              @map("country_id") @db.Uuid
+  cityId                String?              @map("city_id") @db.Uuid
+  linkedinUrl           String?              @map("linkedin_url")
+  githubUrl             String?              @map("github_url")
+  websiteUrl            String?              @map("website_url")
+  locale                String?              @default("fr")
   timezone              String?
-  isPublic              Boolean               @default(true) @map("is_public")
-  currentJobId          String?               @map("current_job_id") @db.Uuid
-  currentJobStartedAt   DateTime?             @map("current_job_started_at")
-  currentOrganizationId String?               @map("current_organization_id") @db.Uuid
+  isPublic              Boolean              @default(true) @map("is_public")
+  currentJobId          String?              @map("current_job_id") @db.Uuid
+  currentJobStartedAt   DateTime?            @map("current_job_started_at")
+  currentOrganizationId String?              @map("current_organization_id") @db.Uuid
   metadata              Json?
-  createdAt             DateTime              @default(now()) @map("created_at")
-  updatedAt             DateTime              @updatedAt @map("updated_at")
-  user_certifications   user_certifications[]
-  user_educations       user_educations[]
-  city                  City?                 @relation(fields: [cityId], references: [id])
-  country               Country?              @relation("UserProfileCountry", fields: [countryId], references: [id])
-  currentJob            Job?                  @relation("UserCurrentJob", fields: [currentJobId], references: [id])
-  currentOrganization   Organization?         @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
-  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
+  user_certifications   UserCertifications[]
+  user_educations       UserEducations[]
+  city                  City?                @relation(fields: [cityId], references: [id])
+  country               Country?             @relation("UserProfileCountry", fields: [countryId], references: [id])
+  currentJob            Job?                 @relation("UserCurrentJob", fields: [currentJobId], references: [id])
+  currentOrganization   Organization?        @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([countryId])
   @@index([cityId])
@@ -474,7 +474,7 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model military_capabilities {
+model MilitaryCapabilities {
   id                                   String       @id @db.Uuid
   organization_id                      String       @unique @db.Uuid
   number_of_active_navy_personnel      Int?
@@ -505,7 +505,7 @@ model military_capabilities {
   organizations                        Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
 }
 
-model subjects {
+model Subject {
   id                String           @id @db.Uuid
   name              String
   serial_number     String           @unique
@@ -514,6 +514,7 @@ model subjects {
   short_description String?
   category          SubjectCategory?
   competitors       String[]
+  vendors           String[]
   fun_fact          String?
   organization_id   String?          @db.Uuid
   website_url       String?
@@ -531,7 +532,7 @@ model subjects {
   @@index([organization_id])
 }
 
-model user_certifications {
+model UserCertifications {
   id               String        @id @db.Uuid
   user_profile_id  String        @db.Uuid
   certification_id String        @db.Uuid
@@ -544,44 +545,44 @@ model user_certifications {
   @@index([certification_id])
 }
 
-model user_educations {
-  id                    String                  @id @db.Uuid
-  user_profile_id       String                  @db.Uuid
-  university_id         String?                 @db.Uuid
-  degree_id             String?                 @db.Uuid
+model UserEducations {
+  id                    String                @id @db.Uuid
+  user_profile_id       String                @db.Uuid
+  university_id         String?               @db.Uuid
+  degree_id             String?               @db.Uuid
   start_year            Int?
   end_year              Int?
-  graduated             Boolean                 @default(false)
-  user_education_fields user_education_fields[]
-  degrees               Degree?                 @relation(fields: [degree_id], references: [id])
-  universities          University?             @relation(fields: [university_id], references: [id])
-  user_profiles         UserProfile             @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+  graduated             Boolean               @default(false)
+  user_education_fields UserEducationFields[]
+  degrees               Degree?               @relation(fields: [degree_id], references: [id])
+  universities          University?           @relation(fields: [university_id], references: [id])
+  user_profiles         UserProfile           @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
 
   @@index([university_id])
   @@index([user_profile_id])
 }
 
 model StudyFields {
-  id                    String                  @id @db.Uuid
+  id                    String                @id @db.Uuid
   name                  String
-  serial_number         String                  @unique
+  serial_number         String                @unique
   area                  String?
   description           String?
   score                 Int?
   metadata              Json?
   deleted_at            DateTime?
-  created_at            DateTime                @default(now())
+  created_at            DateTime              @default(now())
   updated_at            DateTime
-  user_education_fields user_education_fields[]
+  user_education_fields UserEducationFields[]
 }
 
-model user_education_fields {
+model UserEducationFields {
   id                String             @id @db.Uuid
   user_education_id String             @db.Uuid
   study_field_Id    String             @db.Uuid
   type              EducationFieldType
   StudyFields       StudyFields        @relation(fields: [study_field_Id], references: [id])
-  user_educations   user_educations    @relation(fields: [user_education_id], references: [id], onDelete: Cascade)
+  user_educations   UserEducations     @relation(fields: [user_education_id], references: [id], onDelete: Cascade)
 
   @@unique([user_education_id, study_field_Id])
   @@index([study_field_Id])
