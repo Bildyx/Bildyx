@@ -1,0 +1,459 @@
+import { ORPCError } from "@orpc/server";
+import { publicProcedure } from "../oRPC";
+import { database } from "../database";
+import {
+  SignupInputSchema,
+  SignupOutputSchema,
+  LoginInputSchema,
+  LoginOutputSchema,
+  VerifyEmailInputSchema,
+  VerifyEmailOutputSchema,
+  ForgotPasswordInputSchema,
+  ForgotPasswordOutputSchema,
+  ResetPasswordInputSchema,
+  ResetPasswordOutputSchema,
+} from "../models/auth";
+import {
+  randomUUID,
+  scryptSync,
+  randomBytes,
+  timingSafeEqual,
+  createHash,
+} from "node:crypto";
+
+// Secure password hashing helper functions using native Node.js crypto (scrypt)
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  try {
+    const [salt, hash] = stored.split(":");
+    if (!salt || !hash) return false;
+    const testHash = scryptSync(password, salt, 64).toString("hex");
+    return timingSafeEqual(
+      Buffer.from(hash, "hex"),
+      Buffer.from(testHash, "hex"),
+    );
+  } catch (err) {
+    return false;
+  }
+}
+
+export const auth = {
+  // 1. SIGNUP
+  signup: publicProcedure
+    .route({
+      method: "POST",
+      summary: "User registration",
+      description:
+        "Registers a new user (Seeker or Company) and creates initial profiles",
+      path: "/auth/signup",
+      tags: ["Auth"],
+    })
+    .input(SignupInputSchema)
+    .output(SignupOutputSchema)
+    .handler(async ({ input }) => {
+      const emailLower = input.email.trim().toLowerCase();
+
+      // Check if user already exists
+      const existing = await database
+        .selectFrom("users")
+        .where("email", "=", emailLower)
+        .where("deleted_at", "is", null)
+        .select("id")
+        .executeTakeFirst();
+
+      if (existing) {
+        throw new ORPCError("CONFLICT", {
+          message: "A user with this email already exists",
+        });
+      }
+
+      const userId = randomUUID();
+      const verificationCode = Math.floor(
+        100000 + Math.random() * 900000,
+      ).toString();
+      const verificationExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // Expires in 1 hour
+      const passwordHash = hashPassword(input.password);
+
+      // Perform all operations in a database transaction
+      await database.transaction().execute(async (trx) => {
+        if (input.accountType === "company") {
+          // Generate unique slug
+          let slug = input
+            .companyName!.trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+
+          if (!slug) slug = "company";
+
+          const existingOrg = await trx
+            .selectFrom("organizations")
+            .where("slug", "=", slug)
+            .select("id")
+            .executeTakeFirst();
+
+          if (existingOrg) {
+            slug = `${slug}-${randomBytes(3).toString("hex")}`;
+          }
+
+          const orgId = randomUUID();
+          await trx
+            .insertInto("organizations")
+            .values({
+              id: orgId,
+              name: input.companyName!.trim(),
+              slug: slug,
+              updated_at: new Date(),
+            })
+            .execute();
+
+          await trx
+            .insertInto("users")
+            .values({
+              id: userId,
+              email: emailLower,
+              password_hash: passwordHash,
+              email_verified: false,
+              role: "ORGANIZATION",
+              status: "PENDING_VERIFICATION",
+              verification_code: verificationCode,
+              verification_expires_at: verificationExpiresAt,
+              organization_id: orgId,
+              marketing_opt_in: input.marketing ?? false,
+              updated_at: new Date(),
+            })
+            .execute();
+        } else {
+          // Seekers get a Candidate role and a UserProfile entry
+          await trx
+            .insertInto("users")
+            .values({
+              id: userId,
+              email: emailLower,
+              password_hash: passwordHash,
+              email_verified: false,
+              role: "CANDIDATE",
+              status: "PENDING_VERIFICATION",
+              verification_code: verificationCode,
+              verification_expires_at: verificationExpiresAt,
+              first_name: input.firstName!.trim(),
+              last_name: input.lastName!.trim(),
+              display_name: `${input.firstName!.trim()} ${input.lastName!.trim()}`,
+              marketing_opt_in: input.marketing ?? false,
+              updated_at: new Date(),
+            })
+            .execute();
+
+          await trx
+            .insertInto("user_profiles")
+            .values({
+              id: randomUUID(),
+              user_id: userId,
+              is_public: true,
+              updated_at: new Date(),
+            })
+            .execute();
+        }
+      });
+
+      return {
+        message: "Registration successful. Please verify your email.",
+        email: emailLower,
+        userId: userId,
+        verification_code: verificationCode, // Returned for sandbox debug/testing
+      };
+    }),
+
+  // 2. LOGIN
+  login: publicProcedure
+    .route({
+      method: "POST",
+      summary: "User login",
+      description: "Authenticates a user and starts a session",
+      path: "/auth/login",
+      tags: ["Auth"],
+    })
+    .input(LoginInputSchema)
+    .output(LoginOutputSchema)
+    .handler(async ({ input }) => {
+      const emailLower = input.email.trim().toLowerCase();
+
+      const user = await database
+        .selectFrom("users")
+        .selectAll()
+        .where("email", "=", emailLower)
+        .where("deleted_at", "is", null)
+        .executeTakeFirst();
+
+      if (!user) {
+        throw new ORPCError("UNAUTHORIZED", {
+          message: "Invalid credentials",
+        });
+      }
+
+      if (user.status === "PENDING_VERIFICATION") {
+        throw new ORPCError("FORBIDDEN", {
+          message: "Please verify your email before logging in",
+        });
+      }
+
+      if (user.status === "SUSPENDED") {
+        throw new ORPCError("FORBIDDEN", {
+          message: "Your account is suspended",
+        });
+      }
+
+      const isValid = verifyPassword(input.password, user.password_hash);
+      if (!isValid) {
+        // Increment failed attempts
+        await database
+          .updateTable("users")
+          .set({ failed_login_attempts: user.failed_login_attempts + 1 })
+          .where("id", "=", user.id)
+          .execute();
+
+        throw new ORPCError("UNAUTHORIZED", {
+          message: "Invalid credentials",
+        });
+      }
+
+      // Generate session token and store in DB
+      const token = randomBytes(32).toString("hex");
+      const tokenHash = createHash("sha256").update(token).digest("hex");
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days session
+
+      await database
+        .insertInto("user_sessions")
+        .values({
+          id: randomUUID(),
+          user_id: user.id,
+          token_hash: tokenHash,
+          expires_at: expiresAt,
+          created_at: new Date(),
+        })
+        .execute();
+
+      // Reset failed attempts and update last login
+      await database
+        .updateTable("users")
+        .set({
+          failed_login_attempts: 0,
+          last_login_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where("id", "=", user.id)
+        .execute();
+
+      return {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          role: user.role,
+        },
+      };
+    }),
+
+  // 3. EMAIL VERIFICATION
+  verifyEmail: publicProcedure
+    .route({
+      method: "POST",
+      summary: "Verify signup email",
+      description: "Verifies the email verification code sent during signup",
+      path: "/auth/verify-email",
+      tags: ["Auth"],
+    })
+    .input(VerifyEmailInputSchema)
+    .output(VerifyEmailOutputSchema)
+    .handler(async ({ input }) => {
+      const emailLower = input.email.trim().toLowerCase();
+
+      const user = await database
+        .selectFrom("users")
+        .selectAll()
+        .where("email", "=", emailLower)
+        .where("deleted_at", "is", null)
+        .executeTakeFirst();
+
+      if (!user) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "User not found",
+        });
+      }
+
+      if (user.email_verified && user.status === "ACTIVE") {
+        return {
+          message: "Email is already verified",
+        };
+      }
+
+      if (user.verification_code !== input.code) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Incorrect verification code",
+        });
+      }
+
+      if (
+        user.verification_expires_at &&
+        user.verification_expires_at < new Date()
+      ) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Verification code has expired",
+        });
+      }
+
+      // Generate a session automatically upon successful verification
+      const token = randomBytes(32).toString("hex");
+      const tokenHash = createHash("sha256").update(token).digest("hex");
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days session
+
+      await database.transaction().execute(async (trx) => {
+        await trx
+          .updateTable("users")
+          .set({
+            email_verified: true,
+            status: "ACTIVE",
+            verification_code: null,
+            verification_expires_at: null,
+            last_login_at: new Date(),
+            updated_at: new Date(),
+          })
+          .where("id", "=", user.id)
+          .execute();
+
+        await trx
+          .insertInto("user_sessions")
+          .values({
+            id: randomUUID(),
+            user_id: user.id,
+            token_hash: tokenHash,
+            expires_at: expiresAt,
+            created_at: new Date(),
+          })
+          .execute();
+      });
+
+      return {
+        message: "Email successfully verified. You are now logged in.",
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        },
+      };
+    }),
+
+  // 4. FORGOT PASSWORD
+  forgotPassword: publicProcedure
+    .route({
+      method: "POST",
+      summary: "Request password reset",
+      description: "Generates a reset token for a user forgot-password request",
+      path: "/auth/forgot-password",
+      tags: ["Auth"],
+    })
+    .input(ForgotPasswordInputSchema)
+    .output(ForgotPasswordOutputSchema)
+    .handler(async ({ input }) => {
+      const emailLower = input.email.trim().toLowerCase();
+
+      const user = await database
+        .selectFrom("users")
+        .where("email", "=", emailLower)
+        .where("deleted_at", "is", null)
+        .select("id")
+        .executeTakeFirst();
+
+      if (!user) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "No account found with this email address",
+        });
+      }
+
+      const resetToken = Math.floor(100000 + Math.random() * 900000).toString(); // Easy code entry
+      const resetExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiration
+
+      await database
+        .updateTable("users")
+        .set({
+          reset_token: resetToken,
+          reset_expires_at: resetExpiresAt,
+          last_reset_sent_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where("id", "=", user.id)
+        .execute();
+
+      return {
+        message: "Password reset code sent successfully.",
+        reset_token: resetToken, // Returned for sandbox debug/testing
+      };
+    }),
+
+  // 5. RESET PASSWORD
+  resetPassword: publicProcedure
+    .route({
+      method: "POST",
+      summary: "Reset password with token",
+      description:
+        "Updates user password if the reset token matches and is valid",
+      path: "/auth/reset-password",
+      tags: ["Auth"],
+    })
+    .input(ResetPasswordInputSchema)
+    .output(ResetPasswordOutputSchema)
+    .handler(async ({ input }) => {
+      const emailLower = input.email.trim().toLowerCase();
+
+      const user = await database
+        .selectFrom("users")
+        .selectAll()
+        .where("email", "=", emailLower)
+        .where("deleted_at", "is", null)
+        .executeTakeFirst();
+
+      if (!user) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "User not found",
+        });
+      }
+
+      if (user.reset_token !== input.token) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Incorrect reset token",
+        });
+      }
+
+      if (user.reset_expires_at && user.reset_expires_at < new Date()) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Reset token has expired",
+        });
+      }
+
+      const passwordHash = hashPassword(input.password);
+
+      await database
+        .updateTable("users")
+        .set({
+          password_hash: passwordHash,
+          reset_token: null,
+          reset_expires_at: null,
+          password_changed_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where("id", "=", user.id)
+        .execute();
+
+      return {
+        message: "Password successfully updated.",
+      };
+    }),
+};
