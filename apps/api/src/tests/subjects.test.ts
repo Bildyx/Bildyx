@@ -68,17 +68,17 @@ describe("Subjects API Endpoints", () => {
       await assert.rejects(
         callProcedure(subjects.create, {
           name: "",
-          serialNumber: "SUB-TEST-01",
+          serial_number: "SUB-TEST-01",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is empty or missing", async () => {
+    test("should throw ZodError when serial_number is empty or missing", async () => {
       await assert.rejects(
         callProcedure(subjects.create, {
           name: "Test Subject",
-          serialNumber: "   ",
+          serial_number: "   ",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -87,7 +87,7 @@ describe("Subjects API Endpoints", () => {
     test("should successfully create a subject", async () => {
       const result = await callProcedure(subjects.create, {
         name: "Analytics Platform",
-        serialNumber: "SUB-TEST-01",
+        serial_number: "SUB-TEST-01",
         category: "SOFTWARE",
         description: "An analytics service",
         organization_id: testOrgId,
@@ -102,7 +102,7 @@ describe("Subjects API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Analytics Platform");
-      assert.strictEqual(result.serialNumber, "SUB-TEST-01");
+      assert.strictEqual(result.serial_number, "SUB-TEST-01");
       assert.strictEqual(result.category, "SOFTWARE");
       assert.strictEqual(result.organization_id, testOrgId);
       createdSubjectId1 = result.id;
@@ -112,7 +112,7 @@ describe("Subjects API Endpoints", () => {
       await assert.rejects(
         callProcedure(subjects.create, {
           name: "Analytics Platform",
-          serialNumber: "SUB-TEST-02",
+          serial_number: "SUB-TEST-02",
           organization_id: testOrgId,
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
@@ -122,7 +122,7 @@ describe("Subjects API Endpoints", () => {
     test("should successfully create a second subject", async () => {
       const result = await callProcedure(subjects.create, {
         name: "Developer API Gateway",
-        serialNumber: "SUB-TEST-02",
+        serial_number: "SUB-TEST-02",
         category: "API",
       });
 
@@ -240,7 +240,7 @@ describe("Subjects API Endpoints", () => {
       // Create another one to test bulk delete
       const extra = await callProcedure(subjects.create, {
         name: "Temporary subject to delete",
-        serialNumber: "SUB-BULK-DEL",
+        serial_number: "SUB-BULK-DEL",
       });
 
       const idsToDelete = [createdSubjectId1, extra.id];

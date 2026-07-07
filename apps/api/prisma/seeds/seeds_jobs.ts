@@ -36,7 +36,7 @@ export async function seedJobs(prisma: PrismaClient) {
   const data: Prisma.JobCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     title: r.title,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     category: parseEnum(r.category, JobCategory),
 
@@ -52,8 +52,7 @@ export async function seedJobs(prisma: PrismaClient) {
 
     metadata: toJson(r.metadata),
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     deletedAt: toDate(r.deleted_at, false),
     createdAt: toDate(r.created_at, true) as Date,

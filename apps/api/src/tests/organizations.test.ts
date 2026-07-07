@@ -41,7 +41,7 @@ describe("Organizations API Endpoints", () => {
       .values({
         id: testCountryId,
         name: "Test Country for Org",
-        serialNumber: "CNT-ORG-01",
+        serial_number: "CNT-ORG-01",
         updated_at: new Date(),
       })
       .execute();
@@ -52,7 +52,7 @@ describe("Organizations API Endpoints", () => {
       .values({
         id: testCityId,
         name: "Test City for Org",
-        serialNumber: "CTY-ORG-01",
+        serial_number: "CTY-ORG-01",
         country_id: testCountryId,
         updated_at: new Date(),
       })

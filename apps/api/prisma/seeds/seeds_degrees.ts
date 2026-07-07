@@ -22,7 +22,7 @@ export async function seedDegrees(prisma: PrismaClient) {
   const data: Prisma.DegreeCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     level: parseEnum(r.level, DegreeLevel),
 
@@ -32,8 +32,7 @@ export async function seedDegrees(prisma: PrismaClient) {
 
     description: r.description || null,
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 

@@ -31,7 +31,7 @@ async function seed() {
     .values({
       id: certId1,
       name: "Test AWS Cloud Certification",
-      serialNumber: "AWS-TEST-12345",
+      serial_number: "AWS-TEST-12345",
       issuing_organization_id: orgId,
       description: "A test certification for AWS cloud architecture.",
       level: "INTERMEDIATE",
@@ -48,7 +48,7 @@ async function seed() {
     .values({
       id: certId2,
       name: "Test Project Management Professional",
-      serialNumber: "PMP-TEST-67890",
+      serial_number: "PMP-TEST-67890",
       issuing_organization_id: orgId,
       description: "A test certification for PM methodologies.",
       level: "ADVANCED",

@@ -46,7 +46,7 @@ export async function seedCities(prisma: PrismaClient) {
   const data: Prisma.CityCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     countryId: r.country_id,
 

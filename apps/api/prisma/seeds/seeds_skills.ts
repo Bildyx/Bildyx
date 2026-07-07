@@ -42,7 +42,7 @@ export async function seedSkills(prisma: PrismaClient) {
   const data: Prisma.SkillCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     type: r.type || null,
 
@@ -63,8 +63,7 @@ export async function seedSkills(prisma: PrismaClient) {
 
     timeToMaster: r.time_to_master || null,
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 

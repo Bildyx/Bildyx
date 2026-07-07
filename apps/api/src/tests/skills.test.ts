@@ -39,7 +39,7 @@ describe("Skills API Endpoints", () => {
       .values({
         id: testIndustryId,
         name: "Test Industry for Skills",
-        serialNumber: "IND-SKILL-TEST-01",
+        serial_number: "IND-SKILL-TEST-01",
         updated_at: new Date(),
       })
       .execute();
@@ -68,17 +68,17 @@ describe("Skills API Endpoints", () => {
       await assert.rejects(
         callProcedure(skills.create, {
           name: "",
-          serialNumber: "SKL-CREATE-01",
+          serial_number: "SKL-CREATE-01",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is empty or missing", async () => {
+    test("should throw ZodError when serial_number is empty or missing", async () => {
       await assert.rejects(
         callProcedure(skills.create, {
           name: "TypeScript Programming",
-          serialNumber: "  ",
+          serial_number: "  ",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -87,7 +87,7 @@ describe("Skills API Endpoints", () => {
     test("should successfully create a skill", async () => {
       const result = await callProcedure(skills.create, {
         name: "TypeScript Programming",
-        serialNumber: "SKL-CREATE-01",
+        serial_number: "SKL-CREATE-01",
         category: "LANGUAGE",
         difficulty: "INTERMEDIATE",
         description: "Strong typing in JS",
@@ -105,7 +105,7 @@ describe("Skills API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "TypeScript Programming");
-      assert.strictEqual(result.serialNumber, "SKL-CREATE-01");
+      assert.strictEqual(result.serial_number, "SKL-CREATE-01");
       assert.strictEqual(result.category, "LANGUAGE");
       assert.strictEqual(result.difficulty, "INTERMEDIATE");
       assert.strictEqual(result.industry_id, testIndustryId);
@@ -116,7 +116,7 @@ describe("Skills API Endpoints", () => {
       await assert.rejects(
         callProcedure(skills.create, {
           name: "TypeScript Programming",
-          serialNumber: "SKL-CREATE-02",
+          serial_number: "SKL-CREATE-02",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -125,7 +125,7 @@ describe("Skills API Endpoints", () => {
     test("should successfully create a second skill", async () => {
       const result = await callProcedure(skills.create, {
         name: "Agile Project Management",
-        serialNumber: "SKL-CREATE-02",
+        serial_number: "SKL-CREATE-02",
         category: "METHODOLOGY",
         difficulty: "ADVANCED",
       });
@@ -243,7 +243,7 @@ describe("Skills API Endpoints", () => {
       // Create another one to test bulk delete
       const extra = await callProcedure(skills.create, {
         name: "Temporary skill to delete",
-        serialNumber: "SKL-BULK-DEL",
+        serial_number: "SKL-BULK-DEL",
       });
 
       const idsToDelete = [createdSkillId1, extra.id];

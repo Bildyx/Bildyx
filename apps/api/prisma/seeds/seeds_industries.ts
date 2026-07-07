@@ -20,15 +20,14 @@ export async function seedIndustries(prisma: PrismaClient) {
   const data: Prisma.IndustryCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     description: r.description || null,
     iconUrl: r.icon_url || null,
 
     metadata: toJson(r.metadata),
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     deletedAt: toDate(r.deleted_at, false),
     createdAt: toDate(r.created_at, true) as Date,

@@ -3,7 +3,7 @@ import { z } from "zod";
 export const IndustrySchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   description: z.string().nullable().optional(),
   icon_url: z.string().nullable().optional(),
   color: z.string().nullable().optional(),

@@ -37,7 +37,7 @@ describe("Jobs API Endpoints", () => {
     // Create a mock country
     const country = await callProcedure(countries.create, {
       name: "Job Test Country",
-      serialNumber: "JTC-01",
+      serial_number: "JTC-01",
       iso_code: "JT",
     });
     testCountryId = country.id;
@@ -45,7 +45,7 @@ describe("Jobs API Endpoints", () => {
     // Create a mock industry
     const industry = await callProcedure(industries.create, {
       name: "Job Test Industry",
-      serialNumber: "JTI-01",
+      serial_number: "JTI-01",
       description: "Industry for Job tests",
     });
     testIndustryId = industry.id;
@@ -82,17 +82,17 @@ describe("Jobs API Endpoints", () => {
       await assert.rejects(
         callProcedure(jobs.create, {
           title: "",
-          serialNumber: "JOB-01",
+          serial_number: "JOB-01",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is missing or empty", async () => {
+    test("should throw ZodError when serial_number is missing or empty", async () => {
       await assert.rejects(
         callProcedure(jobs.create, {
           title: "Fullstack Developer",
-          serialNumber: "",
+          serial_number: "",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -101,7 +101,7 @@ describe("Jobs API Endpoints", () => {
     test("should successfully create a job", async () => {
       const result = await callProcedure(jobs.create, {
         title: "Fullstack Developer",
-        serialNumber: "JOB-01",
+        serial_number: "JOB-01",
         category: "PRIVATE_SECTOR",
         description: "Develop web applications",
         seniority_level: "SENIOR",
@@ -117,7 +117,7 @@ describe("Jobs API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.title, "Fullstack Developer");
-      assert.strictEqual(result.serialNumber, "JOB-01");
+      assert.strictEqual(result.serial_number, "JOB-01");
       assert.strictEqual(result.industry_id, testIndustryId);
       createdJobId1 = result.id;
     });
@@ -126,7 +126,7 @@ describe("Jobs API Endpoints", () => {
       await assert.rejects(
         callProcedure(jobs.create, {
           title: "Fullstack Developer",
-          serialNumber: "JOB-02",
+          serial_number: "JOB-02",
           industry_id: testIndustryId,
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
@@ -136,7 +136,7 @@ describe("Jobs API Endpoints", () => {
     test("should successfully create a second job", async () => {
       const result = await callProcedure(jobs.create, {
         title: "DevOps Engineer",
-        serialNumber: "JOB-03",
+        serial_number: "JOB-03",
         industry_id: testIndustryId,
         country_id: testCountryId,
         category: "PRIVATE_SECTOR",
@@ -295,7 +295,7 @@ describe("Jobs API Endpoints", () => {
       // Create one more job to test bulk delete
       const extraJob = await callProcedure(jobs.create, {
         title: "Frontend Engineer",
-        serialNumber: "JOB-99",
+        serial_number: "JOB-99",
         industry_id: testIndustryId,
       });
 

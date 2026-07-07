@@ -52,7 +52,7 @@ describe("Job Ads API Endpoints", () => {
       .values({
         id: testJobId,
         title: "Test Job for Ads",
-        serialNumber: "JOB-AD-TEST-01",
+        serial_number: "JOB-AD-TEST-01",
         updated_at: new Date(),
       })
       .execute();
@@ -84,18 +84,18 @@ describe("Job Ads API Endpoints", () => {
       await assert.rejects(
         callProcedure(job_ads.create, {
           title: "",
-          serialNumber: "JAD-CREATE-01",
+          serial_number: "JAD-CREATE-01",
           organization_id: testOrgId,
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is empty or missing", async () => {
+    test("should throw ZodError when serial_number is empty or missing", async () => {
       await assert.rejects(
         callProcedure(job_ads.create, {
           title: "Senior Node.js Developer",
-          serialNumber: "  ",
+          serial_number: "  ",
           organization_id: testOrgId,
         }),
         (err: any) => err.name === "ZodError",
@@ -105,7 +105,7 @@ describe("Job Ads API Endpoints", () => {
     test("should successfully create a job ad in draft status", async () => {
       const result = await callProcedure(job_ads.create, {
         title: "Senior Node.js Developer",
-        serialNumber: "JAD-CREATE-01",
+        serial_number: "JAD-CREATE-01",
         organization_id: testOrgId,
         job_id: testJobId,
         description: "Looking for an expert developer",
@@ -119,7 +119,7 @@ describe("Job Ads API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.title, "Senior Node.js Developer");
-      assert.strictEqual(result.serialNumber, "JAD-CREATE-01");
+      assert.strictEqual(result.serial_number, "JAD-CREATE-01");
       assert.strictEqual(result.organization_id, testOrgId);
       assert.strictEqual(result.status, "DRAFT");
       assert.strictEqual(result.contract_type, "FULL_TIME");
@@ -130,7 +130,7 @@ describe("Job Ads API Endpoints", () => {
     test("should successfully create a second job ad", async () => {
       const result = await callProcedure(job_ads.create, {
         title: "Junior Backend Developer",
-        serialNumber: "JAD-CREATE-02",
+        serial_number: "JAD-CREATE-02",
         organization_id: testOrgId,
         contract_type: "INTERNSHIP",
         remote: "FULL_REMOTE",
@@ -262,7 +262,7 @@ describe("Job Ads API Endpoints", () => {
       // Create another one to test bulk delete
       const extra = await callProcedure(job_ads.create, {
         title: "Temporary Ad to delete",
-        serialNumber: "JAD-BULK-DEL",
+        serial_number: "JAD-BULK-DEL",
         organization_id: testOrgId,
       });
 

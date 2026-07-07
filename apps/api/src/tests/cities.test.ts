@@ -35,7 +35,7 @@ describe("Cities API Endpoints", () => {
     // Create a parent country for the cities
     const country = await callProcedure(countries.create, {
       name: "City Parent Country",
-      serialNumber: "CPC-01",
+      serial_number: "CPC-01",
       iso_code: "CP",
     });
     testCountryId = country.id;
@@ -69,18 +69,18 @@ describe("Cities API Endpoints", () => {
       await assert.rejects(
         callProcedure(cities.create, {
           name: "",
-          serialNumber: "NYC-01",
+          serial_number: "NYC-01",
           country_id: testCountryId,
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is missing or empty", async () => {
+    test("should throw ZodError when serial_number is missing or empty", async () => {
       await assert.rejects(
         callProcedure(cities.create, {
           name: "New York",
-          serialNumber: "",
+          serial_number: "",
           country_id: testCountryId,
         }),
         (err: any) => err.name === "ZodError",
@@ -90,7 +90,7 @@ describe("Cities API Endpoints", () => {
     test("should successfully create a city", async () => {
       const result = await callProcedure(cities.create, {
         name: "New York",
-        serialNumber: "NYC-01",
+        serial_number: "NYC-01",
         country_id: testCountryId,
         is_capital: false,
         population: 8400000,
@@ -99,7 +99,7 @@ describe("Cities API Endpoints", () => {
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "New York");
-      assert.strictEqual(result.serialNumber, "NYC-01");
+      assert.strictEqual(result.serial_number, "NYC-01");
       assert.strictEqual(result.country_id, testCountryId);
       createdCityId1 = result.id;
     });
@@ -108,7 +108,7 @@ describe("Cities API Endpoints", () => {
       await assert.rejects(
         callProcedure(cities.create, {
           name: "New York",
-          serialNumber: "NYC-02",
+          serial_number: "NYC-02",
           country_id: testCountryId,
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
@@ -118,7 +118,7 @@ describe("Cities API Endpoints", () => {
     test("should successfully create a second city", async () => {
       const result = await callProcedure(cities.create, {
         name: "Los Angeles",
-        serialNumber: "LAX-01",
+        serial_number: "LAX-01",
         country_id: testCountryId,
         is_capital: false,
         population: 3900000,
@@ -246,7 +246,7 @@ describe("Cities API Endpoints", () => {
       // Create one more city to test bulk delete
       const extraCity = await callProcedure(cities.create, {
         name: "Chicago",
-        serialNumber: "ORD-01",
+        serial_number: "ORD-01",
         country_id: testCountryId,
       });
 

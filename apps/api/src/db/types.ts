@@ -493,7 +493,7 @@ export interface Certifications {
   name: string;
   products: string[] | null;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   updated_at: Timestamp;
   validity_duration_months: number | null;
   website_url: string | null;
@@ -594,7 +594,7 @@ export interface Degrees {
   metadata: Json | null;
   name: string;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   updated_at: Timestamp;
 }
 
@@ -664,7 +664,7 @@ export interface Industries {
   metadata: Json | null;
   name: string;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   updated_at: Timestamp;
 }
 
@@ -712,23 +712,10 @@ export interface Jobs {
   products: string[] | null;
   score: number | null;
   seniority_level: Senioritylevel | null;
-  serialNumber: string;
+  serial_number: string;
   tags: string[] | null;
   title: string;
   tools_and_tech: string[] | null;
-  updated_at: Timestamp;
-}
-
-export interface Majors {
-  area: string | null;
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
-  description: string | null;
-  id: string;
-  metadata: Json | null;
-  name: string;
-  score: number | null;
-  serial_number: string;
   updated_at: Timestamp;
 }
 
@@ -765,7 +752,6 @@ export interface MilitaryCapabilities {
 export interface Organizations {
   activities: string[] | null;
   budget: string | null;
-  category: string | null;
   city_id: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
@@ -839,7 +825,7 @@ export interface Skills {
   product_categories: string[] | null;
   related_abilities: string[] | null;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   time_to_master: string | null;
   type: string | null;
   updated_at: Timestamp;
@@ -943,6 +929,19 @@ export interface StorageVectorIndexes {
   updated_at: Generated<Timestamp>;
 }
 
+export interface StudyFields {
+  area: string | null;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  description: string | null;
+  id: string;
+  metadata: Json | null;
+  name: string;
+  score: number | null;
+  serial_number: string;
+  updated_at: Timestamp;
+}
+
 export interface Subjects {
   category: Subjectcategory | null;
   competitors: string[] | null;
@@ -956,7 +955,7 @@ export interface Subjects {
   name: string;
   organization_id: string | null;
   score: number | null;
-  serialNumber: string;
+  serial_number: string;
   short_description: string | null;
   tags: string[] | null;
   type: string | null;
@@ -980,7 +979,7 @@ export interface Universities {
   postgraduates: number | null;
   score: number | null;
   score_university: number | null;
-  serialNumber: string;
+  serial_number: string;
   student_count: number | null;
   type: Universitytype | null;
   undergraduates: number | null;
@@ -996,12 +995,18 @@ export interface UserCertifications {
   user_profile_id: string;
 }
 
+export interface UserEducationFields {
+  id: string;
+  study_field_Id: string;
+  type: Educationfieldtype;
+  user_education_id: string;
+}
+
 export interface UserEducations {
   degree_id: string | null;
   end_year: number | null;
   graduated: Generated<boolean>;
   id: string;
-  major_id: string | null;
   start_year: number | null;
   university_id: string | null;
   user_profile_id: string;
@@ -1132,7 +1137,6 @@ export interface DB {
   job_ad_skills: JobAdSkills;
   job_ads: JobAds;
   jobs: Jobs;
-  majors: Majors;
   military_capabilities: MilitaryCapabilities;
   organizations: Organizations;
   "realtime.messages": RealtimeMessages;
@@ -1147,9 +1151,11 @@ export interface DB {
   "storage.s3_multipart_uploads": StorageS3MultipartUploads;
   "storage.s3_multipart_uploads_parts": StorageS3MultipartUploadsParts;
   "storage.vector_indexes": StorageVectorIndexes;
+  StudyFields: StudyFields;
   subjects: Subjects;
   universities: Universities;
   user_certifications: UserCertifications;
+  user_education_fields: UserEducationFields;
   user_educations: UserEducations;
   user_profiles: UserProfiles;
   user_sessions: UserSessions;

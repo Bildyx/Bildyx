@@ -38,7 +38,7 @@ export async function seedCertifications(prisma: PrismaClient) {
   const data: Prisma.CertificationCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     issuingOrganizationId: r.issuing_organization_id || null,
 
@@ -59,8 +59,7 @@ export async function seedCertifications(prisma: PrismaClient) {
 
     websiteUrl: r.website_url || null,
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 

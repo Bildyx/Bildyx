@@ -4,7 +4,7 @@ import { CostOfLivingSchema, LanguageSchema } from "./utils/enums";
 export const CitySchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   country_id: z.string().uuid(),
   is_capital: z.boolean().optional().default(false),
   state_province: z.string().nullable().optional(),

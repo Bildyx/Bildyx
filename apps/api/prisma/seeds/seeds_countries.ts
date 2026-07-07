@@ -76,7 +76,7 @@ export async function seedCountries(prisma: PrismaClient) {
   const data: Prisma.CountryCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     isoCode: r.iso_code ? r.iso_code.trim().toUpperCase().slice(0, 2) : null,
     capitalName: r.capital_name || null,

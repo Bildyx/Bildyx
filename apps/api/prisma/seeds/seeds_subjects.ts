@@ -34,34 +34,33 @@ export async function seedSubjects(prisma: PrismaClient) {
   const data: Prisma.SubjectCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     type: r.type || null,
 
     description: r.description || null,
-    shortDescription: r.short_description || null,
+    short_description: r.short_description || null,
 
     category: parseEnum(r.category, SubjectCategory),
 
     competitors: toStringArray(r.competitors),
 
-    funFact: r.fun_fact || null,
+    fun_fact: r.fun_fact || null,
 
-    organizationId: r.organization_id || null,
+    organization_id: r.organization_id || null,
 
-    websiteUrl: r.website_url || null,
-    logoUrl: r.logo_url || null,
+    website_url: r.website_url || null,
+    logo_url: r.logo_url || null,
 
     tags: toStringArray(r.tags),
 
-    score:
-      r.score && r.score !== "" ? Number(r.score) : null,
+    score: r.score && r.score !== "" ? Number(r.score) : null,
 
     metadata: toJson(r.metadata),
 
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
+    deleted_at: toDate(r.deleted_at, false),
+    created_at: toDate(r.created_at, true) as Date,
+    updated_at: toDate(r.updated_at, true) as Date,
   }));
 
   // NOTE: depend de organizations.ts (organization_id) -> a seeder avant.

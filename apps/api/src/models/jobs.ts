@@ -7,7 +7,7 @@ const currentYear = () => new Date().getFullYear();
 export const JobSchema = z.object({
   id: z.string().uuid(),
   title: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   category: JobCategoryEnum.nullable().optional(),
   description: z.string().nullable().optional(),
   seniority_level: SeniorityLevelEnum.nullable().optional(),

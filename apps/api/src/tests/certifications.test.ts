@@ -73,13 +73,13 @@ describe("Certifications API Endpoints", () => {
     test("should throw ZodError when name is missing", async () => {
       await assert.rejects(
         callProcedure(certifications.create, {
-          serialNumber: "SN-CREATE-FAIL",
+          serial_number: "SN-CREATE-FAIL",
         }),
         (err: any) => err.name === "ZodError",
       );
     });
 
-    test("should throw ZodError when serialNumber is missing", async () => {
+    test("should throw ZodError when serial_number is missing", async () => {
       await assert.rejects(
         callProcedure(certifications.create, {
           name: "Some Cert",
@@ -91,7 +91,7 @@ describe("Certifications API Endpoints", () => {
     test("should successfully create a certification", async () => {
       const res = await callProcedure(certifications.create, {
         name: "Integration Test AWS Certification",
-        serialNumber: "AWS-INTEG-111",
+        serial_number: "AWS-INTEG-111",
         issuing_organization_id: testOrgId,
         description: "Test description",
         level: "INTERMEDIATE",
@@ -101,7 +101,7 @@ describe("Certifications API Endpoints", () => {
 
       assert.ok(res.id);
       assert.strictEqual(res.name, "Integration Test AWS Certification");
-      assert.strictEqual(res.serialNumber, "AWS-INTEG-111");
+      assert.strictEqual(res.serial_number, "AWS-INTEG-111");
       assert.strictEqual(res.issuing_organization_id, testOrgId);
       createdCertId1 = res.id;
     });
@@ -109,7 +109,7 @@ describe("Certifications API Endpoints", () => {
     test("should successfully create a second certification", async () => {
       const res = await callProcedure(certifications.create, {
         name: "Integration Test Scrum Master",
-        serialNumber: "SCRUM-INTEG-222",
+        serial_number: "SCRUM-INTEG-222",
         issuing_organization_id: testOrgId,
         category: "PROJECTMANAGEMENT",
       });
@@ -198,7 +198,7 @@ describe("Certifications API Endpoints", () => {
         callProcedure(certifications.update, {
           certificationId: randomUUID(),
           name: "Updated Name",
-          serialNumber: "SN-111",
+          serial_number: "SN-111",
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
@@ -208,13 +208,13 @@ describe("Certifications API Endpoints", () => {
       const res = await callProcedure(certifications.update, {
         certificationId: createdCertId1,
         name: "Updated AWS Certification Name",
-        serialNumber: "AWS-INTEG-111-UPDATED",
+        serial_number: "AWS-INTEG-111-UPDATED",
         issuing_organization_id: testOrgId,
       });
 
       assert.strictEqual(res.id, createdCertId1);
       assert.strictEqual(res.name, "Updated AWS Certification Name");
-      assert.strictEqual(res.serialNumber, "AWS-INTEG-111-UPDATED");
+      assert.strictEqual(res.serial_number, "AWS-INTEG-111-UPDATED");
     });
   });
 

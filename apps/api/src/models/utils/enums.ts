@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-export const CostOfLivingSchema = z.enum(["LOW", "MEDIAN", "HIGH"]);
-export const QualityOfLifeSchema = z.enum(["LOW", "MEDIAN", "HIGH"]);
+export const CostOfLivingSchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
+export const QualityOfLifeSchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
 
 export const LanguageSchema = z.enum([
   "AFRIKAANS",
@@ -298,7 +298,7 @@ export const UserRoleEnum = z.enum([
   "ADMIN",
   "CANDIDATE",
   "MODERATOR",
-  "ORGANISATION",
+  "ORGANIZATION",
   "SUPER_ADMIN",
   "USER",
 ]);

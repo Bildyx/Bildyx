@@ -38,7 +38,7 @@ export async function seedUniversities(prisma: PrismaClient) {
   const data: Prisma.UniversityCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
-    serialNumber: r.serial_number,
+    serial_number: r.serial_number,
 
     type: parseEnum(r.type, UniversityType),
 

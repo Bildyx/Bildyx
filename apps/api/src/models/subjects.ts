@@ -5,7 +5,7 @@ import { zNullableUUID, zStringArray } from "./utils/preprocessors";
 export const SubjectSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
-  serialNumber: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   type: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   short_description: z.string().nullable().optional(),
