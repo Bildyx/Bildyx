@@ -134,7 +134,7 @@ export async function seedCountries(prisma: PrismaClient) {
       qualityOfEducation: r.quality_of_education || null,
       degreeHolders: r.degree_holders || null,
       numberOfUniversities: toInt(r.number_of_universities),
-      topUniversities: r.top_universities || null,
+      top_universities: r.top_universities || null,
 
       ethnicGroups: r.ethnic_groups || null,
       religion: r.religion || null,

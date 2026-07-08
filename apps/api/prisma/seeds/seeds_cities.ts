@@ -98,7 +98,7 @@ export async function seedCities(prisma: PrismaClient) {
       degreeHolders: r.degree_holders || null,
 
       numberOfUniversities: toInt(r.number_of_universities),
-      topUniversities: r.top_universities || null,
+      top_universities: r.top_universities || null,
 
       numberOfNationalities: r.number_of_nationalities ?? null,
 

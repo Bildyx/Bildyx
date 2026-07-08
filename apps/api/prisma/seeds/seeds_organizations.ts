@@ -100,7 +100,7 @@ export async function seedOrganizations(prisma: PrismaClient) {
 
     score: toInt(r.score),
 
-    cityId: r.city_id || null,
+    city_id: r.city_id || null,
 
     numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
     numberOfSubsidiaries: toInt(r.numberOfSubsidiaries),
