@@ -50,7 +50,7 @@ model Country {
   crimeRate                     String?         @map("crime_rate")
   incomeInequality              String?         @map("income_inequality")
   workLifeBalance               String?         @map("work_life_balance")
-  main_industries               String?
+  mainIndustries                String?         @map("main_industries")
   numberOfMultinationalHqs      String?         @map("number_of_multinational_hqs")
   currency                      Currency?
   medianSalary                  Int?            @map("median_salary")
