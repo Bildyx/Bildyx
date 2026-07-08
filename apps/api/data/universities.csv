@@ -1,1 +1,102 @@
 name;serial_number;type;description;website_url;logo_url;country_id;city_id;student_count;metadata;score_university;local_name;notes;established;score;undergraduates;postgraduates
+Harvard University;UNI-000001;Private Research University;;;;USA;Cambridge,Massachusetts;20000;;;Harvard University;World prestigious university. Ivy League, highly selective.;1636;;7000;13000
+Stanford University;UNI-000002;Private Research University;;;;USA;Stanford,California;15000;;;Stanford University;World-renowned university. Highly selective. Hidden Ivy League.;1885;;7000;8000
+University of Cambridge;UNI-000003;Public Research University;;;;UK;Cambridge,England;24000;;;University of Cambridge;World prestigious university. Russell Group.;1209;;12000;12000
+Massachusetts Institute of Technology (MIT);UNI-000004;Private Research University;;;;USA;Cambridge,Massachusetts;11500;;;Massachusetts Institute of Technology (MIT);World prestigious university. Highly selective.;1861;;4500;7000
+University of California, Berkeley;UNI-000005;Public Research University;;;;USA;Berkeley,California;42000;;;University of California, Berkeley;World prestigious university. Public Ivy League, highly selective.;1868;;31000;11000
+Princeton University;UNI-000006;Private Research University;;;;USA;Princeton,New Jersey;8000;;;Princeton University;World prestigious university. Ivy League, highly selective.;1746;;5300;2700
+University of Oxford;UNI-000007;Public Research University;;;;UK;Oxford,England;24000;;;University of Oxford;World prestigious university. Russell Group.;1096;;12000;12000
+Columbia University;UNI-000008;Private Research University;;;;USA;New York City,New York;31000;;;Columbia University;World prestigious university. Ivy League, highly selective.;1754;;8200;22800
+California Institute of Technology;UNI-000009;Private Research University;;;;USA;Pasadena,California;2200;;;California Institute of Technology;World prestigious university. Highly selective.;1891;;1000;1200
+University of Chicago;UNI-000010;Private Research University;;;;USA;Chicago,Illinois;17000;;;University of Chicago;World prestigious university. Highly selective. Hidden Ivy League.;1890;;6800;10200
+Yale University;UNI-000011;Private Research University;;;;USA;New Haven,Connecticut;13000;;;Yale University;World prestigious university. Ivy League, highly selective.;1701;;6100;6900
+University of California, Los Angeles;UNI-000012;Public Research University;;;;USA;Los Angeles,California;45000;;;University of California, Los Angeles;World prestigious university. Public Ivy League.;1919;;31000;14000
+University of Washington;UNI-000013;Public Research University;;;;USA;Seattle,Washington;54000;;;University of Washington;World-renowned university, public Ivy League;1861;;32000;22000
+Cornell University;UNI-000014;Private Research University;;;;USA;Ithaca,New York;23000;;;Cornell University;World prestigious university. Ivy League, highly selective.;1865;;15000;8000
+University of California, San Diego;UNI-000015;Public Research University;;;;USA;San Diego,California;40000;;;University of California, San Diego;World-renowned university, public Ivy League;1903;;30000;10000
+University College London;UNI-000016;Public Research University;;;;UK;London,England;45000;;;University College London;World prestigious university. Russell Group.;1826;;20000;25000
+University of Pennsylvania;UNI-000017;Private Research University;;;;USA;Philadelphia,Pennsylvania;25000;;;University of Pennsylvania;World prestigious university. Ivy League, highly selective.;1740;;10000;15000
+Johns Hopkins University;UNI-000018;Private Research University;;;;USA;Baltimore,Maryland;24000;;;Johns Hopkins University;World prestigious university. Highly selective. Hidden Ivy League.;1876;;6000;18000
+Swiss Federal Institute of Technology Zurich;UNI-000019;Public Research University;;;;Switzerland;Zurich;20000;;;Eidgenössische Technische Hochschule Zürich;World prestigious university;1855;;10000;10000
+Washington University in St. Louis;UNI-000020;Private Research University;;;;USA;St. Louis,Missouri;15000;;;Washington University in St. Louis;World-renowned university. Highly selective. Hidden Ivy League.;1853;;8000;7000
+University of California, San Francisco;UNI-000021;Public Research University;;;;USA;San Francisco,California;3000;;;University of California, San Francisco;World-renowned university;1864;; N/A (UCSF does not offer undergraduate programs);3000
+Northwestern University;UNI-000022;Private Research University;;;;USA;Evanston,Illinois;21000;;;Northwestern University;World-renowned university. Highly selective. Hidden Ivy League.;1851;;8000;13000
+University of Toronto;UNI-000023;Public Research University;;;;Canada;Toronto,Ontario;90000;;;University of Toronto;World prestigious university. U15 Group.;1827;;60000;30000
+The University of Tokyo;UNI-000024;Public Research University;;;;Japan;Tokyo;30000;;;東京大学;World prestigious university. Imperial university.;1877;;15000;15000
+University of Michigan-Ann Arbor;UNI-000025;Public Research University;;;;USA;Ann Arbor,Michigan;48000;;;University of Michigan-Ann Arbor;World prestigious university. Public Ivy League.;1817;;30000;18000
+Duke University;UNI-000026;Private Research University;;;;USA;Durham,North Carolina;15000;;;Duke University;World-renowned university. Highly selective. Hidden Ivy League.;1838;;6500;8500
+Imperial College London;UNI-000027;Public Research University;;;;UK;London,England;18000;;;Imperial College London;World prestigious university. Russell Group.;1907;;9000;9000
+University of Wisconsin - Madison;UNI-000028;Public Research University;;;;USA;Madison,Wisconsin;45000;;;University of Wisconsin - Madison;World-renowned university, public Ivy League;1848;;30000;15000
+New York University;UNI-000029;Private Research University;;;;USA;New York City,New York;60000;;;New York University;World-renowned university. Highly selective.;1831;;30000;30000
+University of Copenhagen;UNI-000030;Public Research University;;;;Denmark;Copenhagen;38000;;;Københavns Universitet;World-renowned university;1479;;20000;18000
+University of British Columbia;UNI-000031;Public Research University;;;;Canada;Vancouver,British Columbia;60000;;;University of British Columbia;World-renowned university. U15 Group.;1908;;40000;20000
+The University of Edinburgh;UNI-000032;Public Research University;;;;UK;Edinburgh,Scotland;45000;;;The University of Edinburgh;World-renowned university. Russell Group.;1582;;25000;20000
+University of North Carolina at Chapel Hill;UNI-000033;Public Research University;;;;USA;Chapel Hill,North Carolina;30000;;;University of North Carolina at Chapel Hill;World-renowned university, public Ivy League;1789;;20000;10000
+University of Minnesota, Twin Cities;UNI-000034;Public Research University;;;;USA;Minneapolis,Minnesota;50000;;;University of Minnesota, Twin Cities;World-renowned university, public Ivy League;1851;;33000;17000
+Kyoto University;UNI-000035;Public Research University;;;;Japan;Kyoto;23000;;;京都大学;World-renowned university. Imperial university.;1897;;12000;11000
+Rockefeller University;UNI-000036;Private Research University;;;;USA;New York City,New York;2000;;;Rockefeller University;Focused on Biomedical Sciences;1901;; N/A (Rockefeller is a graduate-only institution);2000
+University of Illinois at Urbana-Champaign;UNI-000037;Public Research University;;;;USA;Urbana and Champaign,Illinois;50000;;;University of Illinois at Urbana-Champaign;World-renowned university, public Ivy League;1867;;30000;20000
+The University of Manchester;UNI-000038;Public Research University;;;;UK;Manchester,England;40000;;;The University of Manchester;World-renowned university. Russell Group.;1824;;25000;15000
+The University of Melbourne;UNI-000039;Public Research University;;;;Australia;Melbourne,Victoria;50000;;;The University of Melbourne;World-renowned university. Group of Eight (Go8).;1853;;30000;20000
+Pierre and Marie Curie University - Paris 6;UNI-000040;Public Research University;;;;France;Paris;40,000 (for Sorbonne University);;;Université Pierre-et-Marie-Curie (Paris VI);Elite university in France. World-renowned university.;1257;;30000;10000
+University of Paris-Sud (Paris 11);UNI-000041;Public Research University;;;;France;Orsay;30000;;;Université Paris-Sud (Paris XI);Elite university in France;2015;;15000;15000
+Heidelberg University;UNI-000042;Public Research University;;;;Germany;Heidelberg,Baden-Württemberg;30000;;;Ruprecht-Karls-Universität Heidelberg;World-renowned university. Elite university in Germany.;1386;;20000;10000
+University of Colorado at Boulder;UNI-000043;Public Research University;;;;USA;Boulder,Colorado;35000;;;University of Colorado Boulder;Public Ivy League;1876;;30000;5000
+Karolinska Institute;UNI-000044;Public Medical University;;;;Sweden;Stockholm;3000;;;Karolinska Institutet;World-renowned university;1810;; N/A (focuses primarily on graduate programs in medical and life sciences);3000
+University of California, Santa Barbara;UNI-000045;Public Research University;;;;USA;Santa Barbara,California;25000;;;University of California, Santa Barbara;World-renowned university, public Ivy League;1909;;20000;5000
+King's College London;UNI-000046;Public Research University;;;;UK;London,England;30000;;;King's College London;World-renowned university. Russell Group.;1829;;16000;14000
+Utrecht University;UNI-000047;Public Research University;;;;Netherlands;Utrecht;30000;;;Universiteit Utrecht;World-renowned university;1636;;20000;10000
+The University of Texas Southwestern Medical Center at Dallas;UNI-000048;Public Medical University;;;;USA;Dallas,Texas;3700;;;The University of Texas Southwestern Medical Center at Dallas;Known for Medical Sciences, Healthcare and Research;1943;; N/A (medical institution);3700
+Tsinghua University;UNI-000049;Public Research University;;;;China;Beijing;50000;;;清华大学;World prestigious university. C9 League.;1911;;20000;30000
+Technical University Munich;UNI-000050;Public Research University;;;;Germany;Munich;40000;;;Technische Universität München;World-renowned university. Elite university in Germany.;1827;;20000;20000
+The University of Texas at Austin;UNI-000051;Public Research University;;;;USA;Austin,Texas;50000;;;The University of Texas at Austin;World-renowned university, public Ivy League;1883;;40000;10000
+Vanderbilt University;UNI-000052;Private Research University;;;;USA;Nashville,Tennessee;13000;;;Vanderbilt University;Highly selective. Hidden Ivy League.;1873;;7000;6000
+University of Maryland, College Park;UNI-000053;Public Research University;;;;USA;College Park,Maryland;40000;;;University of Maryland, College Park;World-renowned university, public Ivy League;1856;;30000;10000
+University of Southern California;UNI-000054;Private Research University;;;;USA;Los Angeles,California;47000;;;University of Southern California;World-renowned university. Highly selective. Hidden Ivy League.;1880;;19000;28000
+The University of Queensland;UNI-000055;Public Research University;;;;Australia;Brisbane,Queensland;55000;;;The University of Queensland;Group of Eight (Go8);1909;;40000;15000
+University of Helsinki;UNI-000056;Public Research University;;;;Finland;Helsinki;35000;;;Helsingin yliopisto;Known for Medical Sciences, Humanities and Social Sciences;1640;;20000;15000
+University of Munich;UNI-000057;Public Research University;;;;Germany;Munich;50000;;;Ludwig-Maximilians-Universität München;World-renowned university. Elite university in Germany.;1472;;30000;20000
+University of Zurich;UNI-000058;Public Research University;;;;Switzerland;Zurich;26000;;;Universität Zürich;World-renowned university;1833;;14000;12000
+University of Groningen;UNI-000059;Public Research University;;;;Netherlands;Groningen;30000;;;Rijksuniversiteit Groningen;Known for Life Sciences, Arts and Social Sciences;1614;;18000;12000
+University of Geneva;UNI-000060;Public Research University;;;;Switzerland;Geneva;17000;;;Université de Genève;Known for International Relations, Social Sciences and Law;1559;;9000;8000
+University of Bristol;UNI-000061;Public Research University;;;;UK;Bristol,England;27000;;;University of Bristol;Russell Group;1833;;18000;9000
+University of Oslo;UNI-000062;Public Research University;;;;Norway;Oslo;28000;;;Universitetet i Oslo;Known for Humanities, Natural Sciences and Social Sciences;1811;;20000;8000
+Uppsala University;UNI-000063;Public Research University;;;;Sweden;Uppsala;30000;;;Uppsala universitet;Known for Humanities, Life Sciences and Social Sciences;1477;;20000;10000
+University of California, Irvine;UNI-000064;Public Research University;;;;USA;Irvine,California;36000;;;University of California, Irvine;Public Ivy League;1965;;30000;6000
+Aarhus University;UNI-000065;Public Research University;;;;Denmark;Aarhus;40000;;;Aarhus Universitet;Known for Humanities, Business and Natural Sciences;1928;;25000;15000
+McMaster University;UNI-000066;Public Research University;;;;Canada;Hamilton,Ontario;30000;;;McMaster University;U15 Group;1887;;20000;10000
+McGill University;UNI-000067;Public Research University;;;;Canada;Montreal,Quebec;40000;;;Université McGill;World-renowned university. U15 Group.;1821;;30000;10000
+University of Pittsburgh, Pittsburgh Campus;UNI-000068;Public Research University;;;;USA;Pittsburgh,Pennsylvania;28000;;;University of Pittsburgh;Public Ivy League;1787;;19000;9000
+École Normale Supérieure - Paris;UNI-000069;Public Research University;;;;France;Paris;1800;;;École normale supérieure;Elite university in France;1794;;600;1200
+Ghent University;UNI-000070;Public Research University;;;;Belgium;Ghent;45000;;;Universiteit Gent;Known for Medical Sciences, Engineering and Life Sciences;1817;;30000;15000
+Mayo Medical School;UNI-000071;Private Medical School;;;;USA;Rochester,Minnesota;1000;;;Mayo Medical School;Known for Medical Education and Clinical Research;1972;; N/A (graduate-only institution);1000
+Peking University;UNI-000072;Public Research University;;;;China;Beijing;45000;;;北京大学;World prestigious university. C9 League.;1898;;20000;25000
+Erasmus University;UNI-000073;Public Research University;;;;Netherlands;Rotterdam;28000;;;Erasmus Universiteit Rotterdam;Known for Social Sciences, Business and Medical Sciences;1913;;15000;13000
+Rice University;UNI-000074;Private Research University;;;;USA;Houston,Texas;7000;;;Rice University;Highly selective. Hidden Ivy League.;1912;;4000;3000
+Stockholm University;UNI-000075;Public Research University;;;;Sweden;Stockholm;30000;;;Stockholms universitet;Known for Humanities, Life Sciences and Social Sciences;1878;;20000;10000
+Swiss Federal Institute of Technology Lausanne;UNI-000076;Public Research University;;;;Switzerland;Lausanne;12000;;;École polytechnique fédérale de Lausanne (EPFL);World-renowned university;1853;;6000;6000
+Purdue University - West Lafayette;UNI-000077;Public Research University;;;;USA;West Lafayette,Indiana;45000;;;Purdue University;World-renowned university, public Ivy League;1869;;30000;15000
+Monash University;UNI-000078;Public Research University;;;;Australia;Melbourne,Victoria;80000;;;Monash University;Group of Eight (Go8);1958;;55000;25000
+Rutgers, The State University of New Jersey - New Brunswick;UNI-000079;Public Research University;;;;USA;New Brunswick,New Jersey;50000;;;Rutgers, The State University of New Jersey–New Brunswick;"Public Ivy League
+";1766;;35000;15000
+Boston University;UNI-000080;Private Research University;;;;USA;Boston,Massachusetts;35000;;;Boston University;World-renowned university;1839;;16000;19000
+Carnegie Mellon University;UNI-000081;Private Research University;;;;USA;Pittsburgh,Pennsylvania;14000;;;Carnegie Mellon University;World-renowned university. Highly selective.;1900;;7000;7000
+The Ohio State University - Columbus;UNI-000082;Public Research University;;;;USA;Columbus,Ohio;61000;;;The Ohio State University;World-renowned university, public Ivy League;1870;;47000;14000
+University of Sydney;UNI-000083;Public Research University;;;;Australia;Sydney,New South Wales;45000;;;The University of Sydney;World-renowned university. Group of Eight (Go8).;1850;;30000;15000
+Nagoya University;UNI-000084;Public Research University;;;;Japan;Nagoya,Aichi;20000;;;名古屋大学;World-renowned university. Imperial university.;1871;;12000;8000
+Georgia Institute of Technology;UNI-000085;Public Research University;;;;USA;Atlanta,Georgia;30000;;;Georgia Institute of Technology;World-renowned university, public Ivy League, highly selective.;1885;;15000;15000
+Pennsylvania State University - University Park;UNI-000086;Public Research University;;;;USA;University Park,Pennsylvania;46000;;;The Pennsylvania State University;World-renowned university, public Ivy League;1855;;40000;6000
+University of California, Davis;UNI-000087;Public Research University;;;;USA;Davis,California;39000;;;University of California, Davis;World-renowned university, public Ivy League;1905;;30000;9000
+Leiden University;UNI-000088;Public Research University;;;;Netherlands;Leiden;30000;;;Universiteit Leiden;World-renowned university;1575;;20000;10000
+University of Florida;UNI-000089;Public Research University;;;;USA;Gainesville,Florida;55000;;;University of Florida;World-renowned university, public Ivy League;1853;;35000;20000
+KU Leuven;UNI-000090;Public Research University;;;;Belgium;Leuven;60000;;;Katholieke Universiteit Leuven;World-renowned university;1425;;40000;20000
+National University of Singapore;UNI-000091;Public Research University;;;;Singapore;Singapore;40000;;;National University of Singapore;World-renowned university;1905;;28000;12000
+The University of Western Australia;UNI-000092;Public Research University;;;;Australia;Perth,Western Australia;25000;;;The University of Western Australia;Group of Eight (Go8);1911;;18000;7000
+Moscow State University;UNI-000093;Public Research University;;;;Russia;Moscow;40000;;;Московский государственный университет имени М. В. Ломоносова;World-renowned university. Elite university in Russia.;1755;;25000;15000
+University of Basel;UNI-000094;Public Research University;;;;Switzerland;Basel;13000;;;Universität Basel;Known for Medical Sciences, Life Sciences and Humanities;1460;;7000;6000
+University of Göttingen;UNI-000095;Public Research University;;;;Germany;Göttingen;30000;;;Georg-August-Universität Göttingen;Elite university in Germany;1737;;20000;10000
+The Australian National University;UNI-000096;Public Research University;;;;Australia;Canberra;20000;;;The Australian National University;World-renowned university. Group of Eight (Go8).;1946;;10000;10000
+University of California, Santa Cruz;UNI-000097;Public Research University;;;;USA;Santa Cruz,California;20000;;;University of California, Santa Cruz;Known for Social Sciences, Natural Sciences and Arts;1962;;18000;2000
+Cardiff University;UNI-000098;Public Research University;;;;UK;Cardiff,Wales;30000;;;Prifysgol Caerdydd;Russell Group;1883;;20000;10000
+University of Arizona;UNI-000099;Public Research University;;;;USA;Tucson,Arizona;45000;;;University of Arizona;World-renowned university, public Ivy League;1885;;34000;11000
+King Saud University;UNI-000100;Public Research University;;;;Saudi Arabia;Riyadh;61000;;;جامعة الملك سعود;Leading public university in Saudi Arabia. Flagship institution with strong research programs and broad academic offerings.;1957;;38000;23000
