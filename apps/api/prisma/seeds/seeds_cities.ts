@@ -53,9 +53,9 @@ export async function seedCities(prisma: PrismaClient) {
     isCapital: toBool(r.is_capital),
     stateProvince: r.state_province || null,
 
-    population: toInt(r.population),
+    population: r.population,
 
-    numberOfMultinationalHqs: toInt(r.number_of_multinational_hqs),
+    numberOfMultinationalHqs: r.number_of_multinational_hqs,
     numberOfAirports: toInt(r.number_of_airports),
 
     largestOrganizations: r.largest_organization || null,
@@ -73,7 +73,7 @@ export async function seedCities(prisma: PrismaClient) {
     numberOfUniversities: toInt(r.number_of_universities),
     topUniversities: r.top_universities || null,
 
-    numberOfNationalities: toInt(r.number_of_nationalities),
+    numberOfNationalities: r.number_of_nationalities,
 
     language: parseEnum(r.language, Language),
 
