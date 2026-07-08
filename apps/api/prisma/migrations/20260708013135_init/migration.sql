@@ -88,7 +88,7 @@ CREATE TABLE "countries" (
     "iso_code" CHAR(2),
     "capital_name" TEXT,
     "flag_url" TEXT,
-    "population" BIGINT,
+    "population" TEXT,
     "area_km2" DOUBLE PRECISION,
     "gdp_usd" DOUBLE PRECISION,
     "gdp_per_capita_usd" DOUBLE PRECISION,

@@ -37,7 +37,7 @@ model Country {
   isoCode                       String?         @unique @map("iso_code") @db.Char(2)
   capitalName                   String?         @map("capital_name")
   flagUrl                       String?         @map("flag_url")
-  population                    BigInt?
+  population                    String?
   areaKm2                       Float?          @map("area_km2")
   gdpUsd                        Float?          @map("gdp_usd")
   gdpPerCapitaUsd               Float?          @map("gdp_per_capita_usd")

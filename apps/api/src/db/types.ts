@@ -571,7 +571,7 @@ export interface Countries {
   officialLanguages: ArrayType<Language> | null;
   people_description: string | null;
   personal_income_tax: string | null;
-  population: Int8 | null;
+  population: string | null;
   quality_of_education: string | null;
   quality_of_life: Qualityoflife | null;
   religion: string[] | null;
