@@ -1,5 +1,6 @@
 const beforeTimeMs = performance.now();
 import express from "express";
+import cookieParser from "cookie-parser";
 import util from "node:util";
 import prettyMilliseconds from "pretty-ms";
 import { openAPIGenerator, openAPIHandler, rpcHandler } from "./application";
@@ -17,10 +18,11 @@ import { database } from "./database";
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(async (req, res, next) => {
   const result = await rpcHandler.handle(req, res, {
-    context: { headers: req.headers },
+    context: { headers: req.headers, req, res },
     prefix: RPC_PREFIX,
   });
   if (result.matched) {
@@ -52,7 +54,7 @@ app.get("/spec.json", async (req, res) => {
 
 app.use(async (req, res, next) => {
   const result = await openAPIHandler.handle(req, res, {
-    context: { headers: req.headers },
+    context: { headers: req.headers, req, res },
     prefix: OPENAPI_PREFIX,
   });
   if (result.matched) {
@@ -80,10 +82,11 @@ app.use((req, res) => {
             url: '/spec.json',
             orderSchemaPropertiesBy: 'preserve',
             operationsSorter: (a, b) => {
-              const methods = ['get', 'post', 'patch', 'patch', 'delete'];
+              const methods = ['get', 'post', 'put', 'patch', 'delete'];
               const diff = methods.indexOf(a.method.toLowerCase()) - methods.indexOf(b.method.toLowerCase());
               if (diff !== 0) return diff;
-              return a.path.localeCompare(b.path);
+
+              return a.idx - b.idx;
             },
             authentication: {
               securitySchemes: {

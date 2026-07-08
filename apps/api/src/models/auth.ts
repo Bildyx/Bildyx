@@ -69,3 +69,20 @@ export const ResetPasswordInputSchema = z.object({
 export const ResetPasswordOutputSchema = z.object({
   message: z.string(),
 });
+
+export const ResendVerificationInputSchema = z.object({
+  email: z.email(),
+});
+
+export const ResendVerificationOutputSchema = z.object({
+  message: z.string(),
+  verification_code: z.string().optional(),
+});
+
+export const LogoutInputSchema = z.object({
+  token: z.string().min(1).optional(),
+});
+
+export const LogoutOutputSchema = z.object({
+  message: z.string(),
+});

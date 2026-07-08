@@ -12,35 +12,21 @@ import {
   ForgotPasswordOutputSchema,
   ResetPasswordInputSchema,
   ResetPasswordOutputSchema,
+  ResendVerificationInputSchema,
+  ResendVerificationOutputSchema,
+  LogoutInputSchema,
+  LogoutOutputSchema,
 } from "../models/auth";
+import { randomUUID, randomBytes, createHash } from "node:crypto";
 import {
-  randomUUID,
-  scryptSync,
-  randomBytes,
-  timingSafeEqual,
-  createHash,
-} from "node:crypto";
-
-// Secure password hashing helper functions using native Node.js crypto (scrypt)
-export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
-}
-
-export function verifyPassword(password: string, stored: string): boolean {
-  try {
-    const [salt, hash] = stored.split(":");
-    if (!salt || !hash) return false;
-    const testHash = scryptSync(password, salt, 64).toString("hex");
-    return timingSafeEqual(
-      Buffer.from(hash, "hex"),
-      Buffer.from(testHash, "hex"),
-    );
-  } catch (err) {
-    return false;
-  }
-}
+  hashPassword,
+  verifyPassword,
+  parseDbDate,
+} from "../services/auth.service";
+import {
+  sendVerificationEmail,
+  sendResetEmail,
+} from "../services/mail.service";
 
 export const auth = {
   // 1. SIGNUP
@@ -63,13 +49,25 @@ export const auth = {
         .selectFrom("users")
         .where("email", "=", emailLower)
         .where("deleted_at", "is", null)
-        .select("id")
+        .select(["id", "email_verified", "verification_expires_at"])
         .executeTakeFirst();
 
       if (existing) {
-        throw new ORPCError("CONFLICT", {
-          message: "A user with this email already exists",
-        });
+        const expiredUnverified =
+          !existing.email_verified &&
+          existing.verification_expires_at &&
+          parseDbDate(existing.verification_expires_at).getTime() < Date.now();
+
+        if (expiredUnverified) {
+          await database
+            .deleteFrom("users")
+            .where("id", "=", existing.id)
+            .execute();
+        } else {
+          throw new ORPCError("CONFLICT", {
+            message: "A user with this email already exists",
+          });
+        }
       }
 
       const userId = randomUUID();
@@ -82,9 +80,14 @@ export const auth = {
       // Perform all operations in a database transaction
       await database.transaction().execute(async (trx) => {
         if (input.accountType === "company") {
+          if (!input.companyName || !input.companyName.trim()) {
+            throw new ORPCError("BAD_REQUEST", {
+              message: "Company name is required for company accounts",
+            });
+          }
           // Generate unique slug
-          let slug = input
-            .companyName!.trim()
+          let slug = input.companyName
+            .trim()
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "");
@@ -106,7 +109,7 @@ export const auth = {
             .insertInto("organizations")
             .values({
               id: orgId,
-              name: input.companyName!.trim(),
+              name: input.companyName.trim(),
               slug: slug,
               updated_at: new Date(),
             })
@@ -123,12 +126,24 @@ export const auth = {
               status: "PENDING_VERIFICATION",
               verification_code: verificationCode,
               verification_expires_at: verificationExpiresAt,
+              last_verification_sent_at: new Date(),
               organization_id: orgId,
               marketing_opt_in: input.marketing ?? false,
               updated_at: new Date(),
             })
             .execute();
         } else {
+          if (
+            !input.firstName ||
+            !input.firstName.trim() ||
+            !input.lastName ||
+            !input.lastName.trim()
+          ) {
+            throw new ORPCError("BAD_REQUEST", {
+              message:
+                "First name and last name are required for seeker accounts",
+            });
+          }
           // Seekers get a Candidate role and a UserProfile entry
           await trx
             .insertInto("users")
@@ -141,9 +156,10 @@ export const auth = {
               status: "PENDING_VERIFICATION",
               verification_code: verificationCode,
               verification_expires_at: verificationExpiresAt,
-              first_name: input.firstName!.trim(),
-              last_name: input.lastName!.trim(),
-              display_name: `${input.firstName!.trim()} ${input.lastName!.trim()}`,
+              last_verification_sent_at: new Date(),
+              first_name: input.firstName.trim(),
+              last_name: input.lastName.trim(),
+              display_name: `${input.firstName.trim()} ${input.lastName.trim()}`,
               marketing_opt_in: input.marketing ?? false,
               updated_at: new Date(),
             })
@@ -160,6 +176,8 @@ export const auth = {
             .execute();
         }
       });
+
+      await sendVerificationEmail(emailLower, verificationCode);
 
       return {
         message: "Registration successful. Please verify your email.",
@@ -180,7 +198,7 @@ export const auth = {
     })
     .input(LoginInputSchema)
     .output(LoginOutputSchema)
-    .handler(async ({ input }) => {
+    .handler(async ({ input, context }) => {
       const emailLower = input.email.trim().toLowerCase();
 
       const user = await database
@@ -197,6 +215,19 @@ export const auth = {
       }
 
       if (user.status === "PENDING_VERIFICATION") {
+        if (
+          user.verification_expires_at &&
+          parseDbDate(user.verification_expires_at).getTime() < Date.now()
+        ) {
+          await database
+            .deleteFrom("users")
+            .where("id", "=", user.id)
+            .execute();
+          throw new ORPCError("BAD_REQUEST", {
+            message:
+              "Verification expired. Your account has been deleted. Please create a new account.",
+          });
+        }
         throw new ORPCError("FORBIDDEN", {
           message: "Please verify your email before logging in",
         });
@@ -249,6 +280,18 @@ export const auth = {
         .where("id", "=", user.id)
         .execute();
 
+      const ctx = context as any;
+      if (ctx?.res) {
+        const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
+        const secureFlag = process.env.NODE_ENV === "production";
+        ctx.res.cookie(cookieName, token, {
+          httpOnly: true,
+          secure: secureFlag,
+          sameSite: "lax",
+          expires: expiresAt,
+        });
+      }
+
       return {
         token,
         user: {
@@ -272,7 +315,7 @@ export const auth = {
     })
     .input(VerifyEmailInputSchema)
     .output(VerifyEmailOutputSchema)
-    .handler(async ({ input }) => {
+    .handler(async ({ input, context }) => {
       const emailLower = input.email.trim().toLowerCase();
 
       const user = await database
@@ -302,10 +345,12 @@ export const auth = {
 
       if (
         user.verification_expires_at &&
-        user.verification_expires_at < new Date()
+        parseDbDate(user.verification_expires_at).getTime() < Date.now()
       ) {
+        await database.deleteFrom("users").where("id", "=", user.id).execute();
         throw new ORPCError("BAD_REQUEST", {
-          message: "Verification code has expired",
+          message:
+            "Verification expired. Your account has been deleted. Please create a new account.",
         });
       }
 
@@ -340,6 +385,18 @@ export const auth = {
           .execute();
       });
 
+      const ctx = context as any;
+      if (ctx?.res) {
+        const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
+        const secureFlag = process.env.NODE_ENV === "production";
+        ctx.res.cookie(cookieName, token, {
+          httpOnly: true,
+          secure: secureFlag,
+          sameSite: "lax",
+          expires: expiresAt,
+        });
+      }
+
       return {
         message: "Email successfully verified. You are now logged in.",
         token,
@@ -369,12 +426,22 @@ export const auth = {
         .selectFrom("users")
         .where("email", "=", emailLower)
         .where("deleted_at", "is", null)
-        .select("id")
+        .select(["id", "last_reset_sent_at"])
         .executeTakeFirst();
 
       if (!user) {
         throw new ORPCError("NOT_FOUND", {
           message: "No account found with this email address",
+        });
+      }
+
+      const now = new Date();
+      if (
+        user.last_reset_sent_at &&
+        now.getTime() - parseDbDate(user.last_reset_sent_at).getTime() < 30000
+      ) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Please wait before requesting another reset link",
         });
       }
 
@@ -386,11 +453,13 @@ export const auth = {
         .set({
           reset_token: resetToken,
           reset_expires_at: resetExpiresAt,
-          last_reset_sent_at: new Date(),
-          updated_at: new Date(),
+          last_reset_sent_at: now,
+          updated_at: now,
         })
         .where("id", "=", user.id)
         .execute();
+
+      await sendResetEmail(emailLower, resetToken);
 
       return {
         message: "Password reset code sent successfully.",
@@ -432,7 +501,10 @@ export const auth = {
         });
       }
 
-      if (user.reset_expires_at && user.reset_expires_at < new Date()) {
+      if (
+        user.reset_expires_at &&
+        parseDbDate(user.reset_expires_at).getTime() < Date.now()
+      ) {
         throw new ORPCError("BAD_REQUEST", {
           message: "Reset token has expired",
         });
@@ -454,6 +526,115 @@ export const auth = {
 
       return {
         message: "Password successfully updated.",
+      };
+    }),
+
+  // 6. RESEND VERIFICATION
+  resendVerification: publicProcedure
+    .route({
+      method: "POST",
+      summary: "Resend email verification",
+      description: "Resends the email verification code for an unverified user",
+      path: "/auth/resend-verification",
+      tags: ["Auth"],
+    })
+    .input(ResendVerificationInputSchema)
+    .output(ResendVerificationOutputSchema)
+    .handler(async ({ input }) => {
+      const emailLower = input.email.trim().toLowerCase();
+
+      const user = await database
+        .selectFrom("users")
+        .selectAll()
+        .where("email", "=", emailLower)
+        .where("deleted_at", "is", null)
+        .executeTakeFirst();
+
+      if (!user || user.email_verified) {
+        // Do not leak existence; return success
+        return {
+          message:
+            "A new verification code has been sent if the account exists.",
+        };
+      }
+
+      const now = new Date();
+      if (
+        user.verification_expires_at &&
+        parseDbDate(user.verification_expires_at).getTime() < now.getTime()
+      ) {
+        await database.deleteFrom("users").where("id", "=", user.id).execute();
+        throw new ORPCError("BAD_REQUEST", {
+          message:
+            "Verification expired. Your account has been deleted. Please create a new account.",
+        });
+      }
+
+      if (
+        user.last_verification_sent_at &&
+        now.getTime() - parseDbDate(user.last_verification_sent_at).getTime() <
+          30000
+      ) {
+        throw new ORPCError("BAD_REQUEST", {
+          message: "Please wait before requesting another code",
+        });
+      }
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiration
+
+      await database
+        .updateTable("users")
+        .set({
+          verification_code: code,
+          verification_expires_at: expires,
+          last_verification_sent_at: now,
+          updated_at: now,
+        })
+        .where("id", "=", user.id)
+        .execute();
+
+      await sendVerificationEmail(user.email, code);
+
+      return {
+        message: "Verification code resent successfully.",
+        verification_code: code, // Returned for debugging/testing
+      };
+    }),
+
+  // 7. LOGOUT
+  logout: publicProcedure
+    .route({
+      method: "POST",
+      summary: "User logout",
+      description: "Revokes a user session token",
+      path: "/auth/logout",
+      tags: ["Auth"],
+    })
+    .input(LogoutInputSchema)
+    .output(LogoutOutputSchema)
+    .handler(async ({ input, context }) => {
+      const ctx = context as any;
+      const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
+      const token =
+        input.token || (ctx?.req?.cookies ? ctx.req.cookies[cookieName] : null);
+
+      if (token) {
+        const tokenHash = createHash("sha256").update(token).digest("hex");
+
+        await database
+          .updateTable("user_sessions")
+          .set({ revoked_at: new Date() })
+          .where("token_hash", "=", tokenHash)
+          .execute();
+      }
+
+      if (ctx?.res) {
+        ctx.res.clearCookie(cookieName);
+      }
+
+      return {
+        message: "Successfully logged out",
       };
     }),
 };

@@ -19,7 +19,7 @@
     <header>
         <div class="header-content">
             <a href="index.html" class="logo">
-                <img src="images/image.jpg" alt="Logo Bildyx" />
+                <img src="images/Logo.png" alt="Logo Bildyx" />
             </a>
 
             <nav class="nav-buttons">
@@ -31,7 +31,7 @@
         <!-- Left panel: dynamic brand content -->
         <section class="brand-panel" id="brandPanel" aria-label="Bildyx presentation">
             <a class="brand" href="index.html" aria-label="Back to home">
-                <img class="brand-icon" src="images/image.jpg" alt="" />
+                <img class="brand-icon" src="images/bildyx-icon.png" alt="" />
                 <span>BILDYX</span>
             </a>
 
@@ -213,10 +213,10 @@
                             setTimeout(() => {
                                 window.location.href = 'login.html';
                             }, 2000);
-                        } else if (resp.status === 410) {
-                            showVerificationError(data.error || 'Verification expired. Your account has been deleted. Please create a new account.');
+                        } else if (resp.status === 410 || (data && (data.message || '').includes('expired'))) {
+                            showVerificationError(data.message || data.error || 'Verification expired. Your account has been deleted. Please create a new account.');
                         } else {
-                            showVerificationError(data.error || 'Invalid or expired verification code');
+                            showVerificationError(data.message || data.error || 'Invalid or expired verification code');
                         }
                     } catch (err) {
                         console.error(err);
@@ -246,12 +246,12 @@
                         const data = await resp.json().catch(() => ({}));
                         if (resp.status === 200) {
                             toast('A new verification code has been sent. Check your email.');
-                        } else if (resp.status === 410) {
-                            showVerificationError(data.error || 'Verification expired. Your account has been deleted. Please create a new account.');
-                        } else if (resp.status === 429) {
-                            showVerificationError(data.error || 'Please wait before requesting another code');
+                        } else if (resp.status === 410 || (data && (data.message || '').includes('expired'))) {
+                            showVerificationError(data.message || data.error || 'Verification expired. Your account has been deleted. Please create a new account.');
+                        } else if (resp.status === 429 || (data && (data.message || '').includes('wait'))) {
+                            showVerificationError(data.message || data.error || 'Please wait before requesting another code');
                         } else {
-                            showVerificationError(data.error || 'Unable to resend code');
+                            showVerificationError(data.message || data.error || 'Unable to resend code');
                         }
                     } catch (err) {
                         console.error(err);

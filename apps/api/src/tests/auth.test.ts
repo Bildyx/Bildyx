@@ -313,4 +313,111 @@ describe("Authentication API Endpoints", { concurrency: 1 }, () => {
       assert.ok(loginRes.token);
     });
   });
+
+  describe("POST /auth/resend-verification (Resend Verification)", () => {
+    test("should successfully resend verification code for unverified email", async () => {
+      // First, create a new unverified user
+      const unverifiedEmail = "unverified@test.bildyx.com";
+      await callProcedure(auth.signup, {
+        accountType: "seeker",
+        email: unverifiedEmail,
+        password: "password123",
+        firstName: "Un",
+        lastName: "Verified",
+      });
+
+      // Shift last_verification_sent_at to the past to bypass throttling
+      await database
+        .updateTable("users")
+        .set({
+          last_verification_sent_at: new Date(Date.now() - 40000),
+        })
+        .where("email", "=", unverifiedEmail)
+        .execute();
+
+      const res = await callProcedure(auth.resendVerification, {
+        email: unverifiedEmail,
+      });
+
+      assert.ok(res.verification_code);
+
+      const user = await database
+        .selectFrom("users")
+        .select(["verification_code", "last_verification_sent_at"])
+        .where("email", "=", unverifiedEmail)
+        .executeTakeFirst();
+
+      assert.ok(user);
+      assert.strictEqual(user.verification_code, res.verification_code);
+      assert.ok(user.last_verification_sent_at);
+    });
+
+    test("should throttle resend requests within 30 seconds", async () => {
+      const throttledEmail = "throttle@test.bildyx.com";
+      await callProcedure(auth.signup, {
+        accountType: "seeker",
+        email: throttledEmail,
+        password: "password123",
+        firstName: "Throttled",
+        lastName: "User",
+      });
+
+      // Second call immediately should fail with BAD_REQUEST due to throttle
+      await assert.rejects(
+        callProcedure(auth.resendVerification, {
+          email: throttledEmail,
+        }),
+        (err: any) =>
+          err instanceof ORPCError &&
+          err.code === "BAD_REQUEST" &&
+          err.message.includes("wait"),
+      );
+    });
+
+    test("should not leak existence for non-existent or verified email", async () => {
+      const res = await callProcedure(auth.resendVerification, {
+        email: "nonexistent@test.com",
+      });
+      assert.ok(res.message);
+    });
+  });
+
+  describe("POST /auth/logout (Logout)", () => {
+    test("should successfully revoke session on logout", async () => {
+      // Log in seeker
+      const loginRes = await callProcedure(auth.login, {
+        email: seekerEmail,
+        password: "securepassword123",
+      });
+
+      assert.ok(loginRes.token);
+
+      const tokenHash = createHash("sha256").update(loginRes.token).digest("hex");
+
+      const sessionBefore = await database
+        .selectFrom("user_sessions")
+        .select("revoked_at")
+        .where("token_hash", "=", tokenHash)
+        .executeTakeFirst();
+
+      assert.ok(sessionBefore);
+      assert.strictEqual(sessionBefore.revoked_at, null);
+
+      // Logout
+      const logoutRes = await callProcedure(auth.logout, {
+        token: loginRes.token,
+      });
+
+      assert.strictEqual(logoutRes.message, "Successfully logged out");
+
+      const sessionAfter = await database
+        .selectFrom("user_sessions")
+        .select("revoked_at")
+        .where("token_hash", "=", tokenHash)
+        .executeTakeFirst();
+
+      assert.ok(sessionAfter);
+      assert.ok(sessionAfter.revoked_at);
+    });
+  });
 });

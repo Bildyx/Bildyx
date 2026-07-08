@@ -106,7 +106,7 @@ a {
             rgba(34, 68, 236, 0.93),
             rgba(34, 68, 236, 0.93)
         ),
-        url("../images/image.jpg");
+        url("../assets/image.jpg");
 
     background-size: cover;
     background-position: center;
@@ -119,7 +119,7 @@ a {
             rgba(34, 68, 236, 0.88),
             rgba(34, 68, 236, 0.88)
         ),
-        url("../images/image.jpg");
+        url("../assets/image.jpg");
 
     background-size: cover;
     background-position: center;

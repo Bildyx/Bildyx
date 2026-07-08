@@ -472,11 +472,11 @@ CREATE TABLE "MilitaryCapabilities" (
     "number_of_space_personnel" INTEGER,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "military_capabilities_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "MilitaryCapabilities_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "subjects" (
+CREATE TABLE "Subject" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "serial_number" TEXT NOT NULL,
@@ -485,6 +485,7 @@ CREATE TABLE "subjects" (
     "short_description" TEXT,
     "category" "SubjectCategory",
     "competitors" TEXT[],
+    "vendors" TEXT[],
     "fun_fact" TEXT,
     "organization_id" UUID,
     "website_url" TEXT,
@@ -496,22 +497,22 @@ CREATE TABLE "subjects" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "subjects_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Subject_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "user_certifications" (
+CREATE TABLE "UserCertifications" (
     "id" UUID NOT NULL,
     "user_profile_id" UUID NOT NULL,
     "certification_id" UUID NOT NULL,
     "obtained_at" TIMESTAMP(3),
     "expires_at" TIMESTAMP(3),
 
-    CONSTRAINT "user_certifications_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserCertifications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "user_educations" (
+CREATE TABLE "UserEducations" (
     "id" UUID NOT NULL,
     "user_profile_id" UUID NOT NULL,
     "university_id" UUID,
@@ -520,7 +521,7 @@ CREATE TABLE "user_educations" (
     "end_year" INTEGER,
     "graduated" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "user_educations_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserEducations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -540,13 +541,13 @@ CREATE TABLE "StudyFields" (
 );
 
 -- CreateTable
-CREATE TABLE "user_education_fields" (
+CREATE TABLE "UserEducationFields" (
     "id" UUID NOT NULL,
     "user_education_id" UUID NOT NULL,
     "study_field_Id" UUID NOT NULL,
     "type" "EducationFieldType" NOT NULL,
 
-    CONSTRAINT "user_education_fields_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserEducationFields_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -745,40 +746,40 @@ CREATE INDEX "audit_logs_action_idx" ON "audit_logs"("action");
 CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs"("created_at");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "military_capabilities_organization_id_key" ON "military_capabilities"("organization_id");
+CREATE UNIQUE INDEX "MilitaryCapabilities_organization_id_key" ON "MilitaryCapabilities"("organization_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "subjects_serial_number_key" ON "subjects"("serial_number");
+CREATE UNIQUE INDEX "Subject_serial_number_key" ON "Subject"("serial_number");
 
 -- CreateIndex
-CREATE INDEX "subjects_category_idx" ON "subjects"("category");
+CREATE INDEX "Subject_category_idx" ON "Subject"("category");
 
 -- CreateIndex
-CREATE INDEX "subjects_organization_id_idx" ON "subjects"("organization_id");
+CREATE INDEX "Subject_organization_id_idx" ON "Subject"("organization_id");
 
 -- CreateIndex
-CREATE INDEX "user_certifications_certification_id_idx" ON "user_certifications"("certification_id");
+CREATE INDEX "UserCertifications_certification_id_idx" ON "UserCertifications"("certification_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_certifications_user_profile_id_certification_id_key" ON "user_certifications"("user_profile_id", "certification_id");
+CREATE UNIQUE INDEX "UserCertifications_user_profile_id_certification_id_key" ON "UserCertifications"("user_profile_id", "certification_id");
 
 -- CreateIndex
-CREATE INDEX "user_educations_university_id_idx" ON "user_educations"("university_id");
+CREATE INDEX "UserEducations_university_id_idx" ON "UserEducations"("university_id");
 
 -- CreateIndex
-CREATE INDEX "user_educations_user_profile_id_idx" ON "user_educations"("user_profile_id");
+CREATE INDEX "UserEducations_user_profile_id_idx" ON "UserEducations"("user_profile_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "StudyFields_serial_number_key" ON "StudyFields"("serial_number");
 
 -- CreateIndex
-CREATE INDEX "user_education_fields_study_field_Id_idx" ON "user_education_fields"("study_field_Id");
+CREATE INDEX "UserEducationFields_study_field_Id_idx" ON "UserEducationFields"("study_field_Id");
 
 -- CreateIndex
-CREATE INDEX "user_education_fields_type_idx" ON "user_education_fields"("type");
+CREATE INDEX "UserEducationFields_type_idx" ON "UserEducationFields"("type");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_education_fields_user_education_id_study_field_Id_key" ON "user_education_fields"("user_education_id", "study_field_Id");
+CREATE UNIQUE INDEX "UserEducationFields_user_education_id_study_field_Id_key" ON "UserEducationFields"("user_education_id", "study_field_Id");
 
 -- CreateIndex
 CREATE INDEX "_OrganizationIndustries_B_index" ON "_OrganizationIndustries"("B");
@@ -862,31 +863,31 @@ ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_user_id_fkey" FOREIGN 
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "military_capabilities" ADD CONSTRAINT "military_capabilities_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MilitaryCapabilities" ADD CONSTRAINT "MilitaryCapabilities_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "subjects" ADD CONSTRAINT "subjects_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Subject" ADD CONSTRAINT "Subject_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_certifications" ADD CONSTRAINT "user_certifications_certification_id_fkey" FOREIGN KEY ("certification_id") REFERENCES "certifications"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserCertifications" ADD CONSTRAINT "UserCertifications_certification_id_fkey" FOREIGN KEY ("certification_id") REFERENCES "certifications"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_certifications" ADD CONSTRAINT "user_certifications_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserCertifications" ADD CONSTRAINT "UserCertifications_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_degree_id_fkey" FOREIGN KEY ("degree_id") REFERENCES "degrees"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserEducations" ADD CONSTRAINT "UserEducations_degree_id_fkey" FOREIGN KEY ("degree_id") REFERENCES "degrees"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_university_id_fkey" FOREIGN KEY ("university_id") REFERENCES "universities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserEducations" ADD CONSTRAINT "UserEducations_university_id_fkey" FOREIGN KEY ("university_id") REFERENCES "universities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserEducations" ADD CONSTRAINT "UserEducations_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_study_field_Id_fkey" FOREIGN KEY ("study_field_Id") REFERENCES "StudyFields"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserEducationFields" ADD CONSTRAINT "UserEducationFields_study_field_Id_fkey" FOREIGN KEY ("study_field_Id") REFERENCES "StudyFields"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_user_education_id_fkey" FOREIGN KEY ("user_education_id") REFERENCES "user_educations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserEducationFields" ADD CONSTRAINT "UserEducationFields_user_education_id_fkey" FOREIGN KEY ("user_education_id") REFERENCES "UserEducations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_OrganizationIndustries" ADD CONSTRAINT "_OrganizationIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "industries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -898,7 +899,7 @@ ALTER TABLE "_OrganizationIndustries" ADD CONSTRAINT "_OrganizationIndustries_B_
 ALTER TABLE "_ProductIndustries" ADD CONSTRAINT "_ProductIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "industries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_ProductIndustries" ADD CONSTRAINT "_ProductIndustries_B_fkey" FOREIGN KEY ("B") REFERENCES "subjects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_ProductIndustries" ADD CONSTRAINT "_ProductIndustries_B_fkey" FOREIGN KEY ("B") REFERENCES "Subject"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_RelatedIndustries" ADD CONSTRAINT "_RelatedIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "industries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
