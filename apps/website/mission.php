@@ -14,9 +14,25 @@ echo str_replace('</head>', "    {$missionStylesheet}\n</head>", $sharedHeader);
 
 <main class="mission-main">
     <section class="mission-hero" aria-labelledby="mission-title">
-        <span class="mission-hero__eyebrow">Our purpose</span>
-        <h1 id="mission-title">Our Mission</h1>
-        <p>We eliminate friction from hiring — for both sides. Build better teams, hire faster, spend less.</p>
+        <div class="mission-hero__content">
+            <img
+                class="mission-hero__search mission-hero__search--job"
+                src="images/no-job-search.png"
+                alt="No job search"
+            >
+
+            <div class="mission-hero__text">
+                <span class="mission-hero__eyebrow">Our purpose</span>
+                <h1 id="mission-title">Our Mission</h1>
+                <p>We eliminate friction from hiring — for both sides. Build better teams, hire faster, spend less.</p>
+            </div>
+
+            <img
+                class="mission-hero__search mission-hero__search--candidate"
+                src="images/no-candidate-search.png"
+                alt="No candidate search"
+            >
+        </div>
     </section>
 
     <section class="mission-frame" aria-label="Mission details">

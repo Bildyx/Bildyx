@@ -10,11 +10,38 @@
 }
 
 .mission-hero {
-    min-height: 300px;
-    padding: 72px 20px 86px;
-    background: #2946ee;
-    color: #ffffff;
+    padding: 70px 20px 48px;
+    background: #ffffff;
+    color: #07122f;
     text-align: center;
+}
+
+.mission-hero__content {
+    width: min(950px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 170px minmax(0, 1fr) 170px;
+    align-items: center;
+    gap: 52px;
+}
+
+.mission-hero__text {
+    min-width: 0;
+}
+
+.mission-hero__search {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    display: block;
+}
+
+.mission-hero__search--job {
+    justify-self: end;
+}
+
+.mission-hero__search--candidate {
+    justify-self: start;
 }
 
 .mission-hero__eyebrow,
@@ -28,13 +55,14 @@
 }
 
 .mission-hero__eyebrow {
-    margin-bottom: 22px;
-    color: rgba(255,255,255,.75);
+    margin-bottom: 20px;
+    color: #667085;
 }
 
 .mission-hero h1 {
     margin: 0 0 22px;
-    font-size: clamp(3rem, 6vw, 4.7rem);
+    color: #07122f;
+    font-size: clamp(3rem, 5.2vw, 4.35rem);
     line-height: .95;
     letter-spacing: -0.055em;
     font-weight: 800;
@@ -43,14 +71,14 @@
 .mission-hero p {
     max-width: 620px;
     margin: 0 auto;
-    color: rgba(255,255,255,.92);
+    color: #61708d;
     font-size: 1.08rem;
     line-height: 1.55;
 }
 
 .mission-frame {
     width: min(850px, calc(100% - 40px));
-    margin: 62px auto 86px;
+    margin: 10px auto 86px;
     border: 2px solid #2448ff;
     border-radius: 34px;
     padding: 14px;
@@ -280,10 +308,50 @@
     line-height: 1.45;
 }
 
-@media (max-width: 850px) {
+@media (max-width: 900px) {
+    .mission-hero__content {
+        grid-template-columns: 110px minmax(0, 1fr) 110px;
+        gap: 22px;
+    }
+
+    .mission-hero__search {
+        width: 110px;
+        height: 110px;
+    }
+}
+
+@media (max-width: 720px) {
+    .mission-hero {
+        padding: 46px 18px 34px;
+    }
+
+    .mission-hero__content {
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 28px;
+    }
+
+    .mission-hero__text {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+
+    .mission-hero__search {
+        width: 110px;
+        height: 110px;
+        margin-top: 6px;
+    }
+
+    .mission-hero__search--job {
+        justify-self: end;
+    }
+
+    .mission-hero__search--candidate {
+        justify-self: start;
+    }
+
     .mission-frame {
         width: min(100% - 24px, 850px);
-        margin-top: 38px;
+        margin-top: 28px;
     }
 
     .mission-inner {
@@ -313,11 +381,6 @@
 }
 
 @media (max-width: 520px) {
-    .mission-hero {
-        padding: 54px 18px 64px;
-        min-height: auto;
-    }
-
     .mission-frame {
         border-radius: 24px;
         padding: 9px;
