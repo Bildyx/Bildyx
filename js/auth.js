@@ -75,6 +75,36 @@ function passwordScore(pwd) {
   return checks.filter(Boolean).length;
 }
 
+// Validate that an email address is not from a common free provider
+// such as Gmail or Yahoo. This is used to encourage users to sign up
+// with a professional email address for company accounts.
+function validProfessionalEmail(email) {
+  if (!validEmail(email)) return false;
+
+  const blockedDomains = [
+    "gmail.com",
+    "googlemail.com",
+    "yahoo.com",
+    "yahoo.fr",
+    "hotmail.com",
+    "hotmail.fr",
+    "outlook.com",
+    "outlook.fr",
+    "live.com",
+    "icloud.com",
+    "me.com",
+    "aol.com",
+    "proton.me",
+    "protonmail.com",
+    "gmx.com",
+    "gmx.fr"
+  ];
+
+  const domain = email.split("@")[1]?.toLowerCase();
+
+  return domain && !blockedDomains.includes(domain);
+}
+
 // Display or clear an error message for a given input. The function
 // finds the closest parent with the class 'field' to locate the
 // corresponding error element. It also toggles the 'invalid' class on
@@ -255,6 +285,20 @@ $$('input[name="accountType"]').forEach(radio => {
     if (submitBtn) {
       submitBtn.textContent = isCompany ? 'Create Company Account' : 'Create Job Seeker Account';
     }
+
+    // Update the email label and placeholder based on account type
+    const signupEmailLabel = document.getElementById("signupEmailLabel");
+    const signupEmailInput = document.getElementById("signupEmail");
+
+    if (signupEmailLabel && signupEmailInput) {
+      if (isCompany) {
+        signupEmailLabel.textContent = "Work Email";
+        signupEmailInput.placeholder = "name@company.com";
+      } else {
+        signupEmailLabel.textContent = "Email";
+        signupEmailInput.placeholder = "you@example.com";
+      }
+    }
   });
 });
 
@@ -316,10 +360,13 @@ if (signupForm) {
     // Validate email
     const emailInput = $('#signupEmail');
     if (!emailInput || !validEmail(emailInput.value)) {
-      setError(emailInput, 'Enter a valid email.');
+      setError(emailInput, "Enter a valid email.");
+      ok = false;
+    } else if (type === "company" && !validProfessionalEmail(emailInput.value)) {
+      setError(emailInput, "Please use a professional email address.");
       ok = false;
     } else {
-      setError(emailInput, '');
+      setError(emailInput, "");
     }
     // Validate password
     const passwordInput = $('#signupPassword');
@@ -512,3 +559,68 @@ if (last) {
   const out = $('#debugOutput');
   if (out) out.textContent = JSON.stringify(JSON.parse(last), null, 2);
 }
+
+function activateAuthTab(target) {
+  if (!target) return;
+
+  $$('.tab').forEach(tab => {
+    const active = tab.dataset.target === target;
+
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', active);
+  });
+
+  $$('.auth-form').forEach(form => {
+    form.classList.toggle('active', form.id === target);
+  });
+}
+
+const params = new URLSearchParams(window.location.search);
+const tab = params.get('tab');
+
+if (tab === 'signup') {
+  activateAuthTab('signup-form');
+}
+
+if (tab === 'login') {
+  activateAuthTab('login-form');
+}
+
+// Google OAuth button: opens a popup window to initiate the OAuth flow.
+const googleSignupBtn = document.getElementById("googleSignupBtn");
+
+if (googleSignupBtn) {
+    googleSignupBtn.addEventListener("click", () => {
+        const width = 520;
+        const height = 650;
+
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        window.open(
+            "http://localhost:3000/api/auth/google",
+            "GoogleLogin",
+            `
+            width=${width},
+            height=${height},
+            left=${left},
+            top=${top},
+            popup=yes,
+            menubar=no,
+            toolbar=no,
+            location=no,
+            status=no,
+            resizable=yes,
+            scrollbars=yes
+            `
+        );
+    });
+}
+
+window.addEventListener("message", (event) => {
+    if (event.origin !== "http://localhost:3000") return;
+
+    if (event.data?.type === "GOOGLE_LOGIN_SUCCESS") {
+        window.location.href = "generic.html";
+    }
+});

@@ -22,8 +22,9 @@
                 <img src="assets/image.jpg" alt="Logo Bildyx" />
             </a>
 
-            <nav class="nav-buttons">
-                <a href="login.html" class="signup">Log In / Sign Up</a>
+            <nav class="nav-buttons auth-buttons">
+                <a href="login.html?tab=login" class="login-btn">Log In</a>
+                <a href="login.html?tab=signup" class="signup-btn">Sign Up</a>
             </nav>
         </div>
     </header>
@@ -95,6 +96,8 @@
                             </label>
                         </div>
 
+                    
+
                         <div class="field company-only">
                             <label for="companyName">Company Name</label>
 
@@ -107,6 +110,20 @@
                         </div>
 
                         <div class="seeker-only hidden">
+                            <div class="social-row social-row-single">
+                                <button
+                                    type="button"
+                                    class="social-btn google-btn"
+                                    id="googleSignupBtn">
+                                    <img src="assets/google.svg" alt="">
+                                    Continue with Google
+                                </button>
+                            </div>
+
+                            <div class="divider">
+                                <span>OR</span>
+                            </div>
+
                             <div class="field-grid">
                                 <div class="field">
                                     <label for="firstName">First Name</label>
@@ -193,15 +210,6 @@
                         </label>
 
                         <button class="submit-btn" type="submit">Create Company Account</button>
-
-                        <div class="divider">
-                            <span>or continue with</span>
-                        </div>
-
-                        <div class="social-row">
-                            <button type="button" class="social-btn">LinkedIn</button>
-                            <button type="button" class="social-btn">Google</button>
-                        </div>
                     </form>
 
                     <!-- Login form -->

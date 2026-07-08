@@ -30,6 +30,8 @@
     "mathjax-full": "3.2.1",
     "nanoid": "^5.1.15",
     "nodemailer": "^9.0.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "postcss": "^8.5.15",
     "pptxgenjs": "4.0.0",
     "prismjs": "1.30.0",

@@ -15,6 +15,9 @@
  *   POST /api/auth/login                 Log in with email/password
  *   POST /api/auth/forgot-password       Request a password reset (30s throttle)
  *   POST /api/auth/reset-password        Reset a password using token
+ *   POST /api/auth/logout                Revoke the current session
+ *   GET /api/auth/google                 Start Google OAuth flow
+ *   GET /api/auth/google/callback        Handle Google OAuth callback
  *
  * This file can be run with `node server.js`.  It requires
  * installation of express, @prisma/client, bcryptjs, nanoid,
@@ -34,6 +37,9 @@ require('dotenv').config();
 
 const app = express();
 const prisma = new PrismaClient();
+
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 // Middleware
 app.use(cors());
@@ -177,7 +183,15 @@ app.post('/api/auth/signup', async (req, res) => {
     }
     const cleanedEmail = sanitizeString(email).toLowerCase();
     // Check if a user with this email already exists
-    const existing = await prisma.user.findUnique({ where: { email: cleanedEmail } });
+    const existing = await prisma.user.findUnique({
+      where: { email: cleanedEmail },
+      select: {
+        id: true,
+        email: true,
+        emailVerified: true,
+        verificationExpiresAt: true
+      }
+    });
     if (existing) {
       const expiredUnverified =
         !existing.emailVerified &&
@@ -193,28 +207,34 @@ app.post('/api/auth/signup', async (req, res) => {
     // Hash password
     const passwordHash = await bcrypt.hash(String(password), 10);
     // Determine role based on account type.  Use UserRole enum for clarity.
-    const role = accountType === 'organisation' ? UserRole.ORGANISATION : UserRole.CANDIDATE;
-    // Prepare the user data.  Always include email, role, marketing and password fields.
+    const isCompany = accountType === 'company' || accountType === 'organisation';
+    const role = isCompany ? UserRole.ORGANIZATION : UserRole.CANDIDATE;
+
     const userData = {
       email: cleanedEmail,
       role,
       marketingOptIn: !!marketing,
       passwordHash,
       emailVerified: false,
-      organisationName: null,
+      status: 'PENDING_VERIFICATION',
       firstName: null,
       lastName: null
     };
-    if (role === UserRole.ORGANISATION) {
-      // Capture the organisation name on the user record when registering as an organisation.
-      const orgName = organisationName ?? companyName;
-      userData.organisationName = sanitizeString(orgName);
-    } else {
+
+    if (!isCompany) {
       userData.firstName = sanitizeString(firstName);
       userData.lastName = sanitizeString(lastName);
     }
-    // Create the user in the database
-    const userRecord = await prisma.user.create({ data: userData });
+
+    const userRecord = await prisma.user.create({
+      data: userData,
+      select: {
+        id: true,
+        email: true,
+        role: true
+      }
+    });
+
     // In this simplified schema, no additional records (company accounts, candidates) are created.  All information is stored in the User model.
     // Generate verification code and expiry (15 minutes)
     const code = nanoid(6).toUpperCase();
@@ -473,6 +493,132 @@ app.post('/api/auth/logout', async (req, res) => {
     return res.status(500).json({ error: 'Internal error' });
   }
 });
+
+// Configure Passport to use Google OAuth 2.0 strategy.  The client ID and secret
+// must be set in environment variables.  The callback URL is where
+// Google will redirect after authentication.  The strategy looks up the user
+// by email and creates a new user if none exists.  The profile returned
+// by Google includes the user's name and email.
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: `${process.env.BASE_URL}/api/auth/google/callback`
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails?.[0]?.value?.toLowerCase();
+
+    if (!email) {
+      return done(new Error('Google account has no email'));
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        emailVerified: true
+      }
+    });
+
+    if (existingUser) {
+      if (!existingUser.emailVerified) {
+        const verifiedUser = await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            emailVerified: true,
+            verificationCode: null,
+            verificationExpiresAt: null,
+            lastVerificationSentAt: null,
+            status: 'ACTIVE'
+          },
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            emailVerified: true
+          }
+        });
+
+        return done(null, verifiedUser);
+      }
+
+      return done(null, existingUser);
+    }
+
+    const randomPasswordHash = await bcrypt.hash(nanoid(32), 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        firstName: profile.name?.givenName || '',
+        lastName: profile.name?.familyName || '',
+        displayName: profile.displayName || '',
+        avatarUrl: profile.photos?.[0]?.value || null,
+        role: UserRole.CANDIDATE,
+        marketingOptIn: false,
+        emailVerified: true,
+        passwordHash: randomPasswordHash,
+        verificationCode: null,
+        verificationExpiresAt: null,
+        lastVerificationSentAt: null,
+        status: 'ACTIVE'
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        emailVerified: true
+      }
+    });
+
+    return done(null, newUser);
+  } catch (err) {
+    return done(err);
+  }
+}));
+
+app.get('/api/auth/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })
+);
+
+// Handle the callback from Google after authentication.  
+// If successful, create a session and send a message to the opener window.
+app.get(
+  "/api/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "http://localhost:5500/login.html?tab=login",
+    session: false
+  }),
+  async (req, res) => {
+    await createSession(req.user.id, req, res);
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Google login completed</title>
+        </head>
+        <body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage(
+                { type: "GOOGLE_LOGIN_SUCCESS" },
+                "http://localhost:5500"
+              );
+            }
+
+            window.close();
+          </script>
+
+          <p>You can close this window.</p>
+        </body>
+      </html>
+    `);
+  }
+);
 
 // Start server if run directly
 if (require.main === module) {
