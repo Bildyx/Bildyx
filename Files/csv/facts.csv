@@ -1,41 +1,41 @@
-﻿Hashtag 1;Icon 1;Hashtag 2;Title;Story;Serial Number
-Company;not_found;Netflix;The $50 Million Mistake;"In 1997, Netflix started as a DVD rental service. By 2007, it launched its streaming platform.
+Hashtag 1,Icon 1,Hashtag 2,Title,Story,Serial Number
+Company,not_found,Netflix,The $50 Million Mistake,"In 1997, Netflix started as a DVD rental service. By 2007, it launched its streaming platform.
 Today it produces its own content and dominates global streaming.
-Blockbuster had the chance to buy Netflix for $50 million in 2000… and declined.";FAC-000001
-Company;not_found;Nintendo;Nintendo: A Masterclass in Reinvention;"Founded in 1889 in Japan, Nintendo made handmade hanafuda cards.
+Blockbuster had the chance to buy Netflix for $50 million in 2000… and declined.",FAC-000001
+Company,not_found,Nintendo,Nintendo: A Masterclass in Reinvention,"Founded in 1889 in Japan, Nintendo made handmade hanafuda cards.
 It experimented with taxis, love hotels, and instant rice before hitting success with electronic toys and consoles.
-The name “Nintendo” roughly means “Leave luck to heaven.”";FAC-000002
-Company;not_found;Slack;Slack: The Accidental Pivot That Changed How We Work;"Glitch failed in 2012, but the team realized their internal communication tool was valuable. That tool became Slack.
-Slack stands for “Searchable Log of All Conversation and Knowledge.”";FAC-000003
-Company;not_found;YouTube;YouTube: From Video Dating to Viral Zoo Clip;"It launched on Valentine’s Day 2005 as a video dating site: “Tune In, Hook Up.”
+The name “Nintendo” roughly means “Leave luck to heaven.”",FAC-000002
+Company,not_found,Slack,Slack: The Accidental Pivot That Changed How We Work,"Glitch failed in 2012, but the team realized their internal communication tool was valuable. That tool became Slack.
+Slack stands for “Searchable Log of All Conversation and Knowledge.”",FAC-000003
+Company,not_found,YouTube,YouTube: From Video Dating to Viral Zoo Clip,"It launched on Valentine’s Day 2005 as a video dating site: “Tune In, Hook Up.”
 Users started uploading all kinds of videos, not just dating intros.
 Fun fact:
-The first video ever uploaded was “Me at the zoo,” by co-founder Jawed Karim.";FAC-000004
-Company;not_found;Twitter;Twitter: The $5 Million Pivot from Odeo;"When Apple announced iTunes would support podcasts, Odeo knew it was doomed.
+The first video ever uploaded was “Me at the zoo,” by co-founder Jawed Karim.",FAC-000004
+Company,not_found,Twitter,Twitter: The $5 Million Pivot from Odeo,"When Apple announced iTunes would support podcasts, Odeo knew it was doomed.
 Employees were encouraged to brainstorm new ideas. Jack Dorsey pitched Twitter.
-The original name for Twitter was “Twttr,” inspired by Flickr and SMS’s 140-character limit.";FAC-000005
-Company;not_found;Shopify;Shopify: Built from Snowboards into a Global Powerhouse;"The founders wanted to sell snowboards online but found existing e-commerce tools terrible.
+The original name for Twitter was “Twttr,” inspired by Flickr and SMS’s 140-character limit.",FAC-000005
+Company,not_found,Shopify,Shopify: Built from Snowboards into a Global Powerhouse,"The founders wanted to sell snowboards online but found existing e-commerce tools terrible.
 They built their own — and realized it was a business opportunity.
-Shopify powers over 4 million businesses today, including major brands like Allbirds and Gymshark.";FAC-000006
-Company;not_found;Instagram;Instagram: The Power of Pivoting from Burbn;"Burbn had too many features — check-ins, photos, gaming elements.
+Shopify powers over 4 million businesses today, including major brands like Allbirds and Gymshark.",FAC-000006
+Company,not_found,Instagram,Instagram: The Power of Pivoting from Burbn,"Burbn had too many features — check-ins, photos, gaming elements.
 Founders noticed users mostly used it to share photos. They stripped everything else and launched Instagram.
-Instagram gained 25,000 users in one day after launching in 2010.";FAC-000007
-Company;not_found;PayPal;PayPal: How a PalmPilot Security Tool Became a Global Payment Powerhouse;"It began as Confinity, building cryptography software for handheld devices.
+Instagram gained 25,000 users in one day after launching in 2010.",FAC-000007
+Company,not_found,PayPal,PayPal: How a PalmPilot Security Tool Became a Global Payment Powerhouse,"It began as Confinity, building cryptography software for handheld devices.
 They pivoted to enabling money transfers via email — which became PayPal.
-Elon Musk merged his online banking startup, X.com, with Confinity to form PayPal.";FAC-000008
-Company;not_found;Wrigley;Wrigley: From Soap to Gum Empire;"William Wrigley Jr. gave away gum as a promotional item.
+Elon Musk merged his online banking startup, X.com, with Confinity to form PayPal.",FAC-000008
+Company,not_found,Wrigley,Wrigley: From Soap to Gum Empire,"William Wrigley Jr. gave away gum as a promotional item.
 The gum became more popular than the soap or baking powder.
-The company created iconic gum brands like Juicy Fruit and Doublemint.";FAC-000009
-Company;not_found;Nokia;Nokia: From Paper Mill to Telecom Titan;"Founded in 1865 in Finland as a pulp mill. Later made tires and rubber boots.
+The company created iconic gum brands like Juicy Fruit and Doublemint.",FAC-000009
+Company,not_found,Nokia,Nokia: From Paper Mill to Telecom Titan,"Founded in 1865 in Finland as a pulp mill. Later made tires and rubber boots.
 Became a telecom giant, then faded out in smartphones, and now focuses on network equipment.
-The classic Nokia 3310 is legendary for its durability — and ""Snake"" game.";FAC-000010
-Company;not_found;Airbnb;Airbnb: From Air Mattresses to Obama O’s to Global Disruption;Started as “AirBed & Breakfast” to provide lodging during conferences. To fund their startup, the founders sold cereal boxes labeled “Obama O’s” and “Cap’n McCain’s” during the 2008 U.S. election. ;FAC-000011
-Company;not_found;Pinterest;Pinterest: Pivoting from Tote to Visual Discovery;Originally a shopping app, the founders noticed users were more interested in collecting and sharing images of products than purchasing them, leading to the creation of Pinterest. ;FAC-000012
-Company;not_found;Play-Doh;Play‑Doh: From Wallpaper Cleaner to Toy Icon;Initially used to clean soot from wallpaper, Play-Doh was repurposed as a children's toy when demand for wallpaper cleaner declined post-World War II. ;FAC-000013
-Company;not_found;Suzuki;Suzuki: From Silk Looms to Global Mobility Titan;Founded as a loom manufacturer for Japan's silk industry, Suzuki diversified into motor vehicles after World War II due to declining demand for looms. ;FAC-000014
-Company;not_found;Avon;Avon: From Books to Beauty Empires;Avon began by selling books door-to-door, offering perfume samples as incentives. The perfumes became more popular than the books, prompting a pivot to cosmetics. ;FAC-000015
-Company;not_found;Western Union;Western Union: From Telegraphs to Global Money Transfers;Originally a telegraph company, Western Union shifted focus to financial services as telegraphy became obsolete, capitalizing on its existing infrastructure for money transfers. ;FAC-000016
-Company;not_found;Flickr;Flickr: From Game Feature to Photo-Sharing Platform;Developed as a feature within an online game, Flickr's photo-sharing tool gained popularity, leading the company to focus solely on photo sharing. ;FAC-000017
-Company;not_found;HP (Hewlett-Packard);HP: From Garage-Built Oscillators to Global Tech Leader;Started in a garage producing electronic test equipment, HP expanded into computing and became a leading PC and printer manufacturer. ;FAC-000018
-Company;not_found;Fab.com;Fab.com: From Gay Social Network to Design E-Commerce Powerhouse;Initially a social network, Fab.com pivoted to flash sales of design products, achieving rapid growth before eventually declining. ;FAC-000019
-Company;not_found;Marriott International;Marriott: From Root Beer Stand to Global Hospitality Leader;Marriott began as a root beer stand in Washington, D.C., expanded into restaurants, and eventually opened its first hotel in 1957, growing into a global hospitality company. ;FAC-000020
+The classic Nokia 3310 is legendary for its durability — and ""Snake"" game.",FAC-000010
+Company,not_found,Airbnb,Airbnb: From Air Mattresses to Obama O’s to Global Disruption,"Started as “AirBed & Breakfast” to provide lodging during conferences. To fund their startup, the founders sold cereal boxes labeled “Obama O’s” and “Cap’n McCain’s” during the 2008 U.S. election. ",FAC-000011
+Company,not_found,Pinterest,Pinterest: Pivoting from Tote to Visual Discovery,"Originally a shopping app, the founders noticed users were more interested in collecting and sharing images of products than purchasing them, leading to the creation of Pinterest. ",FAC-000012
+Company,not_found,Play-Doh,Play‑Doh: From Wallpaper Cleaner to Toy Icon,"Initially used to clean soot from wallpaper, Play-Doh was repurposed as a children's toy when demand for wallpaper cleaner declined post-World War II. ",FAC-000013
+Company,not_found,Suzuki,Suzuki: From Silk Looms to Global Mobility Titan,"Founded as a loom manufacturer for Japan's silk industry, Suzuki diversified into motor vehicles after World War II due to declining demand for looms. ",FAC-000014
+Company,not_found,Avon,Avon: From Books to Beauty Empires,"Avon began by selling books door-to-door, offering perfume samples as incentives. The perfumes became more popular than the books, prompting a pivot to cosmetics. ",FAC-000015
+Company,not_found,Western Union,Western Union: From Telegraphs to Global Money Transfers,"Originally a telegraph company, Western Union shifted focus to financial services as telegraphy became obsolete, capitalizing on its existing infrastructure for money transfers. ",FAC-000016
+Company,not_found,Flickr,Flickr: From Game Feature to Photo-Sharing Platform,"Developed as a feature within an online game, Flickr's photo-sharing tool gained popularity, leading the company to focus solely on photo sharing. ",FAC-000017
+Company,not_found,HP (Hewlett-Packard),HP: From Garage-Built Oscillators to Global Tech Leader,"Started in a garage producing electronic test equipment, HP expanded into computing and became a leading PC and printer manufacturer. ",FAC-000018
+Company,not_found,Fab.com,Fab.com: From Gay Social Network to Design E-Commerce Powerhouse,"Initially a social network, Fab.com pivoted to flash sales of design products, achieving rapid growth before eventually declining. ",FAC-000019
+Company,not_found,Marriott International,Marriott: From Root Beer Stand to Global Hospitality Leader,"Marriott began as a root beer stand in Washington, D.C., expanded into restaurants, and eventually opened its first hotel in 1957, growing into a global hospitality company. ",FAC-000020

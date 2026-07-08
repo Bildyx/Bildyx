@@ -1,0 +1,395 @@
+/* Page MicroResume Example — isolée du reste du site. */
+
+.microresume-example-page {
+    background: #2244ec;
+}
+
+.microresume-example-page .site-header {
+    border-bottom: 12px solid #ffffff;
+}
+
+.microresume-example-page .site-footer {
+    margin-top: 12px;
+}
+
+.mre-page {
+    padding: 34px 20px 38px;
+    background: #2244ec;
+}
+
+.mre-resume {
+    width: min(960px, 100%);
+    margin: 0 auto;
+    padding: 38px 36px 34px;
+    background: #ffffff;
+    border: 2px solid #8da5ff;
+    border-radius: 25px;
+    box-shadow:
+        0 0 0 7px rgba(255, 255, 255, 0.16),
+        0 16px 38px rgba(15, 23, 41, 0.13);
+    color: #0f1729;
+}
+
+.mre-profile-header {
+    padding-bottom: 22px;
+    border-bottom: 1px solid #dfe3ee;
+}
+
+.mre-name-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 38px;
+    padding: 7px 16px;
+    border: 1px solid #dfe3ee;
+    border-radius: 999px;
+}
+
+.mre-name-pill h1 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.mre-name-pill span {
+    color: #69738f;
+    font-size: 12px;
+}
+
+.mre-introduction {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    align-items: start;
+    gap: 22px;
+    margin-top: 28px;
+}
+
+.mre-avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #edf0f5;
+}
+
+.mre-introduction p,
+.mre-entry-description {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.mre-profile-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 34px;
+    margin-top: 26px;
+}
+
+.mre-profile-grid h2 {
+    margin: 0 0 12px;
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.mre-profile-grid h3 {
+    margin: 2px 0 12px;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.mre-meta-label {
+    margin: 0 0 8px;
+    color: #6c758e;
+    font-size: 12px;
+}
+
+.mre-tags,
+.mre-skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.mre-tags span {
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: #2244ec;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.mre-skill-tags span {
+    padding: 5px 12px;
+    border: 2px solid #2244ec;
+    border-radius: 999px;
+    color: #2244ec;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.mre-summary-list {
+    display: grid;
+    gap: 4px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+}
+
+.mre-summary-list li::before {
+    content: "▧";
+    margin-right: 8px;
+    color: #6b7590;
+}
+
+.mre-section {
+    padding: 22px 0 0;
+}
+
+.mre-section + .mre-section {
+    margin-top: 22px;
+    border-top: 1px solid #dfe3ee;
+}
+
+.mre-section > h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+    text-transform: uppercase;
+}
+
+.mre-entry-heading,
+.mre-education-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+}
+
+.mre-entry-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #f0f2f7;
+    color: #2244ec;
+    font-weight: 800;
+}
+
+.mre-entry-heading div:last-child {
+    display: grid;
+}
+
+.mre-entry-heading strong,
+.mre-entry-heading span,
+.mre-entry-heading a {
+    line-height: 1.35;
+}
+
+.mre-entry-heading strong {
+    font-size: 12px;
+}
+
+.mre-entry-heading span,
+.mre-entry-heading a {
+    font-size: 11px;
+}
+
+.mre-entry-heading span {
+    color: #69738f;
+}
+
+.mre-entry-heading a {
+    color: #2244ec;
+    font-weight: 700;
+}
+
+.mre-entry-description {
+    margin-top: 18px;
+}
+
+.mre-card-grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.mre-card-grid--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mre-card-grid--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mre-card-column h3 {
+    margin: 0 0 6px;
+    color: #67708a;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/*
+ * Ces cases sont volontairement vides.
+ * Le back-end pourra y insérer ses futures cartes sans changer la mise en page.
+ */
+.mre-card-slot {
+    position: relative;
+    min-height: 360px;
+    overflow: hidden;
+    background: #ffffff;
+    border: 2px solid #a9baff;
+    border-radius: 22px;
+    box-shadow:
+        inset 0 0 0 10px #ffffff,
+        inset 0 0 0 12px #d3dcff,
+        0 0 0 1px rgba(34, 68, 236, 0.1);
+}
+
+.mre-card-slot--education {
+    min-height: 420px;
+}
+
+.mre-tags--experience {
+    margin-top: 20px;
+}
+
+.mre-education-entry {
+    margin-top: 24px;
+}
+
+.mre-education-heading {
+    align-items: center;
+}
+
+.mre-education-heading div:nth-child(2) {
+    display: grid;
+}
+
+.mre-education-heading h3 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.mre-education-heading span {
+    color: #69738f;
+    font-size: 11px;
+}
+
+.mre-education-heading time {
+    margin-left: auto;
+    color: #69738f;
+    font-size: 11px;
+}
+
+.mre-account-button {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    color: #ffffff;
+}
+
+.mre-account-button svg {
+    width: 17px;
+    height: 17px;
+}
+
+.mre-entry-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.mre-entry-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+@media (max-width: 900px) {
+    .mre-resume {
+        padding: 32px 26px;
+    }
+
+    .mre-card-grid--three {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mre-card-column:last-child {
+        grid-column: 1 / -1;
+        max-width: calc(50% - 8px);
+    }
+}
+
+@media (max-width: 680px) {
+    .microresume-example-page .site-header {
+        border-bottom-width: 8px;
+    }
+
+    .mre-page {
+        padding: 18px 10px 24px;
+    }
+
+    .mre-resume {
+        padding: 24px 18px;
+        border-radius: 18px;
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.16);
+    }
+
+    .mre-introduction,
+    .mre-profile-grid,
+    .mre-card-grid--three,
+    .mre-card-grid--two {
+        grid-template-columns: 1fr;
+    }
+
+    .mre-introduction {
+        gap: 15px;
+    }
+
+    .mre-profile-grid {
+        gap: 24px;
+    }
+
+    .mre-card-column:last-child {
+        grid-column: auto;
+        max-width: none;
+    }
+
+    .mre-card-slot,
+    .mre-card-slot--education {
+        min-height: 320px;
+    }
+
+    .mre-section > h2 {
+        font-size: 19px;
+    }
+}
+
+@media (max-width: 430px) {
+    .mre-name-pill {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .mre-avatar {
+        width: 74px;
+        height: 74px;
+    }
+
+    .mre-education-heading {
+        align-items: flex-start;
+    }
+
+    .mre-education-heading time {
+        padding-top: 2px;
+    }
+}
