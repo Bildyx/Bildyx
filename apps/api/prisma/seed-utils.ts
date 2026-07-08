@@ -16,6 +16,14 @@ export function toInt(v?: string): number | null {
   return v && v.trim() !== "" ? Number(v) : null;
 }
 
+// Comme toInt, mais tolère du texte autour du nombre (ex: "1 (via Cairo Intl.
+// Airport)", "20+", "30% Bachelor's..."). Prend le premier entier trouvé.
+export function toIntLoose(v?: string): number | null {
+  if (!v || v.trim() === "") return null;
+  const match = v.match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
+
 export function toFloat(v?: string): number | null {
   return v && v.trim() !== "" ? Number(v) : null;
 }
@@ -36,7 +44,9 @@ export function toDate(v?: string, fallbackToNow = false): Date | null {
   return fallbackToNow ? new Date() : null;
 }
 
-export function toJson(v?: string): Prisma.InputJsonValue | typeof Prisma.JsonNull {
+export function toJson(
+  v?: string,
+): Prisma.InputJsonValue | typeof Prisma.JsonNull {
   return v && v.trim() !== "" ? JSON.parse(v) : Prisma.JsonNull;
 }
 
@@ -70,7 +80,7 @@ export function normalizeEnumKey(v: string): string {
 
 export function parseEnum<T extends object>(
   value: string | undefined,
-  enumObj: T
+  enumObj: T,
 ): T[keyof T] | null {
   if (!value || value.trim() === "") return null;
   const key = normalizeEnumKey(value);
@@ -79,9 +89,22 @@ export function parseEnum<T extends object>(
 
 export function parseEnumArray<T extends object>(
   value: string | undefined,
-  enumObj: T
+  enumObj: T,
 ): T[keyof T][] {
   return toStringArray(value)
     .map((v) => parseEnum(v, enumObj))
     .filter((v): v is T[keyof T] => v !== null);
+}
+
+// Resout un nom lisible (ex: "Adobe") vers l'id genere en base pour des
+// lignes CSV qui referencent une autre table par nom plutot que par sa vraie
+// cle etrangere (laquelle n'existe pas encore au moment ou le CSV a ete
+// rempli). Retourne null (sans lever d'erreur) si aucune correspondance.
+export function buildNameLookup(rows: { id: string; name: string }[]) {
+  const byName = new Map(rows.map((r) => [r.name.trim().toLowerCase(), r.id]));
+
+  return (rawName?: string): string | null => {
+    if (!rawName || rawName.trim() === "") return null;
+    return byName.get(rawName.trim().toLowerCase()) ?? null;
+  };
 }

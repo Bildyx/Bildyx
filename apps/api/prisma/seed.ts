@@ -13,6 +13,7 @@ import { seedUniversities } from "./seeds/seeds_universities";
 import { seedDegrees } from "./seeds/seeds_degrees";
 import { seedSubjects } from "./seeds/seeds_subjects";
 import { seedStudyFields } from "./seeds/seeds_studyFields";
+import { seedMilitaryCapabilities } from "./seeds/seeds_military_capabilities";
 
 const prisma = new PrismaClient();
 
@@ -33,6 +34,7 @@ async function main() {
   await seedCertifications(prisma);
   await seedUniversities(prisma);
   await seedSubjects(prisma);
+  await seedMilitaryCapabilities(prisma);
   await seedSkills(prisma);
   await seedDegrees(prisma);
   await seedStudyFields(prisma);

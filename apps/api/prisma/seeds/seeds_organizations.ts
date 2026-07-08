@@ -60,8 +60,8 @@ type OrganizationCsv = {
   equipments?: string;
   score?: string;
   city_id?: string;
-  number_of_employees?: string;
-  number_of_subsidiaries?: string;
+  numberOfEmployees?: string;
+  numberOfSubsidiaries?: string;
   parent_organization_id?: string;
   metadata?: string;
   deleted_at?: string;
@@ -102,8 +102,8 @@ export async function seedOrganizations(prisma: PrismaClient) {
 
     cityId: r.city_id || null,
 
-    numberOfEmployees: parseEmployeeRange(r.number_of_employees),
-    numberOfSubsidiaries: toInt(r.number_of_subsidiaries),
+    numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
+    numberOfSubsidiaries: toInt(r.numberOfSubsidiaries),
 
     parentOrganizationId: r.parent_organization_id || null,
 

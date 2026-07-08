@@ -95,7 +95,7 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
 
-export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANIZATION" | "SUPER_ADMIN" | "USER";
+export type Userrole = "ADMIN" | "CANDIDATE" | "ORGANIZATION";
 
 export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
 

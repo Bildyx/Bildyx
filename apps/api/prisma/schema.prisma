@@ -92,14 +92,14 @@ model City {
   id                                          String         @id @default(uuid()) @db.Uuid
   name                                        String
   serial_number                               String         @unique
-  countryId                                   String         @map("country_id") @db.Uuid
+  countryId                                   String         @map("country_id") @db.Char(2)
   isCapital                                   Boolean        @default(false) @map("is_capital")
   stateProvince                               String?        @map("state_province")
   population                                  String?
   numberOfMultinationalHqs                    String?        @map("number_of_multinational_hqs")
   numberOfAirports                            Int?           @map("number_of_airports")
   largest_organization                        String?
-  Currency                                    Currency       @map("currency")
+  currency                                    Currency       @map("currency")
   medianSalary                                Int?           @map("median_salary")
   medianHomePrice                             Int?           @map("median_home_price")
   averageRent                                 Int?           @map("average_rent")
@@ -110,7 +110,7 @@ model City {
   degreeHolders                               String?        @map("degree_holders")
   numberOfUniversities                        Int?           @map("number_of_universities")
   top_universities                            String?
-  numberOfNationalities                       String?           @map("number_of_nationalities")
+  numberOfNationalities                       String?        @map("number_of_nationalities")
   language                                    Language[]
   peopleDescription                           String?        @map("people_description")
   latitude                                    Float?
@@ -264,7 +264,7 @@ model University {
   description     String?
   websiteUrl      String?          @map("website_url")
   logoUrl         String?          @map("logo_url")
-  countryId       String?          @map("country_id") @db.Uuid
+  countryId       String?          @map("country_id") @db.Char(2)
   cityId          String?          @map("city_id") @db.Uuid
   studentCount    Int?             @map("student_count")
   metadata        Json?
@@ -392,7 +392,7 @@ model JobAd {
   status                  JobAdStatus     @default(DRAFT)
   contractType            ContractType?   @map("contract_type")
   remote                  RemotePolicy?
-  countryId               String?         @map("country_id") @db.Uuid
+  countryId               String?         @map("country_id") @db.Char(2)
   cityId                  String?         @map("city_id") @db.Uuid
   salaryRange             String?         @map("salary_range")
   requiredYearsExperience Int?            @map("required_years_experience")
@@ -462,7 +462,7 @@ model User {
   resetExpiresAt         DateTime?     @map("reset_expires_at")
   /// Last time a password reset email was sent, used to throttle re‑sends.
   lastResetSentAt        DateTime?     @map("last_reset_sent_at")
-  role                   UserRole      @default(USER)
+  role                   UserRole      @default(CANDIDATE)
   status                 UserStatus    @default(PENDING_VERIFICATION)
   lastLoginAt            DateTime?     @map("last_login_at")
   failedLoginAttempts    Int           @default(0) @map("failed_login_attempts")
@@ -503,7 +503,7 @@ model UserProfile {
   id                    String               @id @default(uuid()) @db.Uuid
   userId                String               @unique @map("user_id") @db.Uuid
   biography             String?
-  countryId             String?              @map("country_id") @db.Uuid
+  countryId             String?              @map("country_id") @db.Char(2)
   cityId                String?              @map("city_id") @db.Uuid
   linkedinUrl           String?              @map("linkedin_url")
   githubUrl             String?              @map("github_url")
@@ -595,8 +595,160 @@ model AuditLog {
 }
 
 enum Currency {
+  AED
+  AFN
+  ALL
+  AMD
+  ANG
+  AOA
+  ARS
+  AUD
+  AWG
+  AZN
+  BAM
+  BBD
+  BDT
+  BGN
+  BHD
+  BIF
+  BMD
+  BND
+  BOB
+  BRL
+  BSD
+  BTN
+  BWP
+  BYN
+  BZD
+  CAD
+  CDF
+  CHF
+  CLP
+  CNY
+  COP
+  CRC
+  CUP
+  CVE
+  CZK
+  DJF
+  DKK
+  DOP
+  DZD
+  EGP
+  ERN
+  ETB
   EUR
+  FJD
+  FKP
+  GBP
+  GEL
+  GHS
+  GIP
+  GMD
+  GNF
+  GTQ
+  GYD
+  HKD
+  HNL
+  HTG
+  HUF
+  IDR
+  ILS
+  INR
+  IQD
+  IRR
+  ISK
+  JMD
+  JOD
+  JPY
+  KES
+  KGS
+  KHR
+  KMF
+  KPW
+  KRW
+  KWD
+  KYD
+  KZT
+  LAK
+  LBP
+  LKR
+  LRD
+  LSL
+  LYD
+  MAD
+  MDL
+  MGA
+  MKD
+  MMK
+  MNT
+  MOP
+  MRU
+  MUR
+  MVR
+  MWK
+  MXN
+  MYR
+  MZN
+  NAD
+  NGN
+  NIO
+  NOK
+  NPR
+  NZD
+  OMR
+  PAB
+  PEN
+  PGK
+  PHP
+  PKR
+  PLN
+  PYG
+  QAR
+  RON
+  RSD
+  RUB
+  RWF
+  SAR
+  SBD
+  SCR
+  SDG
+  SEK
+  SGD
+  SHP
+  SLE
+  SOS
+  SRD
+  SSP
+  STN
+  SYP
+  SZL
+  THB
+  TJS
+  TMT
+  TND
+  TOP
+  TRY
+  TTD
+  TWD
+  TZS
+  UAH
+  UGX
   USD
+  UYU
+  UZS
+  VES
+  VND
+  VUV
+  WST
+  XAF
+  XCD
+  XOF
+  XPF
+  YER
+  ZAR
+  ZMW
+  ZWL
 }
 
 enum CostOfLiving {
@@ -853,10 +1005,7 @@ enum SubjectCategory {
 }
 
 enum UserRole {
-  USER
-  MODERATOR
   ADMIN
-  SUPER_ADMIN
   CANDIDATE
   ORGANIZATION
 }

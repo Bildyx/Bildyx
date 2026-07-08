@@ -5,6 +5,7 @@ import {
   toDate,
   toStringArray,
   parseEnum,
+  buildNameLookup,
 } from "../seed-utils";
 
 type SubjectCsv = {
@@ -16,6 +17,7 @@ type SubjectCsv = {
   short_description?: string;
   category?: string;
   competitors?: string;
+  vendors?: string;
   fun_fact?: string;
   organization_id?: string;
   website_url?: string;
@@ -31,37 +33,60 @@ type SubjectCsv = {
 export async function seedSubjects(prisma: PrismaClient) {
   const rows = readCsv<SubjectCsv>("subjects.csv");
 
-  const data: Prisma.SubjectCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    serial_number: r.serial_number,
+  // subjects.csv renseigne organization_id avec le nom de l'organisation
+  // plutot que son UUID -> resolution par nom (meme pattern que
+  // certifications.issuing_organization_id).
+  const organizations = await prisma.organization.findMany({
+    select: { id: true, name: true },
+  });
+  const resolveOrganizationId = buildNameLookup(organizations);
+  const unmatchedOrganizations = new Set<string>();
 
-    type: r.type || null,
+  const data: Prisma.SubjectCreateManyInput[] = rows.map((r) => {
+    const organization_id = resolveOrganizationId(r.organization_id);
+    if (r.organization_id && !organization_id) {
+      unmatchedOrganizations.add(r.organization_id);
+    }
 
-    description: r.description || null,
-    short_description: r.short_description || null,
+    return {
+      id: r.id,
+      name: r.name,
+      serial_number: r.serial_number,
 
-    category: parseEnum(r.category, SubjectCategory),
+      type: r.type || null,
 
-    competitors: toStringArray(r.competitors),
+      description: r.description || null,
+      short_description: r.short_description || null,
 
-    fun_fact: r.fun_fact || null,
+      category: parseEnum(r.category, SubjectCategory),
 
-    organization_id: r.organization_id || null,
+      competitors: toStringArray(r.competitors),
+      vendors: toStringArray(r.vendors),
 
-    website_url: r.website_url || null,
-    logo_url: r.logo_url || null,
+      fun_fact: r.fun_fact || null,
 
-    tags: toStringArray(r.tags),
+      organization_id,
 
-    score: r.score && r.score !== "" ? Number(r.score) : null,
+      website_url: r.website_url || null,
+      logo_url: r.logo_url || null,
 
-    metadata: toJson(r.metadata),
+      tags: toStringArray(r.tags),
 
-    deleted_at: toDate(r.deleted_at, false),
-    created_at: toDate(r.created_at, true) as Date,
-    updated_at: toDate(r.updated_at, true) as Date,
-  }));
+      score: r.score && r.score !== "" ? Number(r.score) : null,
+
+      metadata: toJson(r.metadata),
+
+      deleted_at: toDate(r.deleted_at, false),
+      created_at: toDate(r.created_at, true) as Date,
+      updated_at: toDate(r.updated_at, true) as Date,
+    };
+  });
+
+  if (unmatchedOrganizations.size > 0) {
+    console.warn(
+      `Subjects: organization_id non resolus (mis a null): ${[...unmatchedOrganizations].join(", ")}`,
+    );
+  }
 
   // NOTE: depend de organizations.ts (organization_id) -> a seeder avant.
   const result = await prisma.subject.createMany({

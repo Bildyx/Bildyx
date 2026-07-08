@@ -72,7 +72,7 @@ describe("Users API Endpoints", { concurrency: 1 }, () => {
         password_hash: "hashed_password_1",
         first_name: "Alice",
         last_name: "Martin",
-        role: "USER",
+        role: "CANDIDATE",
         status: "ACTIVE",
       });
 
