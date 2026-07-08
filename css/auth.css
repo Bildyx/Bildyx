@@ -238,14 +238,18 @@ a {
 
 .form-panel {
     display: flex;
-    align-items: flex-start;
     justify-content: center;
+    align-items: flex-start;
 
     padding: 32px 60px 56px;
 }
 
 .auth-card {
     width: min(100%, 590px);
+
+    padding: 0;
+
+    border-radius: 24px;
 }
 
 /* ---------- Tabs ---------- */
@@ -622,84 +626,6 @@ a {
     cursor: pointer;
     font: inherit;
     font-weight: 700;
-}
-
-/* ---------- Debug panel ---------- */
-
-.debug-panel {
-    position: fixed;
-    right: 18px;
-    bottom: 18px;
-    z-index: 10;
-}
-
-#debugToggle {
-    padding: 11px 18px;
-
-    border: 0;
-    border-radius: 999px;
-    background: var(--t1);
-    color: #ffffff;
-    box-shadow: var(--sh-lg);
-
-    cursor: pointer;
-    font-weight: 800;
-}
-
-.debug-content {
-    display: none;
-
-    width: min(520px, calc(100vw - 36px));
-    max-height: 60vh;
-    overflow: auto;
-    margin-top: 10px;
-    padding: 18px;
-
-    border-radius: 16px;
-    background: #0f1729;
-    color: #dbeafe;
-    box-shadow: var(--sh-xl);
-}
-
-.debug-content.open {
-    display: block;
-}
-
-.debug-content h3 {
-    margin-bottom: 8px;
-}
-
-.debug-content p {
-    margin-bottom: 12px;
-
-    color: #aebbe0;
-
-    font-size: 0.84rem;
-}
-
-pre {
-    white-space: pre-wrap;
-
-    font-size: 0.82rem;
-    line-height: 1.6;
-}
-
-.debug-actions {
-    display: flex;
-    gap: 10px;
-
-    margin-top: 12px;
-}
-
-.debug-actions button {
-    padding: 8px 12px;
-
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-
-    cursor: pointer;
 }
 
 /* ---------- Toast ---------- */
