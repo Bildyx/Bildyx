@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { PrismaClient } from "@prisma/client";
 
 import { seedIndustries } from "./seeds/seeds_industries";
