@@ -150,6 +150,23 @@ def build_hint(field: dict, enums: dict[str, list[str]]) -> str:
     return f"text ({req})"
 
 
+def number_format_for(field: dict, enums: dict[str, list[str]]) -> str | None:
+    """Excel number_format matching the field's Prisma type, or None for General."""
+    base_type = field["base_type"]
+
+    if field["is_list"] or base_type in enums:
+        return "@"
+    if base_type in ("Int", "BigInt"):
+        return "#,##0"
+    if base_type in ("Float", "Decimal"):
+        return "#,##0.00"
+    if base_type == "DateTime":
+        return "yyyy-mm-dd"
+    if base_type == "Boolean":
+        return None
+    return "@"
+
+
 def table_name_for(model_name: str, body: str) -> str:
     map_match = TABLE_MAP_RE.search(body)
     return map_match.group(1) if map_match else camel_to_snake(model_name)
@@ -178,6 +195,10 @@ def write_workbook(
 
         column_letter = ws.cell(row=1, column=col_idx).column_letter
         ws.column_dimensions[column_letter].width = max(18, len(field["column"]) + 4)
+
+        number_format = number_format_for(field, enums)
+        if number_format:
+            ws.column_dimensions[column_letter].number_format = number_format
 
         if field["base_type"] in enums and not field["is_list"]:
             dv = DataValidation(

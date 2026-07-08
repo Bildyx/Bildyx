@@ -47,5 +47,6 @@ Files/                      # Legacy hand-curated business data templates (csv/e
 Excel import template generator added and working for all 11 target reference models.
 
 ## Recent Changes
+- [2026-07-08] `apps/api/scripts/generate_excel_templates.py` now sets a column-level `number_format` matching each field's Prisma type (Int/BigInt → `#,##0`, Float/Decimal → `#,##0.00`, enums/lists/strings → text `@`, Boolean → General). Only affects newly generated templates — existing filled files in `apps/api/data/excel_templates/` weren't regenerated (would wipe their data) and still contain messy text in several numeric-typed columns (population, salaries, airport counts, etc.) pending a decision on data cleanup.
 - [2026-07-07] Added `apps/api/scripts/generate_excel_templates.py`: parses `schema.prisma`, excludes relation fields and auto-managed columns (id/created_at/updated_at/deleted_at), adds enum dropdowns and type hints, outputs one `.xlsx` per model to `apps/api/data/excel_templates/`.
 - [2026-07-07] Added `apps/api/scripts/excel_to_csv.py`: converts every `.xlsx` in `apps/api/data/excel/` to a `.csv` in `apps/api/data/` (active sheet only). Paths are computed from `__file__`, not hardcoded, so it works on any machine.
