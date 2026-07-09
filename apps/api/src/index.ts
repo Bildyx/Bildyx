@@ -14,11 +14,121 @@ import {
 } from "./configuration";
 import { router } from "./routes/router";
 import { database } from "./database";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { randomUUID, randomBytes, createHash } from "node:crypto";
+import { hashPassword } from "./services/auth.service";
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(passport.initialize());
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: `${process.env.BASE_URL || "http://localhost:3000"}/api/auth/google/callback`,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value?.toLowerCase();
+          if (!email) {
+            return done(new Error("Google account has no email"));
+          }
+
+          const existingUser = await database
+            .selectFrom("users")
+            .select(["id", "email", "role", "email_verified"])
+            .where("email", "=", email)
+            .where("deleted_at", "is", null)
+            .executeTakeFirst();
+
+          if (existingUser) {
+            if (!existingUser.email_verified) {
+              await database
+                .updateTable("users")
+                .set({
+                  email_verified: true,
+                  verification_code: null,
+                  verification_expires_at: null,
+                  last_verification_sent_at: null,
+                  status: "ACTIVE",
+                  updated_at: new Date(),
+                })
+                .where("id", "=", existingUser.id)
+                .execute();
+
+              const verifiedUser = {
+                ...existingUser,
+                email_verified: true,
+              };
+              return done(null, verifiedUser);
+            }
+
+            return done(null, existingUser);
+          }
+
+          const randomPasswordHash = hashPassword(
+            randomBytes(32).toString("hex"),
+          );
+          const userId = randomUUID();
+
+          await database.transaction().execute(async (trx) => {
+            await trx
+              .insertInto("users")
+              .values({
+                id: userId,
+                email,
+                first_name: profile.name?.givenName || "",
+                last_name: profile.name?.familyName || "",
+                display_name: profile.displayName || "",
+                avatar_url: profile.photos?.[0]?.value || null,
+                role: "CANDIDATE",
+                marketing_opt_in: false,
+                email_verified: true,
+                password_hash: randomPasswordHash,
+                verification_code: null,
+                verification_expires_at: null,
+                last_verification_sent_at: null,
+                status: "ACTIVE",
+                updated_at: new Date(),
+              })
+              .execute();
+
+            await trx
+              .insertInto("user_profiles")
+              .values({
+                id: randomUUID(),
+                user_id: userId,
+                is_public: true,
+                updated_at: new Date(),
+              })
+              .execute();
+          });
+
+          const newUser = {
+            id: userId,
+            email,
+            role: "CANDIDATE",
+            email_verified: true,
+          };
+
+          return done(null, newUser);
+        } catch (err) {
+          return done(err);
+        }
+      },
+    ),
+  );
+} else {
+  console.warn(
+    "Google OAuth credentials missing. Google login strategy not loaded.",
+  );
+}
 
 app.use(async (req, res, next) => {
   const result = await rpcHandler.handle(req, res, {

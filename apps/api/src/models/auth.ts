@@ -86,3 +86,11 @@ export const LogoutInputSchema = z.object({
 export const LogoutOutputSchema = z.object({
   message: z.string(),
 });
+
+export const CancelUnverifiedInputSchema = z.object({
+  email: z.email(),
+});
+
+export const CancelUnverifiedOutputSchema = z.object({
+  message: z.string(),
+});

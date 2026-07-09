@@ -592,22 +592,44 @@ a {
     background: var(--bd);
 }
 
-.social-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+.social-row-single {
+    display: flex;
+    justify-content: center;
 }
 
-.social-btn {
+.google-btn {
+    width: 100%;
+    max-width: 380px;
     height: 56px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
 
     border: 1px solid var(--bd);
     border-radius: var(--r-sm);
     background: #ffffff;
 
-    cursor: pointer;
     font: inherit;
     font-weight: 700;
+    font-size: 1rem;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.google-btn img {
+    width: 22px;
+    height: 22px;
+}
+
+.google-btn:hover {
+    border-color: var(--p);
+    background: var(--p-dim);
+    color: var(--t1); /* ou #000 */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(34, 68, 236, 0.12);
 }
 
 .switch-text {
@@ -729,4 +751,37 @@ a {
 .link-btn:hover::after,
 .captcha-refresh:hover::after {
     width: 100%;
+}
+
+/* ---------- Auth Buttons ---------- */
+
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.auth-buttons a {
+  text-decoration: none;
+  padding: 10px 22px; /* moins haut */
+  border-radius: 12px; /* moins arrondi */
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Etat par défaut */
+.login-btn,
+.signup-btn {
+  background: white;
+  color: #2f49f5;
+  border: 2px solid white;
+}
+
+/* Hover */
+.login-btn:hover,
+.signup-btn:hover {
+  background: #2f49f5;
+  color: white;
+  border-color: #2f49f5;
+  transform: translateY(-1px);
 }

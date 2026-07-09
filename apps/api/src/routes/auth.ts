@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import passport from "passport";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -16,6 +17,8 @@ import {
   ResendVerificationOutputSchema,
   LogoutInputSchema,
   LogoutOutputSchema,
+  CancelUnverifiedInputSchema,
+  CancelUnverifiedOutputSchema,
 } from "../models/auth";
 import { randomUUID, randomBytes, createHash } from "node:crypto";
 import {
@@ -636,5 +639,169 @@ export const auth = {
       return {
         message: "Successfully logged out",
       };
+    }),
+
+  // 8. CANCEL UNVERIFIED
+  cancelUnverified: publicProcedure
+    .route({
+      method: "POST",
+      summary: "Cancel unverified account registration",
+      description: "Deletes an unverified user account",
+      path: "/auth/cancel-unverified",
+      tags: ["Auth"],
+    })
+    .input(CancelUnverifiedInputSchema)
+    .output(CancelUnverifiedOutputSchema)
+    .handler(async ({ input }) => {
+      const emailLower = input.email.trim().toLowerCase();
+
+      const user = await database
+        .selectFrom("users")
+        .selectAll()
+        .where("email", "=", emailLower)
+        .where("deleted_at", "is", null)
+        .executeTakeFirst();
+
+      if (!user) {
+        return {
+          message: "Account deleted or does not exist",
+        };
+      }
+
+      if (user.email_verified) {
+        throw new ORPCError("BAD_REQUEST", {
+          message:
+            "This account is already verified and cannot be deleted here.",
+        });
+      }
+
+      const orgId = user.organization_id;
+
+      // Delete the unverified user
+      await database.deleteFrom("users").where("id", "=", user.id).execute();
+
+      // If it was a company account, also clean up the organization record
+      if (user.role === "ORGANIZATION" && orgId) {
+        await database
+          .deleteFrom("organizations")
+          .where("id", "=", orgId)
+          .execute();
+      }
+
+      return {
+        message: "Account registration successfully cancelled and deleted",
+      };
+    }),
+
+  // 9. GOOGLE OAUTH START
+  google: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Start Google OAuth flow",
+      path: "/auth/google",
+      tags: ["Auth"],
+    })
+    .handler(async ({ context }) => {
+      const ctx = context as any;
+      if (!ctx?.req || !ctx?.res) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Express request/response context missing",
+        });
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        passport.authenticate("google", {
+          scope: ["profile", "email"],
+        })(ctx.req, ctx.res, (err: any) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }),
+
+  // 10. GOOGLE OAUTH CALLBACK
+  googleCallback: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Handle Google OAuth callback",
+      path: "/auth/google/callback",
+      tags: ["Auth"],
+    })
+    .handler(async ({ context }) => {
+      const ctx = context as any;
+      if (!ctx?.req || !ctx?.res) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Express request/response context missing",
+        });
+      }
+
+      const user = await new Promise<any>((resolve, reject) => {
+        passport.authenticate(
+          "google",
+          { session: false },
+          (err: any, user: any) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(user);
+            }
+          },
+        )(ctx.req, ctx.res, (err: any) => {
+          if (err) reject(err);
+        });
+      });
+
+      if (!user) {
+        ctx.res.redirect("http://localhost:5500/login.html?tab=login");
+        return;
+      }
+
+      // Create session
+      const token = randomBytes(32).toString("hex");
+      const tokenHash = createHash("sha256").update(token).digest("hex");
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days session
+
+      await database
+        .insertInto("user_sessions")
+        .values({
+          id: randomUUID(),
+          user_id: user.id,
+          token_hash: tokenHash,
+          expires_at: expiresAt,
+          ip_address: ctx.req.ip || null,
+          user_agent: ctx.req.get("user-agent") || null,
+          created_at: new Date(),
+        })
+        .execute();
+
+      const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
+      const secureFlag = process.env.NODE_ENV === "production";
+      ctx.res.cookie(cookieName, token, {
+        httpOnly: true,
+        secure: secureFlag,
+        sameSite: "lax",
+        expires: expiresAt,
+      });
+
+      ctx.res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Google login completed</title>
+          </head>
+          <body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage(
+                  { type: "GOOGLE_LOGIN_SUCCESS" },
+                  "http://localhost:5500"
+                );
+              }
+              window.close();
+            </script>
+            <p>You can close this window.</p>
+          </body>
+        </html>
+      `);
     }),
 };
