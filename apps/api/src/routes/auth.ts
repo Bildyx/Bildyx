@@ -180,7 +180,13 @@ export const auth = {
         }
       });
 
-      await sendVerificationEmail(emailLower, verificationCode);
+      try {
+        await sendVerificationEmail(emailLower, verificationCode);
+      } catch (err: any) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: `${err?.message || String(err)}`,
+        });
+      }
 
       return {
         message: "Registration successful. Please verify your email.",
@@ -462,7 +468,13 @@ export const auth = {
         .where("id", "=", user.id)
         .execute();
 
-      await sendResetEmail(emailLower, resetToken);
+      try {
+        await sendResetEmail(emailLower, resetToken);
+      } catch (err: any) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: `${err?.message || String(err)}`,
+        });
+      }
 
       return {
         message: "Password reset code sent successfully.",
@@ -597,7 +609,13 @@ export const auth = {
         .where("id", "=", user.id)
         .execute();
 
-      await sendVerificationEmail(user.email, code);
+      try {
+        await sendVerificationEmail(user.email, code);
+      } catch (err: any) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: `${err?.message || String(err)}`,
+        });
+      }
 
       return {
         message: "Verification code resent successfully.",
@@ -735,21 +753,28 @@ export const auth = {
         });
       }
 
-      const user = await new Promise<any>((resolve, reject) => {
-        passport.authenticate(
-          "google",
-          { session: false },
-          (err: any, user: any) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(user);
-            }
-          },
-        )(ctx.req, ctx.res, (err: any) => {
-          if (err) reject(err);
+      let user: any;
+      try {
+        user = await new Promise<any>((resolve, reject) => {
+          passport.authenticate(
+            "google",
+            { session: false },
+            (err: any, user: any) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(user);
+              }
+            },
+          )(ctx.req, ctx.res, (err: any) => {
+            if (err) reject(err);
+          });
         });
-      });
+      } catch (err: any) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: `Google authentication failed: ${err?.message || String(err)}`,
+        });
+      }
 
       if (!user) {
         ctx.res.redirect("http://localhost:5500/login.html?tab=login");

@@ -139,7 +139,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                toast('Error loading verification screen');
+                toast.error('Error loading verification screen');
                 return;
             }
 
@@ -159,7 +159,7 @@
                     errorBox.textContent = message;
                     errorBox.style.display = 'block';
                 }
-                toast(message);
+                toast.error(message);
             }
 
             async function cancelUnverifiedAccountAndGo(targetUrl) {
@@ -210,18 +210,18 @@
                         });
                         const data = await resp.json().catch(() => ({}));
                         if (resp.status === 200) {
-                            toast('Email verified! You can now log in.');
+                            toast.success('Email verified! You can now log in.');
                             setTimeout(() => {
                                 window.location.href = 'login.html';
                             }, 2000);
                         } else if (resp.status === 410 || (data && (data.message || '').includes('expired'))) {
-                            showVerificationError(data.message || data.error || 'Verification expired. Your account has been deleted. Please create a new account.');
+                            showVerificationError(data.message || 'Verification expired. Your account has been deleted. Please create a new account.');
                         } else {
-                            showVerificationError(data.message || data.error || 'Invalid or expired verification code');
+                            showVerificationError(data.message || 'Invalid or expired verification code');
                         }
                     } catch (err) {
                         console.error(err);
-                        toast('Could not connect to server');
+                        toast.error('Could not connect to server');
                     } finally {
                         if (stopLoading) stopLoading();
                     }
@@ -233,7 +233,7 @@
             if (resendBtn) {
                 resendBtn.addEventListener('click', async () => {
                     if (!email) {
-                        toast('Email missing');
+                        toast.warning('Email missing');
                         return;
                     }
                     let stopLoading;
@@ -246,17 +246,17 @@
                         });
                         const data = await resp.json().catch(() => ({}));
                         if (resp.status === 200) {
-                            toast('A new verification code has been sent. Check your email.');
+                            toast.success('A new verification code has been sent. Check your email.');
                         } else if (resp.status === 410 || (data && (data.message || '').includes('expired'))) {
-                            showVerificationError(data.message || data.error || 'Verification expired. Your account has been deleted. Please create a new account.');
+                            showVerificationError(data.message || 'Verification expired. Your account has been deleted. Please create a new account.');
                         } else if (resp.status === 429 || (data && (data.message || '').includes('wait'))) {
-                            showVerificationError(data.message || data.error || 'Please wait before requesting another code');
+                            showVerificationError(data.message || 'Please wait before requesting another code');
                         } else {
-                            showVerificationError(data.message || data.error || 'Unable to resend code');
+                            showVerificationError(data.message || 'Unable to resend code');
                         }
                     } catch (err) {
                         console.error(err);
-                        toast('Could not connect to server');
+                        toast.error('Could not connect to server');
                     } finally {
                         if (stopLoading) stopLoading();
                     }

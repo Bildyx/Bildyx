@@ -29,16 +29,66 @@ const state = {
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
-// Display a toast notification with a given message. The toast
-// element should exist in the DOM with the id 'toast'. It becomes
-// visible for 2.6 seconds and then hides itself.
-function toast(message) {
-  const el = $('#toast');
-  if (!el) return;
-  el.textContent = message;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2600);
+// Dynamically load Toastify-js CSS and JS
+(function () {
+  if (!document.querySelector('link[href*="toastify-js"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css';
+    document.head.appendChild(link);
+  }
+
+  if (typeof Toastify === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/toastify-js';
+    script.async = false;
+    document.head.appendChild(script);
+  }
+})();
+
+// Display a toast notification with a given message and type.
+// Supports: 'success', 'error', 'warning', 'info'
+function toast(message, type = 'info') {
+  if (typeof Toastify === 'undefined') {
+    setTimeout(() => toast(message, type), 100);
+    return;
+  }
+
+  let backgroundColor = '#2244ec'; // Default info (Bildyx primary)
+  if (type === 'success') {
+    backgroundColor = '#10b981'; // Emerald green
+  } else if (type === 'error') {
+    backgroundColor = '#ef4444'; // Rose red
+  } else if (type === 'warning') {
+    backgroundColor = '#f59e0b'; // Amber yellow
+  }
+
+  Toastify({
+    text: message,
+    duration: 3500,
+    close: true,
+    gravity: 'top',
+    position: 'right',
+    stopOnFocus: true,
+    style: {
+      background: backgroundColor,
+      color: '#ffffff',
+      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontSize: '14px',
+      fontWeight: '600',
+      borderRadius: '12px',
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      padding: '12px 20px',
+    }
+  }).showToast();
 }
+
+// Add typed shortcut helper methods
+toast.success = (message) => toast(message, 'success');
+toast.error = (message) => toast(message, 'error');
+toast.warning = (message) => toast(message, 'warning');
+toast.info = (message) => toast(message, 'info');
 
 // Sanitise a value to prevent XSS by escaping special HTML
 // characters. Always apply sanitisation before outputting user data.
@@ -316,7 +366,7 @@ if (password) {
 // server at a different root (e.g. behind a proxy), update this
 // constant accordingly.  A relative path works for the default
 // http-server setup used in this project.
-const API_BASE = "http://localhost:8500/api/auth";
+const API_BASE = "http://localhost:3000/api/auth";
 console.log("AUTH FILE LOADED", API_BASE);
 
 // Sign up form submission: validate fields, captcha and terms.  On
@@ -348,14 +398,14 @@ if (signupForm) {
 
     // Captcha must be correct
     if (!checkCaptcha('signup')) {
-      toast('Please enter the captcha.');
+      toast.warning('Please enter the captcha.');
       ok = false;
     }
 
     // Terms checkbox must be checked
     const terms = $('#terms');
     if (terms && !terms.checked) {
-      toast('Please accept the Terms and Privacy Policy.');
+      toast.warning('Please accept the Terms and Privacy Policy.');
       ok = false;
     }
 
@@ -410,14 +460,14 @@ if (signupForm) {
           }
         });
 
-        toast('Veuillez corriger les erreurs dans le formulaire.');
+        toast.error('Veuillez corriger les erreurs dans le formulaire.');
       } else {
-        toast(data.message || 'Sign up failed (error code: ' + resp.status+ ")");
+        toast.error(data.message || 'Sign up failed (error code: ' + resp.status+ ")");
       }
 
     } catch (err) {
       console.error("erreur", err);
-      toast(err);
+      toast.error(err);
     } finally {
       if (stopLoading) stopLoading();
     }
@@ -453,7 +503,7 @@ if (loginForm) {
     if (!ok) return;
     // Apply client-side rate limiting: block after too many attempts in a short period
     if (tooManyAttempts(email)) {
-      toast('Too many login attempts. Try again later.');
+      toast.warning('Too many login attempts. Try again later.');
       return;
     }
     let stopLoading;
@@ -472,11 +522,11 @@ if (loginForm) {
       } else {
         // Record attempt on failure
         addAttempt(email);
-        toast(data.error || 'Invalid credentials');
+        toast.error(data.message || 'Invalid credentials');
       }
     } catch (err) {
       console.error(err);
-      toast('Could not connect to server');
+      toast.error('Could not connect to server');
     } finally {
       if (stopLoading) stopLoading();
     }
@@ -498,7 +548,7 @@ if (clearDebug) {
     localStorage.removeItem('bildyx_last_debug');
     const out = $('#debugOutput');
     if (out) out.textContent = 'Waiting for form submission...';
-    toast('Debug cleared');
+    toast.success('Debug cleared');
   });
 }
 
@@ -511,7 +561,7 @@ if (fakeSuccess) {
       createdAt: new Date().toISOString(),
       message: 'This simulates a successful server response.'
     });
-    toast('Debug: fake success emitted.');
+    toast.success('Debug: fake success emitted.');
   });
 }
 
@@ -529,7 +579,7 @@ if (forgotPasswordLink) {
       status: 'debug_only'
     });
     // A toast is sufficient feedback for the user
-    toast('Password reset page can be connected later.');
+    toast.info('Password reset page can be connected later.');
   });
 }
 
