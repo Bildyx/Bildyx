@@ -132,18 +132,18 @@ model City {
 }
 
 model Organization {
-  id                                   String                @id @default(uuid()) @db.Uuid
+  id                                   String               @id @default(uuid()) @db.Uuid
   name                                 String
-  slug                                 String                @unique
+  slug                                 String               @unique
   subtype                              OrganizationSubType?
   type                                 String?
-  legalStatus                          String?               @map("legal_status")
+  legalStatus                          String?              @map("legal_status")
   ownership                            String?
   mission                              String?
-  knownFor                             String[]              @map("known_for")
+  knownFor                             String[]             @map("known_for")
   activities                           String[]
   project                              String?
-  researchAreas                        String[]              @map("research_areas")
+  researchAreas                        String[]             @map("research_areas")
   products                             String[]
   services                             String[]
   partnerships                         String[]
@@ -152,26 +152,26 @@ model Organization {
   founder                              String?
   equipments                           String?
   score                                Int?
-  city_id                              String?               @db.Uuid
+  city_id                              String?              @db.Uuid
   numberOfEmployees                    EmployeeCountRange?
+  personnel                            Int?
   numberOfSubsidiaries                 Int?
-  parentOrganizationId                 String?               @map("parent_organization_id") @db.Uuid
+  parentOrganizationId                 String?              @map("parent_organization_id") @db.Uuid
   metadata                             Json?
-  deletedAt                            DateTime?             @map("deleted_at")
-  createdAt                            DateTime              @default(now()) @map("created_at")
-  updatedAt                            DateTime              @updatedAt @map("updated_at")
-  issuedCertifications                 Certification[]       @relation("CertificationIssuer")
+  deletedAt                            DateTime?            @map("deleted_at")
+  createdAt                            DateTime             @default(now()) @map("created_at")
+  updatedAt                            DateTime             @updatedAt @map("updated_at")
+  issuedCertifications                 Certification[]      @relation("CertificationIssuer")
   jobAds                               JobAd[]
-  military_capabilities                MilitaryCapabilities?
-  cities_organizations_city_idTocities City?                 @relation("organizations_city_idTocities", fields: [city_id], references: [id])
-  parentOrganization                   Organization?         @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
-  childAgencies                        Organization[]        @relation("OrganizationHierarchy")
+  cities_organizations_city_idTocities City?                @relation("organizations_city_idTocities", fields: [city_id], references: [id])
+  parentOrganization                   Organization?        @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
+  childAgencies                        Organization[]       @relation("OrganizationHierarchy")
   subjects                             Subject[]
-  userProfiles                         UserProfile[]         @relation("UserCurrentOrganization")
+  userProfiles                         UserProfile[]        @relation("UserCurrentOrganization")
   users                                User?
-  largestOrganizationCountries         Country[]             @relation("CountryLargestOrganizations")
-  industries                           Industry[]            @relation("OrganizationIndustries")
-  cities_working_area                  City[]                @relation("working_area")
+  largestOrganizationCountries         Country[]            @relation("CountryLargestOrganizations")
+  industries                           Industry[]           @relation("OrganizationIndustries")
+  cities_working_area                  City[]               @relation("working_area")
 
   @@index([parentOrganizationId])
   @@index([subtype])
@@ -306,39 +306,6 @@ model Degree {
 
   @@index([level])
   @@map("degrees")
-}
-
-model MilitaryCapabilities {
-  id                                   String       @id @default(uuid()) @db.Uuid
-  organization_id                      String       @unique @db.Uuid
-  number_of_active_navy_personnel      Int?
-  number_of_destroyers                 Int?
-  number_of_submarines_diesel          Int?
-  number_of_submarines_nuclear         Int?
-  number_of_naval_shipyards            Int?
-  number_of_maritime_patrol_aircraft   Int?
-  number_of_stealth_fleet              Int?
-  number_of_surveillance_radars        Int?
-  number_of_aircrafts                  Int?
-  number_of_fighter_jets               Int?
-  number_of_helicopters                Int?
-  number_of_drones                     Int?
-  number_of_tanker_planes              Int?
-  number_of_transport_planes           Int?
-  number_of_communication_satellites   Int?
-  number_of_missile_warning_satellites Int?
-  number_of_navigation_satellites      Int?
-  number_of_spy_satellites             Int?
-  number_of_satellite_jamming_systems  Int?
-  number_of_surveillance_telescopes    Int?
-  number_of_operational_spaceplanes    Int?
-  number_of_space_launch_sites         Int?
-  number_of_space_operations_squadrons Int?
-  number_of_space_personnel            Int?
-  updated_at                           DateTime
-  organizations                        Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-
-  @@map("military_capabilities")
 }
 
 model Subject {
