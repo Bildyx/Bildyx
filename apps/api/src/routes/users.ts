@@ -164,22 +164,23 @@ export const users = {
       return user;
     }),
 
-  // 5. Supprimer un utilisateur (soft delete)
+  // 5. Supprimer un utilisateur
   delete: publicProcedure
     .route({
       method: "DELETE",
       summary: "Delete a user",
-      description: "Soft delete an existing user by its ID",
+      description: "Delete an existing user by its ID",
       path: "/users/{userId}",
       tags: ["User"],
     })
     .input(DeleteUserSchema)
     .output(z.void())
     .handler(async ({ input }) => {
+      const { userId } = input;
+
       const existing = await database
         .selectFrom("users")
-        .where("id", "=", input.userId)
-        .where("deleted_at", "is", null)
+        .where("id", "=", userId)
         .select("id")
         .executeTakeFirst();
 
@@ -187,11 +188,7 @@ export const users = {
         throw new ORPCError("NOT_FOUND", { message: "User not found" });
       }
 
-      await database
-        .updateTable("users")
-        .set({ deleted_at: new Date() })
-        .where("id", "=", input.userId)
-        .execute();
+      await database.deleteFrom("users").where("id", "=", userId).execute();
     }),
 
   // 6. Supprimer plusieurs utilisateurs (Bulk)

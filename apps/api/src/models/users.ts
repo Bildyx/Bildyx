@@ -3,7 +3,7 @@ import { UserRoleEnum, UserStatusEnum } from "./utils/enums";
 
 export const UserSchema = z.object({
   id: z.string().uuid(),
-  email: z.string().email(),
+  email: z.email(),
   email_verified: z.boolean(),
   password_hash: z.string(),
   first_name: z.string().nullable().optional(),
@@ -43,7 +43,7 @@ export const GetUserSchema = z.object({
 
 // POST
 export const PostUserSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password_hash: z.string().min(1),
   first_name: z.string().nullable().optional(),
   last_name: z.string().nullable().optional(),

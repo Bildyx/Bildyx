@@ -1,8 +1,15 @@
+/* =========================================================
+   Bildyx - Global Stylesheet (Merged & Unified)
+   ========================================================= */
+
+/* ---------- Design Tokens & Variables ---------- */
 :root {
     --primary: #2244ec;
     --primary-dark: #1a35bb;
     --primary-light: #4d6ff0;
     --primary-soft: rgba(255, 255, 255, 0.18);
+    --secondary-color: #f8f9fc;
+    --light-gray: #f2f4fa;
     --white: #ffffff;
     --surface: #f3f4f9;
     --surface-2: #ebedf4;
@@ -18,6 +25,7 @@
     --shadow-card: 0 16px 34px rgba(15, 23, 41, 0.08);
 }
 
+/* ---------- Base Reset ---------- */
 *,
 *::before,
 *::after {
@@ -33,7 +41,7 @@ body {
     min-width: 320px;
     background: var(--white);
     color: var(--text);
-    font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "Plus Jakarta Sans", Arial, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 14px;
     line-height: 1.55;
 }
@@ -60,17 +68,19 @@ a {
     -webkit-tap-highlight-color: transparent;
 }
 
-.site-header {
+/* ---------- Header ---------- */
+.site-header, header {
     min-height: 54px;
     background: var(--primary);
     color: var(--white);
+    padding: 12px 20px;
 }
 
 .header-content {
     width: 100%;
-    max-width: none;
+    max-width: 1200px;
     min-height: 54px;
-    margin: 0;
+    margin: 0 auto;
     padding: 0 22px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -90,6 +100,12 @@ a {
     justify-self: start;
 }
 
+.logo img {
+    width: auto;
+    height: 34px;
+    object-fit: contain;
+}
+
 .main-nav {
     justify-self: center;
     display: flex;
@@ -106,12 +122,6 @@ a {
 
 .main-nav a:hover {
     opacity: 0.72;
-}
-
-.logo img {
-    width: auto;
-    height: 34px;
-    object-fit: contain;
 }
 
 .nav-buttons {
@@ -138,6 +148,7 @@ a {
 
 .nav-buttons .login:hover {
     opacity: 0.8;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-buttons .signup {
@@ -149,10 +160,105 @@ a {
     text-align: center;
 }
 
+.nav-buttons .signup:hover {
+    background-color: var(--primary-light);
+    color: var(--white);
+}
+
+/* ---------- Buttons & Badges ---------- */
+.primary-button,
+.secondary-button,
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 36px;
+    padding: 10px 20px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 800;
+    transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    cursor: pointer;
+}
+
+.primary-button, .btn-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.btn-primary:hover, .primary-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 41, 0.14);
+}
+
+.secondary-button {
+    background: var(--white);
+    color: var(--primary);
+}
+
+.secondary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 41, 0.14);
+}
+
+.button-icon {
+    font-size: 13px;
+}
+
+.eyebrow, .badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
+    background: rgba(34, 68, 236, 0.09);
+    color: var(--primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.eyebrow--light {
+    background: rgba(255, 255, 255, 0.17);
+    color: var(--white);
+}
+
+/* ---------- Homepage & Hero ---------- */
 .home-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: stretch;
+}
+
+.hero {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.hero-column {
+    flex: 1;
+    min-width: 280px;
+    max-width: 480px;
+}
+
+.hero h2 {
+    margin: 0 0 12px;
+    color: var(--primary);
+    font-size: 2rem;
+}
+
+.hero p {
+    margin: 0 0 24px;
+    line-height: 1.5;
 }
 
 .home-panel {
@@ -206,60 +312,8 @@ a {
     color: rgba(255, 255, 255, 0.78);
 }
 
-.eyebrow {
-    display: inline-flex;
-    align-items: center;
-    min-height: 25px;
-    padding: 4px 14px;
-    border-radius: var(--radius-pill);
-    background: rgba(34, 68, 236, 0.09);
-    color: var(--primary);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-}
-
-.eyebrow--light {
-    background: rgba(255, 255, 255, 0.17);
-    color: var(--white);
-}
-
-.primary-button,
-.secondary-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    min-height: 36px;
-    padding: 9px 20px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 800;
-    transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
-}
-
-.primary-button {
-    background: var(--primary);
-    color: var(--white);
-}
-
-.secondary-button {
-    background: var(--white);
-    color: var(--primary);
-}
-
-.primary-button:hover,
-.secondary-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(15, 23, 41, 0.14);
-}
-
-.button-icon {
-    font-size: 13px;
-}
-
-.team-showcase {
+/* ---------- Teams Showcase Section ---------- */
+.teams-section, .team-showcase {
     display: grid;
     grid-template-columns: minmax(0, 1.62fr) minmax(275px, 0.94fr);
     margin-top: 34px;
@@ -270,9 +324,21 @@ a {
     box-shadow: var(--shadow-card);
 }
 
-.team-overview {
+.teams-section {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.team-overview, .teams-left {
     min-width: 0;
     padding: 28px 28px 26px;
+}
+
+.teams-left h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.5rem;
 }
 
 .team-overview > h2,
@@ -288,9 +354,10 @@ a {
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 16px;
+    margin-bottom: 20px;
 }
 
-.team-tab {
+.team-tab, .team-tabs button {
     appearance: none;
     border: 0;
     border-radius: var(--radius-pill);
@@ -305,11 +372,13 @@ a {
     transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
-.team-tab:hover {
+.team-tab:hover, .team-tabs button:hover {
     transform: translateY(-1px);
+    background-color: var(--primary);
+    color: var(--white);
 }
 
-.team-tab.active {
+.team-tab.active, .team-tabs button.active {
     background: var(--primary);
     color: var(--white);
 }
@@ -321,7 +390,7 @@ a {
     margin-top: 20px;
 }
 
-.member-card {
+.member-card, .member {
     min-width: 0;
     min-height: 86px;
     padding: 11px 7px 9px;
@@ -334,15 +403,16 @@ a {
     text-align: center;
 }
 
-.member-avatar {
+.member-avatar, .member .photo {
     width: 39px;
     height: 39px;
     margin-bottom: 5px;
     border-radius: 50%;
     object-fit: cover;
+    background-color: var(--light-gray);
 }
 
-.member-card strong {
+.member-card strong, .member span {
     display: block;
     max-width: 100%;
     overflow: hidden;
@@ -354,7 +424,7 @@ a {
     white-space: nowrap;
 }
 
-.member-card span {
+.member-card span, .member small {
     display: block;
     margin-top: 3px;
     color: var(--text-2);
@@ -362,7 +432,7 @@ a {
     line-height: 1.3;
 }
 
-.team-subsection {
+.team-subsection, .offices, .products {
     margin-top: 25px;
 }
 
@@ -383,13 +453,14 @@ a {
     text-align: center;
 }
 
-.city-photo {
+.city-photo, .city .photo {
     width: 51px;
     height: 51px;
     margin: 0 auto 5px;
     overflow: hidden;
     border: 2px solid transparent;
     border-radius: 50%;
+    background-color: var(--light-gray);
     transition: border-color 150ms ease;
 }
 
@@ -422,7 +493,7 @@ a {
     gap: 9px;
 }
 
-.product-chip {
+.product-chip, .product-item {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -434,11 +505,15 @@ a {
     font-size: 9px;
     font-weight: 500;
     white-space: nowrap;
+    border: 1px solid var(--border);
 }
 
-.product-chip > span {
+.product-chip > span, .product-item .icon {
     color: var(--primary);
     font-size: 12px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
 }
 
 .product-chip.active {
@@ -450,11 +525,17 @@ a {
     color: var(--white);
 }
 
-.team-profile {
+/* ---------- Team Profile Right Side ---------- */
+.team-profile, .teams-right {
     min-width: 0;
     padding: 29px 28px 27px;
     background: var(--primary);
     color: var(--white);
+}
+
+.teams-right h4 {
+    margin-top: 0;
+    font-size: 1.2rem;
 }
 
 .team-badge {
@@ -467,19 +548,21 @@ a {
     font-weight: 800;
 }
 
-.profile-points {
+.profile-points, .teams-right ul {
     margin-top: 16px;
+    padding: 0;
+    list-style: none;
 }
 
-.profile-point {
+.profile-point, .teams-right li {
     margin-bottom: 18px;
 }
 
-.profile-point:last-child {
+.profile-point:last-child, .teams-right li:last-child {
     margin-bottom: 0;
 }
 
-.profile-point h3 {
+.profile-point h3, .teams-right li h5 {
     display: flex;
     align-items: center;
     gap: 7px;
@@ -490,7 +573,7 @@ a {
     font-weight: 800;
 }
 
-.profile-point p {
+.profile-point p, .teams-right li p {
     margin: 0;
     color: rgba(255, 255, 255, 0.82);
     font-size: 9px;
@@ -498,17 +581,17 @@ a {
 }
 
 .profile-point--danger h3 {
-    color: #ff2a2a;
+    color: var(--danger);
 }
 
-.team-actions {
+.team-actions, .teams-right .cta {
     display: flex;
     flex-wrap: wrap;
     gap: 9px;
     margin-top: 24px;
 }
 
-.profile-button {
+.profile-button, .teams-right .cta a {
     appearance: none;
     display: inline-flex;
     align-items: center;
@@ -526,8 +609,10 @@ a {
     transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
-.profile-button:hover {
+.profile-button:hover, .teams-right .cta a:hover {
     transform: translateY(-1px);
+    background-color: var(--white);
+    color: var(--primary);
 }
 
 .profile-button.active {
@@ -540,6 +625,7 @@ a {
     outline-offset: 3px;
 }
 
+/* ---------- Resume Card ---------- */
 .resume-card {
     width: 100%;
     margin-top: 35px;
@@ -675,11 +761,58 @@ a {
     gap: 7px;
 }
 
-.site-footer {
+/* ---------- Generic Page Layout ---------- */
+.generic-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.generic-page .generic-main {
+    flex: 1;
+    min-height: 0;
+}
+
+.generic-main, .content {
+    min-height: calc(100vh - 54px);
+    display: grid;
+    place-items: center;
+    padding: 64px 22px;
+    background: var(--surface);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.generic-card {
+    width: min(100%, 680px);
+    padding: 48px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: var(--white);
+    text-align: center;
+    box-shadow: var(--shadow-card);
+}
+
+.generic-card h1 {
+    margin: 0 0 14px;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.1;
+}
+
+.generic-card p {
+    margin: 0 auto 26px;
+    max-width: 520px;
+    color: var(--text-2);
+    line-height: 1.75;
+}
+
+/* ---------- Footer ---------- */
+.site-footer, footer {
     background: var(--primary);
     color: var(--white);
     padding: 42px 20px 18px;
     border-top: 8px solid var(--white);
+    margin-top: 60px;
 }
 
 .footer-content,
@@ -714,21 +847,33 @@ a {
     gap: 7px;
 }
 
-.footer-column h2 {
+.footer-column h2, .footer-column h4 {
     margin: 0 0 2px;
     font-size: 10px;
     font-weight: 800;
 }
 
-.footer-column a {
+.footer-column ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.footer-column li {
+    margin-bottom: 6px;
+}
+
+.footer-column a, .footer-links a {
     color: rgba(255, 255, 255, 0.76);
     font-size: 10px;
-    transition: color 150ms ease;
+    transition: color 150ms ease, opacity 150ms ease;
 }
 
 .footer-column a:hover,
-.footer-legal a:hover {
+.footer-legal a:hover,
+.footer-links a:hover {
     color: var(--white);
+    opacity: 1;
 }
 
 .footer-bottom {
@@ -747,26 +892,32 @@ a {
     margin: 0;
 }
 
-.footer-legal {
+.footer-legal, .footer-links {
     display: flex;
     gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .footer-legal a {
     color: rgba(255, 255, 255, 0.62);
 }
 
+/* ---------- Responsive Media Queries ---------- */
 @media (max-width: 1500px) {
     .home-panel {
         padding-inline: 42px;
     }
 
-    .team-showcase {
+    .team-showcase, .teams-section {
         grid-template-columns: minmax(0, 1.55fr) minmax(255px, 0.95fr);
     }
 
     .team-overview,
-    .team-profile {
+    .team-profile,
+    .teams-left,
+    .teams-right {
         padding-inline: 22px;
     }
 }
@@ -791,7 +942,12 @@ a {
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+
     .header-content {
         grid-template-columns: minmax(0, 1fr) auto;
         padding-inline: 16px;
@@ -803,6 +959,7 @@ a {
 
     .nav-buttons {
         grid-column: 2;
+        gap: 12px;
     }
 
     .main-nav {
@@ -811,10 +968,6 @@ a {
 
     .logo img {
         height: 31px;
-    }
-
-    .nav-buttons {
-        gap: 12px;
     }
 
     .nav-buttons .signup {
@@ -830,13 +983,19 @@ a {
         font-size: 30px;
     }
 
-    .team-showcase {
+    .team-showcase, .teams-section {
         grid-template-columns: 1fr;
     }
 
     .team-overview,
-    .team-profile {
+    .team-profile,
+    .teams-left,
+    .teams-right {
         padding: 24px 20px;
+    }
+
+    .teams-right {
+        margin-top: 20px;
     }
 
     .team-tabs {
@@ -877,7 +1036,7 @@ a {
         gap: 8px;
     }
 
-    .product-chip {
+    .product-chip, .product-item {
         max-width: 100%;
         white-space: normal;
     }
@@ -908,11 +1067,18 @@ a {
     .footer-content {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 32px 24px;
+        flex-direction: column;
     }
 
     .footer-bottom {
         align-items: flex-start;
         flex-direction: column;
+    }
+}
+
+@media (max-width: 520px) {
+    .generic-card {
+        padding: 34px 22px;
     }
 }
 
@@ -945,15 +1111,12 @@ a {
     }
 
     .primary-button,
-    .secondary-button {
+    .secondary-button,
+    .btn-primary {
         width: 100%;
     }
 
-    .team-members {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .team-actions {
+    .team-actions, .teams-right .cta {
         flex-direction: column;
     }
 
@@ -982,93 +1145,4 @@ a {
     .footer-legal {
         flex-wrap: wrap;
     }
-}
-
-
-/* Generic placeholder page */
-.generic-main {
-    min-height: calc(100vh - 54px);
-    display: grid;
-    place-items: center;
-    padding: 64px 22px;
-    background: var(--surface);
-}
-
-.generic-card {
-    width: min(100%, 720px);
-    padding: 48px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--white);
-    text-align: center;
-    box-shadow: var(--shadow-card);
-}
-
-.generic-card h1 {
-    margin: 0 0 14px;
-    font-size: clamp(30px, 5vw, 46px);
-    line-height: 1.1;
-}
-
-.generic-card p {
-    margin: 0 auto 26px;
-    max-width: 560px;
-    color: var(--text-2);
-}
-
-@media (max-width: 560px) {
-    .generic-card {
-        padding: 34px 22px;
-    }
-}
-
-
-/* Generic placeholder page */
-.generic-main {
-    min-height: calc(100vh - 54px);
-    display: grid;
-    place-items: center;
-    padding: 72px 22px;
-    background: var(--surface);
-}
-
-.generic-card {
-    width: min(680px, 100%);
-    padding: 48px;
-    text-align: center;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    box-shadow: var(--shadow-card);
-}
-
-.generic-card h1 {
-    margin-bottom: 14px;
-    font-size: clamp(28px, 4vw, 42px);
-}
-
-.generic-card p {
-    margin: 0 auto 26px;
-    max-width: 520px;
-    color: var(--text-2);
-    line-height: 1.75;
-}
-
-@media (max-width: 520px) {
-    .generic-card {
-        padding: 34px 22px;
-    }
-}
-
-
-/* Keep the shared footer at the bottom of short generic pages. */
-.generic-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.generic-page .generic-main {
-    flex: 1;
-    min-height: 0;
 }
