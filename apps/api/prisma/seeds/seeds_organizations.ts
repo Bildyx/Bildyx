@@ -1,17 +1,17 @@
 import {
-  PrismaClient,
-  Prisma,
-  OrganizationSubType,
   EmployeeCountRange,
+  OrganizationSubType,
+  Prisma,
+  PrismaClient,
 } from "@prisma/client";
 import {
+  normalizeEnumKey,
+  parseEnum,
   readCsv,
-  toJson,
   toDate,
   toInt,
+  toJson,
   toStringArray,
-  parseEnum,
-  normalizeEnumKey,
 } from "../seed-utils";
 
 // EmployeeCountRange values are like RANGE_1_10, RANGE_5000_PLUS.
@@ -43,6 +43,7 @@ type OrganizationCsv = {
   id: string;
   name: string;
   slug: string;
+  subtype?: string;
   type?: string;
   legal_status?: string;
   ownership?: string;
@@ -77,7 +78,8 @@ export async function seedOrganizations(prisma: PrismaClient) {
     name: r.name,
     slug: r.slug,
 
-    type: parseEnum(r.type, OrganizationSubType),
+    subtype: parseEnum(r.type, OrganizationSubType),
+    type: r.type, OrganizationSubType,
 
     legalStatus: r.legal_status || null,
     ownership: r.ownership || null,

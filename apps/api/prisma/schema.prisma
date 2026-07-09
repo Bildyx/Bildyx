@@ -135,7 +135,8 @@ model Organization {
   id                                   String                @id @default(uuid()) @db.Uuid
   name                                 String
   slug                                 String                @unique
-  type                                 OrganizationSubType?
+  subtype                              OrganizationSubType?
+  type                                 String?
   legalStatus                          String?               @map("legal_status")
   ownership                            String?
   mission                              String?
@@ -173,7 +174,7 @@ model Organization {
   cities_working_area                  City[]                @relation("working_area")
 
   @@index([parentOrganizationId])
-  @@index([type])
+  @@index([subtype])
   @@map("organizations")
 }
 
