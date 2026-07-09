@@ -16,7 +16,7 @@
 
             <div class="footer-column">
                 <h2>Our story</h2>
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=why-we-built-it">Why we built it</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>why-built-it.php">Why we built it</a>
             </div>
 
             <div class="footer-column">
