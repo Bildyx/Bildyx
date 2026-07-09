@@ -37,6 +37,8 @@ export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTER
 
 export type Costofliving = "HIGH" | "LOW" | "MEDIUM";
 
+export type Currency = "AED" | "AFN" | "ALL" | "AMD" | "ANG" | "AOA" | "ARS" | "AUD" | "AWG" | "AZN" | "BAM" | "BBD" | "BDT" | "BGN" | "BHD" | "BIF" | "BMD" | "BND" | "BOB" | "BRL" | "BSD" | "BTN" | "BWP" | "BYN" | "BZD" | "CAD" | "CDF" | "CHF" | "CLP" | "CNY" | "COP" | "CRC" | "CUP" | "CVE" | "CZK" | "DJF" | "DKK" | "DOP" | "DZD" | "EGP" | "ERN" | "ETB" | "EUR" | "FJD" | "FKP" | "GBP" | "GEL" | "GHS" | "GIP" | "GMD" | "GNF" | "GTQ" | "GYD" | "HKD" | "HNL" | "HTG" | "HUF" | "IDR" | "ILS" | "INR" | "IQD" | "IRR" | "ISK" | "JMD" | "JOD" | "JPY" | "KES" | "KGS" | "KHR" | "KMF" | "KPW" | "KRW" | "KWD" | "KYD" | "KZT" | "LAK" | "LBP" | "LKR" | "LRD" | "LSL" | "LYD" | "MAD" | "MDL" | "MGA" | "MKD" | "MMK" | "MNT" | "MOP" | "MRU" | "MUR" | "MVR" | "MWK" | "MXN" | "MYR" | "MZN" | "NAD" | "NGN" | "NIO" | "NOK" | "NPR" | "NZD" | "OMR" | "PAB" | "PEN" | "PGK" | "PHP" | "PKR" | "PLN" | "PYG" | "QAR" | "RON" | "RSD" | "RUB" | "RWF" | "SAR" | "SBD" | "SCR" | "SDG" | "SEK" | "SGD" | "SHP" | "SLE" | "SOS" | "SRD" | "SSP" | "STN" | "SYP" | "SZL" | "THB" | "TJS" | "TMT" | "TND" | "TOP" | "TRY" | "TTD" | "TWD" | "TZS" | "UAH" | "UGX" | "USD" | "UYU" | "UZS" | "VES" | "VND" | "VUV" | "WST" | "XAF" | "XCD" | "XOF" | "XPF" | "YER" | "ZAR" | "ZMW" | "ZWL";
+
 export type Degreelevel = "ASSOCIATE" | "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "PHD";
 
 export type Difficultylevel = "ADVANCED" | "BEGINNER" | "EXPERT" | "INTERMEDIATE";
@@ -83,8 +85,6 @@ export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
 export type Senioritylevel = "C_LEVEL" | "DIRECTOR" | "ELECTED" | "INTERN" | "JUNIOR" | "LEAD" | "MID" | "OTHER" | "SENIOR";
 
-export type Skillcategory = "FRAMEWORK" | "LANGUAGE" | "METHODOLOGY" | "OTHER" | "SOFT" | "TECHNICAL" | "TOOL";
-
 export type Skillimportance = "NICE_TO_HAVE" | "PREFERRED" | "REQUIRED";
 
 export type StorageBuckettype = "ANALYTICS" | "STANDARD" | "VECTOR";
@@ -95,7 +95,7 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
 
-export type Userrole = "ADMIN" | "CANDIDATE" | "MODERATOR" | "ORGANIZATION" | "SUPER_ADMIN" | "USER";
+export type Userrole = "ADMIN" | "CANDIDATE" | "ORGANIZATION";
 
 export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
 
@@ -505,12 +505,13 @@ export interface Cities {
   cost_of_living: Costofliving | null;
   country_id: string;
   created_at: Generated<Timestamp>;
+  currency: Currency;
   degree_holders: string | null;
   deleted_at: Timestamp | null;
   id: string;
   interesting_fact: string | null;
   is_capital: Generated<boolean>;
-  language: Language | null;
+  language: ArrayType<Language> | null;
   largest_organization: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -519,11 +520,11 @@ export interface Cities {
   metadata: Json | null;
   name: string;
   number_of_airports: number | null;
-  number_of_multinational_hqs: number | null;
-  number_of_nationalities: number | null;
+  number_of_multinational_hqs: string | null;
+  number_of_nationalities: string | null;
   number_of_universities: number | null;
   people_description: string | null;
-  population: number | null;
+  population: string | null;
   serial_number: string;
   state_province: string | null;
   temperatures: string | null;
@@ -542,39 +543,38 @@ export interface Countries {
   created_at: Generated<Timestamp>;
   crime_rate: string | null;
   cultural_values: string | null;
-  currency: string | null;
+  currency: Currency | null;
   degree_holders: string | null;
   deleted_at: Timestamp | null;
-  ethnic_groups: string[] | null;
+  ethnic_groups: string | null;
   flag_url: string | null;
   gdp_per_capita_usd: number | null;
   gdp_usd: number | null;
-  global_competitiveness_index: number | null;
+  global_competitiveness_index: string | null;
   government_type: Governmenttype | null;
   hdi: number | null;
-  id: string;
   income_inequality: string | null;
   interesting_fact: string | null;
-  iso_code: string | null;
+  iso_code: string;
   level_of_globalisation: string | null;
   main_industries: string | null;
   median_home_price: number | null;
   median_salary: number | null;
   metadata: Json | null;
   name: string;
-  number_of_airports: number | null;
+  number_of_airports: string | null;
   number_of_foreign_organizations: number | null;
   number_of_international_students: number | null;
-  number_of_multinational_hqs: number | null;
-  number_of_tourists: number | null;
+  number_of_multinational_hqs: string | null;
+  number_of_tourists: string | null;
   number_of_universities: number | null;
   officialLanguages: ArrayType<Language> | null;
   people_description: string | null;
   personal_income_tax: string | null;
-  population: Int8 | null;
+  population: string | null;
   quality_of_education: string | null;
   quality_of_life: Qualityoflife | null;
-  religion: string[] | null;
+  religion: string | null;
   serial_number: string;
   temperatures: string | null;
   top_universities: string | null;
@@ -809,8 +809,7 @@ export interface RealtimeSubscription {
 }
 
 export interface Skills {
-  categories: string[] | null;
-  category: Skillcategory | null;
+  category: string | null;
   common_fields_of_study: string[] | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
@@ -960,6 +959,7 @@ export interface Subjects {
   tags: string[] | null;
   type: string | null;
   updated_at: Timestamp;
+  vendors: string[] | null;
   website_url: string | null;
 }
 

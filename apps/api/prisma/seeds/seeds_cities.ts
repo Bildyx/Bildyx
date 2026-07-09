@@ -1,12 +1,20 @@
-import { PrismaClient, Prisma, CostOfLiving, Language } from "@prisma/client";
+import {
+  PrismaClient,
+  Prisma,
+  CostOfLiving,
+  Currency,
+  Language,
+} from "@prisma/client";
 import {
   readCsv,
   toJson,
   toDate,
   toInt,
+  toIntLoose,
   toFloat,
   toBool,
   parseEnum,
+  parseEnumArray,
 } from "../seed-utils";
 
 type CityCsv = {
@@ -20,6 +28,7 @@ type CityCsv = {
   number_of_multinational_hqs?: string;
   number_of_airports?: string;
   largest_organization?: string;
+  currency?: string;
   median_salary?: string;
   cost_of_living?: string;
   median_home_price?: string;
@@ -41,54 +50,72 @@ type CityCsv = {
 };
 
 export async function seedCities(prisma: PrismaClient) {
-  const rows = readCsv<CityCsv>("cities_rows.csv");
+  const rows = readCsv<CityCsv>("cities.csv");
 
-  const data: Prisma.CityCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    serial_number: r.serial_number,
+  const existingCountries = await prisma.country.findMany({
+    select: { isoCode: true },
+  });
+  const validCountryIds = new Set(existingCountries.map((c) => c.isoCode));
 
-    countryId: r.country_id,
+  const skipped = rows.filter((r) => !validCountryIds.has(r.country_id));
+  if (skipped.length > 0) {
+    console.warn(
+      `Cities skipped (unknown country_id): ${skipped
+        .map((r) => `${r.name} (${r.country_id})`)
+        .join(", ")}`,
+    );
+  }
 
-    isCapital: toBool(r.is_capital),
-    stateProvince: r.state_province || null,
+  const data: Prisma.CityCreateManyInput[] = rows
+    .filter((r) => validCountryIds.has(r.country_id))
+    .map((r) => ({
+      id: r.id,
+      name: r.name,
+      serial_number: r.serial_number,
 
-    population: toInt(r.population),
+      countryId: r.country_id,
 
-    numberOfMultinationalHqs: toInt(r.number_of_multinational_hqs),
-    numberOfAirports: toInt(r.number_of_airports),
+      isCapital: toBool(r.is_capital),
+      stateProvince: r.state_province || null,
 
-    largestOrganizations: r.largest_organization || null,
+      population: r.population ?? null,
 
-    medianSalary: toInt(r.median_salary),
-    costOfLiving: parseEnum(r.cost_of_living, CostOfLiving),
-    medianHomePrice: toInt(r.median_home_price),
-    averageRent: toInt(r.average_rent),
+      numberOfMultinationalHqs: r.number_of_multinational_hqs ?? null,
+      numberOfAirports: toIntLoose(r.number_of_airports),
 
-    temperatures: r.temperatures || null,
-    climate: r.climate || null,
-    interestingFact: r.interesting_fact || null,
-    degreeHolders: r.degree_holders || null,
+      largest_organization: r.largest_organization || null,
 
-    numberOfUniversities: toInt(r.number_of_universities),
-    topUniversities: r.top_universities || null,
+      currency: parseEnum(r.currency, Currency) as Currency,
 
-    numberOfNationalities: toInt(r.number_of_nationalities),
+      medianSalary: toInt(r.median_salary),
+      costOfLiving: parseEnum(r.cost_of_living, CostOfLiving),
+      medianHomePrice: toInt(r.median_home_price),
+      averageRent: toInt(r.average_rent),
 
-    language: parseEnum(r.language, Language),
+      temperatures: r.temperatures || null,
+      climate: r.climate || null,
+      interestingFact: r.interesting_fact || null,
+      degreeHolders: r.degree_holders || null,
 
-    // NOTE: "peopleDescription" existe dans le schema City mais n'est pas
-    // present dans cities_rows.csv -> laisse a null.
+      numberOfUniversities: toInt(r.number_of_universities),
+      top_universities: r.top_universities || null,
 
-    latitude: toFloat(r.latitude),
-    longitude: toFloat(r.longitude),
+      numberOfNationalities: r.number_of_nationalities ?? null,
 
-    metadata: toJson(r.metadata),
+      language: parseEnumArray(r.language, Language),
 
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
-  }));
+      // NOTE: "peopleDescription" existe dans le schema City mais n'est pas
+      // present dans cities_rows.csv -> laisse a null.
+
+      latitude: toFloat(r.latitude),
+      longitude: toFloat(r.longitude),
+
+      metadata: toJson(r.metadata),
+
+      deletedAt: toDate(r.deleted_at, false),
+      createdAt: toDate(r.created_at, true) as Date,
+      updatedAt: toDate(r.updated_at, true) as Date,
+    }));
 
   const result = await prisma.city.createMany({
     data,

@@ -1,17 +1,17 @@
 import {
-  PrismaClient,
-  Prisma,
-  OrganizationSubType,
   EmployeeCountRange,
+  OrganizationSubType,
+  Prisma,
+  PrismaClient,
 } from "@prisma/client";
 import {
+  normalizeEnumKey,
+  parseEnum,
   readCsv,
-  toJson,
   toDate,
   toInt,
+  toJson,
   toStringArray,
-  parseEnum,
-  normalizeEnumKey,
 } from "../seed-utils";
 
 // EmployeeCountRange values are like RANGE_1_10, RANGE_5000_PLUS.
@@ -43,6 +43,7 @@ type OrganizationCsv = {
   id: string;
   name: string;
   slug: string;
+  subtype?: string;
   type?: string;
   legal_status?: string;
   ownership?: string;
@@ -60,8 +61,9 @@ type OrganizationCsv = {
   equipments?: string;
   score?: string;
   city_id?: string;
-  number_of_employees?: string;
-  number_of_subsidiaries?: string;
+  numberOfEmployees?: string;
+  personnel?: string;
+  numberOfSubsidiaries?: string;
   parent_organization_id?: string;
   metadata?: string;
   deleted_at?: string;
@@ -70,14 +72,15 @@ type OrganizationCsv = {
 };
 
 export async function seedOrganizations(prisma: PrismaClient) {
-  const rows = readCsv<OrganizationCsv>("organizations_rows.csv");
+  const rows = readCsv<OrganizationCsv>("organizations.csv");
 
   const data: Prisma.OrganizationCreateManyInput[] = rows.map((r) => ({
     id: r.id,
     name: r.name,
     slug: r.slug,
 
-    type: parseEnum(r.type, OrganizationSubType),
+    subtype: parseEnum(r.type, OrganizationSubType),
+    type: r.type, OrganizationSubType,
 
     legalStatus: r.legal_status || null,
     ownership: r.ownership || null,
@@ -100,10 +103,11 @@ export async function seedOrganizations(prisma: PrismaClient) {
 
     score: toInt(r.score),
 
-    cityId: r.city_id || null,
+    city_id: r.city_id || null,
 
-    numberOfEmployees: parseEmployeeRange(r.number_of_employees),
-    numberOfSubsidiaries: toInt(r.number_of_subsidiaries),
+    numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
+    personnel: toInt(r.personnel),
+    numberOfSubsidiaries: toInt(r.numberOfSubsidiaries),
 
     parentOrganizationId: r.parent_organization_id || null,
 
