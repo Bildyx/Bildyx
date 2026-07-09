@@ -35,6 +35,7 @@ L'API sera accessible via l'url : http://localhost:3000/
 
 ```bash
 cd apps/website
+npx http-server . -p 5500
 ```
 
 Le site sera accessible via l'url : http://localhost:5500/
