@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bildyx — Login / Sign Up</title>
+
+    <!-- Font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Global CSS first, auth-specific CSS second -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+    <!-- Reusable header -->
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="images/Logo.png" alt="Logo Bildyx" />
+            </a>
+
+            <nav class="nav-buttons auth-buttons">
+                <a href="login.html?tab=login" class="login-btn">Log In</a>
+                <a href="login.html?tab=signup" class="signup-btn">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+    <main class="auth-shell">
+        <!-- Left panel: dynamic brand content -->
+        <section class="brand-panel" id="brandPanel" aria-label="Bildyx presentation">
+            <a class="brand" href="index.html" aria-label="Back to home">
+                <img class="brand-icon" src="images/bildyx-icon.png" alt="" />
+                <span>BILDYX</span>
+            </a>
+
+            <div class="brand-content">
+                <h1 id="brandTitle">"Right Teams. Right<br>Candidates."</h1>
+
+                <div class="brand-features">
+                    <article class="feature-card brand-feature">
+                        <span class="feature-icon">
+                            <img src="images/image.jpg" alt="" />
+                        </span>
+
+                        <div>
+                            <h2 class="brand-feature-title">For Companies</h2>
+                            <p class="brand-feature-text">Build profile and present your teams to potential candidates.</p>
+                        </div>
+                    </article>
+
+                    <article class="feature-card brand-feature">
+                        <span class="feature-icon">
+                            <img src="images/image.jpg" alt="" />
+                        </span>
+
+                        <div>
+                            <h2 class="brand-feature-title">For Job Seekers</h2>
+                            <p class="brand-feature-text">Create a powerful microresume in minutes. Use Microresume as elevator pitch to potential employers.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <p class="copyright">© 2026 MayGraph.com. All rights reserved.</p>
+        </section>
+
+        <!-- Right panel: authentication forms -->
+        <section class="form-panel" aria-label="Authentication forms">
+            <div class="auth-card">
+                <div class="tabs" role="tablist" aria-label="Authentication tabs">
+                    <button class="tab" id="signup-tab" type="button" data-target="signup-form" role="tab" aria-selected="true">Sign Up</button>
+                    <button class="tab active" id="login-tab" type="button" data-target="login-form" role="tab" aria-selected="false">Log In</button>
+                </div>
+
+                    <!-- Sign up form -->
+                    <form id="signup-form" class="auth-form" novalidate>
+                        <div class="form-heading">
+                            <h2>Create an account</h2>
+                            <p id="signupSubtitle">Select your account type to get started.</p>
+                        </div>
+
+                        <div class="account-switch" role="radiogroup" aria-label="Account type">
+                            <label class="account-option active">
+                                <input type="radio" name="accountType" value="company" checked />
+                                <img class="option-icon" src="images/image.jpg" alt="" />
+                                <span>Company</span>
+                            </label>
+
+                            <label class="account-option">
+                                <input type="radio" name="accountType" value="job_seeker" />
+                                <img class="option-icon" src="images/image.jpg" alt="" />
+                                <span>Job Seeker</span>
+                            </label>
+                        </div>
+
+                    
+
+                        <div class="field company-only">
+                            <label for="companyName">Company Name</label>
+
+                            <div class="input-wrap">
+                                <img class="input-icon" src="images/image.jpg" alt="" />
+                                <input id="companyName" name="companyName" type="text" placeholder="Type at least 3 characters..." maxlength="80" autocomplete="organization" />
+                            </div>
+
+                            <small class="error"></small>
+                        </div>
+
+                        <div class="seeker-only hidden">
+                            <div class="social-row social-row-single">
+                                <button
+                                    type="button"
+                                    class="social-btn google-btn"
+                                    id="googleSignupBtn">
+                                    <img src="images/google.svg" alt="">
+                                    Continue with Google
+                                </button>
+                            </div>
+
+                            <div class="divider">
+                                <span>OR</span>
+                            </div>
+
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label for="firstName">First Name</label>
+
+                                    <div class="input-wrap">
+                                        <img class="input-icon" src="images/image.jpg" alt="" />
+                                        <input id="firstName" name="firstName" type="text" placeholder="Jane" maxlength="80" autocomplete="given-name" />
+                                    </div>
+
+                                    <small class="error"></small>
+                                </div>
+
+                                <div class="field">
+                                    <label for="lastName">Last Name</label>
+
+                                    <div class="input-wrap">
+                                        <img class="input-icon" src="images/image.jpg" alt="" />
+                                        <input id="lastName" name="lastName" type="text" placeholder="Parker" maxlength="80" autocomplete="family-name" />
+                                    </div>
+
+                                    <small class="error"></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="email" id="emailLabel">Work Email</label>
+
+                            <div class="input-wrap">
+                                <img class="input-icon" src="images/image.jpg" alt="" />
+                                <input id="email" name="email" type="email" placeholder="name@company.com" maxlength="120" autocomplete="email" required />
+                            </div>
+
+                            <small class="error"></small>
+                        </div>
+
+                        <div class="field seeker-only hidden">
+                            <label for="desiredRole">Desired Role</label>
+
+                            <div class="input-wrap">
+                                <img class="input-icon" src="images/image.jpg" alt="" />
+                                <input id="desiredRole" name="desiredRole" type="text" placeholder="Type at least 3 characters..." maxlength="100" autocomplete="organization-title" />
+                            </div>
+
+                            <small class="error"></small>
+                        </div>
+
+                        <div class="field">
+                            <label for="password">Password</label>
+
+                            <div class="input-wrap">
+                                <img class="input-icon" src="images/image.jpg" alt="" />
+                                <input id="password" name="password" type="password" placeholder="••••••••" minlength="8" maxlength="72" autocomplete="new-password" required />
+                                <button class="icon-btn toggle-password" type="button" aria-label="Show password">
+                                    <img class="eye-icon" src="images/image.jpg" alt="" />
+                                </button>
+                            </div>
+
+                            <meter class="password-meter" min="0" max="4" value="0"></meter>
+                            <small class="hint">Minimum 8 characters, with uppercase, lowercase, number and symbol recommended.</small>
+                            <small class="error"></small>
+                        </div>
+
+                        <div class="captcha-box" data-captcha="signup">
+                            <div>
+                                <strong>Security check</strong>
+                                <p>Solve this quick captcha: <span class="captcha-question"></span></p>
+                            </div>
+
+                            <button class="captcha-refresh" type="button" aria-label="Refresh captcha">Refresh</button>
+                            <input class="captcha-answer" type="number" inputmode="numeric" placeholder="Answer" required />
+                        </div>
+
+                        <small class="captcha-error error"></small>
+
+                        <label class="check-line">
+                            <input id="terms" name="terms" type="checkbox" required />
+                            <span>I agree to the <a href="generic.html">Terms of Service</a> and <a href="generic.html">Privacy Policy</a>.</span>
+                        </label>
+
+                        <label class="check-line muted">
+                            <input id="marketing" name="marketing" type="checkbox" />
+                            <span>I agree to receive emails about recruitment services from Bildyx. I can unsubscribe at any time.</span>
+                        </label>
+
+                        <button class="submit-btn" type="submit">Create Company Account</button>
+                    </form>
+
+                    <!-- Login form -->
+                    <form id="login-form" class="auth-form active" novalidate>
+                        <div class="form-heading center">
+                            <h2>Log In</h2>
+                            <p>Welcome back! Please enter your details.</p>
+                        </div>
+
+                        <div class="field">
+                            <label for="loginEmail">Email</label>
+
+                            <div class="input-wrap">
+                                <img class="input-icon" src="images/image.jpg" alt="" />
+                                <input id="loginEmail" name="email" type="email" placeholder="you@example.com" maxlength="120" autocomplete="email" required />
+                            </div>
+
+                            <small class="error"></small>
+                        </div>
+
+                        <div class="field">
+                            <div class="label-row">
+                                <label for="loginPassword">Password</label>
+                                <a href="forgot-password.html" id="forgotPassword">Forgot password?</a>
+                            </div>
+
+                            <div class="input-wrap">
+                                <img class="input-icon" src="images/image.jpg" alt="" />
+                                <input id="loginPassword" name="password" type="password" placeholder="••••••••" maxlength="72" autocomplete="current-password" required />
+                                <button class="icon-btn toggle-password" type="button" aria-label="Show password">
+                                    <img class="eye-icon" src="images/image.jpg" alt="" />
+                                </button>
+                            </div>
+
+                            <small class="error"></small>
+                        </div>
+
+                        <div class="captcha-box" data-captcha="login">
+                            <div>
+                                <strong>Security check</strong>
+                                <p>Solve this quick captcha: <span class="captcha-question"></span></p>
+                            </div>
+
+                            <button class="captcha-refresh" type="button" aria-label="Refresh captcha">Refresh</button>
+                            <input class="captcha-answer" type="number" inputmode="numeric" placeholder="Answer" required />
+                        </div>
+
+                        <small class="captcha-error error"></small>
+
+                        <button class="submit-btn" type="submit">Log In</button>
+
+                        <p class="switch-text">
+                            Don't have an account?
+                            <button type="button" class="link-btn" data-target="signup-form">Sign up</button>
+                        </p>
+                    </form>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- Shared auth logic -->
+    <script src="js/auth.js"></script>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>Bildyx</h4>
+                <p>Une couche de visibilité structurée et modulaire pour le recrutement moderne.</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 MayGraph. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>
