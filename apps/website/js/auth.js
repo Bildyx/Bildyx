@@ -432,8 +432,11 @@ if (signupForm) {
       stopLoading = startButtonLoading(signupForm.querySelector(".submit-btn"));
 
       const resp = await fetch(`${API_BASE}/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(body)
       });
 
@@ -465,9 +468,14 @@ if (signupForm) {
         toast.error(data.message || 'Sign up failed (error code: ' + resp.status+ ")");
       }
 
-    } catch (err) {
-      console.error("erreur", err);
-      toast.error(err);
+        } catch (err) {
+      console.error("Signup fetch error:", err);
+
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Could not connect to the API"
+      );
     } finally {
       if (stopLoading) stopLoading();
     }
@@ -511,10 +519,16 @@ if (loginForm) {
       stopLoading = startButtonLoading(loginForm.querySelector(".submit-btn"));
 
       const resp = await fetch(`${API_BASE}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: passwordInput.value })
-      });
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          password: passwordInput.value
+        })
+    });
       const data = await resp.json().catch(() => ({}));
       if (resp.status === 200) {
         // Login successful: redirect to generic page

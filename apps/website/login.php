@@ -73,7 +73,7 @@ echo str_replace('</head>', "    {$authStylesheet}\n</head>", $sharedHeader);
                     </label>
 
                     <label class="account-option">
-                        <input type="radio" name="accountType" value="job_seeker" />
+                        <input type="radio" name="accountType" value="seeker" />
                         <img class="option-icon" src="images/image.jpg" alt="" />
                         <span>Job Seeker</span>
                     </label>
