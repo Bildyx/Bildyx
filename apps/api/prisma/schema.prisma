@@ -178,7 +178,6 @@ model Organization {
   countries                            Country[]            @relation("OrganizationCountries")
   industries                           Industry[]           @relation("OrganizationIndustries")
   cities_working_area                  City[]               @relation("working_area")
-  militaryCapabilities                 MilitaryCapabilities?
 
   @@index([parentOrganizationId])
   @@index([subtype])
@@ -363,39 +362,6 @@ model StudyFields {
   // src/db/types.ts (kysely-codegen) + mise à jour de
   // src/tests/user_education_fields.test.ts, qui référencent "StudyFields"
   // en dur -> non fait ici (touche la DB live).
-}
-
-model MilitaryCapabilities {
-  id                                   String       @id @default(uuid()) @db.Uuid
-  organization_id                      String       @unique @db.Uuid
-  number_of_active_navy_personnel      Int?
-  number_of_destroyers                 Int?
-  number_of_submarines_diesel          Int?
-  number_of_submarines_nuclear         Int?
-  number_of_naval_shipyards            Int?
-  number_of_maritime_patrol_aircraft   Int?
-  number_of_stealth_fleet              Int?
-  number_of_surveillance_radars        Int?
-  number_of_aircrafts                  Int?
-  number_of_fighter_jets               Int?
-  number_of_helicopters                Int?
-  number_of_drones                     Int?
-  number_of_tanker_planes              Int?
-  number_of_transport_planes           Int?
-  number_of_communication_satellites   Int?
-  number_of_missile_warning_satellites Int?
-  number_of_navigation_satellites      Int?
-  number_of_spy_satellites             Int?
-  number_of_satellite_jamming_systems  Int?
-  number_of_surveillance_telescopes    Int?
-  number_of_operational_spaceplanes    Int?
-  number_of_space_launch_sites         Int?
-  number_of_space_operations_squadrons Int?
-  number_of_space_personnel            Int?
-  updated_at                           DateTime     @updatedAt
-  organization                         Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-
-  @@map("military_capabilities")
 }
 
 model JobAd {
