@@ -1,0 +1,352 @@
+﻿@model MayGraphCards.Models.CountryCardModel
+@using System
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="@Model.BaseHref" />
+    <meta charset="UTF-8">
+    <title>@Model.CountryName - Card</title>
+        <style>
+        @@font-face {
+            font-family: 'Bebas Neue Pro';
+            src: url('Fonts/BebasNeuePro-Bold.woff2') format('woff2');
+            font-weight: bold;
+        }
+        @@font-face {
+            font-family: 'Work Sans';
+            src: url('Fonts/WorkSans-Regular.woff2') format('woff2');
+        }
+        html, body { width: 500px; margin: 0; padding: 0; font-family: 'Work Sans', Arial, sans-serif; background-color: transparent; }
+        .main-card { width: 100%; background: #fdfdfd; border: 3px solid #396bb3; border-radius: 60px; padding: 35px 40px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; }
+        .main-card::after { content: ""; position: absolute; top: 20px; left: 25px; right: 25px; bottom: 20px; border-radius: 50px; border: 3px solid #396bb3; pointer-events: none; }
+        .header-row { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
+        .header { display: flex; border-radius: 30px; border: 3px solid #396bb3; padding: 5px 10px; justify-content: center; width: 100%; align-items: center; }
+        .maygraph-logo { display: flex; align-items: center; }
+        .maygraph-logo img { height: 80px; object-fit: contain; }
+        .card-title { font-family: 'Bebas Neue Pro', sans-serif; font-size: 2.2rem; color: #1d1d1b; font-weight: bold; letter-spacing: 0.5px; }
+        .info-table { display: flex; flex-direction: column; gap: 15px; padding: 15px 20px 5px; }
+        .info-row { display: flex; align-items: center; gap: 14px; }
+        .info-icon img { width: 40px; height: 40px; object-fit: contain; }
+        .info-label { flex: 1 1 130px; font-size: 1.10rem; color: #090b28; font-weight: 500; }
+        .info-value { flex: 1.1 1 180px; color: #00448c; font-size: 1.12rem; font-weight: 500; word-break: break-word; }
+        .footer-row { display: flex; justify-content: space-between; position: relative; margin-top: 15px; padding: 0 20px; }
+        .serial-number { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; color: #1d1d1b; }
+        .copyright { margin-left: auto; color: #1d1d1b; font-weight: bold; }
+        html, body { width: 1300px; }
+        body.extended { width: 1800px; }
+    </style>
+</head>
+    @{ var bodyClass = Model.IsExtended ? "extended" : ""; }
+<body class="@bodyClass">
+    <div class="main-card">
+        <div class="header-row">
+            <div class="maygraph-logo"><img src="Images/logos/Logo-MayGraph_Big1.png" /></div>
+            <div class="header">
+                <div class="card-title">@Model.CountryName</div>
+            </div>
+        </div>
+        <div class="info-table">
+            <div class="info-row">
+                <div class="info-icon"><img src="Images/icons/notes.png" /></div>
+                <div class="info-label">Serial Number</div>
+                <div class="info-value">@Model.SerialNumber</div>
+            </div>
+            @if (!String.IsNullOrWhiteSpace(Model.QualityOfLife))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/life_quality.png" /></div>
+                    <div class="info-label">Quality Of Life</div>
+                    <div class="info-value">@Model.QualityOfLife</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.Temperatures))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/temperature.png" /></div>
+                    <div class="info-label">Temperatures</div>
+                    <div class="info-value">@Model.Temperatures</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.Climate))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/weather.png" /></div>
+                    <div class="info-label">Climate</div>
+                    <div class="info-value">@Model.Climate</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.CrimeRate))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/crime_rate.png" /></div>
+                    <div class="info-label">Crime Rate</div>
+                    <div class="info-value">@Model.CrimeRate</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.IncomeInequality))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/income_inequality.png" /></div>
+                    <div class="info-label">Income Inequality</div>
+                    <div class="info-value">@Model.IncomeInequality</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.WorkLifeBalance))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/work_life_balance.png" /></div>
+                    <div class="info-label">Work Life Balance</div>
+                    <div class="info-value">@Model.WorkLifeBalance</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.Capital))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/capital.png" /></div>
+                    <div class="info-label">Capital</div>
+                    <div class="info-value">@Model.Capital</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.MainCities))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/main_city.png" /></div>
+                    <div class="info-label">Main Cities</div>
+                    <div class="info-value">@Model.MainCities</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.Population))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/population.png" /></div>
+                    <div class="info-label">Population</div>
+                    <div class="info-value">@Model.Population</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.InterestingFact))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/notes.png" /></div>
+                    <div class="info-label">Interesting Fact</div>
+                    <div class="info-value">@Model.InterestingFact</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.CitizenshipProcess))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/notes.png" /></div>
+                    <div class="info-label">Citizenship Process</div>
+                    <div class="info-value">@Model.CitizenshipProcess</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.WorkPermit))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/notes.png" /></div>
+                    <div class="info-label">Work Permit</div>
+                    <div class="info-value">@Model.WorkPermit</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.GlobalCompetitivenessIndex))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/global_index.png" /></div>
+                    <div class="info-label">Global Competitiveness Index</div>
+                    <div class="info-value">@Model.GlobalCompetitivenessIndex</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.LevelOfGlobalization))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/globalization_level.png" /></div>
+                    <div class="info-label">Level Of Globalization</div>
+                    <div class="info-value">@Model.LevelOfGlobalization</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.NumberOfInternationalStudents))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/international_student.png" /></div>
+                    <div class="info-label">Number Of International Students</div>
+                    <div class="info-value">@Model.NumberOfInternationalStudents</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.NumberOfForeignCompaniesThatHaveOffice))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/foreign_company.png" /></div>
+                    <div class="info-label">Number Of Foreign Companies That Have Office</div>
+                    <div class="info-value">@Model.NumberOfForeignCompaniesThatHaveOffice</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.NumberOfTourists))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/tourist.png" /></div>
+                    <div class="info-label">Number Of Tourists</div>
+                    <div class="info-value">@Model.NumberOfTourists</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.NumberOfAirports))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/airport.png" /></div>
+                    <div class="info-label">Number Of Airports</div>
+                    <div class="info-value">@Model.NumberOfAirports</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.QualityOfPrimaryAndSecondaryEducation))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/quality.png" /></div>
+                    <div class="info-label">Quality Of Primary And Secondary Education</div>
+                    <div class="info-value">@Model.QualityOfPrimaryAndSecondaryEducation</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.DegreeHolders))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/mortarboard.png" /></div>
+                    <div class="info-label">Degree Holders</div>
+                    <div class="info-value">@Model.DegreeHolders</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.NumberOfCollegesAndUniversities))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/university.png" /></div>
+                    <div class="info-label">Number Of Colleges And Universities</div>
+                    <div class="info-value">@Model.NumberOfCollegesAndUniversities</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.TopUniversities))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/top_university.png" /></div>
+                    <div class="info-label">Top Universities</div>
+                    <div class="info-value">@Model.TopUniversities</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.EthnicGroups))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/nationality.png" /></div>
+                    <div class="info-label">Ethnic Groups</div>
+                    <div class="info-value">@Model.EthnicGroups</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.Languages))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/language.png" /></div>
+                    <div class="info-label">Languages</div>
+                    <div class="info-value">@Model.Languages</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.Religion))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/religion.png" /></div>
+                    <div class="info-label">Religion</div>
+                    <div class="info-value">@Model.Religion</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.CulturalValues))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/values.png" /></div>
+                    <div class="info-label">Cultural Values</div>
+                    <div class="info-value">@Model.CulturalValues</div>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(Model.PeopleDescription))
+            {
+                <div class="info-row">
+                    <div class="info-icon"><img src="Images/icons/notes.png" /></div>
+                    <div class="info-label">People Description</div>
+                    <div class="info-value">@Model.PeopleDescription</div>
+                </div>
+            }
+            @if (Model.IsExtended)
+            {
+                @if (!String.IsNullOrWhiteSpace(Model.Currency))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/currency.png" /></div>
+                        <div class="info-label">Currency</div>
+                        <div class="info-value">@Model.Currency</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.MainIndustries))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/industry.png" /></div>
+                        <div class="info-label">Main Industries</div>
+                        <div class="info-value">@Model.MainIndustries</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.LargestCompanies))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/big_companies.png" /></div>
+                        <div class="info-label">Largest Companies</div>
+                        <div class="info-value">@Model.LargestCompanies</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.NumberOfMultinationalHQs))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/hq.png" /></div>
+                        <div class="info-label">Number Of Multinational HQs</div>
+                        <div class="info-value">@Model.NumberOfMultinationalHQs</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.MedianSalary))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/salary_evolution.png" /></div>
+                        <div class="info-label">Median Salary</div>
+                        <div class="info-value">@Model.MedianSalary</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.PersonalIncomeTax))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/tax.png" /></div>
+                        <div class="info-label">Personal Income Tax</div>
+                        <div class="info-value">@Model.PersonalIncomeTax</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.CostOfLiving))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/living_cost.png" /></div>
+                        <div class="info-label">Cost Of Living</div>
+                        <div class="info-value">@Model.CostOfLiving</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.MedianHomePrice))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/home_price.png" /></div>
+                        <div class="info-label">Median Home Price</div>
+                        <div class="info-value">@Model.MedianHomePrice</div>
+                    </div>
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.AverageRent))
+                {
+                    <div class="info-row">
+                        <div class="info-icon"><img src="Images/icons/rent.png" /></div>
+                        <div class="info-label">Average Rent</div>
+                        <div class="info-value">@Model.AverageRent</div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="footer-row">
+            <span class="serial-number">@($"#{Model.CountryName}")</span>
+            <span class="copyright">@($"©{DateTime.Now.Year}")</span>
+        </div>
+    </div>
+</body>
+</html>

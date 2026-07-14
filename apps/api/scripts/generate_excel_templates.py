@@ -19,7 +19,7 @@ import re
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.styles import Font, PatternFill
 from openpyxl.worksheet.datavalidation import DataValidation
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -128,28 +128,6 @@ def parse_model_fields(body: str, model_names: set[str]) -> list[dict]:
     return fields
 
 
-def build_hint(field: dict, enums: dict[str, list[str]]) -> str:
-    req = "required" if field["required"] else "optional"
-    base_type = field["base_type"]
-
-    if base_type in enums:
-        kind = "enum list, comma-separated" if field["is_list"] else "enum"
-        return f"{kind} ({req}): {' | '.join(enums[base_type])}"
-    if field["is_list"]:
-        return f"{base_type} list, comma-separated ({req})"
-    if field["is_uuid_fk"]:
-        return f"UUID of related record ({req})"
-    if base_type == "Json":
-        return f"JSON ({req})"
-    if base_type in ("Int", "Float", "BigInt", "Decimal"):
-        return f"number ({req})"
-    if base_type == "Boolean":
-        return f"true / false ({req})"
-    if base_type == "DateTime":
-        return f"date, e.g. 2026-07-07 ({req})"
-    return f"text ({req})"
-
-
 def number_format_for(field: dict, enums: dict[str, list[str]]) -> str | None:
     """Excel number_format matching the field's Prisma type, or None for General."""
     base_type = field["base_type"]
@@ -181,17 +159,12 @@ def write_workbook(
 
     header_font = Font(bold=True)
     required_fill = PatternFill("solid", fgColor="FFF2CC")
-    hint_font = Font(italic=True, color="808080", size=9)
 
     for col_idx, field in enumerate(fields, start=1):
         header_cell = ws.cell(row=1, column=col_idx, value=field["column"])
         header_cell.font = header_font
         if field["required"]:
             header_cell.fill = required_fill
-
-        hint_cell = ws.cell(row=2, column=col_idx, value=build_hint(field, enums))
-        hint_cell.font = hint_font
-        hint_cell.alignment = Alignment(wrap_text=True, vertical="top")
 
         column_letter = ws.cell(row=1, column=col_idx).column_letter
         ws.column_dimensions[column_letter].width = max(18, len(field["column"]) + 4)
@@ -207,10 +180,9 @@ def write_workbook(
                 allow_blank=not field["required"],
             )
             ws.add_data_validation(dv)
-            dv.add(f"{column_letter}3:{column_letter}1000")
+            dv.add(f"{column_letter}2:{column_letter}1000")
 
-    ws.row_dimensions[2].height = 30
-    ws.freeze_panes = "A3"
+    ws.freeze_panes = "A2"
     ws.auto_filter.ref = f"A1:{ws.cell(row=1, column=len(fields)).column_letter}1"
 
     output_dir.mkdir(parents=True, exist_ok=True)

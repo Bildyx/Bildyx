@@ -7,15 +7,35 @@ git clone https://github.com/Bildyx/Bildyx.git
 cd Bildyx
 ```
 
-## 1. Orders to run
+## 1. Install dependencies
 
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get install -y nodejs
-
 npm install
-npm install prisma --save-dev
-npm install @prisma/client
-cd apps/api
-npx prisma generate
 ```
+
+## 2. Generate the prisma schema 
+
+```bash
+npm run db:pull
+npm run db:generate
+```
+
+## 3. Start the API
+
+```bash
+cd apps/api
+npm run dev
+```
+
+L'API sera accessible via l'url : http://localhost:3000/
+
+## 4. Start the website
+
+```bash
+cd apps/website
+npx http-server . -p 5500
+```
+
+Le site sera accessible via l'url : http://localhost:5500/
