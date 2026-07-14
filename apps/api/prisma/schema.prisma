@@ -83,7 +83,7 @@ model Country {
   jobAds                        JobAd[]
   universities                  University[]
   userProfiles                  UserProfile[]   @relation("UserProfileCountry")
-  largestOrganizations          Organization[]  @relation("CountryLargestOrganizations")
+  organizations                 Organization[]  @relation("OrganizationCountries")
 
   @@map("countries")
 }
@@ -175,7 +175,7 @@ model Organization {
   subjects                             Subject[]
   userProfiles                         UserProfile[]        @relation("UserCurrentOrganization")
   users                                User?
-  largestOrganizationCountries         Country[]            @relation("CountryLargestOrganizations")
+  countries                            Country[]            @relation("OrganizationCountries")
   industries                           Industry[]           @relation("OrganizationIndustries")
   cities_working_area                  City[]               @relation("working_area")
 
