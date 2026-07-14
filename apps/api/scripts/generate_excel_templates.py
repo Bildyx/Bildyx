@@ -19,7 +19,8 @@ row and any column outside the defined fields are protected (no limit on
 the number of rows - only the set of columns is restricted), row/column
 insertion and deletion is blocked, and each column gets a data validation
 matching its Prisma type (whole number, decimal, date, or enum dropdown)
-with an English error message.
+with an English error message. Sheet protection and workbook structure
+locking are both password-protected with TEMPLATE_PASSWORD.
 
 Usage:
     python3 generate_excel_templates.py [--schema PATH] [--output DIR]
@@ -90,6 +91,10 @@ M2M_COLUMNS = {
 EXCEL_MAX_ROW = 1_048_576
 
 LISTS_SHEET_NAME = "_lists"
+
+# Password protecting sheet protection and workbook structure locking below,
+# so unprotecting a template requires knowing it rather than a single click.
+TEMPLATE_PASSWORD = "bildyx"
 
 MODEL_RE = re.compile(r"model\s+(\w+)\s*\{(.*?)\n\}", re.S)
 ENUM_RE = re.compile(r"enum\s+(\w+)\s*\{(.*?)\n\}", re.S)
@@ -300,8 +305,9 @@ def enable_sheet_protection(ws: Worksheet) -> None:
     resizing stays allowed - purely cosmetic (doesn't let anyone write
     outside the authorized cells or touch the data validation), and users
     otherwise can't widen a column to see long text or adjust row height.
+    Protected with TEMPLATE_PASSWORD so removing it isn't a single click.
     """
-    ws.protection.sheet = True
+    ws.protection.set_password(TEMPLATE_PASSWORD)
     ws.protection.formatColumns = False
     ws.protection.formatRows = False
 
@@ -366,6 +372,7 @@ def write_workbook(
 
     lock_down_sheet(ws, fields, enums, list_refs)
     wb.security.lockStructure = True
+    wb.security.set_workbook_password(TEMPLATE_PASSWORD)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{table_name}.xlsx"
@@ -451,6 +458,7 @@ def protect_existing_workbook(
     if wb.security is None:
         wb.security = WorkbookProtection()
     wb.security.lockStructure = True
+    wb.security.set_workbook_password(TEMPLATE_PASSWORD)
     wb.save(path)
 
 
