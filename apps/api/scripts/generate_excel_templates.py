@@ -255,6 +255,19 @@ def data_validation_for(field: dict, enums: dict, list_refs: dict[str, str]) -> 
     return None
 
 
+def enable_sheet_protection(ws: Worksheet) -> None:
+    """
+    Turns on sheet protection with Excel's default lockdown (blocks
+    inserting/deleting rows and columns, sorting, etc.), except column/row
+    resizing stays allowed - purely cosmetic (doesn't let anyone write
+    outside the authorized cells or touch the data validation), and users
+    otherwise can't widen a column to see long text or adjust row height.
+    """
+    ws.protection.sheet = True
+    ws.protection.formatColumns = False
+    ws.protection.formatRows = False
+
+
 def lock_down_sheet(
     ws: Worksheet, fields: list[dict], enums: dict, list_refs: dict[str, str]
 ) -> None:
@@ -277,7 +290,7 @@ def lock_down_sheet(
             ws.add_data_validation(dv)
             dv.add(f"{column_letter}2:{column_letter}{EXCEL_MAX_ROW}")
 
-    ws.protection.sheet = True
+    enable_sheet_protection(ws)
 
 
 def write_workbook(
@@ -375,7 +388,7 @@ def protect_existing_workbook(
             ws.add_data_validation(dv)
             dv.add(f"{column_letter}2:{column_letter}{EXCEL_MAX_ROW}")
 
-    ws.protection.sheet = True
+    enable_sheet_protection(ws)
     if wb.security is None:
         wb.security = WorkbookProtection()
     wb.security.lockStructure = True
