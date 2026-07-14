@@ -108,3 +108,15 @@ export function buildNameLookup(rows: { id: string; name: string }[]) {
     return byName.get(rawName.trim().toLowerCase()) ?? null;
   };
 }
+
+// Resout une cellule "NomA;NomB" (colonne de relation many-to-many, meme
+// convention ";"-separee que toStringArray) en ids via un lookup (typiquement
+// buildNameLookup), en ignorant silencieusement les noms non resolus.
+export function resolveNameList(
+  value: string | undefined,
+  resolve: (rawName?: string) => string | null,
+): string[] {
+  return toStringArray(value)
+    .map((name) => resolve(name))
+    .filter((id): id is string => id !== null);
+}
