@@ -104,7 +104,7 @@ export interface _CityMainIndustries {
   B: string;
 }
 
-export interface _CountryLargestOrganizations {
+export interface _OrganizationCountries {
   A: string;
   B: string;
 }
@@ -1097,7 +1097,7 @@ export interface VaultSecrets {
 
 export interface DB {
   _CityMainIndustries: _CityMainIndustries;
-  _CountryLargestOrganizations: _CountryLargestOrganizations;
+  _OrganizationCountries: _OrganizationCountries;
   _OrganizationIndustries: _OrganizationIndustries;
   _prisma_migrations: _PrismaMigrations;
   _ProductIndustries: _ProductIndustries;

@@ -574,11 +574,11 @@ CREATE TABLE "_RelatedIndustries" (
 );
 
 -- CreateTable
-CREATE TABLE "_CountryLargestOrganizations" (
+CREATE TABLE "_OrganizationCountries" (
     "A" CHAR(2) NOT NULL,
     "B" UUID NOT NULL,
 
-    CONSTRAINT "_CountryLargestOrganizations_AB_pkey" PRIMARY KEY ("A","B")
+    CONSTRAINT "_OrganizationCountries_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateTable
@@ -790,7 +790,7 @@ CREATE INDEX "_ProductIndustries_B_index" ON "_ProductIndustries"("B");
 CREATE INDEX "_RelatedIndustries_B_index" ON "_RelatedIndustries"("B");
 
 -- CreateIndex
-CREATE INDEX "_CountryLargestOrganizations_B_index" ON "_CountryLargestOrganizations"("B");
+CREATE INDEX "_OrganizationCountries_B_index" ON "_OrganizationCountries"("B");
 
 -- CreateIndex
 CREATE INDEX "_CityMainIndustries_B_index" ON "_CityMainIndustries"("B");
@@ -907,10 +907,10 @@ ALTER TABLE "_RelatedIndustries" ADD CONSTRAINT "_RelatedIndustries_A_fkey" FORE
 ALTER TABLE "_RelatedIndustries" ADD CONSTRAINT "_RelatedIndustries_B_fkey" FOREIGN KEY ("B") REFERENCES "industries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CountryLargestOrganizations" ADD CONSTRAINT "_CountryLargestOrganizations_A_fkey" FOREIGN KEY ("A") REFERENCES "countries"("iso_code") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_OrganizationCountries" ADD CONSTRAINT "_OrganizationCountries_A_fkey" FOREIGN KEY ("A") REFERENCES "countries"("iso_code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CountryLargestOrganizations" ADD CONSTRAINT "_CountryLargestOrganizations_B_fkey" FOREIGN KEY ("B") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_OrganizationCountries" ADD CONSTRAINT "_OrganizationCountries_B_fkey" FOREIGN KEY ("B") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CityMainIndustries" ADD CONSTRAINT "_CityMainIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
