@@ -34,6 +34,8 @@ def convert(input_dir: Path, output_dir: Path) -> None:
         with csv_path.open("w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f, delimiter=";")
             for row in sheet.iter_rows(values_only=True):
+                if all(cell is None for cell in row):
+                    continue
                 writer.writerow(["" if cell is None else cell for cell in row])
 
         wb.close()
