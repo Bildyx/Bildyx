@@ -11,10 +11,11 @@ to other models) and auto-managed columns (id, created_at, updated_at,
 deleted_at) are skipped since they aren't meant to be filled in manually.
 
 Every generated template is locked down against import errors: the header
-row and any cell outside the defined columns/row range are protected,
-row/column insertion and deletion is blocked, and each column gets a data
-validation matching its Prisma type (whole number, decimal, date, or enum
-dropdown) with an English error message.
+row and any column outside the defined fields are protected (no limit on
+the number of rows - only the set of columns is restricted), row/column
+insertion and deletion is blocked, and each column gets a data validation
+matching its Prisma type (whole number, decimal, date, or enum dropdown)
+with an English error message.
 
 Usage:
     python3 generate_excel_templates.py [--schema PATH] [--output DIR]
@@ -62,10 +63,11 @@ EXCLUDED_FIELDS = {
     "deleted_at",
 }
 
-# Number of data rows (below the header) that stay unlocked/validated so new
-# rows can be entered later without re-running the generator. Everything
-# below this, and every column beyond the last header, stays locked.
-MAX_DATA_ROW = 1000
+# Excel's actual row limit. Data validation ranges are cheap to extend this
+# far (stored as a single range reference, not per-cell), so every data
+# column is validated/unlockable for its entire length - only the column
+# (width) is restricted, never the number of rows.
+EXCEL_MAX_ROW = 1_048_576
 
 LISTS_SHEET_NAME = "_lists"
 
@@ -257,23 +259,23 @@ def lock_down_sheet(
     ws: Worksheet, fields: list[dict], enums: dict, list_refs: dict[str, str]
 ) -> None:
     """
-    Locks every cell outside the defined columns/rows, adds a type-matching
-    data validation to each data column, and enables sheet protection.
-    Cells are locked by default in Excel, so only the intended data-entry
-    range needs to be explicitly unlocked; everything else (header row,
-    columns past the last field, rows past MAX_DATA_ROW) is protected for
-    free once sheet protection is enabled.
+    Locks every column outside the defined fields, adds a type-matching data
+    validation to each data column (unlocked/validated for its full height,
+    row 2 through Excel's row limit), and enables sheet protection. Cells
+    are locked by default in Excel, so only the intended data-entry columns
+    need to be explicitly unlocked; everything else (header row, columns
+    past the last field) is protected for free once sheet protection is
+    enabled. Unlocking is done at the column level (not per-cell) so it
+    covers every row without creating a cell object per row.
     """
     for col_idx, field in enumerate(fields, start=1):
         column_letter = ws.cell(row=1, column=col_idx).column_letter
-
-        for row in range(2, MAX_DATA_ROW + 1):
-            ws.cell(row=row, column=col_idx).protection = Protection(locked=False)
+        ws.column_dimensions[column_letter].protection = Protection(locked=False)
 
         dv = data_validation_for(field, enums, list_refs)
         if dv:
             ws.add_data_validation(dv)
-            dv.add(f"{column_letter}2:{column_letter}{MAX_DATA_ROW}")
+            dv.add(f"{column_letter}2:{column_letter}{EXCEL_MAX_ROW}")
 
     ws.protection.sheet = True
 
@@ -353,17 +355,25 @@ def protect_existing_workbook(
         del wb[LISTS_SHEET_NAME]
     list_refs = write_lists_sheet(wb, enums_used)
 
+    existing_max_row = ws.max_row
+
     for field in ordered_fields:
         col_idx = headers[field["column"]]
         column_letter = ws.cell(row=1, column=col_idx).column_letter
 
-        for row in range(2, MAX_DATA_ROW + 1):
+        # Column-level unlock covers every future row (no per-cell object,
+        # so it reaches all 1,048,576 rows at no cost). It does NOT reach
+        # rows that already have their own explicit cell style (existing
+        # filled data commonly does), so those need unlocking individually
+        # too - cheap since it's bounded by the sheet's current, real size.
+        ws.column_dimensions[column_letter].protection = Protection(locked=False)
+        for row in range(2, existing_max_row + 1):
             ws.cell(row=row, column=col_idx).protection = Protection(locked=False)
 
         dv = data_validation_for(field, enums, list_refs)
         if dv:
             ws.add_data_validation(dv)
-            dv.add(f"{column_letter}2:{column_letter}{MAX_DATA_ROW}")
+            dv.add(f"{column_letter}2:{column_letter}{EXCEL_MAX_ROW}")
 
     ws.protection.sheet = True
     if wb.security is None:
