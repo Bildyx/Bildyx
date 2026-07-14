@@ -44,21 +44,27 @@ type OrganizationCsv = {
   name: string;
   slug: string;
   subtype?: string;
-  type?: string;
-  legal_status?: string;
+  type1?: string;
+  type2?: string;
   ownership?: string;
   mission?: string;
   known_for?: string;
-  activities?: string;
+  programs_activities?: string;
   project?: string;
   research_areas?: string;
   products?: string;
   services?: string;
-  partnerships?: string;
+  partners?: string;
   budget?: string;
   founded?: string;
-  founder?: string;
-  equipments?: string;
+  founders?: string;
+  facilities?: string;
+  authority?: string;
+  jurisdiction?: string;
+  members?: string;
+  collections?: string;
+  graduates?: string;
+  undergraduates?: string;
   score?: string;
   city_id?: string;
   numberOfEmployees?: string;
@@ -79,27 +85,34 @@ export async function seedOrganizations(prisma: PrismaClient) {
     name: r.name,
     slug: r.slug,
 
-    subtype: parseEnum(r.type, OrganizationSubType),
-    type: r.type, OrganizationSubType,
+    subtype: parseEnum(r.subtype, OrganizationSubType),
+    type1: r.type1 || null,
+    type2: r.type2 || null,
 
-    legalStatus: r.legal_status || null,
     ownership: r.ownership || null,
     mission: r.mission || null,
 
-    knownFor: toStringArray(r.known_for),
-    activities: toStringArray(r.activities),
+    knownFor: r.known_for || null,
+    programsActivities: toStringArray(r.programs_activities),
 
     project: r.project || null,
 
     researchAreas: toStringArray(r.research_areas),
     products: toStringArray(r.products),
     services: toStringArray(r.services),
-    partnerships: toStringArray(r.partnerships),
+    partners: toStringArray(r.partners),
 
     budget: r.budget || null,
     founded: r.founded || null,
-    founder: r.founder || null,
-    equipments: r.equipments || null,
+    founders: toStringArray(r.founders),
+    facilities: toStringArray(r.facilities),
+
+    authority: r.authority || null,
+    jurisdiction: r.jurisdiction || null,
+    members: toInt(r.members),
+    collections: r.collections || null,
+    graduates: r.graduates || null,
+    undergraduates: r.undergraduates || null,
 
     score: toInt(r.score),
 
