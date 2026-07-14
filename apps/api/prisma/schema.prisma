@@ -83,7 +83,7 @@ model Country {
   jobAds                        JobAd[]
   universities                  University[]
   userProfiles                  UserProfile[]   @relation("UserProfileCountry")
-  largestOrganizations          Organization[]  @relation("CountryLargestOrganizations")
+  organizations                 Organization[]  @relation("OrganizationCountries")
 
   @@map("countries")
 }
@@ -175,7 +175,7 @@ model Organization {
   subjects                             Subject[]
   userProfiles                         UserProfile[]        @relation("UserCurrentOrganization")
   user                                 User?
-  largestOrganizationCountries         Country[]            @relation("CountryLargestOrganizations")
+  countries                            Country[]            @relation("OrganizationCountries")
   industries                           Industry[]           @relation("OrganizationIndustries")
   cities_working_area                  City[]               @relation("working_area")
   militaryCapabilities                 MilitaryCapabilities?
@@ -953,6 +953,26 @@ enum OrganizationSubType {
   SOCIETY
   CLUB
   ARMY
+  ASSOCIATION
+  CENTRAL_BANK
+  CHAMBER_OF_COMMERCE
+  CITY_GOVERNMENT
+  COURT
+  EMBASSY
+  FOUNDATION
+  HOSPITAL
+  LIBRARY
+  MUSEUM
+  NATIONAL_AUDIT_OFFICE
+  NATIONAL_PARK
+  OMBUDSMAN
+  PRIMARY_SCHOOLS
+  PUBLIC_COMPANY
+  PUBLIC_PARKS
+  SECONDARY_SCHOOLS
+  SOE
+  STATE_GOVERNMENT
+  THINK_TANK
   OTHER
 }
 
