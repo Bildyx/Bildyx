@@ -39,13 +39,13 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
   return null;
 }
 
+// Colonnes reellement presentes dans organizations.csv (le fichier ne
+// contient pas d'id/created_at/updated_at/deleted_at, et son "type" est une
+// colonne texte unique, sans equivalent des type1/type2 du schema actuel).
 type OrganizationCsv = {
-  id: string;
   name: string;
   slug: string;
-  subtype?: string;
-  type1?: string;
-  type2?: string;
+  type?: string;
   legal_status?: string;
   ownership?: string;
   mission?: string;
@@ -55,76 +55,71 @@ type OrganizationCsv = {
   research_areas?: string;
   products?: string;
   services?: string;
-  partners?: string;
+  partnerships?: string;
   budget?: string;
   founded?: string;
-  founders?: string;
-  facilities?: string;
-  authority?: string;
-  jurisdiction?: string;
-  members?: string;
-  collections?: string;
-  graduates?: string;
-  undergraduates?: string;
+  founder?: string;
+  equipments?: string;
   score?: string;
   city_id?: string;
   numberOfEmployees?: string;
-  personnel?: string;
   numberOfSubsidiaries?: string;
   parent_organization_id?: string;
   metadata?: string;
-  deleted_at?: string;
-  created_at?: string;
-  updated_at?: string;
 };
 
 export async function seedOrganizations(prisma: PrismaClient) {
   const rows = readCsv<OrganizationCsv>("organizations.csv");
 
   const data: Prisma.OrganizationCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
     name: r.name,
     slug: r.slug,
 
-    subtype: parseEnum(r.subtype, OrganizationSubType),
-    type1: r.type1 || null,
-    type2: r.type2 || null,
+    subtype: parseEnum(r.type, OrganizationSubType),
+    // type1/type2 n'ont pas d'equivalent dans organizations.csv (une seule
+    // colonne "type" y existe) -> laisses a null.
+    type1: null,
+    type2: null,
 
+    // legal_status n'a plus de champ correspondant dans le schema actuel
+    // (retire de Organization) -> non stocke.
 
-    legalStatus: r.legal_status || null,
     ownership: r.ownership || null,
     mission: r.mission || null,
 
-    knownFor: toStringArray(r.known_for),
-    activities: toStringArray(r.activities),
+    knownFor: r.known_for || null,
+    programsActivities: toStringArray(r.activities),
 
     project: r.project || null,
 
     researchAreas: toStringArray(r.research_areas),
     products: toStringArray(r.products),
     services: toStringArray(r.services),
-    partnerships: toStringArray(r.partnerships),
+    partners: toStringArray(r.partnerships),
 
     budget: r.budget || null,
     founded: r.founded || null,
-    founder: r.founder || null,
-    equipments: r.equipments || null,
+    founders: r.founder ? [r.founder] : [],
+    facilities: r.equipments ? [r.equipments] : [],
+
+    // authority/jurisdiction/members/collections/graduates/undergraduates/
+    // personnel n'ont pas de colonne dans organizations.csv -> laisses a
+    // null (champs optionnels dans le schema).
 
     score: toInt(r.score),
 
     city_id: r.city_id || null,
 
     numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
-    personnel: toInt(r.personnel),
     numberOfSubsidiaries: toInt(r.numberOfSubsidiaries),
 
     parentOrganizationId: r.parent_organization_id || null,
 
     metadata: toJson(r.metadata),
 
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
+    deletedAt: toDate(undefined, false),
+    createdAt: toDate(undefined, true) as Date,
+    updatedAt: toDate(undefined, true) as Date,
   }));
 
   // IMPORTANT: parentOrganizationId est une self-reference. Si un enfant
