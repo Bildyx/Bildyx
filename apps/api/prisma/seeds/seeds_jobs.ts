@@ -10,6 +10,7 @@ import {
   toDate,
   toStringArray,
   parseEnum,
+  buildNameLookup,
 } from "../seed-utils";
 
 type JobCsv = {
@@ -33,31 +34,51 @@ type JobCsv = {
 export async function seedJobs(prisma: PrismaClient) {
   const rows = readCsv<JobCsv>("jobs.csv");
 
-  const data: Prisma.JobCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
-    title: r.title,
-    serial_number: r.serial_number,
+  // jobs.csv renseigne industry_id avec le nom de l'industrie plutot que son
+  // uuid -> resolution par nom (meme pattern que
+  // certifications.issuing_organization_id).
+  const industries = await prisma.industry.findMany({
+    select: { id: true, name: true },
+  });
+  const resolveIndustryId = buildNameLookup(industries);
+  const unmatchedIndustries = new Set<string>();
 
-    category: parseEnum(r.category, JobCategory),
+  const data: Prisma.JobCreateManyInput[] = rows.map((r) => {
+    const industryId = resolveIndustryId(r.industry_id);
+    if (r.industry_id && !industryId) unmatchedIndustries.add(r.industry_id);
 
-    description: r.description || null,
+    return {
+      id: r.id,
+      title: r.title,
+      serial_number: r.serial_number,
 
-    seniorityLevel: parseEnum(r.seniority_level, SeniorityLevel),
+      category: parseEnum(r.category, JobCategory),
 
-    industryId: r.industry_id || null,
+      description: r.description || null,
 
-    products: toStringArray(r.products),
-    toolsAndTech: toStringArray(r.tools_and_tech),
-    tags: toStringArray(r.tags),
+      seniorityLevel: parseEnum(r.seniority_level, SeniorityLevel),
 
-    metadata: toJson(r.metadata),
+      industryId,
 
-    score: r.score && r.score !== "" ? Number(r.score) : null,
+      products: toStringArray(r.products),
+      toolsAndTech: toStringArray(r.tools_and_tech),
+      tags: toStringArray(r.tags),
 
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
-  }));
+      metadata: toJson(r.metadata),
+
+      score: r.score && r.score !== "" ? Number(r.score) : null,
+
+      deletedAt: toDate(r.deleted_at, false),
+      createdAt: toDate(r.created_at, true) as Date,
+      updatedAt: toDate(r.updated_at, true) as Date,
+    };
+  });
+
+  if (unmatchedIndustries.size > 0) {
+    console.warn(
+      `Jobs: industry_id non resolus (mis a null): ${[...unmatchedIndustries].join(", ")}`,
+    );
+  }
 
   // NOTE: depend de industries.ts (industry_id) -> a seeder avant.
   const result = await prisma.job.createMany({

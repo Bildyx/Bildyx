@@ -8,7 +8,11 @@ universities, study fields, military capabilities, degrees) and writes an
 .xlsx file per model with the model's attributes as column headers, ready to
 be filled in and imported into the database. Relation fields (back-references
 to other models) and auto-managed columns (id, created_at, updated_at,
-deleted_at) are skipped since they aren't meant to be filled in manually.
+deleted_at) are skipped since they aren't meant to be filled in manually -
+except implicit many-to-many relations (e.g. Organization<->Country), which
+have no foreign-key column anywhere in the schema to carry them. Those get a
+single free-text ";"-separated column instead (see M2M_COLUMNS), resolved by
+name/key at seed time the same way other array columns already are.
 
 Every generated template is locked down against import errors: the header
 row and any column outside the defined fields are protected (no limit on
@@ -63,6 +67,22 @@ EXCLUDED_FIELDS = {
     "deleted_at",
 }
 
+# Implicit many-to-many relations (Prisma list fields with no `fields:`/
+# `references:` on either side, backed by a hidden join table) have no
+# foreign-key column to expose. Each such relation is exposed as a single
+# free-text column on exactly one of its two models (whichever is the more
+# natural place to edit it from), keyed by (model_name, schema_field_name).
+# The Industry self-relation only needs one of its two fields (industries_A/
+# industries_B) since both describe the same symmetric relation.
+M2M_COLUMNS = {
+    ("Organization", "countries"): "countries",
+    ("Organization", "industries"): "industries",
+    ("Organization", "cities_working_area"): "working_area_cities",
+    ("City", "mainIndustries"): "main_industries",
+    ("Subject", "industries"): "industries",
+    ("Industry", "industries_A"): "related_industries",
+}
+
 # Excel's actual row limit. Data validation ranges are cheap to extend this
 # far (stored as a single range reference, not per-cell), so every data
 # column is validated/unlockable for its entire length - only the column
@@ -109,7 +129,9 @@ def parse_field_type(raw_type: str) -> tuple[str, bool, bool]:
     return raw_type, is_optional, is_list
 
 
-def parse_model_fields(body: str, model_names: set[str]) -> list[dict]:
+def parse_model_fields(
+    body: str, model_names: set[str], model_name: str
+) -> list[dict]:
     fields = []
     for line in body.splitlines():
         line = line.strip()
@@ -121,8 +143,24 @@ def parse_model_fields(body: str, model_names: set[str]) -> list[dict]:
         field_name, raw_type, attrs = m.groups()
         base_type, is_optional, is_list = parse_field_type(raw_type)
 
-        # Fields whose type is another model are relations, not real columns.
+        # Fields whose type is another model are relations, not real columns
+        # - except the curated implicit many-to-many relations in
+        # M2M_COLUMNS, which get a free-text ";"-separated column since they
+        # have no foreign-key column anywhere to represent them instead.
         if base_type in model_names:
+            m2m_column = M2M_COLUMNS.get((model_name, field_name))
+            if m2m_column is None:
+                continue
+            fields.append(
+                {
+                    "column": m2m_column,
+                    "base_type": base_type,
+                    "is_list": is_list,
+                    "required": False,
+                    "is_uuid_fk": False,
+                    "is_m2m": True,
+                }
+            )
             continue
 
         map_match = MAP_ATTR_RE.search(attrs)
@@ -346,6 +384,27 @@ def protect_existing_workbook(
         cell.value: idx
         for idx, cell in enumerate(next(ws.iter_rows(min_row=1, max_row=1)), start=1)
     }
+
+    # Newly-added M2M columns (see M2M_COLUMNS) are appended as new trailing
+    # columns so existing filled rows and column order are left untouched.
+    # Other schema fields missing from the header (pre-existing drift, e.g. a
+    # template that hasn't been regenerated since a schema change) are left
+    # alone and just reported below, same as before.
+    header_font = Font(bold=True)
+    next_col = ws.max_column + 1
+    for field in fields:
+        if not field.get("is_m2m") or field["column"] in headers:
+            continue
+        col_letter = ws.cell(row=1, column=next_col).column_letter
+        header_cell = ws.cell(row=1, column=next_col, value=field["column"])
+        header_cell.font = header_font
+        ws.column_dimensions[col_letter].width = max(18, len(field["column"]) + 4)
+        number_format = number_format_for(field, enums)
+        if number_format:
+            ws.column_dimensions[col_letter].number_format = number_format
+        headers[field["column"]] = next_col
+        next_col += 1
+
     matched_fields = [f for f in fields if f["column"] in headers]
     missing = [f["column"] for f in fields if f["column"] not in headers]
     if missing:
@@ -429,7 +488,7 @@ def main():
         body = model_bodies[model_name]
         table_name = table_name_for(model_name, body)
         output_path = args.output / f"{table_name}.xlsx"
-        fields = parse_model_fields(body, model_names)
+        fields = parse_model_fields(body, model_names, model_name)
         if not fields:
             print(f"Skipping {model_name}: no fillable fields found")
             continue
