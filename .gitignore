@@ -4,6 +4,8 @@
 /generated/prisma
 .vscode/
 
+#Claude
+/claude
 CLAUDE.MD
 Database.rtf
 Database_prompt.rtf
