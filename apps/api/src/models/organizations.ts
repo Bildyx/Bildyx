@@ -8,7 +8,6 @@ export const OrganizationSchema = z.object({
   slug: z.string().trim().min(1),
   type: OrganizationTypeEnum.nullable().optional(),
   legal_status: z.string().nullable().optional(),
-  category: z.string().nullable().optional(),
   ownership: z.string().nullable().optional(),
   mission: z.string().nullable().optional(),
   known_for: zStringArray(),
@@ -30,7 +29,7 @@ export const OrganizationSchema = z.object({
   deleted_at: z.date().nullable().optional().default(null),
   created_at: z.date(),
   updated_at: z.date(),
-  cityId: z.string().uuid().nullable().optional(),
+  city_id: z.string().uuid().nullable().optional(),
 });
 
 // GET

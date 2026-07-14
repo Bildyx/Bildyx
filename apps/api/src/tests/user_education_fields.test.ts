@@ -6,12 +6,6 @@ import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
 import { sql } from "kysely";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("UserEducationFields API Endpoints", { concurrency: 1 }, () => {
   let testUserId: string;
@@ -23,52 +17,11 @@ describe("UserEducationFields API Endpoints", { concurrency: 1 }, () => {
   let createdFieldId2: string;
 
   before(async () => {
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
-
-      // Ensure EducationFieldType enum exists
-      // Note: pgliteClient.exec() is intercepted after schema load to prevent duplicate loads.
-      // We use Kysely's sql.raw() to execute DDL statements directly.
-      try {
-        await database.executeQuery(
-          sql`CREATE TYPE "EducationFieldType" AS ENUM ('MAJOR', 'MINOR')`.compile(
-            database,
-          ),
-        );
-      } catch {
-        // ignore if already exists
-      }
-
-      // Ensure study_fields table exists
-      await database.executeQuery(
-        sql`CREATE TABLE IF NOT EXISTS "StudyFields" (
-          "id" UUID NOT NULL,
-          "name" TEXT NOT NULL,
-          "serial_number" TEXT NOT NULL,
-          "area" TEXT,
-          "description" TEXT,
-          "score" INTEGER,
-          "metadata" JSONB,
-          "deleted_at" TIMESTAMP(3),
-          "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "updated_at" TIMESTAMP(3) NOT NULL,
-          CONSTRAINT "StudyFields_pkey" PRIMARY KEY ("id")
-        )`.compile(database),
-      );
-
-      // Ensure user_education_fields table exists
-      await database.executeQuery(
-        sql`CREATE TABLE IF NOT EXISTS "user_education_fields" (
-          "id" UUID NOT NULL,
-          "user_education_id" UUID NOT NULL,
-          "study_field_Id" UUID NOT NULL,
-          "type" "EducationFieldType" NOT NULL,
-          CONSTRAINT "user_education_fields_pkey" PRIMARY KEY ("id")
-        )`.compile(database),
-      );
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
+
+    
 
     testUserId = randomUUID();
     await database
@@ -119,34 +72,8 @@ describe("UserEducationFields API Endpoints", { concurrency: 1 }, () => {
   });
 
   after(async () => {
-    try {
-      const ids = [createdFieldId1, createdFieldId2].filter(Boolean);
-      if (ids.length > 0) {
-        await database
-          .deleteFrom("user_education_fields")
-          .where("id", "in", ids)
-          .execute();
-      }
-      await database
-        .deleteFrom("user_educations")
-        .where("id", "=", testEducationId)
-        .execute();
-      await database
-        .deleteFrom("StudyFields")
-        .where("id", "in", [testStudyFieldId1, testStudyFieldId2])
-        .execute();
-      await database
-        .deleteFrom("user_profiles")
-        .where("id", "=", testProfileId)
-        .execute();
-      await database.deleteFrom("users").where("id", "=", testUserId).execute();
-    } catch (err) {
-      console.error("Cleanup error in test teardown:", err);
-    } finally {
-      await database.destroy();
-      if (pgliteClient) {
-        await pgliteClient.close();
-      }
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 

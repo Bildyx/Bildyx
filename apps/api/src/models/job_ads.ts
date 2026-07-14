@@ -17,7 +17,7 @@ export const JobAdSchema = z.object({
   status: JobAdStatusEnum.optional().default("DRAFT"),
   contract_type: ContractTypeEnum.nullable().optional(),
   remote: RemotePolicyEnum.nullable().optional(),
-  country_id: zNullableUUID(),
+  country_id: z.string().length(2).nullable().optional(),
   city_id: zNullableUUID(),
   salary_range: z.string().nullable().optional(),
   required_years_experience: z.number().int().min(0).nullable().optional(),
@@ -41,7 +41,7 @@ export const GetJobAdsSchema = z.object({
   contract_type: ContractTypeEnum.optional(),
   remote: RemotePolicyEnum.optional(),
   status: JobAdStatusEnum.optional(),
-  country_id: z.string().uuid().optional(),
+  country_id: z.string().length(2).optional(),
   city_id: z.string().uuid().optional(),
 });
 

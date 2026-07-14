@@ -52,7 +52,7 @@ export const countries = {
     .handler(async ({ input }) => {
       const data = await database
         .selectFrom("countries")
-        .where("id", "=", input.countryId)
+        .where("iso_code", "=", input.countryId)
         .selectAll()
         .executeTakeFirst();
 
@@ -77,7 +77,7 @@ export const countries = {
       const existing = await database
         .selectFrom("countries")
         .where("name", "ilike", input.name)
-        .select("id")
+        .select("iso_code")
         .executeTakeFirst();
 
       if (existing) {
@@ -92,7 +92,6 @@ export const countries = {
         .insertInto("countries")
         .values({
           ...input,
-          id: randomUUID(),
           updated_at: new Date(),
         } as any)
         .returningAll()
@@ -115,15 +114,15 @@ export const countries = {
       path: "/countries/{countryId}",
       tags: ["Country"],
     })
-    .input(z.object({ countryId: z.string().uuid() }).merge(PutCountrySchema))
+    .input(z.object({ countryId: z.string().length(2) }).merge(PutCountrySchema))
     .output(CountrySchema)
     .handler(async ({ input }) => {
       const { countryId, metadata, ...data } = input;
 
       const existing = await database
         .selectFrom("countries")
-        .where("id", "=", countryId)
-        .select("id")
+        .where("iso_code", "=", countryId)
+        .select("iso_code")
         .executeTakeFirst();
 
       if (!existing) {
@@ -133,7 +132,7 @@ export const countries = {
       const country = await database
         .updateTable("countries")
         .set({ ...data, updated_at: new Date() } as any)
-        .where("id", "=", countryId)
+        .where("iso_code", "=", countryId)
         .returningAll()
         .executeTakeFirst();
 
@@ -159,8 +158,8 @@ export const countries = {
     .handler(async ({ input }) => {
       const existing = await database
         .selectFrom("countries")
-        .where("id", "=", input.countryId)
-        .select("id")
+        .where("iso_code", "=", input.countryId)
+        .select("iso_code")
         .executeTakeFirst();
 
       if (!existing) {
@@ -169,7 +168,7 @@ export const countries = {
 
       await database
         .deleteFrom("countries")
-        .where("id", "=", input.countryId)
+        .where("iso_code", "=", input.countryId)
         .execute();
     }),
 
@@ -186,7 +185,7 @@ export const countries = {
     .handler(async ({ input }) => {
       await database
         .deleteFrom("countries")
-        .where("id", "in", input.countryIds)
+        .where("iso_code", "in", input.countryIds)
         .execute();
     }),
 };

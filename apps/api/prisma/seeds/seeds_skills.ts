@@ -1,7 +1,6 @@
 import {
   PrismaClient,
   Prisma,
-  SkillCategory,
   DifficultyLevel,
 } from "@prisma/client";
 import {
@@ -46,8 +45,7 @@ export async function seedSkills(prisma: PrismaClient) {
 
     type: r.type || null,
 
-    category: parseEnum(r.category, SkillCategory),
-    categories: toStringArray(r.categories),
+    category: r.category || null,
 
     description: r.description || null,
     iconUrl: r.icon_url || null,

@@ -8,6 +8,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.3",
     "@types/pg": "^8.20.0",
+    "cross-env": "^10.1.0",
     "kysely-codegen": "^0.20.0",
     "prisma": "^6.19.0",
     "tsx": "^4.22.4",
@@ -30,10 +31,10 @@
     "zod": "^4.4.3"
   },
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "seed": "tsx src/seed.ts",
-    "pretest": "tsx -e \"import { execSync } from 'child_process'; import fs from 'fs'; fs.writeFileSync('src/tests/schema.sql', execSync('npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script', { encoding: 'utf-8' }));\"",
-    "test": "tsx --import ./src/tests/setup.ts --test \"src/tests/**/*.test.ts\"",
+    "pretest": "tsx src/tests/generate-test-schema.ts",
+    "test": "cross-env NODE_ENV=test tsx --import ./src/tests/setup.ts --test \"src/tests/**/*.test.ts\"",
     "db:pull": "prisma db pull",
     "db:generate": "prisma generate",
     "db:types": "kysely-codegen --out-file src/db/types.ts"

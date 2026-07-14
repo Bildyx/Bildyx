@@ -4,12 +4,6 @@ import { degrees } from "../routes/degrees";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Degrees API Endpoints", () => {
   let createdDegreeId1: string;
@@ -23,28 +17,15 @@ describe("Degrees API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
+
   });
 
   after(async () => {
-    // Clean up test degrees
-    try {
-      const degreeIds = [createdDegreeId1, createdDegreeId2].filter(Boolean);
-      if (degreeIds.length > 0) {
-        await database
-          .deleteFrom("degrees")
-          .where("id", "in", degreeIds)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 

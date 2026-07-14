@@ -11,23 +11,14 @@ export const UniversitySchema = z.object({
   description: z.string().nullable().optional(),
   website_url: z.string().nullable().optional(),
   logo_url: z.string().nullable().optional(),
-  founded_year: z
-    .number()
-    .int()
-    .min(0)
-    .max(currentYear())
-    .nullable()
-    .optional(),
-  country_id: z.string().uuid().nullable().optional(),
+  country_id: z.string().length(2).nullable().optional(),
   city_id: z.string().uuid().nullable().optional(),
-  is_public: z.boolean().nullable().optional(),
   student_count: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z.date().nullable().optional().default(null),
   created_at: z.date(),
   updated_at: z.date(),
   local_name: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   established: z.string().nullable().optional(),
   score: z.number().int().min(0).nullable().optional(),
@@ -39,7 +30,7 @@ export const UniversitySchema = z.object({
 export const GetUniversitiesSchema = z.object({
   name: z.string().optional(),
   type: UniversityTypeEnum.optional(),
-  country_id: z.string().uuid().optional(),
+  country_id: z.string().length(2).optional(),
   city_id: z.string().uuid().optional(),
 });
 

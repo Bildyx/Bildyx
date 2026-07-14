@@ -5,6 +5,57 @@ async function seed() {
   console.log("🌱 Database seeding started...");
 
   // 1. Clean up existing test data to allow re-running
+  // Clean up referencing job_ad_skills
+  await database.deleteFrom("job_ad_skills")
+    .where("job_ad_id", "in", (eb) =>
+      eb.selectFrom("job_ads")
+        .select("id")
+        .where("organization_id", "in", (eb2) =>
+          eb2.selectFrom("organizations")
+            .select("id")
+            .where("name", "like", "Test %")
+        )
+    )
+    .execute();
+
+  // Clean up referencing job_ads
+  await database.deleteFrom("job_ads")
+    .where("organization_id", "in", (eb) =>
+      eb.selectFrom("organizations")
+        .select("id")
+        .where("name", "like", "Test %")
+    )
+    .execute();
+
+  // Clean up referencing military_capabilities
+  await database.deleteFrom("military_capabilities")
+    .where("organization_id", "in", (eb) =>
+      eb.selectFrom("organizations")
+        .select("id")
+        .where("name", "like", "Test %")
+    )
+    .execute();
+
+  // Clean up referencing users
+  await database.updateTable("users")
+    .set({ organization_id: null })
+    .where("organization_id", "in", (eb) =>
+      eb.selectFrom("organizations")
+        .select("id")
+        .where("name", "like", "Test %")
+    )
+    .execute();
+
+  // Clean up referencing user_profiles
+  await database.updateTable("user_profiles")
+    .set({ current_organization_id: null })
+    .where("current_organization_id", "in", (eb) =>
+      eb.selectFrom("organizations")
+        .select("id")
+        .where("name", "like", "Test %")
+    )
+    .execute();
+
   await database.deleteFrom("certifications")
     .where("name", "like", "Test %")
     .execute();

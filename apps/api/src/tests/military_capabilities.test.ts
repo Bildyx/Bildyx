@@ -4,12 +4,6 @@ import { military_capabilities } from "../routes/military_capabilities";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Military Capabilities API Endpoints", () => {
   let testOrgId1: string;
@@ -25,11 +19,8 @@ describe("Military Capabilities API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
     testOrgId1 = randomUUID();
@@ -58,19 +49,8 @@ describe("Military Capabilities API Endpoints", () => {
   });
 
   after(async () => {
-    // Clean up test items
-    try {
-      await database.deleteFrom("military_capabilities").execute();
-      if (testOrgId1 || testOrgId2) {
-        await database
-          .deleteFrom("organizations")
-          .where("id", "in", [testOrgId1, testOrgId2])
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 

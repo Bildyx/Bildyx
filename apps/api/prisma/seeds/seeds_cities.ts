@@ -1,4 +1,10 @@
-import { PrismaClient, Prisma, CostOfLiving, Language } from "@prisma/client";
+import {
+  PrismaClient,
+  Prisma,
+  CostOfLiving,
+  Language,
+  Currency,
+} from "@prisma/client";
 import {
   readCsv,
   toJson,
@@ -7,6 +13,7 @@ import {
   toFloat,
   toBool,
   parseEnum,
+  parseEnumArray,
 } from "../seed-utils";
 
 type CityCsv = {
@@ -32,6 +39,7 @@ type CityCsv = {
   top_universities?: string;
   number_of_nationalities?: string;
   language?: string;
+  currency?: string;
   latitude?: string;
   longitude?: string;
   metadata?: string;
@@ -47,18 +55,19 @@ export async function seedCities(prisma: PrismaClient) {
     id: r.id,
     name: r.name,
     serial_number: r.serial_number,
+    currency: parseEnum(r.currency, Currency) ?? Currency.USD,
 
     countryId: r.country_id,
 
     isCapital: toBool(r.is_capital),
     stateProvince: r.state_province || null,
 
-    population: toInt(r.population),
+    population: r.population || null,
 
-    numberOfMultinationalHqs: toInt(r.number_of_multinational_hqs),
+    numberOfMultinationalHqs: r.number_of_multinational_hqs || null,
     numberOfAirports: toInt(r.number_of_airports),
 
-    largestOrganizations: r.largest_organization || null,
+    largest_organization: r.largest_organization || null,
 
     medianSalary: toInt(r.median_salary),
     costOfLiving: parseEnum(r.cost_of_living, CostOfLiving),
@@ -71,11 +80,11 @@ export async function seedCities(prisma: PrismaClient) {
     degreeHolders: r.degree_holders || null,
 
     numberOfUniversities: toInt(r.number_of_universities),
-    topUniversities: r.top_universities || null,
+    top_universities: r.top_universities || null,
 
-    numberOfNationalities: toInt(r.number_of_nationalities),
+    numberOfNationalities: r.number_of_nationalities || null,
 
-    language: parseEnum(r.language, Language),
+    language: parseEnumArray(r.language, Language),
 
     // NOTE: "peopleDescription" existe dans le schema City mais n'est pas
     // present dans cities_rows.csv -> laisse a null.

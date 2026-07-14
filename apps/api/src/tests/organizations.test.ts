@@ -4,12 +4,6 @@ import { organizations } from "../routes/organizations";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Organizations API Endpoints", () => {
   let testCountryId: string;
@@ -25,21 +19,18 @@ describe("Organizations API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
-    testCountryId = randomUUID();
+    testCountryId = "OR";
     testCityId = randomUUID();
 
     // Insert mock country
     await database
       .insertInto("countries")
       .values({
-        id: testCountryId,
+        iso_code: testCountryId,
         name: "Test Country for Org",
         serial_number: "CNT-ORG-01",
         updated_at: new Date(),
@@ -54,32 +45,15 @@ describe("Organizations API Endpoints", () => {
         name: "Test City for Org",
         serial_number: "CTY-ORG-01",
         country_id: testCountryId,
+        currency: "USD",
         updated_at: new Date(),
       })
       .execute();
   });
 
   after(async () => {
-    // Clean up test items
-    try {
-      // Hard delete any remaining organizations created in tests first (since they reference cities)
-      await database.deleteFrom("organizations").execute();
-      if (testCityId) {
-        await database
-          .deleteFrom("cities")
-          .where("id", "=", testCityId)
-          .execute();
-      }
-      if (testCountryId) {
-        await database
-          .deleteFrom("countries")
-          .where("id", "=", testCountryId)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -109,7 +83,6 @@ describe("Organizations API Endpoints", () => {
         name: "Open Source Foundation",
         slug: "open-source-foundation",
         type: "NON_PROFIT",
-        category: "Technology",
         legal_status: "501c3",
         ownership: "Public",
         mission: "Support open source initiatives",
@@ -126,14 +99,14 @@ describe("Organizations API Endpoints", () => {
         equipments: "Servers, Office space",
         numberOfEmployees: "RANGE_11_50",
         numberOfSubsidiaries: 2,
-        cityId: testCityId,
+        city_id: testCityId,
       });
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Open Source Foundation");
       assert.strictEqual(result.slug, "open-source-foundation");
       assert.strictEqual(result.type, "NON_PROFIT");
-      assert.strictEqual(result.cityId, testCityId);
+      assert.strictEqual(result.city_id, testCityId);
       createdOrgId1 = result.id;
     });
 

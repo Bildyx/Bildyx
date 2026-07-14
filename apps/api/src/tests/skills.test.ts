@@ -4,15 +4,9 @@ import { skills } from "../routes/skills";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Skills API Endpoints", () => {
-  let testIndustryId: string;
+  let testIndustry = "Software Development";
   let createdSkillId1: string;
   let createdSkillId2: string;
 
@@ -24,42 +18,14 @@ describe("Skills API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
-
-    testIndustryId = randomUUID();
-
-    // Insert mock industry
-    await database
-      .insertInto("industries")
-      .values({
-        id: testIndustryId,
-        name: "Test Industry for Skills",
-        serial_number: "IND-SKILL-TEST-01",
-        updated_at: new Date(),
-      })
-      .execute();
   });
 
   after(async () => {
-    // Clean up test items
-    try {
-      if (testIndustryId) {
-        await database
-          .deleteFrom("industries")
-          .where("id", "=", testIndustryId)
-          .execute();
-      }
-      // Hard delete any remaining skills created in tests
-      await database.deleteFrom("skills").execute();
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -91,11 +57,10 @@ describe("Skills API Endpoints", () => {
         category: "LANGUAGE",
         difficulty: "INTERMEDIATE",
         description: "Strong typing in JS",
-        industry_id: testIndustryId,
+        industry: testIndustry,
         icon_url: "https://example.com/ts.png",
         type: "Technical",
         time_to_master: "6 months",
-        categories: ["coding", "frontend"],
         used_in: ["web applications", "backend servers"],
         jobs: ["Frontend Engineer", "Backend Developer"],
         product_categories: ["compiler"],
@@ -108,7 +73,7 @@ describe("Skills API Endpoints", () => {
       assert.strictEqual(result.serial_number, "SKL-CREATE-01");
       assert.strictEqual(result.category, "LANGUAGE");
       assert.strictEqual(result.difficulty, "INTERMEDIATE");
-      assert.strictEqual(result.industry_id, testIndustryId);
+      assert.strictEqual(result.industry, testIndustry);
       createdSkillId1 = result.id;
     });
 

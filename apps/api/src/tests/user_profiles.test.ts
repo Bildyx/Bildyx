@@ -5,12 +5,6 @@ import { user_profiles } from "../routes/user_profiles";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("UserProfiles API Endpoints", { concurrency: 1 }, () => {
   let testUserId1: string;
@@ -19,11 +13,11 @@ describe("UserProfiles API Endpoints", { concurrency: 1 }, () => {
   let createdProfileId2: string;
 
   before(async () => {
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
+
+    
 
     testUserId1 = randomUUID();
     testUserId2 = randomUUID();
@@ -48,25 +42,8 @@ describe("UserProfiles API Endpoints", { concurrency: 1 }, () => {
   });
 
   after(async () => {
-    try {
-      const profileIds = [createdProfileId1, createdProfileId2].filter(Boolean);
-      if (profileIds.length > 0) {
-        await database
-          .deleteFrom("user_profiles")
-          .where("id", "in", profileIds)
-          .execute();
-      }
-      await database
-        .deleteFrom("users")
-        .where("id", "in", [testUserId1, testUserId2])
-        .execute();
-    } catch (err) {
-      console.error("Cleanup error in test teardown:", err);
-    } finally {
-      await database.destroy();
-      if (pgliteClient) {
-        await pgliteClient.close();
-      }
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 

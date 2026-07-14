@@ -72,7 +72,7 @@ export const cities = {
       path: "/countries/{countryId}/cities",
       tags: ["Country"],
     })
-    .input(z.object({ countryId: z.string().uuid() }))
+    .input(z.object({ countryId: z.string().length(2) }))
     .output(z.array(CitySchema))
     .handler(async ({ input }) => {
       const cities = await database
@@ -110,8 +110,8 @@ export const cities = {
 
       const existingCountry = await database
         .selectFrom("countries")
-        .where("id", "=", input.country_id)
-        .select("id")
+        .where("iso_code", "=", input.country_id)
+        .select("iso_code")
         .executeTakeFirst();
 
       if (!existingCountry) {
@@ -125,7 +125,7 @@ export const cities = {
           id: randomUUID(),
           updated_at: new Date(),
           metadata: input.metadata,
-        })
+        } as any)
         .returningAll()
         .executeTakeFirst();
 
@@ -162,7 +162,7 @@ export const cities = {
 
       const city = await database
         .updateTable("cities")
-        .set({ ...data, updated_at: new Date() })
+        .set({ ...data, updated_at: new Date() } as any)
         .where("id", "=", cityId)
         .returningAll()
         .executeTakeFirst();

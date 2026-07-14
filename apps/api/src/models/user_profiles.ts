@@ -5,8 +5,8 @@ export const UserProfileSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid(),
   biography: z.string().nullable().optional(),
-  country_id: z.string().uuid().nullable().optional(),
-  city_id: z.string().uuid().nullable().optional(),
+  country_id: z.string().length(2).nullable().optional(),
+  city_id: zNullableUUID(),
   linkedin_url: z.string().nullable().optional(),
   github_url: z.string().nullable().optional(),
   website_url: z.string().nullable().optional(),
@@ -24,7 +24,7 @@ export const UserProfileSchema = z.object({
 // GET
 export const GetUserProfilesSchema = z.object({
   userId: z.string().uuid().optional(),
-  countryId: z.string().uuid().optional(),
+  countryId: z.string().length(2).optional(),
   cityId: z.string().uuid().optional(),
 });
 
@@ -40,7 +40,7 @@ export const GetUserProfileByUserSchema = z.object({
 export const PostUserProfileSchema = z.object({
   user_id: z.string().uuid(),
   biography: z.string().nullable().optional(),
-  country_id: zNullableUUID(),
+  country_id: z.string().length(2).nullable().optional(),
   city_id: zNullableUUID(),
   linkedin_url: z.string().nullable().optional(),
   github_url: z.string().nullable().optional(),
@@ -55,7 +55,9 @@ export const PostUserProfileSchema = z.object({
 });
 
 // PATCH
-export const PutUserProfileSchema = PostUserProfileSchema.omit({ user_id: true }).partial();
+export const PutUserProfileSchema = PostUserProfileSchema.omit({
+  user_id: true,
+}).partial();
 
 // DELETE
 export const DeleteUserProfileSchema = z.object({

@@ -4,12 +4,6 @@ import { industries } from "../routes/industries";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Industries API Endpoints", () => {
   let createdIndustryId1: string;
@@ -23,30 +17,15 @@ describe("Industries API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
+
   });
 
   after(async () => {
-    // Clean up test industries
-    try {
-      const industryIds = [createdIndustryId1, createdIndustryId2].filter(
-        Boolean,
-      );
-      if (industryIds.length > 0) {
-        await database
-          .deleteFrom("industries")
-          .where("id", "in", industryIds)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -76,7 +55,6 @@ describe("Industries API Endpoints", () => {
         name: "Software Engineering",
         serial_number: "IND-01",
         description: "IT and Software services",
-        color: "#007acc",
       });
 
       assert.ok(result.id);
@@ -167,12 +145,10 @@ describe("Industries API Endpoints", () => {
       const result = await callProcedure(industries.update, {
         industryId: createdIndustryId1,
         name: "Software & IT Services",
-        color: "#333333",
       });
 
       assert.strictEqual(result.id, createdIndustryId1);
       assert.strictEqual(result.name, "Software & IT Services");
-      assert.strictEqual(result.color, "#333333");
 
       // Verify in DB
       const dbIndustry = await database

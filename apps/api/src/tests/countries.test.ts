@@ -3,17 +3,10 @@ import assert from "node:assert";
 import { countries } from "../routes/countries";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
-import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Countries API Endpoints", () => {
-  let createdCountryId1: string;
-  let createdCountryId2: string;
+  let createdCountryId1: string; // Will store "FR"
+  let createdCountryId2: string; // Will store "DE"
 
   const callProcedure = async (procedure: any, input?: any) => {
     const schema = procedure["~orpc"]?.inputSchema;
@@ -23,28 +16,14 @@ describe("Countries API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
   });
 
   after(async () => {
-    // Clean up test countries
-    try {
-      const countryIds = [createdCountryId1, createdCountryId2].filter(Boolean);
-      if (countryIds.length > 0) {
-        await database
-          .deleteFrom("countries")
-          .where("id", "in", countryIds)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -53,6 +32,7 @@ describe("Countries API Endpoints", () => {
       await assert.rejects(
         callProcedure(countries.create, {
           serial_number: "FR-01",
+          iso_code: "FR",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -62,6 +42,7 @@ describe("Countries API Endpoints", () => {
       await assert.rejects(
         callProcedure(countries.create, {
           name: "France",
+          iso_code: "FR",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -75,10 +56,11 @@ describe("Countries API Endpoints", () => {
         calling_code: "+33",
       });
 
-      assert.ok(result.id);
+      assert.ok(result.iso_code);
+      assert.strictEqual(result.iso_code, "FR");
       assert.strictEqual(result.name, "France");
       assert.strictEqual(result.serial_number, "FR-01");
-      createdCountryId1 = result.id;
+      createdCountryId1 = result.iso_code;
     });
 
     test("should throw CONFLICT when creating a country with an existing name", async () => {
@@ -86,6 +68,7 @@ describe("Countries API Endpoints", () => {
         callProcedure(countries.create, {
           name: "France",
           serial_number: "FR-02",
+          iso_code: "FX",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -99,9 +82,10 @@ describe("Countries API Endpoints", () => {
         calling_code: "+49",
       });
 
-      assert.ok(result.id);
+      assert.ok(result.iso_code);
+      assert.strictEqual(result.iso_code, "DE");
       assert.strictEqual(result.name, "Germany");
-      createdCountryId2 = result.id;
+      createdCountryId2 = result.iso_code;
     });
   });
 
@@ -133,7 +117,7 @@ describe("Countries API Endpoints", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(countries.getById, {
-          countryId: randomUUID(),
+          countryId: "XX",
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
@@ -144,7 +128,7 @@ describe("Countries API Endpoints", () => {
         countryId: createdCountryId1,
       });
 
-      assert.strictEqual(result.id, createdCountryId1);
+      assert.strictEqual(result.iso_code, createdCountryId1);
       assert.strictEqual(result.name, "France");
       assert.strictEqual(result.serial_number, "FR-01");
     });
@@ -154,7 +138,7 @@ describe("Countries API Endpoints", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(countries.update, {
-          countryId: randomUUID(),
+          countryId: "XX",
           name: "Updated Name",
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
@@ -168,14 +152,14 @@ describe("Countries API Endpoints", () => {
         calling_code: "+330",
       });
 
-      assert.strictEqual(result.id, createdCountryId1);
+      assert.strictEqual(result.iso_code, createdCountryId1);
       assert.strictEqual(result.name, "La France");
       assert.strictEqual(result.calling_code, "+330");
 
       // Verify in DB
       const dbCountry = await database
         .selectFrom("countries")
-        .where("id", "=", createdCountryId1)
+        .where("iso_code", "=", createdCountryId1)
         .selectAll()
         .executeTakeFirst();
       assert.strictEqual(dbCountry?.name, "La France");
@@ -186,7 +170,7 @@ describe("Countries API Endpoints", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
         callProcedure(countries.delete, {
-          countryId: randomUUID(),
+          countryId: "XX",
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
@@ -200,7 +184,7 @@ describe("Countries API Endpoints", () => {
       // Verify DB
       const dbCountry = await database
         .selectFrom("countries")
-        .where("id", "=", createdCountryId2)
+        .where("iso_code", "=", createdCountryId2)
         .executeTakeFirst();
       assert.strictEqual(dbCountry, undefined);
 
@@ -214,9 +198,10 @@ describe("Countries API Endpoints", () => {
       const extraCountry = await callProcedure(countries.create, {
         name: "Spain",
         serial_number: "ES-01",
+        iso_code: "ES",
       });
 
-      const idsToDelete = [createdCountryId1, extraCountry.id];
+      const idsToDelete = [createdCountryId1, extraCountry.iso_code];
 
       await callProcedure(countries.deleteBulk, {
         countryIds: idsToDelete,
@@ -225,7 +210,7 @@ describe("Countries API Endpoints", () => {
       // Verify DB
       const remaining = await database
         .selectFrom("countries")
-        .where("id", "in", idsToDelete)
+        .where("iso_code", "in", idsToDelete)
         .execute();
       assert.strictEqual(remaining.length, 0);
 

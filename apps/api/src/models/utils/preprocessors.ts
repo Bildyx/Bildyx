@@ -45,3 +45,29 @@ export const zNullableUUID = () =>
     (val) => (val === "" ? null : val),
     z.string().uuid().nullable().optional(),
   );
+
+/**
+ * Preprocessor for optional nullable integer number that parses strings.
+ */
+export const zNullableInt = () =>
+  z.preprocess((val) => {
+    if (typeof val === "string") {
+      if (val === "") return null;
+      const num = parseInt(val, 10);
+      return isNaN(num) ? val : num;
+    }
+    return val;
+  }, z.number().int().min(0).nullable().optional());
+
+/**
+ * Preprocessor for optional nullable float/decimal number that parses strings.
+ */
+export const zNullableFloat = () =>
+  z.preprocess((val) => {
+    if (typeof val === "string") {
+      if (val === "") return null;
+      const num = parseFloat(val);
+      return isNaN(num) ? val : num;
+    }
+    return val;
+  }, z.number().min(0).nullable().optional());

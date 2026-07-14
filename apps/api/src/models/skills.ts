@@ -8,10 +8,9 @@ export const SkillSchema = z.object({
   serial_number: z.string().trim().min(1),
   type: z.string().nullable().optional(),
   category: SkillCategoryEnum.nullable().optional(),
-  categories: zStringArray(),
   description: z.string().nullable().optional(),
   icon_url: z.string().nullable().optional(),
-  industry_id: z.string().uuid().nullable().optional(),
+  industry: z.string().nullable().optional(),
   difficulty: DifficultyLevelEnum.nullable().optional(),
   used_in: zStringArray(),
   jobs: zStringArray(),
@@ -31,7 +30,7 @@ export const GetSkillsSchema = z.object({
   name: z.string().optional(),
   category: SkillCategoryEnum.optional(),
   difficulty: DifficultyLevelEnum.optional(),
-  industry_id: z.string().uuid().optional(),
+  industry: z.string().optional(),
 });
 
 export const GetSkillSchema = z.object({
