@@ -136,21 +136,27 @@ model Organization {
   name                                 String
   slug                                 String               @unique
   subtype                              OrganizationSubType?
-  type                                 String?
-  legalStatus                          String?              @map("legal_status")
+  type1                                String?
+  type2                                String?
   ownership                            String?
   mission                              String?
-  knownFor                             String[]             @map("known_for")
-  activities                           String[]
+  knownFor                             String?              @map("known_for")
+  programsActivities                   String[]             @map("programs_activities")
   project                              String?
   researchAreas                        String[]             @map("research_areas")
   products                             String[]
   services                             String[]
-  partnerships                         String[]
+  partners                             String[]
   budget                               String?
   founded                              String?
-  founder                              String?
-  equipments                           String?
+  founders                             String[]
+  facilities                           String[]
+  authority                            String?
+  jurisdiction                         String?
+  members                              Int?
+  collections                          String?
+  graduates                            String?
+  undergraduates                       String?
   score                                Int?
   city_id                              String?              @db.Uuid
   numberOfEmployees                    EmployeeCountRange?
