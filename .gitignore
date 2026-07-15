@@ -26,3 +26,6 @@ build/
 
 # Test cache
 .schema.hash
+
+# Claude Code system files
+.claude/
