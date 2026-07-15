@@ -41,6 +41,7 @@ type CityCsv = {
   top_universities?: string;
   number_of_nationalities?: string;
   language?: string;
+  people_description?: string;
   latitude?: string;
   longitude?: string;
   metadata?: string;
@@ -104,8 +105,7 @@ export async function seedCities(prisma: PrismaClient) {
 
       language: parseEnumArray(r.language, Language),
 
-      // NOTE: "peopleDescription" existe dans le schema City mais n'est pas
-      // present dans cities_rows.csv -> laisse a null.
+      peopleDescription: r.people_description || null,
 
       latitude: toFloat(r.latitude),
       longitude: toFloat(r.longitude),

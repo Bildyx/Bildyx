@@ -65,7 +65,7 @@ type OrganizationCsv = {
   score?: string;
   city_id?: string;
   numberOfEmployees?: string;
-  subsidiaries?: string;
+  numberOfSubsidiaries?: string;
   parent_organization_id?: string;
   metadata?: string;
 };
@@ -138,7 +138,7 @@ export async function seedOrganizations(prisma: PrismaClient) {
       city_id,
 
       numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
-      subsidiaries: r.subsidiaries,
+      subsidiaries: r.numberOfSubsidiaries || null,
 
       // parentOrganizationId est une self-reference : renseignee dans la 2e
       // passe ci-dessous, une fois toutes les lignes en base, pour ne jamais
