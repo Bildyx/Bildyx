@@ -77,7 +77,7 @@ export type Language = "AFRIKAANS" | "ALBANIAN" | "AMHARIC" | "ARABIC" | "ARMENI
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type Organizationsubtype = "ARMY" | "CLUB" | "COMPANY" | "GOVERNMENT" | "INTERNATIONAL_ORGANIZATION" | "NGO" | "NON_PROFIT" | "OTHER" | "RESEARCH_INSTITUTE" | "SOCIETY" | "UNIVERSITY";
+export type Organizationsubtype = "ARMY" | "ASSOCIATION" | "CENTRAL_BANK" | "CHAMBER_OF_COMMERCE" | "CITY_GOVERNMENT" | "CLUB" | "COMPANY" | "COURT" | "EMBASSY" | "FOUNDATION" | "GOVERNMENT" | "HOSPITAL" | "INTERNATIONAL_ORGANIZATION" | "LIBRARY" | "MUSEUM" | "NATIONAL_AUDIT_OFFICE" | "NATIONAL_PARK" | "NGO" | "NON_PROFIT" | "OMBUDSMAN" | "OTHER" | "PRIMARY_SCHOOLS" | "PUBLIC_COMPANY" | "PUBLIC_PARKS" | "RESEARCH_INSTITUTE" | "SECONDARY_SCHOOLS" | "SOCIETY" | "SOE" | "STATE_GOVERNMENT" | "THINK_TANK" | "UNIVERSITY";
 
 export type Qualityoflife = "HIGH" | "LOW" | "MEDIUM";
 
@@ -655,6 +655,15 @@ export interface ExtensionsPgStatStatementsInfo {
   stats_reset: Timestamp | null;
 }
 
+export interface ImportRowHashes {
+  id: string;
+  last_imported_at: Timestamp;
+  model_name: string;
+  natural_key: string;
+  row_hash: string;
+  source_file: string | null;
+}
+
 export interface Industries {
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
@@ -719,63 +728,43 @@ export interface Jobs {
   updated_at: Timestamp;
 }
 
-export interface MilitaryCapabilities {
-  id: string;
-  number_of_active_navy_personnel: number | null;
-  number_of_aircrafts: number | null;
-  number_of_communication_satellites: number | null;
-  number_of_destroyers: number | null;
-  number_of_drones: number | null;
-  number_of_fighter_jets: number | null;
-  number_of_helicopters: number | null;
-  number_of_maritime_patrol_aircraft: number | null;
-  number_of_missile_warning_satellites: number | null;
-  number_of_naval_shipyards: number | null;
-  number_of_navigation_satellites: number | null;
-  number_of_operational_spaceplanes: number | null;
-  number_of_satellite_jamming_systems: number | null;
-  number_of_space_launch_sites: number | null;
-  number_of_space_operations_squadrons: number | null;
-  number_of_space_personnel: number | null;
-  number_of_spy_satellites: number | null;
-  number_of_stealth_fleet: number | null;
-  number_of_submarines_diesel: number | null;
-  number_of_submarines_nuclear: number | null;
-  number_of_surveillance_radars: number | null;
-  number_of_surveillance_telescopes: number | null;
-  number_of_tanker_planes: number | null;
-  number_of_transport_planes: number | null;
-  organization_id: string;
-  updated_at: Timestamp;
-}
-
 export interface Organizations {
-  activities: string[] | null;
+  authority: string | null;
   budget: string | null;
   city_id: string | null;
+  collections: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  equipments: string | null;
+  description: string | null;
+  facilities: string[] | null;
   founded: string | null;
-  founder: string | null;
+  founders: string[] | null;
+  graduates: string | null;
   id: string;
-  known_for: string[] | null;
-  legal_status: string | null;
+  jurisdiction: string | null;
+  known_for: string | null;
+  members: number | null;
   metadata: Json | null;
   mission: string | null;
   name: string;
   numberOfEmployees: Employeecountrange | null;
-  numberOfSubsidiaries: number | null;
+  offices: string | null;
   ownership: string | null;
   parent_organization_id: string | null;
-  partnerships: string[] | null;
+  partners: string[] | null;
+  personnel: number | null;
   products: string[] | null;
+  programs_activities: string[] | null;
   project: string | null;
   research_areas: string[] | null;
   score: number | null;
   services: string[] | null;
   slug: string;
-  type: Organizationsubtype | null;
+  subsidiaries: string | null;
+  subtype: Organizationsubtype | null;
+  type1: string | null;
+  type2: string | null;
+  undergraduates: string | null;
   updated_at: Timestamp;
 }
 
@@ -1133,11 +1122,11 @@ export interface DB {
   degrees: Degrees;
   "extensions.pg_stat_statements": ExtensionsPgStatStatements;
   "extensions.pg_stat_statements_info": ExtensionsPgStatStatementsInfo;
+  import_row_hashes: ImportRowHashes;
   industries: Industries;
   job_ad_skills: JobAdSkills;
   job_ads: JobAds;
   jobs: Jobs;
-  military_capabilities: MilitaryCapabilities;
   organizations: Organizations;
   "realtime.messages": RealtimeMessages;
   "realtime.schema_migrations": RealtimeSchemaMigrations;

@@ -15,6 +15,7 @@ export const CertificationSchema = z.object({
   validity_duration_months: z.number().int().min(0).nullable().optional(),
   difficulty: DifficultyLevelEnum.nullable().optional(),
   website_url: z.string().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z.date().nullable().optional(),
   created_at: z.date(),
@@ -46,6 +47,7 @@ export const PostCertificationSchema = z.object({
   difficulty: DifficultyLevelEnum.nullable().optional(),
   website_url: z.string().nullable().optional(),
   metadata: z.any().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
 });
 
 // PATCH

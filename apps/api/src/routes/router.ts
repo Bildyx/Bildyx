@@ -12,7 +12,6 @@ import { subjects } from "./subjects";
 import { skills } from "./skills";
 import { universities } from "./universities";
 import { organizations } from "./organizations";
-import { military_capabilities } from "./military_capabilities";
 import { users } from "./users";
 import { user_sessions } from "./user_sessions";
 import { user_profiles } from "./user_profiles";
@@ -20,6 +19,7 @@ import { user_educations } from "./user_educations";
 import { user_education_fields } from "./user_education_fields";
 import { user_certifications } from "./user_certifications";
 import { audit_logs } from "./audit_logs";
+import { cards } from "./cards";
 
 export const router = publicProcedure.router({
   auth,
@@ -35,7 +35,6 @@ export const router = publicProcedure.router({
   skills,
   universities,
   organizations,
-  military_capabilities,
   users,
   user_sessions,
   user_profiles,
@@ -43,5 +42,6 @@ export const router = publicProcedure.router({
   user_education_fields,
   user_certifications,
   audit_logs,
+  cards,
 });
 export type Router = typeof router;

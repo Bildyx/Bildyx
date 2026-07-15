@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        document.documentElement.style.width = '<%= extended ? 1000 : 700 %>px';
+    </script>
+    <meta charset="UTF-8">
+    <title><%= countryName %> - Card</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700&display=swap');
+        html, body { margin: 0; padding: 0; font-family: 'Work Sans', Arial, sans-serif; background-color: transparent; }
+        body { width: 100%; }
+        .main-card { width: 100%; background: #fdfdfd; border: 3px solid #396bb3; border-radius: 60px; padding: 35px 40px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; }
+        .main-card::after { content: ""; position: absolute; top: 20px; left: 25px; right: 25px; bottom: 20px; border-radius: 50px; border: 3px solid #396bb3; pointer-events: none; }
+        .header-row { display: flex; align-items: center; border: 3px solid #396bb3; border-radius: 35px; padding: 8px 15px; margin-bottom: 15px; gap: 15px; background: #ffffff; }
+        .maygraph-logo { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border: 3px solid #396bb3; border-radius: 18px; box-sizing: border-box; background: #ffffff; padding: 4px; flex-shrink: 0; }
+        .maygraph-logo img { width: 100%; height: 100%; object-fit: contain; }
+        .card-title { font-family: 'Work Sans', sans-serif; font-size: 2.2rem; color: #090b28; font-weight: 700; margin: 0; text-align: left; }
+        .info-table { display: flex; flex-direction: column; gap: 15px; padding: 0px 20px; }
+        .info-row { display: flex; align-items: flex-start; gap: 14px; }
+        .info-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .info-icon img { width: 40px; height: 40px; object-fit: contain; }
+        .info-label { flex: 0 0 250px; font-size: 1.10rem; color: #555555; font-weight: 500; padding-top: 8px; }
+        .info-value { flex: 1; text-align: left; color: #00448c; font-size: 1.12rem; font-weight: 500; word-break: break-word; line-height: 1.4; }
+        .footer-row { display: flex; justify-content: space-between; position: relative; margin-top: 20px; margin-bottom: 2px; padding: 0px 20px; }
+        .serial-number { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; color: #1d1d1b; font-weight: bold; }
+        .copyright { margin-left: auto; color: #1d1d1b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <div class="header-row">
+            <div class="maygraph-logo">
+                <img src="<%= getIcon('logos', 'Logo-MayGraph_Big1.png') %>" alt="MayGraph" />
+            </div>
+            <div class="card-title"><%= countryName %></div>
+        </div>
+        <div class="info-table">
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'notes.png') %>" alt="" /></div>
+                <div class="info-label">Serial Number</div>
+                <div class="info-value" style="padding-top: 8px;"><%= serialNumber %></div>
+            </div>
+            <% if (qualityOfLife) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'life_quality.png') %>" alt="" /></div>
+                <div class="info-label">Quality Of Life</div>
+                <div class="info-value" style="padding-top: 8px;"><%= qualityOfLife %></div>
+            </div>
+            <% } %>
+            <% if (temperatures) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'temperature.png') %>" alt="" /></div>
+                <div class="info-label">Temperatures</div>
+                <div class="info-value" style="padding-top: 8px;"><%= temperatures %></div>
+            </div>
+            <% } %>
+            <% if (climate) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'weather.png') %>" alt="" /></div>
+                <div class="info-label">Climate</div>
+                <div class="info-value" style="padding-top: 8px;"><%= climate %></div>
+            </div>
+            <% } %>
+            <% if (crimeRate) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'crime_rate.png') %>" alt="" /></div>
+                <div class="info-label">Crime Rate</div>
+                <div class="info-value" style="padding-top: 8px;"><%= crimeRate %></div>
+            </div>
+            <% } %>
+            <% if (incomeInequality) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'income_inequality.png') %>" alt="" /></div>
+                <div class="info-label">Income Inequality</div>
+                <div class="info-value" style="padding-top: 8px;"><%= incomeInequality %></div>
+            </div>
+            <% } %>
+            <% if (workLifeBalance) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'work_life_balance.png') %>" alt="" /></div>
+                <div class="info-label">Work Life Balance</div>
+                <div class="info-value" style="padding-top: 8px;"><%= workLifeBalance %></div>
+            </div>
+            <% } %>
+            <% if (capital) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'capital.png') %>" alt="" /></div>
+                <div class="info-label">Capital</div>
+                <div class="info-value" style="padding-top: 8px;"><%= capital %></div>
+            </div>
+            <% } %>
+            <% if (population) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'population.png') %>" alt="" /></div>
+                <div class="info-label">Population</div>
+                <div class="info-value" style="padding-top: 8px;"><%= population %></div>
+            </div>
+            <% } %>
+            <% if (interestingFact) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'notes.png') %>" alt="" /></div>
+                <div class="info-label">Interesting Fact</div>
+                <div class="info-value"><%= interestingFact %></div>
+            </div>
+            <% } %>
+            <% if (citizenshipProcess) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'passeport.png') %>" alt="" /></div>
+                <div class="info-label">Citizenship Process</div>
+                <div class="info-value"><%= citizenshipProcess %></div>
+            </div>
+            <% } %>
+            <% if (workPermit) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'contract.png') %>" alt="" /></div>
+                <div class="info-label">Work Permit</div>
+                <div class="info-value"><%= workPermit %></div>
+            </div>
+            <% } %>
+            <% if (globalCompetitivenessIndex) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'global_index.png') %>" alt="" /></div>
+                <div class="info-label">Global Competitiveness Index</div>
+                <div class="info-value" style="padding-top: 8px;"><%= globalCompetitivenessIndex %></div>
+            </div>
+            <% } %>
+            <% if (levelOfGlobalization) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'globalization_level.png') %>" alt="" /></div>
+                <div class="info-label">Level Of Globalization</div>
+                <div class="info-value" style="padding-top: 8px;"><%= levelOfGlobalization %></div>
+            </div>
+            <% } %>
+            <% if (numberOfInternationalStudents) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'international_student.png') %>" alt="" /></div>
+                <div class="info-label">Number Of International Students</div>
+                <div class="info-value" style="padding-top: 8px;"><%= numberOfInternationalStudents %></div>
+            </div>
+            <% } %>
+            <% if (numberOfForeignCompaniesThatHaveOffice) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'foreign_company.png') %>" alt="" /></div>
+                <div class="info-label">Foreign Companies With Offices</div>
+                <div class="info-value" style="padding-top: 8px;"><%= numberOfForeignCompaniesThatHaveOffice %></div>
+            </div>
+            <% } %>
+            <% if (numberOfTourists) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'tourist.png') %>" alt="" /></div>
+                <div class="info-label">Number Of Tourists</div>
+                <div class="info-value" style="padding-top: 8px;"><%= numberOfTourists %></div>
+            </div>
+            <% } %>
+            <% if (numberOfAirports) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'airport.png') %>" alt="" /></div>
+                <div class="info-label">Number Of Airports</div>
+                <div class="info-value" style="padding-top: 8px;"><%= numberOfAirports %></div>
+            </div>
+            <% } %>
+            <% if (qualityOfPrimaryAndSecondaryEducation) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'open_book.png') %>" alt="" /></div>
+                <div class="info-label">Primary &amp; Secondary Education</div>
+                <div class="info-value"><%= qualityOfPrimaryAndSecondaryEducation %></div>
+            </div>
+            <% } %>
+            <% if (degreeHolders) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'mortarboard.png') %>" alt="" /></div>
+                <div class="info-label">Degree Holders</div>
+                <div class="info-value" style="padding-top: 8px;"><%= degreeHolders %></div>
+            </div>
+            <% } %>
+            <% if (numberOfCollegesAndUniversities) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'university.png') %>" alt="" /></div>
+                <div class="info-label">Colleges and Universities</div>
+                <div class="info-value" style="padding-top: 8px;"><%= numberOfCollegesAndUniversities %></div>
+            </div>
+            <% } %>
+            <% if (ethnicGroups) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'group.png') %>" alt="" /></div>
+                <div class="info-label">Ethnic Groups</div>
+                <div class="info-value"><%= ethnicGroups %></div>
+            </div>
+            <% } %>
+            <% if (languages) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'language.png') %>" alt="" /></div>
+                <div class="info-label">Languages</div>
+                <div class="info-value"><%= languages %></div>
+            </div>
+            <% } %>
+            <% if (religion) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'religion.png') %>" alt="" /></div>
+                <div class="info-label">Religion</div>
+                <div class="info-value"><%= religion %></div>
+            </div>
+            <% } %>
+            <% if (culturalValues) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'values.png') %>" alt="" /></div>
+                <div class="info-label">Cultural Values</div>
+                <div class="info-value"><%= culturalValues %></div>
+            </div>
+            <% } %>
+            <% if (peopleDescription) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'people_description.png') %>" alt="" /></div>
+                <div class="info-label">People Description</div>
+                <div class="info-value"><%= peopleDescription %></div>
+            </div>
+            <% } %>
+            <% if (extended) { %>
+                <% if (currency) { %>
+                <div class="info-row">
+                    <div class="info-icon"><img src="<%= getIcon('icons', 'currency.png') %>" alt="" /></div>
+                    <div class="info-label">Currency</div>
+                    <div class="info-value" style="padding-top: 8px;"><%= currency %></div>
+                </div>
+                <% } %>
+                <% if (numberOfMultinationalHQs) { %>
+                <div class="info-row">
+                    <div class="info-icon"><img src="<%= getIcon('icons', 'hq.png') %>" alt="" /></div>
+                    <div class="info-label">Number Of Multinational HQs</div>
+                    <div class="info-value" style="padding-top: 8px;"><%= numberOfMultinationalHQs %></div>
+                </div>
+                <% } %>
+                <% if (medianSalary) { %>
+                <div class="info-row">
+                    <div class="info-icon"><img src="<%= getIcon('icons', 'salary_evolution.png') %>" alt="" /></div>
+                    <div class="info-label">Median Salary</div>
+                    <div class="info-value" style="padding-top: 8px;"><%= medianSalary %></div>
+                </div>
+                <% } %>
+                <% if (personalIncomeTax) { %>
+                <div class="info-row">
+                    <div class="info-icon"><img src="<%= getIcon('icons', 'tax.png') %>" alt="" /></div>
+                    <div class="info-label">Personal Income Tax</div>
+                    <div class="info-value" style="padding-top: 8px;"><%= personalIncomeTax %></div>
+                </div>
+                <% } %>
+                <% if (costOfLiving) { %>
+                <div class="info-row">
+                    <div class="info-icon"><img src="<%= getIcon('icons', 'living_cost.png') %>" alt="" /></div>
+                    <div class="info-label">Cost Of Living</div>
+                    <div class="info-value" style="padding-top: 8px;"><%= costOfLiving %></div>
+                </div>
+                <% } %>
+                <% if (medianHomePrice) { %>
+                <div class="info-row">
+                    <div class="info-icon"><img src="<%= getIcon('icons', 'home_price.png') %>" alt="" /></div>
+                    <div class="info-label">Median Home Price</div>
+                    <div class="info-value" style="padding-top: 8px;"><%= medianHomePrice %></div>
+                </div>
+                <% } %>
+                <% if (averageRent) { %>
+                <div class="info-row">
+                    <div class="info-icon"><img src="<%= getIcon('icons', 'rent.png') %>" alt="" /></div>
+                    <div class="info-label">Average Rent</div>
+                    <div class="info-value" style="padding-top: 8px;"><%= averageRent %></div>
+                </div>
+                <% } %>
+            <% } %>
+        </div>
+        <div class="footer-row">
+            <span class="serial-number">#<%= countryName %></span>
+            <span class="copyright">©<%= year %></span>
+        </div>
+    </div>
+</body>
+</html>

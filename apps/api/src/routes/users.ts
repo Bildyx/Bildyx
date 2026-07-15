@@ -40,7 +40,7 @@ export const users = {
       }
 
       if (role) {
-        query = query.where("role", "=", role);
+        query = query.where("role", "=", role as any);
       }
 
       if (status) {

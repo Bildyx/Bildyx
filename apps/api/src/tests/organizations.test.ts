@@ -4,12 +4,6 @@ import { organizations } from "../routes/organizations";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Organizations API Endpoints", () => {
   let testCountryId: string;
@@ -25,23 +19,20 @@ describe("Organizations API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
-    testCountryId = randomUUID();
+    testCountryId = Math.random().toString(36).substring(2, 4).toUpperCase();
     testCityId = randomUUID();
 
     // Insert mock country
     await database
       .insertInto("countries")
       .values({
-        id: testCountryId,
+        iso_code: testCountryId,
         name: "Test Country for Org",
-        serial_number: "CNT-ORG-01",
+        serial_number: `CNT-${testCountryId}`,
         updated_at: new Date(),
       })
       .execute();
@@ -52,34 +43,20 @@ describe("Organizations API Endpoints", () => {
       .values({
         id: testCityId,
         name: "Test City for Org",
-        serial_number: "CTY-ORG-01",
+        serial_number: `CTY-${testCountryId}`,
         country_id: testCountryId,
+        currency: "USD",
         updated_at: new Date(),
       })
       .execute();
+
+    // Clean up the table because PGLite database is globally initialized with seed data
+    await database.deleteFrom("organizations").execute();
   });
 
   after(async () => {
-    // Clean up test items
-    try {
-      // Hard delete any remaining organizations created in tests first (since they reference cities)
-      await database.deleteFrom("organizations").execute();
-      if (testCityId) {
-        await database
-          .deleteFrom("cities")
-          .where("id", "=", testCityId)
-          .execute();
-      }
-      if (testCountryId) {
-        await database
-          .deleteFrom("countries")
-          .where("id", "=", testCountryId)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -108,32 +85,26 @@ describe("Organizations API Endpoints", () => {
       const result = await callProcedure(organizations.create, {
         name: "Open Source Foundation",
         slug: "open-source-foundation",
-        type: "NON_PROFIT",
-        category: "Technology",
-        legal_status: "501c3",
+        subtype: "ASSOCIATION",
         ownership: "Public",
         mission: "Support open source initiatives",
-        known_for: ["Code hosting", "Community events"],
-        activities: ["Sponsoring developers", "Running conferences"],
+        known_for: "Code hosting, Community events",
         project: "FOSS support",
         research_areas: ["Software engineering", "Open standards"],
         products: ["Hosting platform", "CLI tools"],
         services: ["Mentorship", "Funding"],
-        partnerships: ["Tech Co", "Dev Association"],
         budget: "$1,000,000",
         founded: "2010",
-        founder: "John Doe",
-        equipments: "Servers, Office space",
+        founders: ["John Doe"],
         numberOfEmployees: "RANGE_11_50",
-        numberOfSubsidiaries: 2,
-        cityId: testCityId,
+        city_id: testCityId,
       });
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Open Source Foundation");
       assert.strictEqual(result.slug, "open-source-foundation");
-      assert.strictEqual(result.type, "NON_PROFIT");
-      assert.strictEqual(result.cityId, testCityId);
+      assert.strictEqual(result.subtype, "ASSOCIATION");
+      assert.strictEqual(result.city_id, testCityId);
       createdOrgId1 = result.id;
     });
 
@@ -151,11 +122,11 @@ describe("Organizations API Endpoints", () => {
       const result = await callProcedure(organizations.create, {
         name: "Cyber Security Agency",
         slug: "cyber-security-agency",
-        type: "GOVERNMENT",
+        subtype: "GOVERNMENT",
       });
 
       assert.ok(result.id);
-      assert.strictEqual(result.type, "GOVERNMENT");
+      assert.strictEqual(result.subtype, "GOVERNMENT");
       createdOrgId2 = result.id;
     });
   });
@@ -179,7 +150,7 @@ describe("Organizations API Endpoints", () => {
 
     test("should filter organizations by type", async () => {
       const results = await callProcedure(organizations.getAll, {
-        type: "GOVERNMENT",
+        subtype: "GOVERNMENT",
       });
 
       assert.strictEqual(results.length, 1);

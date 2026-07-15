@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Kysely, PostgresDialect } from "kysely";
 import pg from "pg";
 import type { DB } from "./db/types";
@@ -21,7 +22,7 @@ if (process.env.NODE_ENV === "test") {
 
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL is missing. Start the API through src/bootstrap.ts.",
+      "DATABASE_URL is missing. Please check your .env file.",
     );
   }
 

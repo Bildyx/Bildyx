@@ -5,13 +5,7 @@ import { certifications } from "../routes/certifications";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { sql } from "kysely";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Certifications API Endpoints", () => {
   let testOrgId: string;
@@ -19,11 +13,8 @@ describe("Certifications API Endpoints", () => {
   let createdCertId2: string;
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
     // Setup temporary organization for testing
@@ -41,24 +32,8 @@ describe("Certifications API Endpoints", () => {
   });
 
   after(async () => {
-    // Clean up test certifications and organization
-    try {
-      const certIds = [createdCertId1, createdCertId2].filter(Boolean);
-      if (certIds.length > 0) {
-        await database
-          .deleteFrom("certifications")
-          .where("id", "in", certIds)
-          .execute();
-      }
-
-      await database
-        .deleteFrom("organizations")
-        .where("id", "=", testOrgId)
-        .execute();
-    } catch (err) {
-      console.error("Cleanup error in test teardown:", err);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 

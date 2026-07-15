@@ -1,11 +1,11 @@
 import {
   PrismaClient,
-  Prisma,
   Currency,
   Language,
+  CostOfLiving,
+  Prisma,
   GovernmentType,
   QualityOfLife,
-  CostOfLiving,
 } from "@prisma/client";
 import {
   readCsv,

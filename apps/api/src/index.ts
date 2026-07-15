@@ -1,4 +1,5 @@
 const beforeTimeMs = performance.now();
+import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
 import util from "node:util";
@@ -16,7 +17,7 @@ import { router } from "./routes/router";
 import { database } from "./database";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { randomUUID, randomBytes, createHash } from "node:crypto";
+import { randomUUID, randomBytes } from "node:crypto";
 import { hashPassword } from "./services/auth.service";
 import cors from "cors";
 
@@ -141,14 +142,21 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 }
 
 app.use(async (req, res, next) => {
-  const result = await rpcHandler.handle(req, res, {
-    context: { headers: req.headers, req, res },
-    prefix: RPC_PREFIX,
-  });
-  if (result.matched) {
-    return;
+  try {
+    const result = await rpcHandler.handle(req, res, {
+      context: { headers: req.headers, req, res },
+      prefix: RPC_PREFIX,
+    });
+    if (result.matched) {
+      return;
+    }
+    next();
+  } catch (err) {
+    if (res.headersSent) {
+      return;
+    }
+    next(err);
   }
-  next();
 });
 
 app.get("/spec.json", async (req, res) => {
@@ -173,14 +181,21 @@ app.get("/spec.json", async (req, res) => {
 });
 
 app.use(async (req, res, next) => {
-  const result = await openAPIHandler.handle(req, res, {
-    context: { headers: req.headers, req, res },
-    prefix: OPENAPI_PREFIX,
-  });
-  if (result.matched) {
-    return;
+  try {
+    const result = await openAPIHandler.handle(req, res, {
+      context: { headers: req.headers, req, res },
+      prefix: OPENAPI_PREFIX,
+    });
+    if (result.matched) {
+      return;
+    }
+    next();
+  } catch (err) {
+    if (res.headersSent) {
+      return;
+    }
+    next(err);
   }
-  next();
 });
 
 app.use((req, res) => {

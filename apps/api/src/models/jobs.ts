@@ -11,19 +11,15 @@ export const JobSchema = z.object({
   category: JobCategoryEnum.nullable().optional(),
   description: z.string().nullable().optional(),
   seniority_level: SeniorityLevelEnum.nullable().optional(),
-  is_elected: z.boolean().optional().default(false),
-  is_regulated: z.boolean().optional().default(false),
-  start_year: z.number().int().min(0).max(currentYear()).nullable().optional(),
   industry_id: zNullableUUID(),
-  country_id: zNullableUUID(),
   products: zStringArray(),
   tools_and_tech: zStringArray(),
   tags: zStringArray(),
   metadata: z.any().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   deleted_at: z.date().nullable().optional().default(null),
   created_at: z.date(),
   updated_at: z.date(),
-  score: z.number().int().min(0).nullable().optional(),
 });
 
 // GET
@@ -32,7 +28,6 @@ export const GetJobsSchema = z.object({
   category: JobCategoryEnum.optional(),
   seniority_level: SeniorityLevelEnum.optional(),
   industry_id: z.string().uuid().optional(),
-  country_id: z.string().uuid().optional(),
 });
 
 export const GetJobSchema = z.object({

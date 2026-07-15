@@ -4,12 +4,6 @@ import { job_ads_skills } from "../routes/job_ads_skills";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Job Ad Skills API Endpoints", () => {
   let testOrgId: string;
@@ -27,11 +21,8 @@ describe("Job Ad Skills API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
     testOrgId = randomUUID();
@@ -85,45 +76,8 @@ describe("Job Ad Skills API Endpoints", () => {
   });
 
   after(async () => {
-    // Clean up test items
-    try {
-      const jobAdSkillIds = [createdJobAdSkillId1, createdJobAdSkillId2].filter(
-        Boolean,
-      );
-      if (jobAdSkillIds.length > 0) {
-        await database
-          .deleteFrom("job_ad_skills")
-          .where("id", "in", jobAdSkillIds)
-          .execute();
-      }
-      if (testSkillId1) {
-        await database
-          .deleteFrom("skills")
-          .where("id", "=", testSkillId1)
-          .execute();
-      }
-      if (testSkillId2) {
-        await database
-          .deleteFrom("skills")
-          .where("id", "=", testSkillId2)
-          .execute();
-      }
-      if (testJobAdId) {
-        await database
-          .deleteFrom("job_ads")
-          .where("id", "=", testJobAdId)
-          .execute();
-      }
-      if (testOrgId) {
-        await database
-          .deleteFrom("organizations")
-          .where("id", "=", testOrgId)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 

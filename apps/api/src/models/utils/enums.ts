@@ -226,18 +226,38 @@ export const SeniorityLevelEnum = z.enum([
 // Organizations
 // ---------------------------------------------------------------------------
 
-export const OrganizationTypeEnum = z.enum([
+export const OrganizationSubtypeEnum = z.enum([
+  "ARMY",
+  "ASSOCIATION",
+  "CENTRAL_BANK",
+  "CHAMBER_OF_COMMERCE",
+  "CITY_GOVERNMENT",
+  "CLUB",
   "COMPANY",
+  "COURT",
+  "EMBASSY",
+  "FOUNDATION",
   "GOVERNMENT",
-  "RESEARCH_INSTITUTE",
-  "UNIVERSITY",
+  "HOSPITAL",
   "INTERNATIONAL_ORGANIZATION",
+  "LIBRARY",
+  "MUSEUM",
+  "NATIONAL_AUDIT_OFFICE",
+  "NATIONAL_PARK",
   "NGO",
   "NON_PROFIT",
-  "SOCIETY",
-  "CLUB",
-  "ARMY",
+  "OMBUDSMAN",
   "OTHER",
+  "PRIMARY_SCHOOLS",
+  "PUBLIC_COMPANY",
+  "PUBLIC_PARKS",
+  "RESEARCH_INSTITUTE",
+  "SECONDARY_SCHOOLS",
+  "SOCIETY",
+  "SOE",
+  "STATE_GOVERNMENT",
+  "THINK_TANK",
+  "UNIVERSITY",
 ]);
 
 export const EmployeeCountRangeEnum = z.enum([

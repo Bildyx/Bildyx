@@ -15,7 +15,7 @@ sudo apt-get install -y nodejs
 npm install
 ```
 
-## 2. Generate the prisma schema 
+## 2. Generate the prisma schema
 
 ```bash
 npm run db:pull

@@ -4,12 +4,6 @@ import { universities } from "../routes/universities";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Universities API Endpoints", () => {
   let testCountryId: string;
@@ -25,21 +19,18 @@ describe("Universities API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
-    testCountryId = randomUUID();
+    testCountryId = "UN";
     testCityId = randomUUID();
 
     // Insert mock country
     await database
       .insertInto("countries")
       .values({
-        id: testCountryId,
+        iso_code: testCountryId,
         name: "Test Country for Uni",
         serial_number: "CNT-UNI-01",
         updated_at: new Date(),
@@ -54,32 +45,15 @@ describe("Universities API Endpoints", () => {
         name: "Test City for Uni",
         serial_number: "CTY-UNI-01",
         country_id: testCountryId,
+        currency: "USD",
         updated_at: new Date(),
       })
       .execute();
   });
 
   after(async () => {
-    // Clean up test items
-    try {
-      if (testCityId) {
-        await database
-          .deleteFrom("cities")
-          .where("id", "=", testCityId)
-          .execute();
-      }
-      if (testCountryId) {
-        await database
-          .deleteFrom("countries")
-          .where("id", "=", testCountryId)
-          .execute();
-      }
-      // Hard delete any remaining universities created in tests
-      await database.deleteFrom("universities").execute();
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -112,18 +86,15 @@ describe("Universities API Endpoints", () => {
         description: "Prestigious university in France",
         website_url: "https://sorbonne.edu",
         logo_url: "https://sorbonne.edu/logo.png",
-        founded_year: 1257,
         country_id: testCountryId,
         city_id: testCityId,
-        is_public: true,
         student_count: 55000,
         undergraduates: 35000,
         postgraduates: 20000,
         score: 95,
         local_name: "Université de la Sorbonne",
-        location: "Paris, France",
         notes: "Historical campus",
-        established: "13th Century",
+        established: "1257",
       });
 
       assert.ok(result.id);

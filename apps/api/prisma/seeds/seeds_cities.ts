@@ -2,8 +2,8 @@ import {
   PrismaClient,
   Prisma,
   CostOfLiving,
-  Currency,
   Language,
+  Currency,
 } from "@prisma/client";
 import {
   readCsv,
