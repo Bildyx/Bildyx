@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CostOfLivingSchema, LanguageSchema } from "./utils/enums";
-import { zNullableInt, zEnumArray } from "./utils/preprocessors";
+import { zNullableInt, zNullableString, zNullableStringCoercive, zEnumArray } from "./utils/preprocessors";
 
 export const CitySchema = z.object({
   id: z.string().uuid(),
@@ -10,9 +10,10 @@ export const CitySchema = z.object({
   currency: z.string().length(3),
   is_capital: z.boolean().optional().default(false),
   state_province: z.string().nullable().optional(),
-  population: zNullableInt(),
-  number_of_multinational_hqs: zNullableInt(),
+  population: zNullableStringCoercive(),
+  number_of_multinational_hqs: zNullableStringCoercive(),
   number_of_airports: z.number().int().min(0).nullable().optional(),
+  largest_organization: zNullableString(),
   median_salary: z.number().int().min(0).nullable().optional(),
   cost_of_living: CostOfLivingSchema.nullable().optional(),
   median_home_price: z.number().int().min(0).nullable().optional(),
@@ -22,7 +23,8 @@ export const CitySchema = z.object({
   interesting_fact: z.string().nullable().optional(),
   degree_holders: z.string().nullable().optional(),
   number_of_universities: z.number().int().min(0).nullable().optional(),
-  number_of_nationalities: zNullableInt(),
+  top_universities: zNullableString(),
+  number_of_nationalities: zNullableStringCoercive(),
   language: zEnumArray(LanguageSchema),
   people_description: z.string().nullable().optional(),
   latitude: z.number().min(-90).max(90).nullable().optional(),

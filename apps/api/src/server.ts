@@ -6,20 +6,28 @@ import { openAPIGenerator, openAPIHandler, rpcHandler } from "./application"
 import { NAME, OPENAPI_PREFIX, VERSION, HOST, PORT, RPC_PREFIX } from "./configuration"
 import { router } from "./routes/router"
 import { database } from "./database"
+import { closeBrowser } from "./services/card.service"
 
 const app = express()
 
 app.use(express.json())
 
 app.use(async (req, res, next) => {
-  const result = await rpcHandler.handle(req, res, {
-    context: { headers: req.headers },
-    prefix: RPC_PREFIX,
-  })
-  if (result.matched) {
-    return
+  try {
+    const result = await rpcHandler.handle(req, res, {
+      context: { headers: req.headers, req, res },
+      prefix: RPC_PREFIX,
+    })
+    if (result.matched) {
+      return
+    }
+    next()
+  } catch (err) {
+    if (res.headersSent) {
+      return
+    }
+    next(err)
   }
-  next()
 })
 
 app.get("/spec.json", async (req, res) => {
@@ -44,14 +52,21 @@ app.get("/spec.json", async (req, res) => {
 })
 
 app.use(async (req, res, next) => {
-  const result = await openAPIHandler.handle(req, res, {
-    context: { headers: req.headers },
-    prefix: OPENAPI_PREFIX,
-  })
-  if (result.matched) {
-    return
+  try {
+    const result = await openAPIHandler.handle(req, res, {
+      context: { headers: req.headers, req, res },
+      prefix: OPENAPI_PREFIX,
+    })
+    if (result.matched) {
+      return
+    }
+    next()
+  } catch (err) {
+    if (res.headersSent) {
+      return
+    }
+    next(err)
   }
-  next()
 })
 
 app.use((req, res) => {
@@ -71,6 +86,10 @@ app.use((req, res) => {
         <script>
           Scalar.createApiReference('#app', {
             url: '/spec.json',
+            operationsSorter: (a, b) => {
+              const methods = ['get', 'post', 'put', 'patch', 'delete'];
+              return methods.indexOf(a.method.toLowerCase()) - methods.indexOf(b.method.toLowerCase());
+            },
             authentication: {
               securitySchemes: {
                 bearerAuth: {
@@ -100,6 +119,7 @@ const server = app.listen(PORT, HOST, () => {
 })
 
 const gracefulShutdown = async (): Promise<void> => {
+  await closeBrowser()
   await database.destroy()
   server.close((error) => {
     if (error != null) {
