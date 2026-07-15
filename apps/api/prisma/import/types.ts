@@ -31,6 +31,14 @@ export interface ImportAdapter<Row extends CsvRow = CsvRow, Fk = unknown> {
   naturalKeyColumn: string;
   // Prisma field name for the same natural key (used in `where` clauses).
   naturalKeyField: string;
+  // Optional: normalizes the raw, trimmed CSV natural-key value the same way
+  // mapRow will before using it for hashing/DB writes (e.g. Country.isoCode
+  // is upper-cased and truncated to 2 chars in mapRow). plan.ts's
+  // duplicate-detection and orphan-tracking run before mapRow is called and
+  // must agree with what mapRow actually produces, or they can miss real
+  // duplicates / misreport orphans purely due to casing. Defaults to the
+  // identity function, which is correct for every adapter except Country.
+  normalizeNaturalKey?: (raw: string) => string;
   // Prisma field name for the model's soft-delete timestamp, used by
   // --prune only (see run.ts). Every one of the 11 reference models has one
   // ("deletedAt" or, for Subject/StudyFields, "deleted_at").

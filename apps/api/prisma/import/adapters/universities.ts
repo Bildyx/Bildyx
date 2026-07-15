@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { UniversityType } from "@prisma/client";
-import { toFloat, toInt, toJson } from "../../seed-utils";
-import { checkEnum, checkOptionalFk, checkRequiredText } from "../checks";
+import { toFloat, toInt } from "../../seed-utils";
+import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -103,6 +103,9 @@ export const universitiesAdapter: ImportAdapter<CsvRow, UniversitiesFk> = {
     const cityId = checkOptionalFk(row.city_id, fk.resolveCityId, "city_id");
     if (cityId.issue) warnings.push(cityId.issue);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -115,7 +118,7 @@ export const universitiesAdapter: ImportAdapter<CsvRow, UniversitiesFk> = {
         countryId: countryId.value,
         cityId: cityId.value,
         studentCount: toInt(row.student_count),
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
         scoreUniversity: toFloat(row.score_university),
         localName: row.local_name || null,
         notes: row.notes || null,

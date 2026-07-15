@@ -71,7 +71,18 @@ export async function runImportForModel(
     const written: { naturalKey: string; rowHash: string; data: Record<string, unknown>; row: CsvRow }[] = [];
 
     for (const planned of plan.toInsert) {
-      await delegate.create({ data: planned.data });
+      // upsert, not create: ImportRowHash may not know about this natural
+      // key yet (e.g. the row was seeded by the legacy npm run seed script,
+      // or ImportRowHash was never backfilled) even though a row with the
+      // same natural key already exists in the target table - a blind
+      // create() would then crash the whole transaction on the unique
+      // constraint. upsert makes this self-healing: ImportRowHash gets
+      // populated on this run either way, so later runs classify correctly.
+      await delegate.upsert({
+        where: { [adapter.naturalKeyField]: planned.naturalKey },
+        create: planned.data,
+        update: planned.data,
+      });
       written.push(planned);
     }
     for (const planned of plan.toUpdate) {

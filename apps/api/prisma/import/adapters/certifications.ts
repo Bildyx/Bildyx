@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { CertificationCategory, DifficultyLevel } from "@prisma/client";
-import { buildNameLookup, toInt, toJson, toStringArray } from "../../seed-utils";
-import { checkEnum, checkOptionalFk, checkRequiredText } from "../checks";
+import { buildNameLookup, toInt, toStringArray } from "../../seed-utils";
+import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -61,6 +61,9 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
     );
     if (issuingOrganizationId.issue) warnings.push(issuingOrganizationId.issue);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -76,7 +79,7 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
         difficulty: difficulty.value,
         websiteUrl: row.website_url || null,
         score: toInt(row.score),
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
       },
       errors,
       warnings,

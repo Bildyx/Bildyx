@@ -42,12 +42,13 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
 }
 
 // Colonnes reellement presentes dans organizations.csv (le fichier ne
-// contient pas d'id/created_at/updated_at/deleted_at, et son "type" est une
-// colonne texte unique, sans equivalent des type1/type2 du schema actuel).
+// contient pas d'id/created_at/updated_at/deleted_at).
 type OrganizationCsv = {
   name: string;
   slug: string;
   type?: string;
+  type1?: string;
+  type2?: string;
   legal_status?: string;
   ownership?: string;
   mission?: string;
@@ -103,10 +104,8 @@ export async function seedOrganizations(prisma: PrismaClient) {
       slug: r.slug,
 
       subtype: parseEnum(r.type, OrganizationSubType),
-      // type1/type2 n'ont pas d'equivalent dans organizations.csv (une seule
-      // colonne "type" y existe) -> laisses a null.
-      type1: null,
-      type2: null,
+      type1: r.type1 || null,
+      type2: r.type2 || null,
 
       // legal_status n'a plus de champ correspondant dans le schema actuel
       // (retire de Organization) -> non stocke.
