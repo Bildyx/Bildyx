@@ -1,11 +1,11 @@
 import {
   PrismaClient,
-  Prisma,
+  Currency,
   Language,
+  CostOfLiving,
+  Prisma,
   GovernmentType,
   QualityOfLife,
-  CostOfLiving,
-  Currency,
 } from "@prisma/client";
 import {
   readCsv,
@@ -14,7 +14,6 @@ import {
   toInt,
   toFloat,
   toBigInt,
-  toStringArray,
   parseEnum,
   parseEnumArray,
 } from "../seed-utils";
@@ -72,75 +71,83 @@ type CountryCsv = {
 };
 
 export async function seedCountries(prisma: PrismaClient) {
-  const rows = readCsv<CountryCsv>("countries_rows.csv");
+  const rows = readCsv<CountryCsv>("countries.csv");
 
-  const data: Prisma.CountryCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    serial_number: r.serial_number,
+  const skipped = rows.filter((r) => !r.iso_code || r.iso_code.trim() === "");
+  if (skipped.length > 0) {
+    console.warn(
+      `Countries skipped (missing iso_code): ${skipped.map((r) => r.name).join(", ")}`,
+    );
+  }
 
-    isoCode: r.iso_code ? r.iso_code.trim().toUpperCase().slice(0, 2) : "XX",
-    capitalName: r.capital_name || null,
-    flagUrl: r.flag_url || null,
+  const data: Prisma.CountryCreateManyInput[] = rows
+    .filter((r) => r.iso_code && r.iso_code.trim() !== "")
+    .map((r) => ({
+      isoCode: r.iso_code!.trim().toUpperCase().slice(0, 2),
+      name: r.name,
+      serial_number: r.serial_number,
 
-    population: r.population || null,
-    areaKm2: toFloat(r.area_km2),
-    gdpUsd: toFloat(r.gdp_usd),
-    gdpPerCapitaUsd: toFloat(r.gdp_per_capita_usd),
-    hdi: toFloat(r.hdi),
+      capitalName: r.capital_name || null,
+      flagUrl: r.flag_url || null,
 
-    currency: parseEnum(r.currency, Currency),
+      population: r.population ?? null,
+      areaKm2: toInt(r.area_km2),
+      gdpUsd: toFloat(r.gdp_usd),
+      gdpPerCapitaUsd: toFloat(r.gdp_per_capita_usd),
+      hdi: toFloat(r.hdi),
 
-    officialLanguages: parseEnumArray(r.official_languages, Language),
+      currency: parseEnum(r.currency, Currency),
 
-    callingCode: r.calling_code || null,
+      officialLanguages: parseEnumArray(r.official_languages, Language),
 
-    governmentType: parseEnum(r.government_type, GovernmentType),
-    qualityOfLife: parseEnum(r.quality_of_life, QualityOfLife),
+      callingCode: r.calling_code || null,
 
-    temperatures: r.temperatures || null,
-    climate: r.climate || null,
-    crimeRate: r.crime_rate || null,
-    incomeInequality: r.income_inequality || null,
-    workLifeBalance: r.work_life_balance || null,
-    main_industries: r.main_industries || null,
+      governmentType: parseEnum(r.government_type, GovernmentType),
+      qualityOfLife: parseEnum(r.quality_of_life, QualityOfLife),
 
-    numberOfMultinationalHqs: r.number_of_multinational_hqs || null,
-    medianSalary: toInt(r.median_salary),
+      temperatures: r.temperatures || null,
+      climate: r.climate || null,
+      crimeRate: r.crime_rate || null,
+      incomeInequality: r.income_inequality || null,
+      workLifeBalance: r.work_life_balance || null,
+      mainIndustries: r.main_industries || null,
 
-    costOfLiving: parseEnum(r.cost_of_living, CostOfLiving),
+      numberOfMultinationalHqs: r.number_of_multinational_hqs ?? null,
+      medianSalary: toInt(r.median_salary),
 
-    medianHomePrice: toInt(r.median_home_price),
-    averageRent: toInt(r.average_rent),
+      costOfLiving: parseEnum(r.cost_of_living, CostOfLiving),
 
-    interestingFact: r.interesting_fact || null,
-    citizenshipProcess: r.citizenship_process || null,
-    workPermit: r.work_permit || null,
+      medianHomePrice: toInt(r.median_home_price),
+      averageRent: toInt(r.average_rent),
 
-    globalCompetitivenessIndex: r.global_competitiveness_index || null,
-    levelOfGlobalisation: r.level_of_globalisation || null,
-    numberOfInternationalStudents: toInt(r.number_of_international_students),
-    numberOfForeignOrganizations: toInt(r.number_of_foreign_organizations),
-    personalIncomeTax: r.personal_income_tax || null,
-    numberOfTourists: r.number_of_tourists || null,
-    numberOfAirports: r.number_of_airports || null,
-    qualityOfEducation: r.quality_of_education || null,
-    degreeHolders: r.degree_holders || null,
-    numberOfUniversities: toInt(r.number_of_universities),
-    top_universities: r.top_universities || null,
+      interestingFact: r.interesting_fact || null,
+      citizenshipProcess: r.citizenship_process || null,
+      workPermit: r.work_permit || null,
 
-    ethnicGroups: r.ethnic_groups || null,
-    religion: r.religion || null,
+      globalCompetitivenessIndex: r.global_competitiveness_index ?? null,
+      levelOfGlobalisation: r.level_of_globalisation || null,
+      numberOfInternationalStudents: toInt(r.number_of_international_students),
+      numberOfForeignOrganizations: toInt(r.number_of_foreign_organizations),
+      personalIncomeTax: r.personal_income_tax || null,
+      numberOfTourists: r.number_of_tourists ?? null,
+      numberOfAirports: r.number_of_airports ?? null,
+      qualityOfEducation: r.quality_of_education || null,
+      degreeHolders: r.degree_holders || null,
+      numberOfUniversities: toInt(r.number_of_universities),
+      top_universities: r.top_universities || null,
 
-    culturalValues: r.cultural_values || null,
-    peopleDescription: r.people_description || null,
+      ethnicGroups: r.ethnic_groups || null,
+      religion: r.religion || null,
 
-    metadata: toJson(r.metadata),
+      culturalValues: r.cultural_values || null,
+      peopleDescription: r.people_description || null,
 
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
-  }));
+      metadata: toJson(r.metadata),
+
+      deletedAt: toDate(r.deleted_at, false),
+      createdAt: toDate(r.created_at, true) as Date,
+      updatedAt: toDate(r.updated_at, true) as Date,
+    }));
 
   const result = await prisma.country.createMany({
     data,

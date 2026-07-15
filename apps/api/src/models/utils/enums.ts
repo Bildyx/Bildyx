@@ -294,14 +294,7 @@ export const UniversityTypeEnum = z.enum([
 // Users
 // ---------------------------------------------------------------------------
 
-export const UserRoleEnum = z.enum([
-  "ADMIN",
-  "CANDIDATE",
-  "MODERATOR",
-  "ORGANIZATION",
-  "SUPER_ADMIN",
-  "USER",
-]);
+export const UserRoleEnum = z.enum(["ADMIN", "CANDIDATE", "ORGANIZATION"]);
 
 export const UserStatusEnum = z.enum([
   "ACTIVE",

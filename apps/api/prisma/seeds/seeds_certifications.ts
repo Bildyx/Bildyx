@@ -10,6 +10,7 @@ import {
   toDate,
   toStringArray,
   parseEnum,
+  buildNameLookup,
 } from "../seed-utils";
 
 type CertificationCsv = {
@@ -33,40 +34,63 @@ type CertificationCsv = {
 };
 
 export async function seedCertifications(prisma: PrismaClient) {
-  const rows = readCsv<CertificationCsv>("certifications_rows.csv");
+  const rows = readCsv<CertificationCsv>("certifications.csv");
 
-  const data: Prisma.CertificationCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    serial_number: r.serial_number,
+  // certifications.csv renseigne issuing_organization_id avec le nom de
+  // l'organisation (ex: "Adobe") plutot que son UUID -> resolution par nom.
+  const organizations = await prisma.organization.findMany({
+    select: { id: true, name: true },
+  });
+  const resolveOrganizationId = buildNameLookup(organizations);
+  const unmatchedOrganizations = new Set<string>();
 
-    issuingOrganizationId: r.issuing_organization_id || null,
+  const data: Prisma.CertificationCreateManyInput[] = rows.map((r) => {
+    const issuingOrganizationId = resolveOrganizationId(
+      r.issuing_organization_id,
+    );
+    if (r.issuing_organization_id && !issuingOrganizationId) {
+      unmatchedOrganizations.add(r.issuing_organization_id);
+    }
 
-    description: r.description || null,
-    level: r.level || null,
+    return {
+      id: r.id,
+      name: r.name,
+      serial_number: r.serial_number,
 
-    category: parseEnum(r.category, CertificationCategory),
+      issuingOrganizationId,
 
-    products: toStringArray(r.products),
-    jobs: toStringArray(r.jobs),
+      description: r.description || null,
+      level: r.level || null,
 
-    validityDurationMonths:
-      r.validity_duration_months && r.validity_duration_months !== ""
-        ? Number(r.validity_duration_months)
-        : null,
+      category: parseEnum(r.category, CertificationCategory),
 
-    difficulty: parseEnum(r.difficulty, DifficultyLevel),
+      products: toStringArray(r.products),
+      jobs: toStringArray(r.jobs),
 
-    websiteUrl: r.website_url || null,
+      validityDurationMonths:
+        r.validity_duration_months && r.validity_duration_months !== ""
+          ? Number(r.validity_duration_months)
+          : null,
 
-    score: r.score && r.score !== "" ? Number(r.score) : null,
+      difficulty: parseEnum(r.difficulty, DifficultyLevel),
 
-    metadata: toJson(r.metadata),
+      websiteUrl: r.website_url || null,
 
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
-  }));
+      score: r.score && r.score !== "" ? Number(r.score) : null,
+
+      metadata: toJson(r.metadata),
+
+      deletedAt: toDate(r.deleted_at, false),
+      createdAt: toDate(r.created_at, true) as Date,
+      updatedAt: toDate(r.updated_at, true) as Date,
+    };
+  });
+
+  if (unmatchedOrganizations.size > 0) {
+    console.warn(
+      `Certifications: issuing_organization_id non resolus (mis a null): ${[...unmatchedOrganizations].join(", ")}`,
+    );
+  }
 
   // NOTE: depend de organizations.ts (issuing_organization_id) -> a seeder
   // avant.

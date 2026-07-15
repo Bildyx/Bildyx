@@ -1,0 +1,96 @@
+﻿@model MayGraphCards.Models.FactCardModel
+@using System
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="@Model.BaseHref" />
+    <meta charset="UTF-8">
+    <title>@Model.SerialNumber - Card</title>
+        <style>
+        @@font-face {
+            font-family: 'Bebas Neue Pro';
+            src: url('Fonts/BebasNeuePro-Bold.woff2') format('woff2');
+            font-weight: bold;
+        }
+
+        @@font-face {
+            font-family: 'Work Sans';
+            src: url('Fonts/WorkSans-Regular.woff2') format('woff2');
+        }
+
+        html, body {
+            width: 450px;
+            margin: 0;
+            padding: 0;
+            font-family: 'Work Sans', Arial, sans-serif;
+            background-color: transparent;
+        }
+        .main-card { width: 100%; height: 100%; background: #fdfdfd; border: 3px solid #396bb3; border-radius: 60px; padding: 35px 40px 35px 40px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; }
+        .main-card::after { content: ""; position: absolute; top: 20px; left: 25px; right: 25px; bottom: 20px; border-radius: 50px; border: 3px solid #396bb3; pointer-events: none; }
+        .header-row { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
+        .header { display: flex; border-radius: 30px; border: 3px solid #396bb3; padding: 5px 10px; justify-content: center; align-items: center; width: 100%; }
+        .maygraph-logo { display: flex; align-items: center; }
+        .maygraph-logo img { height: 80px; object-fit: contain; }
+        .dyk-title { font-family: 'Bebas Neue Pro', sans-serif; font-size: 2.2rem; color: #1d1d1b; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; text-align: center; gap: 6px; }
+        .dyk-title img { height: 35px; }
+        .hashtags-row { display: flex; flex-direction: row; justify-content: center; gap: 10px; margin-top: 12px; }
+        .hashtag-container { display: flex; flex-direction: row; align-items: center; color: #396bb3; font-weight: 700; font-size: 1.1rem; gap: 3px; }
+        .hashtag-container img { height: 20px; }
+        .fact-row { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .fact-title { margin-top: 20px; display: flex; justify-content: center; font-size: 1.4rem; font-weight: bold; word-break: break-word; text-align: center; }
+        .fact-text { margin-top: 15px; margin-bottom: 15px; letter-spacing: 0.7px; text-align: center; font-size: 1.5rem; line-height: 1.8rem; padding: 0px 10px; color: #1d1d1b; display: flex; align-items: center; white-space: break-spaces; }
+        .footer-row { display: flex; justify-content: space-between; position: relative; margin-top: 5px; padding: 0px 15px; }
+        .serial-number { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; color: #1d1d1b; }
+        .copyright { margin-left: auto; color: #1d1d1b; font-weight: bold; }
+            .header-icon { display: none; }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <div class="header-row">
+            <div class="maygraph-logo">
+                <img src="Images/logos/Logo-MayGraph_Big1.png" alt="logos/Logo-MayGraph_Big1.png" />
+            </div>
+            <div class="header">
+                <div class="dyk-title">Did You Know?</div>
+            </div>
+            <div class="header-icon">
+                <img src="Images/icons/knowledge.png" />
+            </div>
+        </div>
+        @if (!String.IsNullOrWhiteSpace(Model.Hashtag1) || !String.IsNullOrWhiteSpace(Model.Hashtag2))
+        {
+            <div class="hashtags-row">
+                @if (!String.IsNullOrWhiteSpace(Model.Hashtag1))
+                {
+                    <div class="hashtag-container">
+                        @if (!String.IsNullOrWhiteSpace(Model.Icon1))
+                        {
+                            <img src="@($"Images/icons/{Model.Icon1}.png")" alt="Icon1" />
+                        }
+                        <div>@($"#{Model.Hashtag1}")</div>
+                    </div>                    
+                }
+                @if (!String.IsNullOrWhiteSpace(Model.Hashtag2))
+                {
+                    <div class="hashtag-container">
+                        <img src="Images/icons/brain_target.png" alt="Icon2" />
+                        <div>@($"#{Model.Hashtag2}")</div>
+                    </div>
+                }
+            </div>
+        }
+        <div class="fact-row">
+            @if (!String.IsNullOrWhiteSpace(Model.Title))
+            {
+                <div class="fact-title">@Model.Title</div>
+            }
+            <div class="fact-text">@Model.Story</div>
+        </div>
+        <div class="footer-row">
+            <span class="serial-number">@($"#{Model.SerialNumber}")</span>
+            <span class="copyright">@($"©{DateTime.Now.Year}")</span>
+        </div>
+    </div>
+</body>
+</html>

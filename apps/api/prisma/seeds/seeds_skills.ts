@@ -1,8 +1,4 @@
-import {
-  PrismaClient,
-  Prisma,
-  DifficultyLevel,
-} from "@prisma/client";
+import { PrismaClient, Prisma, DifficultyLevel } from "@prisma/client";
 import {
   readCsv,
   toJson,
@@ -16,7 +12,6 @@ type SkillCsv = {
   name: string;
   serial_number: string;
   type?: string;
-  category?: string;
   categories?: string;
   description?: string;
   icon_url?: string;
@@ -36,7 +31,7 @@ type SkillCsv = {
 };
 
 export async function seedSkills(prisma: PrismaClient) {
-  const rows = readCsv<SkillCsv>("skills_rows.csv");
+  const rows = readCsv<SkillCsv>("skills.csv");
 
   const data: Prisma.SkillCreateManyInput[] = rows.map((r) => ({
     id: r.id,
@@ -45,7 +40,9 @@ export async function seedSkills(prisma: PrismaClient) {
 
     type: r.type || null,
 
-    category: r.category || null,
+    // "categories" est une colonne CSV multi-valeurs (comma-separated), mais
+    // Skill.category est un simple champ texte -> stockee telle quelle.
+    category: r.categories || null,
 
     description: r.description || null,
     iconUrl: r.icon_url || null,

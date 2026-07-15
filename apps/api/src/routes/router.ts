@@ -1,4 +1,5 @@
 import { publicProcedure } from "../oRPC";
+import { auth } from "./auth";
 import { certifications } from "./certifications";
 import { cities } from "./cities";
 import { countries } from "./countries";
@@ -22,6 +23,7 @@ import { audit_logs } from "./audit_logs";
 import { cards } from "./cards";
 
 export const router = publicProcedure.router({
+  auth,
   certifications,
   cities,
   countries,

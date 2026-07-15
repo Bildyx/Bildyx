@@ -10,13 +10,13 @@
             <div class="footer-column">
                 <h2>About us</h2>
                 <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>company.php">Company</a>
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=mission">Mission</a>
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=contact">Contact</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>mission.php">Mission</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>contact.php">Contact</a>
             </div>
 
             <div class="footer-column">
                 <h2>Our story</h2>
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=why-we-built-it">Why we built it</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>why-built-it.php">Why we built it</a>
             </div>
 
             <div class="footer-column">
@@ -32,8 +32,8 @@
         <div class="footer-bottom">
             <p>© 2026 MayGraph. All rights reserved.</p>
             <div class="footer-legal">
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=privacy-policy">Privacy Policy</a>
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=terms-of-service">Terms of Service</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>privacy-policy.php">Privacy Policy</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>terms-service.php">Terms of Service</a>
             </div>
         </div>
     </footer>

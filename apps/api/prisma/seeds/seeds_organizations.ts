@@ -1,17 +1,19 @@
+import { randomUUID } from "node:crypto";
 import {
-  PrismaClient,
-  Prisma,
-  OrganizationSubType,
   EmployeeCountRange,
+  OrganizationSubType,
+  Prisma,
+  PrismaClient,
 } from "@prisma/client";
 import {
+  buildNameLookup,
+  normalizeEnumKey,
+  parseEnum,
   readCsv,
-  toJson,
   toDate,
   toInt,
+  toJson,
   toStringArray,
-  parseEnum,
-  normalizeEnumKey,
 } from "../seed-utils";
 
 // EmployeeCountRange values are like RANGE_1_10, RANGE_5000_PLUS.
@@ -39,8 +41,10 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
   return null;
 }
 
+// Colonnes reellement presentes dans organizations.csv (le fichier ne
+// contient pas d'id/created_at/updated_at/deleted_at, et son "type" est une
+// colonne texte unique, sans equivalent des type1/type2 du schema actuel).
 type OrganizationCsv = {
-  id: string;
   name: string;
   slug: string;
   type?: string;
@@ -60,65 +64,96 @@ type OrganizationCsv = {
   equipments?: string;
   score?: string;
   city_id?: string;
-  number_of_employees?: string;
-  number_of_subsidiaries?: string;
+  numberOfEmployees?: string;
+  subsidiaries?: string;
   parent_organization_id?: string;
   metadata?: string;
-  deleted_at?: string;
-  created_at?: string;
-  updated_at?: string;
 };
 
 export async function seedOrganizations(prisma: PrismaClient) {
-  const rows = readCsv<OrganizationCsv>("organizations_rows.csv");
+  const rows = readCsv<OrganizationCsv>("organizations.csv");
 
-  const data: Prisma.OrganizationCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    slug: r.slug,
+  // organizations.csv renseigne city_id avec le nom de la ville (les villes
+  // sont deja seedees a ce stade) et parent_organization_id avec le nom
+  // d'une autre organisation du meme fichier (elle n'a pas encore d'id reel
+  // puisqu'aucune ligne organization n'est encore en base) -> resolution par
+  // nom, avec des uuid generes nous-memes en amont pour parent_organization_id
+  // afin de pouvoir la resoudre en une seule passe quel que soit l'ordre des
+  // lignes dans le CSV.
+  const cities = await prisma.city.findMany({ select: { id: true, name: true } });
+  const resolveCityId = buildNameLookup(cities);
+  const unmatchedCities = new Set<string>();
 
-    type: parseEnum(r.type, OrganizationSubType),
+  const idByOrgName = new Map(
+    rows.map((r) => [r.name.trim().toLowerCase(), randomUUID()]),
+  );
+  const resolveParentId = (rawName?: string): string | null => {
+    if (!rawName || rawName.trim() === "") return null;
+    return idByOrgName.get(rawName.trim().toLowerCase()) ?? null;
+  };
+  const unmatchedParents = new Set<string>();
 
-    legalStatus: r.legal_status || null,
-    ownership: r.ownership || null,
-    mission: r.mission || null,
+  const data: Prisma.OrganizationCreateManyInput[] = rows.map((r) => {
+    const city_id = resolveCityId(r.city_id);
+    if (r.city_id && !city_id) unmatchedCities.add(r.city_id);
 
-    knownFor: toStringArray(r.known_for),
-    activities: toStringArray(r.activities),
+    return {
+      id: idByOrgName.get(r.name.trim().toLowerCase())!,
+      name: r.name,
+      slug: r.slug,
 
-    project: r.project || null,
+      subtype: parseEnum(r.type, OrganizationSubType),
+      // type1/type2 n'ont pas d'equivalent dans organizations.csv (une seule
+      // colonne "type" y existe) -> laisses a null.
+      type1: null,
+      type2: null,
 
-    researchAreas: toStringArray(r.research_areas),
-    products: toStringArray(r.products),
-    services: toStringArray(r.services),
-    partnerships: toStringArray(r.partnerships),
+      // legal_status n'a plus de champ correspondant dans le schema actuel
+      // (retire de Organization) -> non stocke.
 
-    budget: r.budget || null,
-    founded: r.founded || null,
-    founder: r.founder || null,
-    equipments: r.equipments || null,
+      ownership: r.ownership || null,
+      mission: r.mission || null,
 
-    score: toInt(r.score),
+      knownFor: r.known_for || null,
+      programsActivities: toStringArray(r.activities),
 
-    cityId: r.city_id || null,
+      project: r.project || null,
 
-    numberOfEmployees: parseEmployeeRange(r.number_of_employees),
-    numberOfSubsidiaries: toInt(r.number_of_subsidiaries),
+      researchAreas: toStringArray(r.research_areas),
+      products: toStringArray(r.products),
+      services: toStringArray(r.services),
+      partners: toStringArray(r.partnerships),
 
-    parentOrganizationId: r.parent_organization_id || null,
+      budget: r.budget || null,
+      founded: r.founded || null,
+      founders: r.founder ? [r.founder] : [],
+      facilities: r.equipments ? [r.equipments] : [],
 
-    metadata: toJson(r.metadata),
+      // authority/jurisdiction/members/collections/graduates/undergraduates/
+      // personnel n'ont pas de colonne dans organizations.csv -> laisses a
+      // null (champs optionnels dans le schema).
 
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
-  }));
+      score: toInt(r.score),
 
-  // IMPORTANT: parentOrganizationId est une self-reference. Si un enfant
-  // apparait dans le CSV avant son parent, createMany peut echouer sur la
-  // contrainte de foreign key. Si ca arrive, seed en 2 passes : d'abord sans
-  // parentOrganizationId, puis un updateMany pour le renseigner, OU trie
-  // "rows" selon la profondeur de hierarchie avant le map ci-dessus.
+      city_id,
+
+      numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
+      subsidiaries: r.subsidiaries,
+
+      // parentOrganizationId est une self-reference : renseignee dans la 2e
+      // passe ci-dessous, une fois toutes les lignes en base, pour ne jamais
+      // violer la contrainte de cle etrangere si un enfant apparait dans le
+      // CSV avant son parent.
+      parentOrganizationId: null,
+
+      metadata: toJson(r.metadata),
+
+      deletedAt: toDate(undefined, false),
+      createdAt: toDate(undefined, true) as Date,
+      updatedAt: toDate(undefined, true) as Date,
+    };
+  });
+
   const result = await prisma.organization.createMany({
     data,
     skipDuplicates: true,
@@ -126,8 +161,29 @@ export async function seedOrganizations(prisma: PrismaClient) {
 
   console.log(`Organizations rows imported: ${result.count}`);
 
-  // NOTE: les relations M2M "industries" et "workingArea" ne sont pas
-  // seedées ici (absentes du CSV).
+  for (const r of rows) {
+    const parentOrganizationId = resolveParentId(r.parent_organization_id);
+    if (r.parent_organization_id && !parentOrganizationId) {
+      unmatchedParents.add(r.parent_organization_id);
+    }
+    if (!parentOrganizationId) continue;
+
+    await prisma.organization.update({
+      where: { id: idByOrgName.get(r.name.trim().toLowerCase())! },
+      data: { parentOrganizationId },
+    });
+  }
+
+  if (unmatchedCities.size > 0) {
+    console.warn(
+      `Organizations: city_id non resolus (mis a null): ${[...unmatchedCities].join(", ")}`,
+    );
+  }
+  if (unmatchedParents.size > 0) {
+    console.warn(
+      `Organizations: parent_organization_id non resolus (mis a null): ${[...unmatchedParents].join(", ")}`,
+    );
+  }
 
   return result.count;
 }

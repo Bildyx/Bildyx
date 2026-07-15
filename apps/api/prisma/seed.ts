@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { PrismaClient } from "@prisma/client";
 
 import { seedIndustries } from "./seeds/seeds_industries";
@@ -11,6 +13,7 @@ import { seedUniversities } from "./seeds/seeds_universities";
 import { seedDegrees } from "./seeds/seeds_degrees";
 import { seedSubjects } from "./seeds/seeds_subjects";
 import { seedStudyFields } from "./seeds/seeds_studyFields";
+import { seedManyToManyRelations } from "./seeds/seeds_relations";
 
 const prisma = new PrismaClient();
 
@@ -34,6 +37,12 @@ async function main() {
   await seedSkills(prisma);
   await seedDegrees(prisma);
   await seedStudyFields(prisma);
+
+  // Doit tourner en dernier : lie les relations many-to-many implicites
+  // (Organization<->Country/Industry/City, City<->Industry, Subject<->
+  // Industry, Industry<->Industry) une fois que toutes les lignes qu'elles
+  // referencent existent en base.
+  await seedManyToManyRelations(prisma);
 
   console.log("\nSeed completed successfully.");
 }

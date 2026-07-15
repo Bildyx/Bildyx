@@ -1,7 +1,7 @@
+import "dotenv/config";
 import { Kysely, PostgresDialect } from "kysely";
 import pg from "pg";
 import type { DB } from "./db/types";
-import "dotenv/config";
 
 const { Pool } = pg;
 
@@ -11,27 +11,51 @@ export let pgliteClient: any = null;
 if (process.env.NODE_ENV === "test") {
   const { PGlite } = await import("@electric-sql/pglite");
   const { PGliteDialect } = await import("kysely");
+
   pgliteClient = new PGlite();
+
   dialect = new PGliteDialect({
     pglite: pgliteClient,
   });
 } else {
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error(
+      "DATABASE_URL is missing. Please check your .env file.",
+    );
+  }
+
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     max: 10,
+    ssl: connectionString.includes("localhost")
+      ? false
+      : {
+          rejectUnauthorized: false,
+        },
   });
 
-  // Register standard text array parser for the custom enum array _Language OID dynamically
   try {
-    const res = await pool.query(
-      "SELECT oid FROM pg_type WHERE typname = '_Language'",
+    const result = await pool.query(
+      `SELECT oid
+       FROM pg_type
+       WHERE typname = '_Language'`,
     );
-    if (res.rows.length > 0) {
-      const oid = res.rows[0].oid;
-      pg.types.setTypeParser(oid, pg.types.getTypeParser(1009 as any));
+
+    if (result.rows.length > 0) {
+      const oid = result.rows[0].oid;
+
+      pg.types.setTypeParser(
+        oid,
+        pg.types.getTypeParser(1009 as any),
+      );
     }
-  } catch (err) {
-    console.error("Failed to register custom enum array parser:", err);
+  } catch (error) {
+    console.error(
+      "Failed to register custom enum array parser:",
+      error,
+    );
   }
 
   dialect = new PostgresDialect({
@@ -44,25 +68,33 @@ export const database = new Kysely<DB>({
 });
 
 if (process.env.NODE_ENV === "test") {
-  // Prevent Kysely from closing/destroying the database during tests
   const originalDestroy = database.destroy.bind(database);
+
   database.destroy = async () => {
-    // No-op to allow sharing database in a single process test run
+    // Keep the shared test database alive.
   };
+
   (database as any).realDestroy = originalDestroy;
 
-  // Intercept PGlite.exec to avoid executing schema.sql multiple times
   if (pgliteClient) {
     const originalExec = pgliteClient.exec.bind(pgliteClient);
     let schemaLoaded = false;
-    pgliteClient.exec = async (sql: string, options?: any) => {
-      if (sql.includes("CREATE TABLE") || sql.includes("create table")) {
+
+    pgliteClient.exec = async (
+      sql: string,
+      options?: any,
+    ) => {
+      const createsTable = /create\s+table/i.test(sql);
+
+      if (createsTable) {
         if (schemaLoaded) {
           return [];
         }
+
         schemaLoaded = true;
       }
-      return await originalExec(sql, options);
+
+      return originalExec(sql, options);
     };
   }
 }

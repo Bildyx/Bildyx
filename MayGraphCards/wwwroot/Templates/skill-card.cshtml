@@ -1,0 +1,154 @@
+﻿@model MayGraphCards.Models.SkillCardModel
+@using System
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="@Model.BaseHref" />
+    <meta charset="UTF-8">
+    <title>@Model.SerialNumber - Card</title>
+        <style>
+
+        @@font-face { font-family: 'Bebas Neue Pro'; src: url('Fonts/BebasNeuePro-Bold.woff2') format('woff2'); font-weight: bold; }
+        @@font-face { font-family: 'Work Sans'; src: url('Fonts/WorkSans-Regular.woff2') format('woff2'); }
+        html, body { width: 550px; margin: 0; padding: 0; font-family: 'Work Sans', Arial, sans-serif; background-color: transparent; }
+        .main-card { width: 100%; height: 100%; background: #fdfdfd; border: 3px solid #396bb3; border-radius: 60px; padding: 35px 40px 30px 40px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; }
+        .main-card::after { content: ""; position: absolute; top: 20px; left: 25px; right: 25px; bottom: 20px; border-radius: 50px; border: 3px solid #396bb3; pointer-events: none; }
+        .header-row { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
+        .header { display: flex; border-radius: 30px; border: 3px solid #396bb3; padding: 5px 10px; justify-content: center; width: 100%; }
+        .maygraph-logo { display: flex; align-items: center; }
+        .maygraph-logo img { height: 80px; object-fit: contain; }
+        .skill-title { font-family: 'Bebas Neue Pro', sans-serif; font-size: 1.8rem; color: #1d1d1b; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; text-align: center; gap: 15px; justify-content: center; }
+        .skill-title img { width: 35px; }
+        .type-primary { color: #104589; font-weight: 700; font-size: 1.25rem; text-align: center; margin-bottom: 15px; }
+        .info-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .info-icon { display: flex; align-items: center; justify-content: center; }
+        .info-icon img { width: 40px; object-fit: contain; }
+        .info-block { display: flex; flex-direction: column; }
+        .info-label { color: #090b28; font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+        .info-value { color: #00448c; font-size: 1rem; font-weight: 500; word-break: break-word; }
+        .footer-row { display: flex; justify-content: space-between; position: relative; margin-top: 5px; padding: 0px 15px; }
+        .serial-number { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; color: #1d1d1b; }
+        .copyright { margin-left: auto; color: #1d1d1b; font-weight: bold; }
+            .header-icon { display: none; }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <div class="header-row">
+            <div class="maygraph-logo">
+                <img src="Images/logos/Logo-MayGraph_Big1.png" />
+            </div>
+            <div class="header">
+                <div class="skill-title">@Model.Name</div>
+            </div>
+            <div class="header-icon">
+                <img src="Images/icons/skill.png" />
+            </div>
+        </div>
+        @if (!String.IsNullOrWhiteSpace(Model.Type))
+        {
+            <div class="type-primary">@Model.Type</div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.SkillCategories))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/skill_categorie.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Skill Categories</span>
+                    <span class="info-value">@Model.SkillCategories</span>
+                </div>
+            </div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.UsedIn))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/used_in.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Used in</span>
+                    <span class="info-value">@Model.UsedIn</span>
+                </div>
+            </div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.JobOccupations))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/employees.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Job Occupations</span>
+                    <span class="info-value">@Model.JobOccupations</span>
+                </div>
+            </div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.Industry))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/industry.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Industry</span>
+                    <span class="info-value">@Model.Industry</span>
+                </div>
+            </div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.ProductCategory))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/product_branch.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Product Category</span>
+                    <span class="info-value">@Model.ProductCategory</span>
+                </div>
+            </div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.CommonFieldsOfStudy))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/mortarboard.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Common Fields of Study</span>
+                    <span class="info-value">@Model.CommonFieldsOfStudy</span>
+                </div>
+            </div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.RelatedAbilities))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/brain.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Related Abilities</span>
+                    <span class="info-value">@Model.RelatedAbilities</span>
+                </div>
+            </div>
+        }
+        @if (!String.IsNullOrWhiteSpace(Model.TimeToMasterIt))
+        {
+            <div class="info-row">
+                <span class="info-icon">
+                    <img src="Images/icons/hourglass.png" />
+                </span>
+                <div class="info-block">
+                    <span class="info-label">Time to master it</span>
+                    <span class="info-value">@Model.TimeToMasterIt</span>
+                </div>
+            </div>
+        }
+        <div class="footer-row">
+            <span class="serial-number">@($"#{Model.SerialNumber}")</span>
+            <span class="copyright">@($"©{DateTime.Now.Year}")</span>
+        </div>
+    </div>
+</body>
+</html>

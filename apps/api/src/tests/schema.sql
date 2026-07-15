@@ -2,6 +2,9 @@
 CREATE SCHEMA IF NOT EXISTS "public";
 
 -- CreateEnum
+CREATE TYPE "Currency" AS ENUM ('AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHF', 'CLP', 'CNY', 'COP', 'CRC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'UYU', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XCD', 'XOF', 'XPF', 'YER', 'ZAR', 'ZMW', 'ZWL');
+
+-- CreateEnum
 CREATE TYPE "CostOfLiving" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
 
 -- CreateEnum
@@ -32,7 +35,7 @@ CREATE TYPE "EducationLevel" AS ENUM ('NONE', 'HIGH_SCHOOL', 'BACHELOR', 'MASTER
 CREATE TYPE "SkillImportance" AS ENUM ('REQUIRED', 'PREFERRED', 'NICE_TO_HAVE');
 
 -- CreateEnum
-CREATE TYPE "OrganizationSubType" AS ENUM ('COMPANY', 'GOVERNMENT', 'RESEARCH_INSTITUTE', 'UNIVERSITY', 'INTERNATIONAL_ORGANIZATION', 'NGO', 'NON_PROFIT', 'SOCIETY', 'CLUB', 'ARMY', 'OTHER');
+CREATE TYPE "OrganizationSubType" AS ENUM ('COMPANY', 'GOVERNMENT', 'RESEARCH_INSTITUTE', 'UNIVERSITY', 'INTERNATIONAL_ORGANIZATION', 'NGO', 'NON_PROFIT', 'SOCIETY', 'CLUB', 'ARMY', 'ASSOCIATION', 'CENTRAL_BANK', 'CHAMBER_OF_COMMERCE', 'CITY_GOVERNMENT', 'COURT', 'EMBASSY', 'FOUNDATION', 'HOSPITAL', 'LIBRARY', 'MUSEUM', 'NATIONAL_AUDIT_OFFICE', 'NATIONAL_PARK', 'OMBUDSMAN', 'PRIMARY_SCHOOLS', 'PUBLIC_COMPANY', 'PUBLIC_PARKS', 'SECONDARY_SCHOOLS', 'SOE', 'STATE_GOVERNMENT', 'THINK_TANK', 'OTHER');
 
 -- CreateEnum
 CREATE TYPE "EmployeeCountRange" AS ENUM ('RANGE_1_10', 'RANGE_11_50', 'RANGE_51_200', 'RANGE_201_1000', 'RANGE_1001_5000', 'RANGE_5000_PLUS');
@@ -56,6 +59,7 @@ CREATE TYPE "DegreeLevel" AS ENUM ('HIGH_SCHOOL', 'ASSOCIATE', 'BACHELOR', 'MAST
 CREATE TYPE "SubjectCategory" AS ENUM ('SOFTWARE', 'HARDWARE', 'SERVICE', 'PLATFORM', 'API', 'PHYSICAL_PRODUCT', 'OTHER');
 
 -- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'CANDIDATE', 'ORGANIZATION');
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'CANDIDATE', 'ORGANIZATION');
 
 -- CreateEnum
@@ -86,10 +90,13 @@ CREATE TABLE "industries" (
 -- CreateTable
 CREATE TABLE "countries" (
     "iso_code" CHAR(2) NOT NULL,
+    "iso_code" CHAR(2) NOT NULL,
     "name" TEXT NOT NULL,
     "serial_number" TEXT NOT NULL,
     "capital_name" TEXT,
     "flag_url" TEXT,
+    "population" TEXT,
+    "area_km2" INTEGER,
     "population" TEXT,
     "area_km2" INTEGER,
     "gdp_usd" DOUBLE PRECISION,
@@ -107,13 +114,17 @@ CREATE TABLE "countries" (
     "main_industries" TEXT,
     "number_of_multinational_hqs" TEXT,
     "currency" "Currency",
+    "number_of_multinational_hqs" TEXT,
+    "currency" "Currency",
     "median_salary" INTEGER,
     "median_home_price" INTEGER,
     "average_rent" INTEGER,
     "cost_of_living" "CostOfLiving",
+    "cost_of_living" "CostOfLiving",
     "interesting_fact" TEXT,
     "citizenship_process" TEXT,
     "work_permit" TEXT,
+    "global_competitiveness_index" TEXT,
     "global_competitiveness_index" TEXT,
     "level_of_globalisation" TEXT,
     "number_of_international_students" INTEGER,
@@ -121,10 +132,14 @@ CREATE TABLE "countries" (
     "personal_income_tax" TEXT,
     "number_of_tourists" TEXT,
     "number_of_airports" TEXT,
+    "number_of_tourists" TEXT,
+    "number_of_airports" TEXT,
     "quality_of_education" TEXT,
     "degree_holders" TEXT,
     "number_of_universities" INTEGER,
     "top_universities" TEXT,
+    "ethnic_groups" TEXT,
+    "religion" TEXT,
     "ethnic_groups" TEXT,
     "religion" TEXT,
     "cultural_values" TEXT,
@@ -135,6 +150,7 @@ CREATE TABLE "countries" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "countries_pkey" PRIMARY KEY ("iso_code")
+    CONSTRAINT "countries_pkey" PRIMARY KEY ("iso_code")
 );
 
 -- CreateTable
@@ -143,16 +159,21 @@ CREATE TABLE "cities" (
     "name" TEXT NOT NULL,
     "serial_number" TEXT NOT NULL,
     "country_id" CHAR(2) NOT NULL,
+    "country_id" CHAR(2) NOT NULL,
     "is_capital" BOOLEAN NOT NULL DEFAULT false,
     "state_province" TEXT,
+    "population" TEXT,
+    "number_of_multinational_hqs" TEXT,
     "population" TEXT,
     "number_of_multinational_hqs" TEXT,
     "number_of_airports" INTEGER,
     "largest_organization" TEXT,
     "currency" "Currency" NOT NULL,
+    "currency" "Currency" NOT NULL,
     "median_salary" INTEGER,
     "median_home_price" INTEGER,
     "average_rent" INTEGER,
+    "cost_of_living" "CostOfLiving",
     "cost_of_living" "CostOfLiving",
     "temperatures" TEXT,
     "climate" TEXT,
@@ -160,6 +181,8 @@ CREATE TABLE "cities" (
     "degree_holders" TEXT,
     "number_of_universities" INTEGER,
     "top_universities" TEXT,
+    "number_of_nationalities" TEXT,
+    "language" "Language"[],
     "number_of_nationalities" TEXT,
     "language" "Language"[],
     "people_description" TEXT,
@@ -178,24 +201,32 @@ CREATE TABLE "organizations" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "type" "OrganizationSubType",
-    "legal_status" TEXT,
+    "subtype" "OrganizationSubType",
+    "type1" TEXT,
+    "type2" TEXT,
     "ownership" TEXT,
     "mission" TEXT,
-    "known_for" TEXT[],
-    "activities" TEXT[],
+    "known_for" TEXT,
+    "programs_activities" TEXT[],
     "project" TEXT,
     "research_areas" TEXT[],
     "products" TEXT[],
     "services" TEXT[],
-    "partnerships" TEXT[],
+    "partners" TEXT[],
     "budget" TEXT,
     "founded" TEXT,
-    "founder" TEXT,
-    "equipments" TEXT,
+    "founders" TEXT[],
+    "facilities" TEXT[],
+    "authority" TEXT,
+    "jurisdiction" TEXT,
+    "members" INTEGER,
+    "collections" TEXT,
+    "graduates" TEXT,
+    "undergraduates" TEXT,
     "score" INTEGER,
     "city_id" UUID,
     "numberOfEmployees" "EmployeeCountRange",
+    "personnel" INTEGER,
     "numberOfSubsidiaries" INTEGER,
     "parent_organization_id" UUID,
     "metadata" JSONB,
@@ -233,6 +264,7 @@ CREATE TABLE "skills" (
     "name" TEXT NOT NULL,
     "serial_number" TEXT NOT NULL,
     "type" TEXT,
+    "category" TEXT,
     "category" TEXT,
     "description" TEXT,
     "icon_url" TEXT,
@@ -286,6 +318,7 @@ CREATE TABLE "universities" (
     "website_url" TEXT,
     "logo_url" TEXT,
     "country_id" CHAR(2),
+    "country_id" CHAR(2),
     "city_id" UUID,
     "student_count" INTEGER,
     "metadata" JSONB,
@@ -322,6 +355,47 @@ CREATE TABLE "degrees" (
 );
 
 -- CreateTable
+CREATE TABLE "subjects" (
+    "id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
+    "type" TEXT,
+    "description" TEXT,
+    "short_description" TEXT,
+    "category" "SubjectCategory",
+    "competitors" TEXT[],
+    "vendors" TEXT[],
+    "fun_fact" TEXT,
+    "organization_id" UUID,
+    "website_url" TEXT,
+    "logo_url" TEXT,
+    "tags" TEXT[],
+    "score" INTEGER,
+    "metadata" JSONB,
+    "deleted_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "subjects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StudyFields" (
+    "id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "serial_number" TEXT NOT NULL,
+    "area" TEXT,
+    "description" TEXT,
+    "score" INTEGER,
+    "metadata" JSONB,
+    "deleted_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "StudyFields_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "job_ads" (
     "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
@@ -332,6 +406,7 @@ CREATE TABLE "job_ads" (
     "status" "JobAdStatus" NOT NULL DEFAULT 'DRAFT',
     "contract_type" "ContractType",
     "remote" "RemotePolicy",
+    "country_id" CHAR(2),
     "country_id" CHAR(2),
     "city_id" UUID,
     "salary_range" TEXT,
@@ -379,6 +454,7 @@ CREATE TABLE "users" (
     "reset_expires_at" TIMESTAMP(3),
     "last_reset_sent_at" TIMESTAMP(3),
     "role" "UserRole" NOT NULL DEFAULT 'CANDIDATE',
+    "role" "UserRole" NOT NULL DEFAULT 'CANDIDATE',
     "status" "UserStatus" NOT NULL DEFAULT 'PENDING_VERIFICATION',
     "last_login_at" TIMESTAMP(3),
     "failed_login_attempts" INTEGER NOT NULL DEFAULT 0,
@@ -411,6 +487,7 @@ CREATE TABLE "user_profiles" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
     "biography" TEXT,
+    "country_id" CHAR(2),
     "country_id" CHAR(2),
     "city_id" UUID,
     "linkedin_url" TEXT,
@@ -578,7 +655,7 @@ CREATE TABLE "_CountryLargestOrganizations" (
     "A" CHAR(2) NOT NULL,
     "B" UUID NOT NULL,
 
-    CONSTRAINT "_CountryLargestOrganizations_AB_pkey" PRIMARY KEY ("A","B")
+    CONSTRAINT "_OrganizationCountries_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateTable
@@ -602,8 +679,10 @@ CREATE UNIQUE INDEX "industries_serial_number_key" ON "industries"("serial_numbe
 
 -- CreateIndex
 CREATE UNIQUE INDEX "countries_iso_code_key" ON "countries"("iso_code");
+CREATE UNIQUE INDEX "countries_iso_code_key" ON "countries"("iso_code");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "countries_serial_number_key" ON "countries"("serial_number");
 CREATE UNIQUE INDEX "countries_serial_number_key" ON "countries"("serial_number");
 
 -- CreateIndex
@@ -619,7 +698,10 @@ CREATE UNIQUE INDEX "organizations_slug_key" ON "organizations"("slug");
 CREATE INDEX "organizations_parent_organization_id_idx" ON "organizations"("parent_organization_id");
 
 -- CreateIndex
-CREATE INDEX "organizations_type_idx" ON "organizations"("type");
+CREATE INDEX "organizations_subtype_idx" ON "organizations"("subtype");
+
+-- CreateIndex
+CREATE INDEX "organizations_city_id_idx" ON "organizations"("city_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "jobs_serial_number_key" ON "jobs"("serial_number");
@@ -665,6 +747,18 @@ CREATE UNIQUE INDEX "degrees_serial_number_key" ON "degrees"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "degrees_level_idx" ON "degrees"("level");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "subjects_serial_number_key" ON "subjects"("serial_number");
+
+-- CreateIndex
+CREATE INDEX "subjects_category_idx" ON "subjects"("category");
+
+-- CreateIndex
+CREATE INDEX "subjects_organization_id_idx" ON "subjects"("organization_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "StudyFields_serial_number_key" ON "StudyFields"("serial_number");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "job_ads_serial_number_key" ON "job_ads"("serial_number");
@@ -736,10 +830,10 @@ CREATE INDEX "user_profiles_current_job_id_idx" ON "user_profiles"("current_job_
 CREATE INDEX "user_profiles_current_organization_id_idx" ON "user_profiles"("current_organization_id");
 
 -- CreateIndex
-CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
+CREATE INDEX "user_certifications_certification_id_idx" ON "user_certifications"("certification_id");
 
 -- CreateIndex
-CREATE INDEX "audit_logs_action_idx" ON "audit_logs"("action");
+CREATE UNIQUE INDEX "user_certifications_user_profile_id_certification_id_key" ON "user_certifications"("user_profile_id", "certification_id");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs"("created_at");
@@ -748,22 +842,22 @@ CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs"("created_at");
 CREATE UNIQUE INDEX "StudyFields_serial_number_key" ON "StudyFields"("serial_number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "military_capabilities_organization_id_key" ON "military_capabilities"("organization_id");
+CREATE INDEX "user_educations_user_profile_id_idx" ON "user_educations"("user_profile_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "subjects_serial_number_key" ON "subjects"("serial_number");
+CREATE INDEX "user_education_fields_study_field_Id_idx" ON "user_education_fields"("study_field_Id");
 
 -- CreateIndex
-CREATE INDEX "subjects_category_idx" ON "subjects"("category");
+CREATE INDEX "user_education_fields_type_idx" ON "user_education_fields"("type");
 
 -- CreateIndex
-CREATE INDEX "subjects_organization_id_idx" ON "subjects"("organization_id");
+CREATE UNIQUE INDEX "user_education_fields_user_education_id_study_field_Id_key" ON "user_education_fields"("user_education_id", "study_field_Id");
 
 -- CreateIndex
-CREATE INDEX "user_certifications_certification_id_idx" ON "user_certifications"("certification_id");
+CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_certifications_user_profile_id_certification_id_key" ON "user_certifications"("user_profile_id", "certification_id");
+CREATE INDEX "audit_logs_action_idx" ON "audit_logs"("action");
 
 -- CreateIndex
 CREATE INDEX "user_education_fields_study_field_Id_idx" ON "user_education_fields"("study_field_Id");
@@ -790,7 +884,7 @@ CREATE INDEX "_ProductIndustries_B_index" ON "_ProductIndustries"("B");
 CREATE INDEX "_RelatedIndustries_B_index" ON "_RelatedIndustries"("B");
 
 -- CreateIndex
-CREATE INDEX "_CountryLargestOrganizations_B_index" ON "_CountryLargestOrganizations"("B");
+CREATE INDEX "_OrganizationCountries_B_index" ON "_OrganizationCountries"("B");
 
 -- CreateIndex
 CREATE INDEX "_CityMainIndustries_B_index" ON "_CityMainIndustries"("B");
@@ -799,6 +893,7 @@ CREATE INDEX "_CityMainIndustries_B_index" ON "_CityMainIndustries"("B");
 CREATE INDEX "_working_area_B_index" ON "_working_area"("B");
 
 -- AddForeignKey
+ALTER TABLE "cities" ADD CONSTRAINT "cities_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "cities" ADD CONSTRAINT "cities_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -824,6 +919,7 @@ ALTER TABLE "job_ads" ADD CONSTRAINT "job_ads_city_id_fkey" FOREIGN KEY ("city_i
 
 -- AddForeignKey
 ALTER TABLE "job_ads" ADD CONSTRAINT "job_ads_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "job_ads" ADD CONSTRAINT "job_ads_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "job_ads" ADD CONSTRAINT "job_ads_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -848,6 +944,7 @@ ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_city_id_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_current_job_id_fkey" FOREIGN KEY ("current_job_id") REFERENCES "jobs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -868,10 +965,7 @@ ALTER TABLE "military_capabilities" ADD CONSTRAINT "military_capabilities_organi
 ALTER TABLE "subjects" ADD CONSTRAINT "subjects_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_certifications" ADD CONSTRAINT "user_certifications_certification_id_fkey" FOREIGN KEY ("certification_id") REFERENCES "certifications"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user_certifications" ADD CONSTRAINT "user_certifications_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_user_education_id_fkey" FOREIGN KEY ("user_education_id") REFERENCES "user_educations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_study_field_Id_fkey" FOREIGN KEY ("study_field_Id") REFERENCES "StudyFields"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -910,7 +1004,7 @@ ALTER TABLE "_RelatedIndustries" ADD CONSTRAINT "_RelatedIndustries_B_fkey" FORE
 ALTER TABLE "_CountryLargestOrganizations" ADD CONSTRAINT "_CountryLargestOrganizations_A_fkey" FOREIGN KEY ("A") REFERENCES "countries"("iso_code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CountryLargestOrganizations" ADD CONSTRAINT "_CountryLargestOrganizations_B_fkey" FOREIGN KEY ("B") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_OrganizationCountries" ADD CONSTRAINT "_OrganizationCountries_B_fkey" FOREIGN KEY ("B") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CityMainIndustries" ADD CONSTRAINT "_CityMainIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
