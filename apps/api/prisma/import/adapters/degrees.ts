@@ -1,6 +1,6 @@
 import { DegreeLevel } from "@prisma/client";
-import { toFloat, toInt, toJson } from "../../seed-utils";
-import { checkEnum, checkRequiredText } from "../checks";
+import { toFloat, toInt } from "../../seed-utils";
+import { checkEnum, checkJson, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -38,6 +38,9 @@ export const degreesAdapter: ImportAdapter<CsvRow, void> = {
     const level = checkEnum(row.level, DegreeLevel, "level", false);
     if (level.issue) warnings.push(level.issue);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -48,7 +51,7 @@ export const degreesAdapter: ImportAdapter<CsvRow, void> = {
         durationYears: toFloat(row.duration_years),
         description: row.description || null,
         score: toInt(row.score),
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
       },
       errors,
       warnings,

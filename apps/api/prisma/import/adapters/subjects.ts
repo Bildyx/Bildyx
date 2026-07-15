@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { SubjectCategory } from "@prisma/client";
-import { buildNameLookup, toInt, toJson, toStringArray } from "../../seed-utils";
-import { checkEnum, checkOptionalFk, checkRequiredText } from "../checks";
+import { buildNameLookup, toInt, toStringArray } from "../../seed-utils";
+import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -58,6 +58,9 @@ export const subjectsAdapter: ImportAdapter<CsvRow, SubjectsFk> = {
     const organizationId = checkOptionalFk(row.organization_id, fk.resolveOrganizationId, "organization_id");
     if (organizationId.issue) warnings.push(organizationId.issue);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -75,7 +78,7 @@ export const subjectsAdapter: ImportAdapter<CsvRow, SubjectsFk> = {
         logo_url: row.logo_url || null,
         tags: toStringArray(row.tags),
         score: toInt(row.score),
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
       },
       errors,
       warnings,

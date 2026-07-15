@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { JobCategory, SeniorityLevel } from "@prisma/client";
-import { buildNameLookup, toJson, toStringArray, toInt } from "../../seed-utils";
-import { checkEnum, checkOptionalFk, checkRequiredText } from "../checks";
+import { buildNameLookup, toStringArray, toInt } from "../../seed-utils";
+import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -55,6 +55,9 @@ export const jobsAdapter: ImportAdapter<CsvRow, JobsFk> = {
     const industryId = checkOptionalFk(row.industry_id, fk.resolveIndustryId, "industry_id");
     if (industryId.issue) warnings.push(industryId.issue);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -67,7 +70,7 @@ export const jobsAdapter: ImportAdapter<CsvRow, JobsFk> = {
         products: toStringArray(row.products),
         toolsAndTech: toStringArray(row.tools_and_tech),
         tags: toStringArray(row.tags),
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
         score: toInt(row.score),
       },
       errors,

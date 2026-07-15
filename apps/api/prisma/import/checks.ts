@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { parseEnum, toStringArray } from "../seed-utils";
 import type { RowIssue } from "./types";
 
@@ -102,6 +103,28 @@ export function checkRequiredFk(
   }
 
   return { value: resolved };
+}
+
+// Metadata cells are free-form JSON typed by hand in Excel - unlike every
+// other field here, JSON.parse throws instead of returning a sentinel, so a
+// single malformed cell must not be allowed to propagate an uncaught
+// exception out of mapRow (it would abort the whole --all batch instead of
+// rejecting just this value, unlike every other check in this file).
+export function checkJson(
+  raw: string | undefined,
+  column: string,
+): { value: Prisma.InputJsonValue | typeof Prisma.JsonNull; issue?: RowIssue } {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) return { value: Prisma.JsonNull };
+
+  try {
+    return { value: JSON.parse(trimmed) };
+  } catch {
+    return {
+      value: Prisma.JsonNull,
+      issue: { row: 0, column, message: `${column}: JSON invalide (mis à null)` },
+    };
+  }
 }
 
 export function checkOptionalFk(

@@ -1,5 +1,5 @@
-import { toInt, toJson } from "../../seed-utils";
-import { checkRequiredText } from "../checks";
+import { toInt } from "../../seed-utils";
+import { checkJson, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -37,6 +37,9 @@ export const industriesAdapter: ImportAdapter<CsvRow, void> = {
     const name = checkRequiredText(row.name, "name");
     if (name.issue) errors.push(name.issue);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -44,7 +47,7 @@ export const industriesAdapter: ImportAdapter<CsvRow, void> = {
         serial_number: serialNumber.value,
         description: row.description || null,
         iconUrl: row.icon_url || null,
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
         score: toInt(row.score),
       },
       errors,

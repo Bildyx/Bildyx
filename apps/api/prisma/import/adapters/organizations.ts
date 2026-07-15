@@ -5,10 +5,9 @@ import {
   buildNameLookup,
   normalizeEnumKey,
   toInt,
-  toJson,
   toStringArray,
 } from "../../seed-utils";
-import { checkEnum, checkOptionalFk, checkRequiredText } from "../checks";
+import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
 import type {
   CsvRow,
   ImportAdapter,
@@ -170,6 +169,9 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
 
     const id = fk.idBySlug.get(slug.value) ?? fk.resolveOrgIdByName(row.name);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: slug.value,
       data: {
@@ -180,8 +182,8 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         name: name.value,
         slug: slug.value,
         subtype: subtype.value,
-        type1: null,
-        type2: null,
+        type1: row.type1 || null,
+        type2: row.type2 || null,
         ownership: row.ownership || null,
         mission: row.mission || null,
         knownFor: row.known_for || null,
@@ -210,7 +212,7 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         subsidiaries: row.subsidiaries || null,
         // Always null here - see afterUpsert.
         parentOrganizationId: null,
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
       },
       errors,
       warnings,

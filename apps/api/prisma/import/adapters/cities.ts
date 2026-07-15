@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { Currency, CostOfLiving, Language } from "@prisma/client";
-import { toInt, toIntLoose, toFloat, toJson, toBool } from "../../seed-utils";
-import { checkEnum, checkEnumArray, checkRequiredFk, checkRequiredText } from "../checks";
+import { toInt, toIntLoose, toFloat, toBool } from "../../seed-utils";
+import { checkEnum, checkEnumArray, checkJson, checkRequiredFk, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -83,6 +83,9 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
     const language = checkEnumArray(row.language, Language, "language");
     warnings.push(...language.issues);
 
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
+
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -111,7 +114,7 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
         peopleDescription: row.people_description || null,
         latitude: toFloat(row.latitude),
         longitude: toFloat(row.longitude),
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
       },
       errors,
       warnings,

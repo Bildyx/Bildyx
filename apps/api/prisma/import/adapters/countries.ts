@@ -5,8 +5,8 @@ import {
   CostOfLiving,
   Language,
 } from "@prisma/client";
-import { toInt, toFloat, toJson } from "../../seed-utils";
-import { checkEnum, checkEnumArray, checkRequiredText } from "../checks";
+import { toInt, toFloat } from "../../seed-utils";
+import { checkEnum, checkEnumArray, checkJson, checkRequiredText } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -57,6 +57,15 @@ const EXPECTED_COLUMNS = [
   "metadata",
 ];
 
+// Country.isoCode is normalized (upper-cased, truncated to 2 chars) before
+// being used as the natural key for hashing/DB writes - exposed here so
+// plan.ts's pre-mapRow duplicate/orphan tracking can apply the same
+// normalization and agree with what mapRow actually produces (see
+// normalizeNaturalKey in types.ts).
+function normalizeIsoCode(raw: string): string {
+  return raw.toUpperCase().slice(0, 2);
+}
+
 export const countriesAdapter: ImportAdapter<CsvRow, void> = {
   modelName: "Country",
   prismaModel: "country",
@@ -65,6 +74,7 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
   naturalKeyField: "isoCode",
   deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  normalizeNaturalKey: normalizeIsoCode,
 
   async buildFkContext() {},
 
@@ -72,7 +82,7 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
     const errors: RowIssue[] = [];
     const warnings: RowIssue[] = [];
 
-    const isoCode = (row.iso_code ?? "").trim().toUpperCase().slice(0, 2);
+    const isoCode = normalizeIsoCode((row.iso_code ?? "").trim());
     if (!isoCode) {
       errors.push({ row: 0, column: "iso_code", message: "iso_code: valeur requise manquante" });
     }
@@ -97,6 +107,9 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
 
     const officialLanguages = checkEnumArray(row.officialLanguages, Language, "officialLanguages");
     warnings.push(...officialLanguages.issues);
+
+    const metadata = checkJson(row.metadata, "metadata");
+    if (metadata.issue) warnings.push(metadata.issue);
 
     return {
       naturalKey: isoCode,
@@ -145,7 +158,7 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
         religion: row.religion || null,
         culturalValues: row.cultural_values || null,
         peopleDescription: row.people_description || null,
-        metadata: toJson(row.metadata),
+        metadata: metadata.value,
       },
       errors,
       warnings,

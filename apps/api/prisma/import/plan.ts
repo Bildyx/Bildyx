@@ -57,7 +57,7 @@ export function planImport<Row extends CsvRow, Fk>(
   rows: Row[],
   adapter: Pick<
     ImportAdapter<Row, Fk>,
-    "modelName" | "naturalKeyColumn" | "expectedColumns" | "mapRow"
+    "modelName" | "naturalKeyColumn" | "expectedColumns" | "mapRow" | "normalizeNaturalKey"
   >,
   fkContext: Fk,
   existingHashes: Map<string, string>,
@@ -70,17 +70,20 @@ export function planImport<Row extends CsvRow, Fk>(
     });
   }
 
+  const normalize = adapter.normalizeNaturalKey ?? ((raw: string) => raw);
+
   const plan = emptyPlan<Row>(adapter.modelName, null);
   plan.duplicateNaturalKeys = findDuplicateNaturalKeys(
     rows,
     adapter.naturalKeyColumn,
+    normalize,
   );
 
   const currentNaturalKeys = new Set<string>();
 
   rows.forEach((row, index) => {
     const rowNumber = index + 1;
-    const naturalKey = (row[adapter.naturalKeyColumn] ?? "").trim();
+    const naturalKey = normalize((row[adapter.naturalKeyColumn] ?? "").trim());
 
     if (naturalKey) currentNaturalKeys.add(naturalKey);
 

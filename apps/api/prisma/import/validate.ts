@@ -33,15 +33,19 @@ export function validateHeader(
 }
 
 // Maps each natural key value that appears more than once in the file to
-// the (1-based) row numbers it appears on.
+// the (1-based) row numbers it appears on. `normalize` must match whatever
+// the adapter's mapRow does to the same raw value (see normalizeNaturalKey
+// in types.ts), or two rows differing only by e.g. casing won't be caught
+// here and will instead crash on the DB's own unique constraint at commit.
 export function findDuplicateNaturalKeys(
   rows: CsvRow[],
   naturalKeyColumn: string,
+  normalize: (raw: string) => string = (raw) => raw,
 ): Map<string, number[]> {
   const seen = new Map<string, number[]>();
 
   rows.forEach((row, index) => {
-    const key = (row[naturalKeyColumn] ?? "").trim();
+    const key = normalize((row[naturalKeyColumn] ?? "").trim());
     if (!key) return;
     seen.set(key, [...(seen.get(key) ?? []), index + 1]);
   });
