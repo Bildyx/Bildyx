@@ -31,7 +31,7 @@ type CountryCsv = {
   gdp_per_capita_usd?: string;
   hdi?: string;
   currency?: string;
-  official_languages?: string;
+  officialLanguages?: string;
   calling_code?: string;
   government_type?: string;
   quality_of_life?: string;
@@ -98,7 +98,7 @@ export async function seedCountries(prisma: PrismaClient) {
 
       currency: parseEnum(r.currency, Currency),
 
-      officialLanguages: parseEnumArray(r.official_languages, Language),
+      officialLanguages: parseEnumArray(r.officialLanguages, Language),
 
       callingCode: r.calling_code || null,
 
