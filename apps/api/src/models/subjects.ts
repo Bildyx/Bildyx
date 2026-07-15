@@ -11,6 +11,7 @@ export const SubjectSchema = z.object({
   short_description: z.string().nullable().optional(),
   category: SubjectCategoryEnum.nullable().optional(),
   competitors: zStringArray(),
+  vendors: zStringArray(),
   fun_fact: z.string().nullable().optional(),
   organization_id: zNullableUUID(),
   website_url: z.string().nullable().optional(),

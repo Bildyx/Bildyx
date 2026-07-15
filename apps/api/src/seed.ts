@@ -27,15 +27,6 @@ async function seed() {
     )
     .execute();
 
-  // Clean up referencing military_capabilities
-  await database.deleteFrom("military_capabilities")
-    .where("organization_id", "in", (eb) =>
-      eb.selectFrom("organizations")
-        .select("id")
-        .where("name", "like", "Test %")
-    )
-    .execute();
-
   // Clean up referencing users
   await database.updateTable("users")
     .set({ organization_id: null })

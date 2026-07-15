@@ -18,11 +18,11 @@ export const SkillSchema = z.object({
   common_fields_of_study: zStringArray(),
   related_abilities: zStringArray(),
   time_to_master: z.string().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
   deleted_at: z.date().nullable().optional().default(null),
   created_at: z.date(),
   updated_at: z.date(),
-  score: z.number().int().min(0).nullable().optional(),
 });
 
 // GET

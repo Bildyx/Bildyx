@@ -15,15 +15,16 @@ export const UniversitySchema = z.object({
   city_id: z.string().uuid().nullable().optional(),
   student_count: z.number().int().min(0).nullable().optional(),
   metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
+  score_university: z.number().int().min(0).nullable().optional(),
   local_name: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   established: z.string().nullable().optional(),
   score: z.number().int().min(0).nullable().optional(),
   undergraduates: z.number().int().min(0).nullable().optional(),
   postgraduates: z.number().int().min(0).nullable().optional(),
+  deleted_at: z.date().nullable().optional().default(null),
+  created_at: z.date(),
+  updated_at: z.date(),
 });
 
 // GET

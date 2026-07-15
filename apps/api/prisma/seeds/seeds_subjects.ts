@@ -89,7 +89,7 @@ export async function seedSubjects(prisma: PrismaClient) {
   }
 
   // NOTE: depend de organizations.ts (organization_id) -> a seeder avant.
-  const result = await prisma.subjects.createMany({
+  const result = await prisma.subject.createMany({
     data,
     skipDuplicates: true,
   });

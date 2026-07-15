@@ -23,7 +23,7 @@ model Industry {
   jobs               Job[]
   mainIndustryCities City[]         @relation("CityMainIndustries")
   organizations      Organization[] @relation("OrganizationIndustries")
-  products           subjects[]     @relation("ProductIndustries")
+  products           Subject[]      @relation("ProductIndustries")
   industries_A       Industry[]     @relation("RelatedIndustries")
   industries_B       Industry[]     @relation("RelatedIndustries")
 
@@ -259,7 +259,7 @@ model Certification {
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime               @updatedAt @map("updated_at")
   issuingOrganization    Organization?          @relation("CertificationIssuer", fields: [issuingOrganizationId], references: [id])
-  user_certifications    user_certifications[]
+  user_certifications    UserCertifications[]
 
   @@index([issuingOrganizationId])
   @@index([category])
@@ -311,7 +311,7 @@ model Degree {
   deletedAt       DateTime?         @map("deleted_at")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
-  user_educations user_educations[]
+  user_educations UserEducations[]
 
   @@index([level])
   @@map("degrees")
@@ -1039,161 +1039,4 @@ enum UserStatus {
 enum EducationFieldType {
   MAJOR
   MINOR
-}
-
-enum Currency {
-  AED
-  AFN
-  ALL
-  AMD
-  ANG
-  AOA
-  ARS
-  AUD
-  AWG
-  AZN
-  BAM
-  BBD
-  BDT
-  BGN
-  BHD
-  BIF
-  BMD
-  BND
-  BOB
-  BRL
-  BSD
-  BTN
-  BWP
-  BYN
-  BZD
-  CAD
-  CDF
-  CHF
-  CLP
-  CNY
-  COP
-  CRC
-  CUP
-  CVE
-  CZK
-  DJF
-  DKK
-  DOP
-  DZD
-  EGP
-  ERN
-  ETB
-  EUR
-  FJD
-  FKP
-  GBP
-  GEL
-  GHS
-  GIP
-  GMD
-  GNF
-  GTQ
-  GYD
-  HKD
-  HNL
-  HTG
-  HUF
-  IDR
-  ILS
-  INR
-  IQD
-  IRR
-  ISK
-  JMD
-  JOD
-  JPY
-  KES
-  KGS
-  KHR
-  KMF
-  KPW
-  KRW
-  KWD
-  KYD
-  KZT
-  LAK
-  LBP
-  LKR
-  LRD
-  LSL
-  LYD
-  MAD
-  MDL
-  MGA
-  MKD
-  MMK
-  MNT
-  MOP
-  MRU
-  MUR
-  MVR
-  MWK
-  MXN
-  MYR
-  MZN
-  NAD
-  NGN
-  NIO
-  NOK
-  NPR
-  NZD
-  OMR
-  PAB
-  PEN
-  PGK
-  PHP
-  PKR
-  PLN
-  PYG
-  QAR
-  RON
-  RSD
-  RUB
-  RWF
-  SAR
-  SBD
-  SCR
-  SDG
-  SEK
-  SGD
-  SHP
-  SLE
-  SOS
-  SRD
-  SSP
-  STN
-  SYP
-  SZL
-  THB
-  TJS
-  TMT
-  TND
-  TOP
-  TRY
-  TTD
-  TWD
-  TZS
-  UAH
-  UGX
-  USD
-  UYU
-  UZS
-  VES
-  VND
-  VUV
-  WST
-  XAF
-  XCD
-  XOF
-  XPF
-  YER
-  ZAR
-  ZMW
-  ZWL
 }

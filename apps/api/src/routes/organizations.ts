@@ -25,7 +25,7 @@ export const organizations = {
     .input(GetOrganizationsSchema)
     .output(z.array(OrganizationSchema))
     .handler(async ({ input }) => {
-      const { name, type } = input;
+      const { name, subtype } = input;
 
       let query = database
         .selectFrom("organizations")
@@ -38,8 +38,8 @@ export const organizations = {
         );
       }
 
-      if (type) {
-        query = query.where("type", "=", type);
+      if (subtype) {
+        query = query.where("subtype", "=", subtype);
       }
 
       return await query.selectAll().orderBy("name", "asc").execute();
@@ -146,7 +146,7 @@ export const organizations = {
 
       const organization = await database
         .updateTable("organizations")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set({ ...rest, updated_at: new Date(), metadata: metadata as any } as any)
         .where("id", "=", organizationId)
         .returningAll()
         .executeTakeFirst();
