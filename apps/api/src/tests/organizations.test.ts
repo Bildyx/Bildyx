@@ -23,7 +23,7 @@ describe("Organizations API Endpoints", () => {
       await pgliteClient.exec("BEGIN");
     }
 
-    testCountryId = "OR";
+    testCountryId = Math.random().toString(36).substring(2, 4).toUpperCase();
     testCityId = randomUUID();
 
     // Insert mock country
@@ -32,7 +32,7 @@ describe("Organizations API Endpoints", () => {
       .values({
         iso_code: testCountryId,
         name: "Test Country for Org",
-        serial_number: "CNT-ORG-01",
+        serial_number: `CNT-${testCountryId}`,
         updated_at: new Date(),
       })
       .execute();
@@ -43,12 +43,15 @@ describe("Organizations API Endpoints", () => {
       .values({
         id: testCityId,
         name: "Test City for Org",
-        serial_number: "CTY-ORG-01",
+        serial_number: `CTY-${testCountryId}`,
         country_id: testCountryId,
         currency: "USD",
         updated_at: new Date(),
       })
       .execute();
+
+    // Clean up the table because PGLite database is globally initialized with seed data
+    await database.deleteFrom("organizations").execute();
   });
 
   after(async () => {
@@ -82,30 +85,25 @@ describe("Organizations API Endpoints", () => {
       const result = await callProcedure(organizations.create, {
         name: "Open Source Foundation",
         slug: "open-source-foundation",
-        type: "NON_PROFIT",
-        legal_status: "501c3",
+        subtype: "ASSOCIATION",
         ownership: "Public",
         mission: "Support open source initiatives",
-        known_for: ["Code hosting", "Community events"],
-        activities: ["Sponsoring developers", "Running conferences"],
+        known_for: "Code hosting, Community events",
         project: "FOSS support",
         research_areas: ["Software engineering", "Open standards"],
         products: ["Hosting platform", "CLI tools"],
         services: ["Mentorship", "Funding"],
-        partnerships: ["Tech Co", "Dev Association"],
         budget: "$1,000,000",
         founded: "2010",
-        founder: "John Doe",
-        equipments: "Servers, Office space",
+        founders: ["John Doe"],
         numberOfEmployees: "RANGE_11_50",
-        numberOfSubsidiaries: 2,
         city_id: testCityId,
       });
 
       assert.ok(result.id);
       assert.strictEqual(result.name, "Open Source Foundation");
       assert.strictEqual(result.slug, "open-source-foundation");
-      assert.strictEqual(result.type, "NON_PROFIT");
+      assert.strictEqual(result.subtype, "ASSOCIATION");
       assert.strictEqual(result.city_id, testCityId);
       createdOrgId1 = result.id;
     });
@@ -124,11 +122,11 @@ describe("Organizations API Endpoints", () => {
       const result = await callProcedure(organizations.create, {
         name: "Cyber Security Agency",
         slug: "cyber-security-agency",
-        type: "GOVERNMENT",
+        subtype: "GOVERNMENT",
       });
 
       assert.ok(result.id);
-      assert.strictEqual(result.type, "GOVERNMENT");
+      assert.strictEqual(result.subtype, "GOVERNMENT");
       createdOrgId2 = result.id;
     });
   });
@@ -152,7 +150,7 @@ describe("Organizations API Endpoints", () => {
 
     test("should filter organizations by type", async () => {
       const results = await callProcedure(organizations.getAll, {
-        type: "GOVERNMENT",
+        subtype: "GOVERNMENT",
       });
 
       assert.strictEqual(results.length, 1);
