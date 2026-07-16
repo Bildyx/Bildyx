@@ -51,7 +51,7 @@ export interface ImportAdapter<Row extends CsvRow = CsvRow, Fk = unknown> {
   buildFkContext: (prisma: PrismaClient, rows: Row[]) => Promise<Fk>;
   mapRow: (row: Row, rowIndex: number, fk: Fk) => MappedRow;
   // Optional second pass after every insert/update of this model has been
-  // written within the transaction. Only Organization needs this today, for
+  // written. Only Organization needs this today, for
   // its self-referencing parentOrganizationId: inserting a child with its
   // parent's id set before the parent row exists would violate the FK, so
   // mapRow always writes parentOrganizationId: null and this hook fills it

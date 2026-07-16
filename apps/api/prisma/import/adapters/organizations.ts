@@ -7,6 +7,7 @@ import {
   toInt,
   toStringArray,
 } from "../../seed-utils";
+import { runBatched } from "../batch";
 import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
 import type {
   CsvRow,
@@ -220,15 +221,19 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   },
 
   async afterUpsert(tx: PrismaTransactionClient, written, fk: OrganizationsFk) {
+    const parentLinks: { id: unknown; parentOrganizationId: string }[] = [];
     for (const { data, row } of written) {
       const rawParentName = row.parent_organization_id;
       if (!rawParentName || rawParentName.trim() === "") continue;
       const parentOrganizationId = fk.resolveOrgIdByName(rawParentName);
       if (!parentOrganizationId) continue;
-      await tx.organization.update({
-        where: { id: data.id },
-        data: { parentOrganizationId },
-      });
+      parentLinks.push({ id: data.id, parentOrganizationId });
     }
+    await runBatched(parentLinks, ({ id, parentOrganizationId }) =>
+      tx.organization.update({
+        where: { id },
+        data: { parentOrganizationId },
+      }),
+    );
   },
 };
