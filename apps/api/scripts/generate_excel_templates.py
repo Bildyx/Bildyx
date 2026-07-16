@@ -238,15 +238,18 @@ def write_lists_sheet(wb: Workbook, enums_used: dict[str, list[str]]) -> dict[st
 
 
 def data_validation_for(field: dict, enums: dict, list_refs: dict[str, str]) -> DataValidation | None:
-    """Data validation enforcing the field's Prisma type, with an English error message."""
+    """
+    Data validation enforcing only the field's Prisma type, with an English
+    error message. Blank is always allowed, even for required fields - the
+    template shouldn't block partially-filled rows, only wrong-typed values.
+    """
     base_type = field["base_type"]
-    allow_blank = not field["required"]
 
     if base_type in enums and not field["is_list"]:
         return DataValidation(
             type="list",
             formula1=list_refs[base_type],
-            allow_blank=allow_blank,
+            allow_blank=True,
             showErrorMessage=True,
             errorTitle="Invalid value",
             error="Please select a value from the dropdown list.",
@@ -259,7 +262,7 @@ def data_validation_for(field: dict, enums: dict, list_refs: dict[str, str]) -> 
             operator="between",
             formula1=-2147483648,
             formula2=2147483647,
-            allow_blank=allow_blank,
+            allow_blank=True,
             showErrorMessage=True,
             errorTitle="Invalid number",
             error="Please enter a whole number.",
@@ -270,7 +273,7 @@ def data_validation_for(field: dict, enums: dict, list_refs: dict[str, str]) -> 
             operator="between",
             formula1=-999999999999.0,
             formula2=999999999999.0,
-            allow_blank=allow_blank,
+            allow_blank=True,
             showErrorMessage=True,
             errorTitle="Invalid number",
             error="Please enter a numeric value.",
@@ -281,7 +284,7 @@ def data_validation_for(field: dict, enums: dict, list_refs: dict[str, str]) -> 
             operator="between",
             formula1=date(1900, 1, 1),
             formula2=date(2999, 12, 31),
-            allow_blank=allow_blank,
+            allow_blank=True,
             showErrorMessage=True,
             errorTitle="Invalid date",
             error="Please enter a valid date (YYYY-MM-DD).",
@@ -290,7 +293,7 @@ def data_validation_for(field: dict, enums: dict, list_refs: dict[str, str]) -> 
         return DataValidation(
             type="list",
             formula1='"TRUE,FALSE"',
-            allow_blank=allow_blank,
+            allow_blank=True,
             showErrorMessage=True,
             errorTitle="Invalid value",
             error="Please select TRUE or FALSE.",
