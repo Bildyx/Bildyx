@@ -967,6 +967,7 @@ enum EmployeeCountRange {
   RANGE_201_1000
   RANGE_1001_5000
   RANGE_5000_PLUS
+  CLASSIFIED
 }
 
 enum UniversityType {
