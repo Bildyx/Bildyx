@@ -37,6 +37,22 @@ function normalizeName(v: string): string {
   return v.trim().toLowerCase();
 }
 
+// universities.csv's type column mixes ownership + specialty into the label
+// ("Private Research University", "Public Medical University") while
+// UniversityType only models the institution's category - there's no
+// ownership/specialty field to preserve that part of the label, so this
+// maps each label to the category keyword it actually contains and drops
+// the rest.
+function normalizeUniversityType(v: string): string {
+  const lower = v.toLowerCase();
+  if (lower.includes("grande") && lower.includes("ecole")) return "GRANDE_ECOLE";
+  if (lower.includes("institute") || lower.includes("school")) return "INSTITUTE";
+  if (lower.includes("academy")) return "ACADEMY";
+  if (lower.includes("online")) return "ONLINE";
+  if (lower.includes("university")) return "UNIVERSITY";
+  return v;
+}
+
 export interface UniversitiesFk {
   resolveCountryId: (raw?: string) => string | null;
   resolveCityId: (raw?: string) => string | null;
@@ -94,7 +110,7 @@ export const universitiesAdapter: ImportAdapter<CsvRow, UniversitiesFk> = {
     const name = checkRequiredText(row.name, "name");
     if (name.issue) errors.push(name.issue);
 
-    const type = checkEnum(row.type, UniversityType, "type", false);
+    const type = checkEnum(normalizeUniversityType(row.type ?? ""), UniversityType, "type", false);
     if (type.issue) warnings.push(type.issue);
 
     const countryId = checkOptionalFk(row.country_id, fk.resolveCountryId, "country_id");

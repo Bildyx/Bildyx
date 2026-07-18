@@ -6,7 +6,14 @@ import {
   Language,
 } from "@prisma/client";
 import { toInt, toFloat } from "../../seed-utils";
-import { checkEnum, checkEnumArray, checkJson, checkRequiredText } from "../checks";
+import {
+  checkEnum,
+  checkEnumArray,
+  checkJson,
+  checkRequiredText,
+  checkScaleEnum,
+  LANGUAGE_ALIASES,
+} from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -99,13 +106,18 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
     const governmentType = checkEnum(row.government_type, GovernmentType, "government_type", false);
     if (governmentType.issue) warnings.push(governmentType.issue);
 
-    const qualityOfLife = checkEnum(row.quality_of_life, QualityOfLife, "quality_of_life", false);
+    const qualityOfLife = checkScaleEnum(row.quality_of_life, QualityOfLife, "quality_of_life");
     if (qualityOfLife.issue) warnings.push(qualityOfLife.issue);
 
-    const costOfLiving = checkEnum(row.cost_of_living, CostOfLiving, "cost_of_living", false);
+    const costOfLiving = checkScaleEnum(row.cost_of_living, CostOfLiving, "cost_of_living");
     if (costOfLiving.issue) warnings.push(costOfLiving.issue);
 
-    const officialLanguages = checkEnumArray(row.officialLanguages, Language, "officialLanguages");
+    const officialLanguages = checkEnumArray(
+      row.officialLanguages,
+      Language,
+      "officialLanguages",
+      LANGUAGE_ALIASES,
+    );
     warnings.push(...officialLanguages.issues);
 
     const metadata = checkJson(row.metadata, "metadata");

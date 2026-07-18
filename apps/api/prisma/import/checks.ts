@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { parseEnum, toStringArray } from "../seed-utils";
+import { normalizeScaleValue, parseEnum, toStringArray } from "../seed-utils";
 import type { RowIssue } from "./types";
 
 // Shared building blocks for adapters' mapRow(): every field-level check
@@ -8,6 +8,15 @@ import type { RowIssue } from "./types";
 // `warnings` (row accepted, value stored as null) - required fields
 // (values, FKs, enums) always error; optional ones always warn instead of
 // disappearing into a silent null like the old seed scripts did.
+
+// Source cells often annotate enum values with a trailing qualifier, e.g.
+// "Vietnamese (official)" or "Persian (Farsi, official)" - stripped before
+// matching so (a) the qualifier doesn't get glued into the enum key and (b)
+// a comma inside the parens doesn't get treated as a list separator by
+// checkEnumArray's tokenizer.
+function stripParenthetical(raw: string): string {
+  return raw.replace(/\([^)]*\)/g, " ");
+}
 
 export function checkRequiredText(
   raw: string | undefined,
@@ -38,7 +47,7 @@ export function checkEnum<T extends object>(
     return { value: null };
   }
 
-  const parsed = parseEnum(raw, enumObj);
+  const parsed = parseEnum(stripParenthetical(trimmed), enumObj);
   if (parsed === null) {
     return {
       value: null,
@@ -53,20 +62,70 @@ export function checkEnum<T extends object>(
   return { value: parsed };
 }
 
+// Same contract as checkEnum, but for the cost_of_living/quality_of_life
+// scale fields whose source cells mix vocabularies ("Medium"/"Moderate")
+// and word order ("Moderate to Low" vs "Low to Medium") - see
+// normalizeScaleValue.
+export function checkScaleEnum<T extends object>(
+  raw: string | undefined,
+  enumObj: T,
+  column: string,
+): { value: T[keyof T] | null; issue?: RowIssue } {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) return { value: null };
+
+  const parsed = parseEnum(normalizeScaleValue(trimmed), enumObj);
+  if (parsed === null) {
+    return {
+      value: null,
+      issue: {
+        row: 0,
+        column,
+        message: `${column}: valeur "${raw}" non reconnue (aucune correspondance dans l'enum)`,
+      },
+    };
+  }
+
+  return { value: parsed };
+}
+
+// Common source phrasings for Language that aren't just a formatting
+// variant of the enum member (checked in checkEnumArray via its `aliases`
+// param) - e.g. "Mandarin" alone rather than "Chinese Mandarin".
+export const LANGUAGE_ALIASES: Record<string, string> = {
+  azeri: "AZERBAIJANI",
+  cantonese: "CHINESE_CANTONESE",
+  chinese: "CHINESE_MANDARIN",
+  gaelic: "SCOTTISH_GAELIC",
+  mandarin: "CHINESE_MANDARIN",
+  "mandarin chinese": "CHINESE_MANDARIN",
+  slovene: "SLOVENIAN",
+  "berber languages": "BERBER",
+  "english widely spoken": "ENGLISH",
+  "english widely used": "ENGLISH",
+  "english commonly taught": "ENGLISH",
+  "russian widely spoken": "RUSSIAN",
+};
+
 // List-enum fields (e.g. Country.officialLanguages): unmapped tokens are
 // dropped from the resulting array but reported individually rather than
-// disappearing silently.
+// disappearing silently. `aliases` maps a lowercased raw phrase (e.g.
+// "mandarin") to the enum key that phrase should resolve to (e.g.
+// "CHINESE_MANDARIN") for values that aren't just a formatting variant of
+// the enum member's name.
 export function checkEnumArray<T extends object>(
   raw: string | undefined,
   enumObj: T,
   column: string,
+  aliases?: Record<string, string>,
 ): { value: T[keyof T][]; issues: RowIssue[] } {
-  const tokens = toStringArray(raw);
+  const tokens = toStringArray(raw ? stripParenthetical(raw) : raw);
   const value: T[keyof T][] = [];
   const issues: RowIssue[] = [];
 
   for (const token of tokens) {
-    const parsed = parseEnum(token, enumObj);
+    const aliased = aliases?.[token.trim().toLowerCase()] ?? token;
+    const parsed = parseEnum(aliased, enumObj);
     if (parsed === null) {
       issues.push({
         row: 0,
