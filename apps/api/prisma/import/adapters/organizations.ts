@@ -89,6 +89,11 @@ export interface OrganizationsFk {
   // regardless of row order).
   resolveOrgIdByName: (raw?: string) => string | null;
   idBySlug: Map<string, string>;
+  // Ids confirmed to already exist in the DB - resolveOrgIdByName can also
+  // return a pre-generated id for a row that never actually gets written
+  // (e.g. it was rejected for having a duplicate natural key elsewhere in
+  // the file), so afterUpsert cross-checks against this set before linking.
+  existingIds: Set<string>;
 }
 
 export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
@@ -139,7 +144,9 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       return idByNameForBatch.get(name) ?? idByNameFromDb.get(name) ?? null;
     };
 
-    return { resolveCityId, resolveOrgIdByName, idBySlug };
+    const existingIds = new Set(existingOrgs.map((o) => o.id));
+
+    return { resolveCityId, resolveOrgIdByName, idBySlug, existingIds };
   },
 
   mapRow(row, _rowIndex, fk): MappedRow {
@@ -238,12 +245,18 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   },
 
   async afterUpsert(tx: PrismaTransactionClient, written, fk: OrganizationsFk) {
+    // A name pre-generates an id in buildFkContext regardless of whether its
+    // row actually makes it into `written` (e.g. it was dropped for having a
+    // duplicate natural key elsewhere in the file) - only link to ids that
+    // are confirmed to exist, either already in the DB or written this run.
+    const validIds = new Set([...fk.existingIds, ...written.map((w) => w.data.id)]);
+
     const parentLinks: { id: unknown; parentOrganizationId: string }[] = [];
     for (const { data, row } of written) {
       const rawParentName = row.parent_organization_id;
       if (!rawParentName || rawParentName.trim() === "") continue;
       const parentOrganizationId = fk.resolveOrgIdByName(rawParentName);
-      if (!parentOrganizationId) continue;
+      if (!parentOrganizationId || !validIds.has(parentOrganizationId)) continue;
       parentLinks.push({ id: data.id, parentOrganizationId });
     }
     await runBatched(parentLinks, ({ id, parentOrganizationId }) =>
