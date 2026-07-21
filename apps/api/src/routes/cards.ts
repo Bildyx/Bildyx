@@ -2,7 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC.js";
 import { z } from "zod";
 import { database } from "../database.js";
-import { generateCard } from "../services/card.service.js";
+import { renderCardHtml } from "../services/card.service.js";
 import {
   mapCountry,
   mapCity,
@@ -33,17 +33,16 @@ const CardInputSchema = z.object({
   extended: z.string().optional(),
 });
 
-async function sendPngResponse(ctx: any, png: Buffer) {
-  ctx.res.setHeader("Content-Type", "image/png");
-  ctx.res.setHeader("Content-Length", png.length);
-  ctx.res.send(png);
+async function sendHtmlResponse(ctx: any, html: string) {
+  ctx.res.setHeader("Content-Type", "text/html; charset=utf-8");
+  ctx.res.send(html);
 }
 
 export const cards = {
   getCountry: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate country card image",
+      summary: "Generate country card HTML",
       path: "/cards/country/{id}",
       tags: ["Cards"],
     })
@@ -67,13 +66,16 @@ export const cards = {
           ctx.res.status(404).json({ error: "Country not found" });
           return;
         }
-        const png = await generateCard("country-card", {
+        const html = await renderCardHtml("country-card", {
           ...mapCountry(row as any),
           extended: isExtended,
         });
-        await sendPngResponse(ctx, png);
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
-        console.error(`[cards] Error generating country card for '${id}':`, err);
+        console.error(
+          `[cards] Error generating country card for '${id}':`,
+          err,
+        );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: err?.message ?? "Internal server error",
         });
@@ -83,7 +85,7 @@ export const cards = {
   getCity: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate city card image",
+      summary: "Generate city card HTML",
       path: "/cards/city/{id}",
       tags: ["Cards"],
     })
@@ -107,8 +109,8 @@ export const cards = {
           ctx.res.status(404).json({ error: "City not found" });
           return;
         }
-        const png = await generateCard("city-card", mapCity(row as any));
-        await sendPngResponse(ctx, png);
+        const html = await renderCardHtml("city-card", mapCity(row as any));
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
         console.error(`[cards] Error generating city card for '${id}':`, err);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -120,7 +122,7 @@ export const cards = {
   getJob: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate job card image",
+      summary: "Generate job card HTML",
       path: "/cards/job/{id}",
       tags: ["Cards"],
     })
@@ -144,8 +146,8 @@ export const cards = {
           ctx.res.status(404).json({ error: "Job not found" });
           return;
         }
-        const png = await generateCard("job-card", mapJob(row as any));
-        await sendPngResponse(ctx, png);
+        const html = await renderCardHtml("job-card", mapJob(row as any));
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
         console.error(`[cards] Error generating job card for '${id}':`, err);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -157,7 +159,7 @@ export const cards = {
   getCompany: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate company card image",
+      summary: "Generate company card HTML",
       path: "/cards/company/{id}",
       tags: ["Cards"],
     })
@@ -181,10 +183,16 @@ export const cards = {
           ctx.res.status(404).json({ error: "Organization not found" });
           return;
         }
-        const png = await generateCard("company-card", mapOrganization(row as any));
-        await sendPngResponse(ctx, png);
+        const html = await renderCardHtml(
+          "company-card",
+          mapOrganization(row as any),
+        );
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
-        console.error(`[cards] Error generating company card for '${id}':`, err);
+        console.error(
+          `[cards] Error generating company card for '${id}':`,
+          err,
+        );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: err?.message ?? "Internal server error",
         });
@@ -194,7 +202,7 @@ export const cards = {
   getUniversity: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate university card image",
+      summary: "Generate university card HTML",
       path: "/cards/university/{id}",
       tags: ["Cards"],
     })
@@ -218,10 +226,16 @@ export const cards = {
           ctx.res.status(404).json({ error: "University not found" });
           return;
         }
-        const png = await generateCard("university-card", mapUniversity(row as any));
-        await sendPngResponse(ctx, png);
+        const html = await renderCardHtml(
+          "university-card",
+          mapUniversity(row as any),
+        );
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
-        console.error(`[cards] Error generating university card for '${id}':`, err);
+        console.error(
+          `[cards] Error generating university card for '${id}':`,
+          err,
+        );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: err?.message ?? "Internal server error",
         });
@@ -231,7 +245,7 @@ export const cards = {
   getSkill: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate skill card image",
+      summary: "Generate skill card HTML",
       path: "/cards/skill/{id}",
       tags: ["Cards"],
     })
@@ -255,8 +269,8 @@ export const cards = {
           ctx.res.status(404).json({ error: "Skill not found" });
           return;
         }
-        const png = await generateCard("skill-card", mapSkill(row as any));
-        await sendPngResponse(ctx, png);
+        const html = await renderCardHtml("skill-card", mapSkill(row as any));
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
         console.error(`[cards] Error generating skill card for '${id}':`, err);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -268,7 +282,7 @@ export const cards = {
   getIndustry: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate industry card image",
+      summary: "Generate industry card HTML",
       path: "/cards/industry/{id}",
       tags: ["Cards"],
     })
@@ -292,10 +306,16 @@ export const cards = {
           ctx.res.status(404).json({ error: "Industry not found" });
           return;
         }
-        const png = await generateCard("industry-card", mapIndustry(row as any));
-        await sendPngResponse(ctx, png);
+        const html = await renderCardHtml(
+          "industry-card",
+          mapIndustry(row as any),
+        );
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
-        console.error(`[cards] Error generating industry card for '${id}':`, err);
+        console.error(
+          `[cards] Error generating industry card for '${id}':`,
+          err,
+        );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: err?.message ?? "Internal server error",
         });
@@ -305,7 +325,7 @@ export const cards = {
   getCertification: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate certification card image",
+      summary: "Generate certification card HTML",
       path: "/cards/certification/{id}",
       tags: ["Cards"],
     })
@@ -338,13 +358,16 @@ export const cards = {
             .executeTakeFirst();
           issuingOrgName = org?.name;
         }
-        const png = await generateCard(
+        const html = await renderCardHtml(
           "certification-card",
           mapCertification(row as any, issuingOrgName),
         );
-        await sendPngResponse(ctx, png);
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
-        console.error(`[cards] Error generating certification card for '${id}':`, err);
+        console.error(
+          `[cards] Error generating certification card for '${id}':`,
+          err,
+        );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: err?.message ?? "Internal server error",
         });
@@ -354,7 +377,7 @@ export const cards = {
   getProduct: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate product card image",
+      summary: "Generate product card HTML",
       path: "/cards/product/{id}",
       tags: ["Cards"],
     })
@@ -391,19 +414,26 @@ export const cards = {
 
         const industries = await database
           .selectFrom("industries")
-          .innerJoin("_ProductIndustries", "_ProductIndustries.B", "industries.id")
+          .innerJoin(
+            "_ProductIndustries",
+            "_ProductIndustries.B",
+            "industries.id",
+          )
           .select("industries.name")
           .where("_ProductIndustries.A", "=", row.id)
           .execute();
         const industriesStr = industries.map((ind) => ind.name).join(", ");
 
-        const png = await generateCard(
+        const html = await renderCardHtml(
           "product-card",
           mapSubject(row as any, organizationName, industriesStr),
         );
-        await sendPngResponse(ctx, png);
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
-        console.error(`[cards] Error generating product card for '${id}':`, err);
+        console.error(
+          `[cards] Error generating product card for '${id}':`,
+          err,
+        );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: err?.message ?? "Internal server error",
         });
@@ -413,7 +443,7 @@ export const cards = {
   getSubject: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate subject card image",
+      summary: "Generate subject card HTML",
       path: "/cards/subject/{id}",
       tags: ["Cards"],
     })
@@ -450,19 +480,26 @@ export const cards = {
 
         const industries = await database
           .selectFrom("industries")
-          .innerJoin("_ProductIndustries", "_ProductIndustries.B", "industries.id")
+          .innerJoin(
+            "_ProductIndustries",
+            "_ProductIndustries.B",
+            "industries.id",
+          )
           .select("industries.name")
           .where("_ProductIndustries.A", "=", row.id)
           .execute();
         const industriesStr = industries.map((ind) => ind.name).join(", ");
 
-        const png = await generateCard(
+        const html = await renderCardHtml(
           "product-card",
           mapSubject(row as any, organizationName, industriesStr),
         );
-        await sendPngResponse(ctx, png);
+        await sendHtmlResponse(ctx, html);
       } catch (err: any) {
-        console.error(`[cards] Error generating subject card for '${id}':`, err);
+        console.error(
+          `[cards] Error generating subject card for '${id}':`,
+          err,
+        );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: err?.message ?? "Internal server error",
         });
@@ -479,7 +516,7 @@ export const cards = {
     .handler(async () => {
       return {
         description: "Bildyx Card Generation API",
-        usage: "GET /api/cards/{type}/{id}  —  returns a PNG image",
+        usage: "GET /api/cards/{type}/{id}  —  returns HTML",
         types: VALID_TYPES,
         params: {
           id: "UUID or serial_number (or slug for company)",
