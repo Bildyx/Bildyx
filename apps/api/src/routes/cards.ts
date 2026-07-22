@@ -14,24 +14,7 @@ import {
   mapCertification,
   mapSubject,
 } from "../services/cards/mappers.js";
-
-const VALID_TYPES = [
-  "country",
-  "city",
-  "job",
-  "company",
-  "university",
-  "skill",
-  "industry",
-  "certification",
-  "product",
-  "subject",
-] as const;
-
-const CardInputSchema = z.object({
-  id: z.string(),
-  extended: z.string().optional(),
-});
+import { CardInputSchema } from "../models/card.js";
 
 async function sendHtmlResponse(ctx: any, html: string) {
   ctx.res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -66,8 +49,9 @@ export const cards = {
           ctx.res.status(404).json({ error: "Country not found" });
           return;
         }
+        const mappedData = await mapCountry(row as any);
         const html = await renderCardHtml("country-card", {
-          ...mapCountry(row as any),
+          ...mappedData,
           extended: isExtended,
         });
         await sendHtmlResponse(ctx, html);
@@ -156,11 +140,11 @@ export const cards = {
       }
     }),
 
-  getCompany: publicProcedure
+  getOrganization: publicProcedure
     .route({
       method: "GET",
-      summary: "Generate company card HTML",
-      path: "/cards/company/{id}",
+      summary: "Generate organization card HTML",
+      path: "/cards/organization/{id}",
       tags: ["Cards"],
     })
     .input(CardInputSchema)
@@ -190,7 +174,7 @@ export const cards = {
         await sendHtmlResponse(ctx, html);
       } catch (err: any) {
         console.error(
-          `[cards] Error generating company card for '${id}':`,
+          `[cards] Error generating organization card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -504,36 +488,5 @@ export const cards = {
           message: err?.message ?? "Internal server error",
         });
       }
-    }),
-
-  listCardTypes: publicProcedure
-    .route({
-      method: "GET",
-      summary: "List available card types and metadata",
-      path: "/cards",
-      tags: ["Cards"],
-    })
-    .handler(async () => {
-      return {
-        description: "Bildyx Card Generation API",
-        usage: "GET /api/cards/{type}/{id}  —  returns HTML",
-        types: VALID_TYPES,
-        params: {
-          id: "UUID or serial_number (or slug for company)",
-          extended:
-            "boolean (string) — country cards only, adds economic section (default: false)",
-        },
-        examples: [
-          "GET /api/cards/country/AE",
-          "GET /api/cards/country/AE?extended=true",
-          "GET /api/cards/city/DXB-001",
-          "GET /api/cards/job/job-001",
-          "GET /api/cards/company/microsoft",
-          "GET /api/cards/university/univ-001",
-          "GET /api/cards/skill/skill-001",
-          "GET /api/cards/industry/ind-001",
-          "GET /api/cards/certification/cert-001",
-        ],
-      };
     }),
 };
