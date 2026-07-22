@@ -93,7 +93,8 @@ export const cards = {
           ctx.res.status(404).json({ error: "City not found" });
           return;
         }
-        const html = await renderCardHtml("city-card", mapCity(row as any));
+        const mappedData = await mapCity(row as any);
+        const html = await renderCardHtml("city-card", mappedData);
         await sendHtmlResponse(ctx, html);
       } catch (err: any) {
         console.error(`[cards] Error generating city card for '${id}':`, err);

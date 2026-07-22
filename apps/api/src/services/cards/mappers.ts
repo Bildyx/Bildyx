@@ -1,8 +1,5 @@
-/**
- * Mapping functions: DB rows → EJS template data objects.
- * Each function receives a raw DB row and returns a plain object
- * whose keys match the EJS template variables exactly.
- */
+import { database } from "../../database.js";
+
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -98,43 +95,22 @@ export async function mapCountry(row: Record<string, any>) {
     workLifeBalance: str(row.work_life_balance),
     capital: str(row.capital_name),
     mainCities: join(row.main_cities) || str(row.main_cities),
-    population:
-      str(row.population) ||
-      (typeof row.population === "number"
-        ? row.population.toLocaleString("en-US")
-        : null),
+    population: str(row.population) || (typeof row.population === "number" ? row.population.toLocaleString("en-US") : null),
     interestingFact: str(row.interesting_fact),
     citizenshipProcess: str(row.citizenship_process),
     workPermit: str(row.work_permit),
-    globalCompetitivenessIndex:
-      str(row.global_competitiveness_index) ||
-      (row.global_competitiveness_index != null
-        ? String(row.global_competitiveness_index)
-        : null),
+    globalCompetitivenessIndex: str(row.global_competitiveness_index) || (row.global_competitiveness_index != null ? String(row.global_competitiveness_index) : null),
     levelOfGlobalization: str(row.level_of_globalisation),
-    numberOfInternationalStudents:
-      typeof row.number_of_international_students === "number"
-        ? `~${row.number_of_international_students.toLocaleString("en-US")}`
-        : str(row.number_of_international_students),
-    numberOfForeignCompaniesThatHaveOffice:
-      typeof row.number_of_foreign_organizations === "number"
-        ? `~${row.number_of_foreign_organizations.toLocaleString("en-US")}`
-        : str(row.number_of_foreign_organizations),
+    numberOfInternationalStudents: (typeof row.number_of_international_students === "number" ? `~${row.number_of_international_students.toLocaleString("en-US")}` : str(row.number_of_international_students)),
+    numberOfForeignCompaniesThatHaveOffice: (typeof row.number_of_foreign_organizations === "number" ? `~${row.number_of_foreign_organizations.toLocaleString("en-US")}` : str(row.number_of_foreign_organizations)),
     numberOfTourists: str(row.number_of_tourists),
     numberOfAirports: str(row.number_of_airports),
     qualityOfPrimaryAndSecondaryEducation: str(row.quality_of_education),
     degreeHolders: str(row.degree_holders),
-    numberOfCollegesAndUniversities:
-      typeof row.number_of_universities === "number"
-        ? `${row.number_of_universities}+`
-        : str(row.number_of_universities),
+    numberOfCollegesAndUniversities: (typeof row.number_of_universities === "number" ? `${row.number_of_universities}+` : str(row.number_of_universities)),
     topUniversities: join(row.top_universities) || str(row.top_universities),
     ethnicGroups: join(row.ethnic_groups) || str(row.ethnic_groups),
-    languages:
-      join(row.officialLanguages) ||
-      join(row.languages) ||
-      str(row.languages) ||
-      str(row.officialLanguages),
+    languages: join(row.officialLanguages) || join(row.languages) || str(row.languages) || str(row.officialLanguages),
     religion: join(row.religion) || str(row.religion),
     culturalValues: str(row.cultural_values),
     peopleDescription: str(row.people_description),
@@ -142,20 +118,11 @@ export async function mapCountry(row: Record<string, any>) {
     mainIndustries: join(row.main_industries) || str(row.main_industries),
     largestCompanies: join(row.largest_companies) || str(row.largest_companies),
     numberOfMultinationalHQs: str(row.number_of_multinational_hqs),
-    medianSalary:
-      typeof row.median_salary === "number"
-        ? `~€${row.median_salary.toLocaleString("en-US")}`
-        : str(row.median_salary),
+    medianSalary: (typeof row.median_salary === "number" ? `~€${row.median_salary.toLocaleString("en-US")}` : str(row.median_salary)),
     personalIncomeTax: str(row.personal_income_tax),
     costOfLiving: str(row.cost_of_living),
-    medianHomePrice:
-      typeof row.median_home_price === "number"
-        ? `~€${row.median_home_price.toLocaleString("en-US")}`
-        : str(row.median_home_price),
-    averageRent:
-      typeof row.average_rent === "number"
-        ? `~€${row.average_rent.toLocaleString("en-US")}`
-        : str(row.average_rent),
+    medianHomePrice: (typeof row.median_home_price === "number" ? `~€${row.median_home_price.toLocaleString("en-US")}` : str(row.median_home_price)),
+    averageRent: (typeof row.average_rent === "number" ? `~€${row.average_rent.toLocaleString("en-US")}` : str(row.average_rent)),
     year: new Date().getFullYear(),
     extended: false,
   };
@@ -165,7 +132,79 @@ export async function mapCountry(row: Record<string, any>) {
 // City
 // ---------------------------------------------------------------------------
 
-export function mapCity(row: Record<string, any>) {
+export async function mapCity(row: Record<string, any>) {
+  const iso2 = (row.country_id || row.countryId || "").toLowerCase();
+  const flagUrl = iso2 ? `https://flagcdn.com/w320/${iso2}.png` : null;
+  const photoUrl = await fetchWikivoyagePhoto(row.name);
+
+  // Dynamic database relations fetching
+  let mainIndustriesStr = null;
+  let largestCompaniesStr = null;
+  let topUniversitiesStr = null;
+
+  try {
+    if (row.id) {
+      // 1. Industries
+      const industries = await database
+        .selectFrom("industries")
+        .innerJoin("_CityMainIndustries", "_CityMainIndustries.B", "industries.id")
+        .select("industries.name")
+        .where("_CityMainIndustries.A", "=", row.id)
+        .execute();
+      if (industries.length > 0) {
+        mainIndustriesStr = industries.map((ind) => ind.name).join(", ");
+      }
+
+      // 2. Headquartered Companies
+      const companies = await database
+        .selectFrom("organizations")
+        .select("organizations.name")
+        .where("city_id", "=", row.id)
+        .limit(5)
+        .execute();
+      if (companies.length > 0) {
+        largestCompaniesStr = companies.map((c) => c.name).join(", ");
+      }
+
+      // 3. Universities
+      const univs = await database
+        .selectFrom("universities")
+        .select("universities.name")
+        .where("city_id", "=", row.id)
+        .limit(4)
+        .execute();
+      if (univs.length > 0) {
+        topUniversitiesStr = univs.map((u) => u.name).join(", ");
+      }
+    }
+  } catch (err) {
+    console.warn(`[mapCity] Failed to query relations for city '${row.name}':`, err);
+  }
+
+  // Formatting helpers
+  const cur = str(row.currency) || "USD";
+  const getFormattedValue = (val: number | null | undefined, isHomePrice = false, isRent = false) => {
+    if (val == null) return null;
+    let formattedVal = val.toLocaleString("en-US");
+    if (isHomePrice && val >= 1000000) {
+      formattedVal = `${(val / 1000000).toFixed(1)} Million`;
+    }
+    const suffix = isRent ? "/month" : "";
+    if (cur === "USD") {
+      return `US $${formattedVal}${suffix}`;
+    }
+    if (cur === "EUR") {
+      return `€${formattedVal}${suffix}`;
+    }
+    if (cur === "HKD") {
+      return `HK$${formattedVal}${suffix}`;
+    }
+    if (cur === "AED") {
+      return `AED ${formattedVal}${suffix}`;
+    }
+    return `${cur} ${formattedVal}${suffix}`;
+  };
+
   return {
     cityName: row.name,
     serialNumber: row.serial_number,
@@ -173,26 +212,25 @@ export function mapCity(row: Record<string, any>) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "_")
       .replace(/^_|_$/g, ""),
-    population: str(row.population) ?? fmt(row.population),
-    mainIndustries: null as string | null,
-    numberOfMultinationalHQs:
-      str(row.number_of_multinational_hqs) ??
-      fmt(row.number_of_multinational_hqs),
-    numberOfAirports: fmt(row.number_of_airports),
-    largestCompanies: null as string | null,
-    medianSalary: fmt(row.median_salary),
+    flagUrl,
+    photoUrl,
+    population: str(row.population) || (typeof row.population === "number" ? row.population.toLocaleString("en-US") : null),
+    mainIndustries: mainIndustriesStr || str(row.main_industries),
+    numberOfMultinationalHQs: str(row.number_of_multinational_hqs) || (typeof row.number_of_multinational_hqs === "number" ? `${row.number_of_multinational_hqs}+` : null),
+    numberOfAirports: (typeof row.number_of_airports === "number" ? String(row.number_of_airports) : str(row.number_of_airports)),
+    largestCompanies: largestCompaniesStr || str(row.largest_organization),
+    medianSalary: (typeof row.median_salary === "number" ? getFormattedValue(row.median_salary) : str(row.median_salary)),
     costOfLiving: str(row.cost_of_living),
-    medianHomePrice: fmt(row.median_home_price),
-    averageRent: fmt(row.average_rent),
+    medianHomePrice: (typeof row.median_home_price === "number" ? getFormattedValue(row.median_home_price, true) : str(row.median_home_price)),
+    averageRent: (typeof row.average_rent === "number" ? getFormattedValue(row.average_rent, false, true) : str(row.average_rent)),
     temperatures: str(row.temperatures),
     climate: str(row.climate),
     interestingFact: str(row.interesting_fact),
     degreeHolders: str(row.degree_holders),
-    numberOfCollegesAndUniversities: fmt(row.number_of_universities),
-    topUniversities: null as string | null,
-    numberOfNationalities:
-      str(row.number_of_nationalities) ?? fmt(row.number_of_nationalities),
-    languages: str(row.language),
+    numberOfCollegesAndUniversities: (typeof row.number_of_universities === "number" ? `${row.number_of_universities}+` : str(row.number_of_universities)),
+    topUniversities: topUniversitiesStr || join(row.top_universities) || str(row.top_universities),
+    numberOfNationalities: str(row.number_of_nationalities) || (typeof row.number_of_nationalities === "number" ? `${row.number_of_nationalities}+` : null),
+    languages: join(row.language) || str(row.language),
     peopleDescription: str(row.people_description),
     year: new Date().getFullYear(),
   };
