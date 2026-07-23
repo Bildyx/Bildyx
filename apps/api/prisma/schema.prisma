@@ -134,42 +134,42 @@ model City {
 model Organization {
   id                   String               @id @default(uuid()) @db.Uuid
   name                 String
-  serial_number        String               @unique
   slug                 String               @unique
-  subtype              OrganizationSubType?
-  type1                String?
-  type2                String?
   ownership            String?
   mission              String?
   knownFor             String?              @map("known_for")
-  programsActivities   String[]             @map("programs_activities")
   project              String?
   researchAreas        String[]             @map("research_areas")
-  description          String?
   products             String[]
   services             String[]
-  partners             String[]
   budget               String?
   founded              String?
-  founders             String[]
-  facilities           String[]
-  offices              String?
-  authority            String?
-  jurisdiction         String?
-  members              Int?
-  collections          String?
-  graduates            String?
-  undergraduates       String?
   score                Int?
   city_id              String?              @db.Uuid
   numberOfEmployees    EmployeeCountRange?
-  personnel            Int?
-  subsidiaries         String?
   parentOrganizationId String?              @map("parent_organization_id") @db.Uuid
   metadata             Json?
   deletedAt            DateTime?            @map("deleted_at")
   createdAt            DateTime             @default(now()) @map("created_at")
   updatedAt            DateTime             @updatedAt @map("updated_at")
+  authority            String?
+  collections          String?
+  description          String?
+  facilities           String[]
+  founders             String[]
+  graduates            String?
+  jurisdiction         String?
+  members              Int?
+  offices              String?
+  partners             String[]
+  personnel            Int?
+  programsActivities   String[]             @map("programs_activities")
+  serial_number        String               @unique
+  subsidiaries         String?
+  subtype              OrganizationSubType?
+  type1                String?
+  type2                String?
+  undergraduates       String?
   issuedCertifications Certification[]      @relation("CertificationIssuer")
   jobAds               JobAd[]
   headquartersCity     City?                @relation("OrganizationHeadquarters", fields: [city_id], references: [id])
@@ -358,13 +358,6 @@ model StudyFields {
   created_at            DateTime              @default(now())
   updated_at            DateTime              @updatedAt
   user_education_fields UserEducationFields[]
-
-  // NOTE: pas de @@map ici -> table physique "StudyFields" (PascalCase),
-  // incohérent avec le reste (snake_case). Corriger vers @@map("study_fields")
-  // nécessite une migration (ALTER TABLE RENAME) + régénération de
-  // src/db/types.ts (kysely-codegen) + mise à jour de
-  // src/tests/user_education_fields.test.ts, qui référencent "StudyFields"
-  // en dur -> non fait ici (touche la DB live).
 }
 
 model JobAd {
@@ -755,12 +748,18 @@ enum CostOfLiving {
   LOW
   MEDIUM
   HIGH
+  LOW_MEDIUM
+  MEDIUM_HIGH
+  VERY_HIGH
 }
 
 enum QualityOfLife {
   LOW
   MEDIUM
   HIGH
+  LOW_MEDIUM
+  MEDIUM_HIGH
+  VERY_HIGH
 }
 
 enum Language {
@@ -865,6 +864,30 @@ enum Language {
   YIDDISH
   YORUBA
   ZULU
+  AMBONESE_MALAY
+  AYMARA
+  BAJAN_CREOLE
+  BERBER
+  CHAMORRO
+  CORSICAN
+  DHIVEHI
+  FRISIAN
+  GUYANESE_CREOLE
+  HMONG
+  KAPAMPANGAN
+  KIMBUNDU
+  MONTENEGRIN
+  NAVAJO
+  QUECHUA
+  ROMANI
+  ROMANSH
+  SCOTS
+  SCOTTISH_GAELIC
+  SEYCHELLOIS_CREOLE
+  SHUAR
+  TAGALOG
+  UMBUNDU
+  VALENCIAN
 }
 
 enum JobCategory {
@@ -937,6 +960,7 @@ enum OrganizationSubType {
   SOCIETY
   CLUB
   ARMY
+  OTHER
   ASSOCIATION
   CENTRAL_BANK
   CHAMBER_OF_COMMERCE
@@ -957,7 +981,6 @@ enum OrganizationSubType {
   SOE
   STATE_GOVERNMENT
   THINK_TANK
-  OTHER
 }
 
 enum EmployeeCountRange {

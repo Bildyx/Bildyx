@@ -21,6 +21,7 @@ import {
   CancelUnverifiedOutputSchema,
 } from "../models/auth";
 import { randomUUID, randomBytes, createHash } from "node:crypto";
+import { generateSerialNumber } from "../models/utils/enums.js";
 import {
   hashPassword,
   verifyPassword,
@@ -114,6 +115,7 @@ export const auth = {
               id: orgId,
               name: input.companyName.trim(),
               slug: slug,
+              serial_number: generateSerialNumber("COMPANY"),
               updated_at: new Date(),
             })
             .execute();

@@ -5,13 +5,13 @@ CREATE SCHEMA IF NOT EXISTS "public";
 CREATE TYPE "Currency" AS ENUM ('AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHF', 'CLP', 'CNY', 'COP', 'CRC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'UYU', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XCD', 'XOF', 'XPF', 'YER', 'ZAR', 'ZMW', 'ZWL');
 
 -- CreateEnum
-CREATE TYPE "CostOfLiving" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+CREATE TYPE "CostOfLiving" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'LOW_MEDIUM', 'MEDIUM_HIGH', 'VERY_HIGH');
 
 -- CreateEnum
-CREATE TYPE "QualityOfLife" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+CREATE TYPE "QualityOfLife" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'LOW_MEDIUM', 'MEDIUM_HIGH', 'VERY_HIGH');
 
 -- CreateEnum
-CREATE TYPE "Language" AS ENUM ('AFRIKAANS', 'ALBANIAN', 'AMHARIC', 'ARABIC', 'ARMENIAN', 'AZERBAIJANI', 'BASQUE', 'BELARUSIAN', 'BENGALI', 'BOSNIAN', 'BULGARIAN', 'BURMESE', 'CATALAN', 'CEBUANO', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'CROATIAN', 'CZECH', 'DANISH', 'DUTCH', 'ENGLISH', 'ESPERANTO', 'ESTONIAN', 'FILIPINO', 'FINNISH', 'FRENCH', 'GALICIAN', 'GEORGIAN', 'GERMAN', 'GREEK', 'GUJARATI', 'HAITIAN_CREOLE', 'HAUSA', 'HEBREW', 'HINDI', 'HUNGARIAN', 'ICELANDIC', 'IGBO', 'INDONESIAN', 'IRISH', 'ITALIAN', 'JAPANESE', 'JAVANESE', 'KANNADA', 'KAZAKH', 'KHMER', 'KOREAN', 'KURDISH', 'KYRGYZ', 'LAO', 'LATIN', 'LATVIAN', 'LITHUANIAN', 'LUXEMBOURGISH', 'MACEDONIAN', 'MALAGASY', 'MALAY', 'MALAYALAM', 'MALTESE', 'MAORI', 'MARATHI', 'MONGOLIAN', 'NEPALI', 'NORWEGIAN', 'PASHTO', 'PERSIAN', 'POLISH', 'PORTUGUESE', 'PUNJABI', 'ROMANIAN', 'RUSSIAN', 'SAMOAN', 'SERBIAN', 'SHONA', 'SINDHI', 'SINHALA', 'SLOVAK', 'SLOVENIAN', 'SOMALI', 'SPANISH', 'SUNDANESE', 'SWAHILI', 'SWEDISH', 'TAJIK', 'TAMIL', 'TATAR', 'TELUGU', 'THAI', 'TIBETAN', 'TURKISH', 'TURKMEN', 'UKRAINIAN', 'URDU', 'UZBEK', 'VIETNAMESE', 'WELSH', 'WOLOF', 'XHOSA', 'YIDDISH', 'YORUBA', 'ZULU');
+CREATE TYPE "Language" AS ENUM ('AFRIKAANS', 'ALBANIAN', 'AMHARIC', 'ARABIC', 'ARMENIAN', 'AZERBAIJANI', 'BASQUE', 'BELARUSIAN', 'BENGALI', 'BOSNIAN', 'BULGARIAN', 'BURMESE', 'CATALAN', 'CEBUANO', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'CROATIAN', 'CZECH', 'DANISH', 'DUTCH', 'ENGLISH', 'ESPERANTO', 'ESTONIAN', 'FILIPINO', 'FINNISH', 'FRENCH', 'GALICIAN', 'GEORGIAN', 'GERMAN', 'GREEK', 'GUJARATI', 'HAITIAN_CREOLE', 'HAUSA', 'HEBREW', 'HINDI', 'HUNGARIAN', 'ICELANDIC', 'IGBO', 'INDONESIAN', 'IRISH', 'ITALIAN', 'JAPANESE', 'JAVANESE', 'KANNADA', 'KAZAKH', 'KHMER', 'KOREAN', 'KURDISH', 'KYRGYZ', 'LAO', 'LATIN', 'LATVIAN', 'LITHUANIAN', 'LUXEMBOURGISH', 'MACEDONIAN', 'MALAGASY', 'MALAY', 'MALAYALAM', 'MALTESE', 'MAORI', 'MARATHI', 'MONGOLIAN', 'NEPALI', 'NORWEGIAN', 'PASHTO', 'PERSIAN', 'POLISH', 'PORTUGUESE', 'PUNJABI', 'ROMANIAN', 'RUSSIAN', 'SAMOAN', 'SERBIAN', 'SHONA', 'SINDHI', 'SINHALA', 'SLOVAK', 'SLOVENIAN', 'SOMALI', 'SPANISH', 'SUNDANESE', 'SWAHILI', 'SWEDISH', 'TAJIK', 'TAMIL', 'TATAR', 'TELUGU', 'THAI', 'TIBETAN', 'TURKISH', 'TURKMEN', 'UKRAINIAN', 'URDU', 'UZBEK', 'VIETNAMESE', 'WELSH', 'WOLOF', 'XHOSA', 'YIDDISH', 'YORUBA', 'ZULU', 'AMBONESE_MALAY', 'AYMARA', 'BAJAN_CREOLE', 'BERBER', 'CHAMORRO', 'CORSICAN', 'DHIVEHI', 'FRISIAN', 'GUYANESE_CREOLE', 'HMONG', 'KAPAMPANGAN', 'KIMBUNDU', 'MONTENEGRIN', 'NAVAJO', 'QUECHUA', 'ROMANI', 'ROMANSH', 'SCOTS', 'SCOTTISH_GAELIC', 'SEYCHELLOIS_CREOLE', 'SHUAR', 'TAGALOG', 'UMBUNDU', 'VALENCIAN');
 
 -- CreateEnum
 CREATE TYPE "JobCategory" AS ENUM ('PRIVATE_SECTOR', 'PUBLIC_SECTOR', 'GOVERNMENT', 'NGO', 'MILITARY', 'ACADEMIC', 'OTHER');
@@ -35,10 +35,10 @@ CREATE TYPE "EducationLevel" AS ENUM ('NONE', 'HIGH_SCHOOL', 'BACHELOR', 'MASTER
 CREATE TYPE "SkillImportance" AS ENUM ('REQUIRED', 'PREFERRED', 'NICE_TO_HAVE');
 
 -- CreateEnum
-CREATE TYPE "OrganizationSubType" AS ENUM ('COMPANY', 'GOVERNMENT', 'RESEARCH_INSTITUTE', 'UNIVERSITY', 'INTERNATIONAL_ORGANIZATION', 'NGO', 'NON_PROFIT', 'SOCIETY', 'CLUB', 'ARMY', 'ASSOCIATION', 'CENTRAL_BANK', 'CHAMBER_OF_COMMERCE', 'CITY_GOVERNMENT', 'COURT', 'EMBASSY', 'FOUNDATION', 'HOSPITAL', 'LIBRARY', 'MUSEUM', 'NATIONAL_AUDIT_OFFICE', 'NATIONAL_PARK', 'OMBUDSMAN', 'PRIMARY_SCHOOLS', 'PUBLIC_COMPANY', 'PUBLIC_PARKS', 'SECONDARY_SCHOOLS', 'SOE', 'STATE_GOVERNMENT', 'THINK_TANK', 'OTHER');
+CREATE TYPE "OrganizationSubType" AS ENUM ('COMPANY', 'GOVERNMENT', 'RESEARCH_INSTITUTE', 'UNIVERSITY', 'INTERNATIONAL_ORGANIZATION', 'NGO', 'NON_PROFIT', 'SOCIETY', 'CLUB', 'ARMY', 'OTHER', 'ASSOCIATION', 'CENTRAL_BANK', 'CHAMBER_OF_COMMERCE', 'CITY_GOVERNMENT', 'COURT', 'EMBASSY', 'FOUNDATION', 'HOSPITAL', 'LIBRARY', 'MUSEUM', 'NATIONAL_AUDIT_OFFICE', 'NATIONAL_PARK', 'OMBUDSMAN', 'PRIMARY_SCHOOLS', 'PUBLIC_COMPANY', 'PUBLIC_PARKS', 'SECONDARY_SCHOOLS', 'SOE', 'STATE_GOVERNMENT', 'THINK_TANK');
 
 -- CreateEnum
-CREATE TYPE "EmployeeCountRange" AS ENUM ('RANGE_1_10', 'RANGE_11_50', 'RANGE_51_200', 'RANGE_201_1000', 'RANGE_1001_5000', 'RANGE_5000_PLUS');
+CREATE TYPE "EmployeeCountRange" AS ENUM ('RANGE_1_10', 'RANGE_11_50', 'RANGE_51_200', 'RANGE_201_1000', 'RANGE_1001_5000', 'RANGE_5000_PLUS', 'CLASSIFIED');
 
 -- CreateEnum
 CREATE TYPE "UniversityType" AS ENUM ('UNIVERSITY', 'GRANDE_ECOLE', 'INSTITUTE', 'ACADEMY', 'ONLINE', 'OTHER');
@@ -178,40 +178,41 @@ CREATE TABLE "organizations" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "subtype" "OrganizationSubType",
-    "type1" TEXT,
-    "type2" TEXT,
     "ownership" TEXT,
     "mission" TEXT,
     "known_for" TEXT,
-    "programs_activities" TEXT[],
     "project" TEXT,
     "research_areas" TEXT[],
-    "description" TEXT,
     "products" TEXT[],
     "services" TEXT[],
-    "partners" TEXT[],
     "budget" TEXT,
     "founded" TEXT,
-    "founders" TEXT[],
-    "facilities" TEXT[],
-    "offices" TEXT,
-    "authority" TEXT,
-    "jurisdiction" TEXT,
-    "members" INTEGER,
-    "collections" TEXT,
-    "graduates" TEXT,
-    "undergraduates" TEXT,
     "score" INTEGER,
     "city_id" UUID,
     "numberOfEmployees" "EmployeeCountRange",
-    "personnel" INTEGER,
-    "subsidiaries" TEXT,
     "parent_organization_id" UUID,
     "metadata" JSONB,
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "authority" TEXT,
+    "collections" TEXT,
+    "description" TEXT,
+    "facilities" TEXT[],
+    "founders" TEXT[],
+    "graduates" TEXT,
+    "jurisdiction" TEXT,
+    "members" INTEGER,
+    "offices" TEXT,
+    "partners" TEXT[],
+    "personnel" INTEGER,
+    "programs_activities" TEXT[],
+    "serial_number" TEXT NOT NULL,
+    "subsidiaries" TEXT,
+    "subtype" "OrganizationSubType",
+    "type1" TEXT,
+    "type2" TEXT,
+    "undergraduates" TEXT,
 
     CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
 );
@@ -603,6 +604,9 @@ CREATE INDEX "cities_country_id_idx" ON "cities"("country_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "organizations_slug_key" ON "organizations"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "organizations_serial_number_key" ON "organizations"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "organizations_parent_organization_id_idx" ON "organizations"("parent_organization_id");

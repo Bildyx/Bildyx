@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
+import { generateSerialNumber } from "../../../src/models/utils/enums.js";
 import {
   buildNameLookup,
   normalizeEnumKey,
@@ -19,6 +20,7 @@ import type {
 
 const EXPECTED_COLUMNS = [
   "name",
+  "serial_number",
   "slug",
   "subtype",
   "type1",
@@ -182,6 +184,7 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         id: id ?? undefined,
         name: name.value,
         slug: slug.value,
+        serial_number: row.serial_number || generateSerialNumber(subtype.value),
         subtype: subtype.value,
         type1: row.type1 || null,
         type2: row.type2 || null,

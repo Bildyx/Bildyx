@@ -4,6 +4,7 @@ import { job_ads } from "../routes/job_ads";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
+import { generateSerialNumber } from "../models/utils/enums.js";
 
 describe("Job Ads API Endpoints", () => {
   let testOrgId: string;
@@ -33,6 +34,7 @@ describe("Job Ads API Endpoints", () => {
         id: testOrgId,
         name: "Test Org for Job Ads",
         slug: "test-org-job-ads-slug",
+        serial_number: generateSerialNumber("COMPANY"),
         updated_at: new Date(),
       })
       .execute();
