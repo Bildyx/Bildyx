@@ -29,7 +29,7 @@ echo str_replace('</head>', "    {$testsStylesheet}\n</head>", $sharedHeader);
                     <span role="columnheader">Summary</span>
                 </div>
 
-                <a class="tp-test-row" role="row" href="#">
+                <a class="tp-test-row" role="row" href="tests-preferences/basic-information.php">
                     <span class="tp-test-name" role="cell"><span class="tp-icon">▱</span> Basic Information</span>
                     <span role="cell">Test</span>
                     <span class="tp-status" role="cell">Completed</span>
