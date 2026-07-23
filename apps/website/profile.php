@@ -288,6 +288,7 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
 
         <aside class="profile-side-nav" aria-label="Profile menu">
             <button class="side-nav-button is-active" type="button" data-panel="profilePanel">◎ Profile</button>
+            <button class="side-nav-button" type="button" data-panel="experiencePanel">▥ My Target List</button>
             <button class="side-nav-button" type="button" data-panel="testsPanel">▣ Tests &amp;<br />Preferences</button>
             <button class="side-nav-button" type="button" data-panel="jobsPanel">▥ My Jobs</button>
             <button class="side-nav-button" type="button" data-panel="settingsPanel">⚙ Settings</button>
