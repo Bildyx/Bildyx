@@ -1,6 +1,5 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC.js";
-import { z } from "zod";
 import { database } from "../database.js";
 import { renderCardHtml } from "../services/card.service.js";
 import {
@@ -15,8 +14,24 @@ import {
   mapSubject,
 } from "../services/cards/mappers.js";
 import { CardInputSchema } from "../models/card.js";
+import type { Request, Response } from "express";
+import { OrganizationSubtypeEnum } from "../models/utils/enums.js";
+import { z } from "zod";
 
-async function sendHtmlResponse(ctx: any, html: string) {
+interface CardsContext {
+  req?: Request;
+  res?: Response;
+}
+
+async function sendHtmlResponse(
+  ctx: CardsContext,
+  html: string,
+): Promise<void> {
+  if (!ctx.res) {
+    throw new ORPCError("INTERNAL_SERVER_ERROR", {
+      message: "Express response context missing",
+    });
+  }
   ctx.res.setHeader("Content-Type", "text/html; charset=utf-8");
   ctx.res.send(html);
 }
@@ -31,8 +46,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -46,22 +61,24 @@ export const cards = {
           .where("iso_code", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Country not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Country not found",
+          });
         }
-        const mappedData = await mapCountry(row as any);
+        const mappedData = await mapCountry(row);
         const html = await renderCardHtml("country-card", {
           ...mappedData,
           extended: isExtended,
         });
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(
           `[cards] Error generating country card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -75,8 +92,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -90,16 +107,18 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "City not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "City not found",
+          });
         }
-        const mappedData = await mapCity(row as any);
+        const mappedData = await mapCity(row);
         const html = await renderCardHtml("city-card", mappedData);
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(`[cards] Error generating city card for '${id}':`, err);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -113,8 +132,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -128,15 +147,17 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Job not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Job not found",
+          });
         }
-        const html = await renderCardHtml("job-card", mapJob(row as any));
+        const html = await renderCardHtml("job-card", mapJob(row));
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(`[cards] Error generating job card for '${id}':`, err);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -150,8 +171,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -165,21 +186,31 @@ export const cards = {
           .where(isUuid ? "id" : "slug", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Organization not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Organization not found",
+          });
         }
-        const html = await renderCardHtml(
-          "company-card",
-          mapOrganization(row as any),
+
+        let template = "company-card";
+
+        switch (row.subtype as z.infer<typeof OrganizationSubtypeEnum>) {
+          case OrganizationSubtypeEnum.enum.GOVERNMENT: {
+            template = "government-card";
+            break;
+          }
+        }
+        await sendHtmlResponse(
+          ctx,
+          await renderCardHtml(template, await mapOrganization(row)),
         );
-        await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(
           `[cards] Error generating organization card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -193,8 +224,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -208,21 +239,23 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "University not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "University not found",
+          });
         }
         const html = await renderCardHtml(
           "university-card",
-          mapUniversity(row as any),
+          mapUniversity(row),
         );
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(
           `[cards] Error generating university card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -236,8 +269,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -251,15 +284,17 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Skill not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Skill not found",
+          });
         }
-        const html = await renderCardHtml("skill-card", mapSkill(row as any));
+        const html = await renderCardHtml("skill-card", mapSkill(row));
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(`[cards] Error generating skill card for '${id}':`, err);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -273,8 +308,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -288,21 +323,20 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Industry not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Industry not found",
+          });
         }
-        const html = await renderCardHtml(
-          "industry-card",
-          mapIndustry(row as any),
-        );
+        const html = await renderCardHtml("industry-card", mapIndustry(row));
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(
           `[cards] Error generating industry card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -316,8 +350,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -331,30 +365,32 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Certification not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Certification not found",
+          });
         }
         let issuingOrgName: string | undefined;
-        if ((row as any).issuing_organization_id) {
+        if (row.issuing_organization_id) {
           const org = await database
             .selectFrom("organizations")
             .select("name")
-            .where("id", "=", (row as any).issuing_organization_id)
+            .where("id", "=", row.issuing_organization_id)
             .executeTakeFirst();
           issuingOrgName = org?.name;
         }
         const html = await renderCardHtml(
           "certification-card",
-          mapCertification(row as any, issuingOrgName),
+          mapCertification(row, issuingOrgName),
         );
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(
           `[cards] Error generating certification card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -368,8 +404,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -383,8 +419,9 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Product not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Product not found",
+          });
         }
 
         let organizationName: string | undefined;
@@ -411,16 +448,17 @@ export const cards = {
 
         const html = await renderCardHtml(
           "product-card",
-          mapSubject(row as any, organizationName, industriesStr),
+          mapSubject(row, organizationName, industriesStr),
         );
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(
           `[cards] Error generating product card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),
@@ -434,8 +472,8 @@ export const cards = {
     })
     .input(CardInputSchema)
     .handler(async ({ input, context }) => {
-      const ctx = context as any;
-      if (!ctx?.req || !ctx?.res) {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Express request/response context missing",
         });
@@ -449,8 +487,9 @@ export const cards = {
           .where(isUuid ? "id" : "serial_number", "=", id)
           .executeTakeFirst();
         if (!row) {
-          ctx.res.status(404).json({ error: "Subject not found" });
-          return;
+          throw new ORPCError("NOT_FOUND", {
+            message: "Subject not found",
+          });
         }
 
         let organizationName: string | undefined;
@@ -477,16 +516,17 @@ export const cards = {
 
         const html = await renderCardHtml(
           "product-card",
-          mapSubject(row as any, organizationName, industriesStr),
+          mapSubject(row, organizationName, industriesStr),
         );
         await sendHtmlResponse(ctx, html);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         console.error(
           `[cards] Error generating subject card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: err?.message ?? "Internal server error",
+          message: error.message || "Internal server error",
         });
       }
     }),

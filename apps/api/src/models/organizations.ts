@@ -4,6 +4,7 @@ import { EmployeeCountRangeEnum, OrganizationSubtypeEnum } from "./utils/enums";
 export const OrganizationSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1),
+  serial_number: z.string().trim().min(1),
   slug: z.string().trim().min(1),
   subtype: OrganizationSubtypeEnum.nullable().optional(),
   type1: z.string().nullable().optional(),

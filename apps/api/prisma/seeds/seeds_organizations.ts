@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { generateSerialNumber } from "../../src/models/utils/enums.js";
 import {
   EmployeeCountRange,
   OrganizationSubType,
@@ -45,6 +46,7 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
 // contient pas d'id/created_at/updated_at/deleted_at).
 type OrganizationCsv = {
   name: string;
+  serial_number?: string;
   slug: string;
   type?: string;
   type1?: string;
@@ -102,6 +104,7 @@ export async function seedOrganizations(prisma: PrismaClient) {
       id: idByOrgName.get(r.name.trim().toLowerCase())!,
       name: r.name,
       slug: r.slug,
+      serial_number: r.serial_number || generateSerialNumber(parseEnum(r.type, OrganizationSubType)),
 
       subtype: parseEnum(r.type, OrganizationSubType),
       type1: r.type1 || null,

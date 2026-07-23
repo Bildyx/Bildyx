@@ -35,7 +35,7 @@ export type Certificationcategory = "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "PRO
 
 export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "OTHER" | "PART_TIME";
 
-export type Costofliving = "HIGH" | "LOW" | "MEDIUM";
+export type Costofliving = "HIGH" | "LOW" | "LOW_MEDIUM" | "MEDIUM" | "MEDIUM_HIGH" | "VERY_HIGH";
 
 export type Currency = "AED" | "AFN" | "ALL" | "AMD" | "ANG" | "AOA" | "ARS" | "AUD" | "AWG" | "AZN" | "BAM" | "BBD" | "BDT" | "BGN" | "BHD" | "BIF" | "BMD" | "BND" | "BOB" | "BRL" | "BSD" | "BTN" | "BWP" | "BYN" | "BZD" | "CAD" | "CDF" | "CHF" | "CLP" | "CNY" | "COP" | "CRC" | "CUP" | "CVE" | "CZK" | "DJF" | "DKK" | "DOP" | "DZD" | "EGP" | "ERN" | "ETB" | "EUR" | "FJD" | "FKP" | "GBP" | "GEL" | "GHS" | "GIP" | "GMD" | "GNF" | "GTQ" | "GYD" | "HKD" | "HNL" | "HTG" | "HUF" | "IDR" | "ILS" | "INR" | "IQD" | "IRR" | "ISK" | "JMD" | "JOD" | "JPY" | "KES" | "KGS" | "KHR" | "KMF" | "KPW" | "KRW" | "KWD" | "KYD" | "KZT" | "LAK" | "LBP" | "LKR" | "LRD" | "LSL" | "LYD" | "MAD" | "MDL" | "MGA" | "MKD" | "MMK" | "MNT" | "MOP" | "MRU" | "MUR" | "MVR" | "MWK" | "MXN" | "MYR" | "MZN" | "NAD" | "NGN" | "NIO" | "NOK" | "NPR" | "NZD" | "OMR" | "PAB" | "PEN" | "PGK" | "PHP" | "PKR" | "PLN" | "PYG" | "QAR" | "RON" | "RSD" | "RUB" | "RWF" | "SAR" | "SBD" | "SCR" | "SDG" | "SEK" | "SGD" | "SHP" | "SLE" | "SOS" | "SRD" | "SSP" | "STN" | "SYP" | "SZL" | "THB" | "TJS" | "TMT" | "TND" | "TOP" | "TRY" | "TTD" | "TWD" | "TZS" | "UAH" | "UGX" | "USD" | "UYU" | "UZS" | "VES" | "VND" | "VUV" | "WST" | "XAF" | "XCD" | "XOF" | "XPF" | "YER" | "ZAR" | "ZMW" | "ZWL";
 
@@ -47,7 +47,7 @@ export type Educationfieldtype = "MAJOR" | "MINOR";
 
 export type Educationlevel = "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "NONE" | "OTHER" | "PHD";
 
-export type Employeecountrange = "RANGE_1_10" | "RANGE_1001_5000" | "RANGE_11_50" | "RANGE_201_1000" | "RANGE_5000_PLUS" | "RANGE_51_200";
+export type Employeecountrange = "CLASSIFIED" | "RANGE_1_10" | "RANGE_1001_5000" | "RANGE_11_50" | "RANGE_201_1000" | "RANGE_5000_PLUS" | "RANGE_51_200";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -73,13 +73,13 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
-export type Language = "AFRIKAANS" | "ALBANIAN" | "AMHARIC" | "ARABIC" | "ARMENIAN" | "AZERBAIJANI" | "BASQUE" | "BELARUSIAN" | "BENGALI" | "BOSNIAN" | "BULGARIAN" | "BURMESE" | "CATALAN" | "CEBUANO" | "CHINESE_CANTONESE" | "CHINESE_MANDARIN" | "CROATIAN" | "CZECH" | "DANISH" | "DUTCH" | "ENGLISH" | "ESPERANTO" | "ESTONIAN" | "FILIPINO" | "FINNISH" | "FRENCH" | "GALICIAN" | "GEORGIAN" | "GERMAN" | "GREEK" | "GUJARATI" | "HAITIAN_CREOLE" | "HAUSA" | "HEBREW" | "HINDI" | "HUNGARIAN" | "ICELANDIC" | "IGBO" | "INDONESIAN" | "IRISH" | "ITALIAN" | "JAPANESE" | "JAVANESE" | "KANNADA" | "KAZAKH" | "KHMER" | "KOREAN" | "KURDISH" | "KYRGYZ" | "LAO" | "LATIN" | "LATVIAN" | "LITHUANIAN" | "LUXEMBOURGISH" | "MACEDONIAN" | "MALAGASY" | "MALAY" | "MALAYALAM" | "MALTESE" | "MAORI" | "MARATHI" | "MONGOLIAN" | "NEPALI" | "NORWEGIAN" | "PASHTO" | "PERSIAN" | "POLISH" | "PORTUGUESE" | "PUNJABI" | "ROMANIAN" | "RUSSIAN" | "SAMOAN" | "SERBIAN" | "SHONA" | "SINDHI" | "SINHALA" | "SLOVAK" | "SLOVENIAN" | "SOMALI" | "SPANISH" | "SUNDANESE" | "SWAHILI" | "SWEDISH" | "TAJIK" | "TAMIL" | "TATAR" | "TELUGU" | "THAI" | "TIBETAN" | "TURKISH" | "TURKMEN" | "UKRAINIAN" | "URDU" | "UZBEK" | "VIETNAMESE" | "WELSH" | "WOLOF" | "XHOSA" | "YIDDISH" | "YORUBA" | "ZULU";
+export type Language = "AFRIKAANS" | "ALBANIAN" | "AMBONESE_MALAY" | "AMHARIC" | "ARABIC" | "ARMENIAN" | "AYMARA" | "AZERBAIJANI" | "BAJAN_CREOLE" | "BASQUE" | "BELARUSIAN" | "BENGALI" | "BERBER" | "BOSNIAN" | "BULGARIAN" | "BURMESE" | "CATALAN" | "CEBUANO" | "CHAMORRO" | "CHINESE_CANTONESE" | "CHINESE_MANDARIN" | "CORSICAN" | "CROATIAN" | "CZECH" | "DANISH" | "DHIVEHI" | "DUTCH" | "ENGLISH" | "ESPERANTO" | "ESTONIAN" | "FILIPINO" | "FINNISH" | "FRENCH" | "FRISIAN" | "GALICIAN" | "GEORGIAN" | "GERMAN" | "GREEK" | "GUJARATI" | "GUYANESE_CREOLE" | "HAITIAN_CREOLE" | "HAUSA" | "HEBREW" | "HINDI" | "HMONG" | "HUNGARIAN" | "ICELANDIC" | "IGBO" | "INDONESIAN" | "IRISH" | "ITALIAN" | "JAPANESE" | "JAVANESE" | "KANNADA" | "KAPAMPANGAN" | "KAZAKH" | "KHMER" | "KIMBUNDU" | "KOREAN" | "KURDISH" | "KYRGYZ" | "LAO" | "LATIN" | "LATVIAN" | "LITHUANIAN" | "LUXEMBOURGISH" | "MACEDONIAN" | "MALAGASY" | "MALAY" | "MALAYALAM" | "MALTESE" | "MAORI" | "MARATHI" | "MONGOLIAN" | "MONTENEGRIN" | "NAVAJO" | "NEPALI" | "NORWEGIAN" | "PASHTO" | "PERSIAN" | "POLISH" | "PORTUGUESE" | "PUNJABI" | "QUECHUA" | "ROMANI" | "ROMANIAN" | "ROMANSH" | "RUSSIAN" | "SAMOAN" | "SCOTS" | "SCOTTISH_GAELIC" | "SERBIAN" | "SEYCHELLOIS_CREOLE" | "SHONA" | "SHUAR" | "SINDHI" | "SINHALA" | "SLOVAK" | "SLOVENIAN" | "SOMALI" | "SPANISH" | "SUNDANESE" | "SWAHILI" | "SWEDISH" | "TAGALOG" | "TAJIK" | "TAMIL" | "TATAR" | "TELUGU" | "THAI" | "TIBETAN" | "TURKISH" | "TURKMEN" | "UKRAINIAN" | "UMBUNDU" | "URDU" | "UZBEK" | "VALENCIAN" | "VIETNAMESE" | "WELSH" | "WOLOF" | "XHOSA" | "YIDDISH" | "YORUBA" | "ZULU";
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type Organizationsubtype = "ARMY" | "ASSOCIATION" | "CENTRAL_BANK" | "CHAMBER_OF_COMMERCE" | "CITY_GOVERNMENT" | "CLUB" | "COMPANY" | "COURT" | "EMBASSY" | "FOUNDATION" | "GOVERNMENT" | "HOSPITAL" | "INTERNATIONAL_ORGANIZATION" | "LIBRARY" | "MUSEUM" | "NATIONAL_AUDIT_OFFICE" | "NATIONAL_PARK" | "NGO" | "NON_PROFIT" | "OMBUDSMAN" | "OTHER" | "PRIMARY_SCHOOLS" | "PUBLIC_COMPANY" | "PUBLIC_PARKS" | "RESEARCH_INSTITUTE" | "SECONDARY_SCHOOLS" | "SOCIETY" | "SOE" | "STATE_GOVERNMENT" | "THINK_TANK" | "UNIVERSITY";
 
-export type Qualityoflife = "HIGH" | "LOW" | "MEDIUM";
+export type Qualityoflife = "HIGH" | "LOW" | "LOW_MEDIUM" | "MEDIUM" | "MEDIUM_HIGH" | "VERY_HIGH";
 
 export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
@@ -758,6 +758,7 @@ export interface Organizations {
   project: string | null;
   research_areas: string[] | null;
   score: number | null;
+  serial_number: string;
   services: string[] | null;
   slug: string;
   subsidiaries: string | null;

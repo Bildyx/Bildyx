@@ -4,6 +4,7 @@ import { subjects } from "../routes/subjects";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
+import { generateSerialNumber } from "../models/utils/enums.js";
 
 describe("Subjects API Endpoints", () => {
   let testOrgId: string;
@@ -31,6 +32,7 @@ describe("Subjects API Endpoints", () => {
         id: testOrgId,
         name: "Test Org for Subjects",
         slug: "test-org-subjects-slug",
+        serial_number: generateSerialNumber("COMPANY"),
         updated_at: new Date(),
       })
       .execute();
