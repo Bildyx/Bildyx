@@ -1,7 +1,7 @@
 /* =========================================================
    Bildyx — Profile builder page
    Fichier dédié à profile.php uniquement.
-   Ne remplace pas auth.css et ne modifie pas les styles globaux.
+   Ne remplace pas auth.css.
    ========================================================= */
 
 :root {
@@ -19,9 +19,11 @@
 }
 
 body.profile-page {
+    margin: 0;
     background: var(--profile-blue);
     color: var(--profile-text);
     font-family: var(--profile-font);
+    overflow-x: hidden;
 }
 
 .profile-shell {
@@ -85,7 +87,7 @@ body.profile-page {
     padding: 0 18px;
     border: 1px solid var(--profile-border);
     border-radius: 999px;
-    background: #fff;
+    background: #ffffff;
 }
 
 .name-pill strong {
@@ -212,6 +214,10 @@ body.profile-page {
     border: 2px solid #eef1f8;
 }
 
+.hidden-file-input {
+    display: none;
+}
+
 .tiny-button,
 .inline-link {
     border: 0;
@@ -221,6 +227,8 @@ body.profile-page {
     font: inherit;
     font-size: 0.75rem;
     font-style: italic;
+    padding: 0;
+    width: fit-content;
 }
 
 .tiny-button:hover,
@@ -367,10 +375,16 @@ body.profile-page {
 .summary-text[contenteditable="true"],
 .name-pill strong[contenteditable="true"],
 .title-line [contenteditable="true"] {
-    background: rgba(36, 69, 238, 0.08);
-    outline: 1px dashed rgba(36, 69, 238, 0.35);
     border-radius: 6px;
     padding: 2px 5px;
+}
+
+.profile-meta-list span[contenteditable="true"]:focus,
+.summary-text[contenteditable="true"]:focus,
+.name-pill strong[contenteditable="true"]:focus,
+.title-line [contenteditable="true"]:focus {
+    background: rgba(36, 69, 238, 0.08);
+    outline: 1px dashed rgba(36, 69, 238, 0.35);
 }
 
 .skills-box {
@@ -530,6 +544,7 @@ body.profile-page {
     color: var(--profile-muted);
     font-size: 0.86rem;
     text-align: center;
+    grid-template-rows: auto auto;
 }
 
 .backend-slot::before {
@@ -543,10 +558,6 @@ body.profile-page {
     border: 1px solid var(--profile-border);
     color: var(--profile-blue);
     font-weight: 900;
-}
-
-.backend-slot {
-    grid-template-rows: auto auto;
 }
 
 .backend-slot--small {
@@ -626,11 +637,6 @@ body.profile-page {
     margin-top: 8px;
 }
 
-.date-row--right {
-    justify-content: flex-end;
-    margin-top: 8px;
-}
-
 .cert-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -688,11 +694,24 @@ body.profile-page {
     font: inherit;
     font-size: 0.9rem;
     font-weight: 800;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    line-height: 1.25;
 }
 
 .side-nav-button:hover,
 .side-nav-button.is-active {
     background: rgba(36, 69, 238, 0.1);
+}
+
+.side-nav-button span {
+    width: 18px;
+    min-width: 18px;
+    display: inline-flex;
+    justify-content: center;
+    color: inherit;
 }
 
 .utility-panel {
@@ -745,7 +764,7 @@ body.profile-page {
     padding: 14px 18px;
     border-radius: 12px;
     background: #071226;
-    color: #fff;
+    color: #ffffff;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
     transform: translateY(-12px);
     opacity: 0;
@@ -767,8 +786,14 @@ body.profile-page {
         position: static;
         width: 100%;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         order: -1;
+    }
+
+    .profile-workspace > .profile-card,
+    .profile-workspace > .profile-side-nav {
+        grid-column: 1;
+        grid-row: auto;
     }
 }
 
@@ -814,12 +839,4 @@ body.profile-page {
 .profile-workspace > .profile-side-nav {
     grid-column: 2;
     grid-row: 1;
-}
-
-@media (max-width: 1180px) {
-    .profile-workspace > .profile-card,
-    .profile-workspace > .profile-side-nav {
-        grid-column: 1;
-        grid-row: auto;
-    }
 }

@@ -61,15 +61,22 @@ $questions = [
 $icons = ['✦','♘','▣','⌁','□','○','♙','◈','☻','♧','♙','▱','◉','△','✧','♙','♡','▥','☼','▤','▱','♙','☑','ϟ','☆','⌁','❤','▭','☹','▱','✦','♙','☷','⌁','♙','◌','◷','⊗','≋','▤','◉','☻','⚙','◑','◌','◁','♧','◎','☔','↗'];
 
 ob_start();
-require dirname(__DIR__) . '/includes/header.php';
+require __DIR__ . '/../includes/header.php';
 $sharedHeader = ob_get_clean();
 
 /*
- * <base href="../"> garde les liens du header/footer corrects
- * même si cette page est dans le dossier /tests-preferences/.
+ * IMPORTANT : cette page est dans /tests-preferences/.
+ * On ajoute donc <base href="../"> juste après <head>, AVANT les CSS/scripts du header partagé.
+ * Comme ça, le header, le footer, le logo, les CSS globaux et les liens restent connectés au site entier.
  */
-$headAdditions = '<base href="../">' . "\n" . '    <link rel="stylesheet" href="css/tests-preferences.css" />';
-echo str_replace('</head>', "    {$headAdditions}\n</head>", $sharedHeader);
+$headAdditions = '    <base href="../">' . "\n" .
+                 '    <link rel="stylesheet" href="css/tests-preferences.css" />' . "\n";
+
+if (strpos($sharedHeader, '<head>') !== false) {
+    echo str_replace('<head>', "<head>\n" . $headAdditions, $sharedHeader);
+} else {
+    echo str_replace('</head>', $headAdditions . '</head>', $sharedHeader);
+}
 ?>
 
 <main class="tp-page">
@@ -136,4 +143,4 @@ echo str_replace('</head>', "    {$headAdditions}\n</head>", $sharedHeader);
     </section>
 </main>
 
-<?php require dirname(__DIR__) . '/includes/footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>
