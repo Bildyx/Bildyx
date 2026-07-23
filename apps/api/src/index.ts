@@ -23,9 +23,25 @@ import cors from "cors";
 
 const app = express();
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:8000",
+  "http://localhost:5500",
+  "http://localhost:8080",
+  "http://localhost:3001",
+  "http://localhost:5173",
+  "http://127.0.0.1:5500",
+  "http://127.0.0.1:8000",
+  "http://127.0.0.1:8080",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5500",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin '${origin}' not allowed`));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

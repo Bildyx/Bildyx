@@ -578,6 +578,16 @@ body.profile-page {
     background: var(--profile-blue-soft);
 }
 
+.backend-slot.is-filled {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+}
+
+.backend-slot.is-filled::before {
+    content: none;
+}
+
 .entry-skills {
     margin-top: 18px;
 }
@@ -839,4 +849,106 @@ body.profile-page {
 .profile-workspace > .profile-side-nav {
     grid-column: 2;
     grid-row: 1;
+}
+
+/* ─── Skeleton Loading ─── */
+@keyframes skeleton-loading {
+    0% { background-position: 150% 50%; }
+    100% { background-position: -50% 50%; }
+}
+.skeleton-loader {
+    display: inline-block;
+    height: 1em;
+    width: 100%;
+    background: linear-gradient(90deg, #f0f3f8 25%, #dbe1ee 50%, #f0f3f8 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.4s ease-in-out infinite;
+    border-radius: 4px;
+    margin: 4px 0;
+}
+.skeleton-loader.skeleton-name { width: 140px; height: 1.2rem; }
+.skeleton-loader.skeleton-headline { width: 80%; height: 1rem; }
+.skeleton-loader.skeleton-summary { width: 100%; height: 3.5rem; }
+.skeleton-loader.skeleton-role { width: 220px; height: 1.8rem; }
+.skeleton-loader.skeleton-meta { width: 60%; height: 0.9rem; }
+.skeleton-loader.skeleton-chip { width: 80px; height: 1.6rem; border-radius: 999px; }
+.skeleton-loader.skeleton-card { width: 100%; height: 150px; border-radius: 12px; }
+
+/* Modale Overlay */
+.org-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px; /* Évite de coller aux bords sur mobile */
+}
+
+/* Modale Card (Ajustement de la taille) */
+.org-modal-card {
+    background: #fff;
+    width: 100%;
+    max-width: 600px; /* Plus large (passé de 480px à 600px) */
+    max-height: 85vh; /* Limite la hauteur à 85% de l'écran */
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.org-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0; /* Empêche le header de s'écraser */
+}
+
+.org-modal-body {
+    padding: 20px;
+    overflow-y: auto; /* Permet le scroll dans le corps si le contenu dépasse */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Zone Autocomplete & Liste */
+.org-search-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.org-search-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Liste des résultats */
+.org-results-list {
+    position: relative; /* Repasse en relatif pour pousser le bas de la modale plutôt que de dépasser */
+    top: auto;
+    left: auto;
+    right: auto;
+    margin-top: 8px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    max-height: 320px; /* Plus grand espace pour lire les résultats */
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }

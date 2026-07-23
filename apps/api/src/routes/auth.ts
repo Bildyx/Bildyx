@@ -779,7 +779,7 @@ export const auth = {
       }
 
       if (!user) {
-        ctx.res.redirect("http://localhost:5500/login.html?tab=login");
+        ctx.res.redirect(`${process.env.FRONTEND_URL || "http://localhost:8000"}/login.html?tab=login`);
         return;
       }
 
@@ -810,6 +810,7 @@ export const auth = {
         expires: expiresAt,
       });
 
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:8000";
       ctx.res.send(`
         <!DOCTYPE html>
         <html>
@@ -821,7 +822,7 @@ export const auth = {
               if (window.opener) {
                 window.opener.postMessage(
                   { type: "GOOGLE_LOGIN_SUCCESS" },
-                  "http://localhost:5500"
+                  "${frontendUrl}"
                 );
               }
               window.close();
@@ -830,5 +831,74 @@ export const auth = {
           </body>
         </html>
       `);
+    }),
+
+  // 11. GET CURRENT USER (from session cookie)
+  me: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Get current authenticated user",
+      description:
+        "Returns the user linked to the current session cookie. Used by the frontend to hydrate session state.",
+      path: "/auth/me",
+      tags: ["Auth"],
+    })
+    .handler(async ({ context }) => {
+      const ctx = context as any;
+      const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
+      const token = ctx?.req?.cookies?.[cookieName];
+
+      if (!token) {
+        throw new ORPCError("UNAUTHORIZED", {
+          message: "No active session",
+        });
+      }
+
+      const tokenHash = createHash("sha256").update(token).digest("hex");
+
+      const session = await database
+        .selectFrom("user_sessions")
+        .selectAll()
+        .where("token_hash", "=", tokenHash)
+        .where("revoked_at", "is", null)
+        .executeTakeFirst();
+
+      if (!session) {
+        throw new ORPCError("UNAUTHORIZED", {
+          message: "Session not found or revoked",
+        });
+      }
+
+      if (new Date(session.expires_at) < new Date()) {
+        throw new ORPCError("UNAUTHORIZED", {
+          message: "Session expired",
+        });
+      }
+
+      const user = await database
+        .selectFrom("users")
+        .select(["id", "email", "first_name", "last_name", "display_name", "role", "avatar_url", "organization_id"])
+        .where("id", "=", session.user_id)
+        .where("deleted_at", "is", null)
+        .executeTakeFirst();
+
+      if (!user) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "User not found",
+        });
+      }
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          display_name: user.display_name,
+          role: user.role,
+          avatar_url: user.avatar_url,
+          organization_id: user.organization_id,
+        },
+      };
     }),
 };

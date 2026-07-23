@@ -108,6 +108,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <!-- Shared auth logic -->
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
         // Email verification script.  Pull the email from the query
@@ -205,15 +206,25 @@
                         stopLoading = startButtonLoading(verifyForm.querySelector(".submit-btn"));
                         const resp = await fetch(`${API_BASE}/verify-email`, {
                             method: 'POST',
+                            credentials: 'include',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email: email.trim(), code: codeInput.value.trim() })
                         });
                         const data = await resp.json().catch(() => ({}));
                         if (resp.status === 200) {
-                            toast.success('Email verified! You can now log in.');
+                            toast.success('Email verified! Redirecting to your profile...');
+                            // Stocker la session
+                            if (window.BildyxAPI && data.user) {
+                                window.BildyxAPI.setSession({
+                                    userId: data.user.id,
+                                    email: data.user.email,
+                                    role: data.user.role,
+                                    profileId: null,
+                                });
+                            }
                             setTimeout(() => {
-                                window.location.href = 'login.html';
-                            }, 2000);
+                                window.location.href = 'profile.php';
+                            }, 1500);
                         } else if (resp.status === 410 || (data && (data.message || '').includes('expired'))) {
                             showVerificationError(data.message || 'Verification expired. Your account has been deleted. Please create a new account.');
                         } else {

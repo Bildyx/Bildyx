@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Profile — Bildyx';
 $pageDescription = 'Build and edit your Bildyx MicroResume profile.';
-$pageScript = '';
+$pageScript = 'js/profile.js';
 $bodyClass = 'profile-page';
 $showMainNav = false;
 $activePage = 'profile';
@@ -20,7 +20,7 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
             <header class="profile-top">
                 <div class="name-zone">
                     <div class="name-pill">
-                        <strong id="profileName" contenteditable="true">Justine Tauxe</strong>
+                        <strong id="profileName" data-field="name" contenteditable="true"><span class="skeleton-loader skeleton-name"></span></strong>
                         <span>MicroResume</span>
                     </div>
 
@@ -30,12 +30,14 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
                 <div class="headline-wrap">
                     <input
                         class="headline-input"
+                        data-field="headline"
                         type="text"
-                        value="Cosmopolitan. Nerd. Learner. Love Tokyo."
+                        value=""
                         maxlength="100"
                         aria-label="Profile headline"
+                        placeholder="Add a headline..."
                     />
-                    <p class="field-help">40/100 chars · 5/12 words</p>
+                    <p class="field-help"><span id="headlineCounter">0</span>/100 chars</p>
                 </div>
 
                 <section class="summary-block" aria-labelledby="career-summary-title">
@@ -43,33 +45,31 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
 
                     <div class="summary-row">
                         <div class="avatar-editor">
-                            <div class="profile-avatar" id="profileAvatar">JT</div>
+                            <div class="profile-avatar" id="profileAvatar" data-field="avatar"></div>
                             <button class="tiny-button" type="button" id="changeAvatarButton">Change photo</button>
                             <input class="hidden-file-input" id="avatarInput" type="file" accept="image/*" />
                         </div>
 
-                        <p class="summary-text" contenteditable="true">
-                            I am as hardworking as Japanese.
+                        <p class="summary-text" data-field="summary" contenteditable="true">
+                            <span class="skeleton-loader skeleton-summary"></span>
                         </p>
 
                         <button class="icon-action" type="button" data-edit-button aria-label="Edit career summary">✎</button>
                     </div>
 
-                    <p class="location-line">⌾ Aachen, Germany</p>
+                    <p class="location-line" data-field="location"><span class="skeleton-loader skeleton-meta"></span></p>
                 </section>
 
                 <div class="profile-main-grid">
                     <section class="profile-core" aria-labelledby="role-title">
                         <div class="title-line">
-                            <h1 id="role-title" contenteditable="true">Software Ninjica</h1>
+                            <h1 id="role-title" data-field="role" contenteditable="true"><span class="skeleton-loader skeleton-role"></span></h1>
                         </div>
 
                         <p class="mini-label"><span aria-hidden="true">◉</span> Languages (max 5)</p>
                         <div class="chip-row" aria-label="Languages">
-                            <span class="chip is-filled">English</span>
-                            <span class="chip is-filled">German</span>
-                            <span class="chip is-filled">Spanish</span>
-                            <span class="chip is-filled">Japanese</span>
+                            <span class="skeleton-loader skeleton-chip"></span>
+                            <span class="skeleton-loader skeleton-chip"></span>
                             <button class="chip-add" type="button" aria-label="Add language">+</button>
                         </div>
 
@@ -80,13 +80,13 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
                         </p>
 
                         <ul class="profile-meta-list">
-                            <li><strong>◎ Worked In:</strong> <span>Abilene, Texas (United States), Aberdeen (United Kingdom)</span></li>
-                            <li><strong>◎ Studied In:</strong> <span>—</span></li>
-                            <li><strong>▥ Companies:</strong> <span>Pekamix Global, Pekamix</span></li>
-                            <li><strong>▦ Products/Services:</strong> <span>SalesPro</span></li>
-                            <li><strong>▣ Job Occupations:</strong> <span>Software Engineer</span></li>
-                            <li><strong>⌁ Degrees:</strong> <span>Bachelor of Business Administration (BBA), Associate Degree in Nursing (ADN)</span></li>
-                            <li><strong>ⓘ Certifications:</strong> <span>Microsoft Azure Fundamentals, AWS Certified Solutions Architect - Associate</span></li>
+                            <li><strong>◎ Worked In:</strong> <span data-field="meta-worked-in"><span class="skeleton-loader skeleton-meta"></span></span></li>
+                            <li><strong>◎ Studied In:</strong> <span data-field="meta-studied-in"><span class="skeleton-loader skeleton-meta"></span></span></li>
+                            <li><strong>▥ Companies:</strong> <span data-field="meta-companies"><span class="skeleton-loader skeleton-meta"></span></span></li>
+                            <li><strong>▦ Products/Services:</strong> <span data-field="meta-products"><span class="skeleton-loader skeleton-meta"></span></span></li>
+                            <li><strong>▣ Job Occupations:</strong> <span data-field="meta-jobs"><span class="skeleton-loader skeleton-meta"></span></span></li>
+                            <li><strong>⌁ Degrees:</strong> <span data-field="meta-degrees"><span class="skeleton-loader skeleton-meta"></span></span></li>
+                            <li><strong>ⓘ Certifications:</strong> <span data-field="meta-certifications"><span class="skeleton-loader skeleton-meta"></span></span></li>
                         </ul>
                     </section>
 
@@ -97,9 +97,8 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
                         </div>
 
                         <div class="chip-row skill-row" aria-label="Top skills">
-                            <span class="chip">Programming</span>
-                            <span class="chip">customer_service</span>
-                            <span class="chip">Team Building</span>
+                            <span class="skeleton-loader skeleton-chip"></span>
+                            <span class="skeleton-loader skeleton-chip"></span>
                             <button class="chip-add" type="button" aria-label="Add skill">+</button>
                         </div>
                     </section>
@@ -111,113 +110,12 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
             <section class="builder-section" aria-labelledby="experience-title">
                 <div class="section-title-row">
                     <h2 id="experience-title">Experiences</h2>
-                    <button class="icon-action" type="button" data-edit-button aria-label="Edit experiences">✎</button>
+                    <button class="outline-button outline-button--small" type="button" id="addExperienceButton">+ Add</button>
                 </div>
 
                 <div class="entry-list" id="experienceList">
-                    <article class="entry-card" data-entry>
-                        <div class="entry-toolbar">
-                            <h3>Work Experience 1</h3>
-                            <div>
-                                <button class="entry-tool" type="button" data-action="collapse" aria-label="Collapse work experience">−</button>
-                                <button class="entry-tool" type="button" data-action="remove" aria-label="Remove work experience">×</button>
-                            </div>
-                        </div>
-
-                        <div class="entry-body">
-                            <div class="entry-header-line">
-                                <div class="round-place" aria-hidden="true"></div>
-
-                                <div class="entry-controls">
-                                    <div class="date-row">
-                                        <select aria-label="Start date">
-                                            <option>Jan 2025</option>
-                                            <option>Jan 2024</option>
-                                            <option>Nov 2012</option>
-                                        </select>
-                                        <span>–</span>
-                                        <select aria-label="End date">
-                                            <option>Jul 2025</option>
-                                            <option>May 2024</option>
-                                            <option>Oct 2013</option>
-                                        </select>
-                                    </div>
-
-                                    <p>Abilene, Texas <span>Pekamix Global</span></p>
-                                    <button class="inline-link" type="button">Add brand (optional)...</button>
-                                    <button class="inline-link" type="button">Add client/industry served (optional)...</button>
-                                    <a href="#">Software Engineer</a>
-
-                                    <label>
-                                        Type:
-                                        <select>
-                                            <option>Internship</option>
-                                            <option>Full-time</option>
-                                            <option>Part-time</option>
-                                            <option>Freelance</option>
-                                        </select>
-                                    </label>
-
-                                    <label>
-                                        Level:
-                                        <select>
-                                            <option>Optional</option>
-                                            <option>Junior</option>
-                                            <option>Mid-level</option>
-                                            <option>Senior</option>
-                                        </select>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <textarea maxlength="600">I was working hard for Pekamix family. Likes it.</textarea>
-                            <p class="word-counter">9/60 words</p>
-
-                            <div class="backend-grid backend-grid--three">
-                                <section>
-                                    <h4>Company</h4>
-                                    <div class="backend-slot" data-card-slot="company">Company card</div>
-                                </section>
-
-                                <section>
-                                    <h4>Product/Service</h4>
-                                    <div class="backend-slot" data-card-slot="product">Product/Service card</div>
-                                </section>
-
-                                <section>
-                                    <h4>Role</h4>
-                                    <div class="backend-slot" data-card-slot="role">Role card</div>
-                                </section>
-                            </div>
-
-                            <div class="backend-grid backend-grid--two">
-                                <section>
-                                    <h4>Brands</h4>
-                                    <button class="inline-link" type="button">Add brand (optional)...</button>
-                                    <div class="backend-slot backend-slot--small">Brand card</div>
-                                </section>
-
-                                <section>
-                                    <h4>Client/Industry</h4>
-                                    <button class="inline-link" type="button">Add client/industry...</button>
-                                    <div class="backend-slot backend-slot--small">Client/Industry card</div>
-                                </section>
-                            </div>
-
-                            <div class="entry-skills">
-                                <p>Skills related to Software Engineer (select up to 5)</p>
-                                <div class="chip-row">
-                                    <span class="chip">AI</span>
-                                    <span class="chip">customer_service</span>
-                                    <span class="chip is-filled">Programming</span>
-                                </div>
-                                <small>3/5 selected</small>
-                            </div>
-                        </div>
-                    </article>
+                    <div class="skeleton-loader skeleton-card"></div>
                 </div>
-
-                <button class="outline-button" type="button" id="addExperienceButton">+ Add Work Experience</button>
             </section>
 
             <hr>
@@ -225,61 +123,12 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
             <section class="builder-section" aria-labelledby="education-title">
                 <div class="section-title-row">
                     <h2 id="education-title">Education</h2>
-                    <button class="icon-action" type="button" data-edit-button aria-label="Edit education">✎</button>
+                    <button class="outline-button outline-button--small" type="button" id="addEducationButton">+ Add</button>
                 </div>
 
                 <div class="entry-list" id="educationList">
-                    <article class="entry-card" data-entry>
-                        <div class="entry-toolbar">
-                            <h3>Education 1</h3>
-                            <div>
-                                <button class="entry-tool" type="button" data-action="collapse" aria-label="Collapse education">−</button>
-                                <button class="entry-tool" type="button" data-action="remove" aria-label="Remove education">×</button>
-                            </div>
-                        </div>
-
-                        <div class="entry-body">
-                            <div class="education-form-line">
-                                <div class="entry-icon-soft" aria-hidden="true">☻</div>
-
-                                <div class="education-fields">
-                                    <p><strong>Sterlingbridge University</strong> <button class="inline-link" type="button">Add school/faculty/department (optional)...</button></p>
-                                    <p><strong>Bachelor of Business Administration (BBA)</strong></p>
-                                    <p><strong>Management</strong></p>
-
-                                    <div class="date-row">
-                                        <label>Mode:
-                                            <select>
-                                                <option>Full time</option>
-                                                <option>Part time</option>
-                                                <option>Online</option>
-                                            </select>
-                                        </label>
-                                        <label><input type="checkbox" checked> Honors</label>
-                                        <label><input type="checkbox" checked> Double Degree</label>
-                                        <label><input type="checkbox" checked> Double Major</label>
-                                    </div>
-
-                                    <div class="chip-row education-tags">
-                                        <span class="chip">English</span>
-                                        <span class="chip">Marketing</span>
-                                        <span class="chip">Entrepreneurship</span>
-                                    </div>
-
-                                    <textarea maxlength="500">Hello, I am engineer.</textarea>
-                                    <p class="word-counter">4/50 words</p>
-
-                                    <div class="backend-grid backend-grid--two">
-                                        <div class="backend-slot backend-slot--education">University card</div>
-                                        <div class="backend-slot backend-slot--education">Degree card</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
+                    <div class="skeleton-loader skeleton-card"></div>
                 </div>
-
-                <button class="outline-button" type="button" id="addEducationButton">+ Add Degree</button>
             </section>
 
             <hr>
@@ -287,30 +136,12 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
             <section class="builder-section" aria-labelledby="certification-title">
                 <div class="section-title-row">
                     <h2 id="certification-title">Certifications</h2>
-                    <button class="icon-action" type="button" data-edit-button aria-label="Edit certifications">✎</button>
+                    <button class="outline-button outline-button--small" type="button" id="addCertificationButton">+ Add</button>
                 </div>
 
                 <div class="cert-grid">
-                    <article class="entry-card cert-card" data-entry>
-                        <div class="entry-toolbar">
-                            <h3>Microsoft Azure Fundamentals</h3>
-                            <button class="entry-tool" type="button" data-action="remove" aria-label="Remove certification">×</button>
-                        </div>
-                        <p>Issued by: Microsoft</p>
-                        <div class="backend-slot backend-slot--certification">Certification card</div>
-                    </article>
-
-                    <article class="entry-card cert-card" data-entry>
-                        <div class="entry-toolbar">
-                            <h3>AWS Certified Solutions Architect - Associate</h3>
-                            <button class="entry-tool" type="button" data-action="remove" aria-label="Remove certification">×</button>
-                        </div>
-                        <p>Issued by: Amazon Web Services</p>
-                        <div class="backend-slot backend-slot--certification">Certification card</div>
-                    </article>
+                    <div class="skeleton-loader skeleton-card" style="height: 80px;"></div>
                 </div>
-
-                <button class="outline-button" type="button" id="addCertificationButton">+ Add Certification</button>
             </section>
 
             <div class="save-row">
