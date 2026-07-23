@@ -532,7 +532,7 @@ if (loginForm) {
       const data = await resp.json().catch(() => ({}));
       if (resp.status === 200) {
         // Login successful: redirect to generic page
-        window.location.href = 'generic.html';
+        window.location.href = 'profile.php';
       } else {
         // Record attempt on failure
         addAttempt(email);
@@ -666,6 +666,6 @@ window.addEventListener("message", (event) => {
     if (event.origin !== "http://localhost:3000") return;
 
     if (event.data?.type === "GOOGLE_LOGIN_SUCCESS") {
-        window.location.href = "generic.html";
+        window.location.href = "profile.php";
     }
 });
