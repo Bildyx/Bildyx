@@ -41,9 +41,6 @@ CREATE TYPE "OrganizationSubType" AS ENUM ('COMPANY', 'GOVERNMENT', 'RESEARCH_IN
 CREATE TYPE "EmployeeCountRange" AS ENUM ('RANGE_1_10', 'RANGE_11_50', 'RANGE_51_200', 'RANGE_201_1000', 'RANGE_1001_5000', 'RANGE_5000_PLUS', 'CLASSIFIED');
 
 -- CreateEnum
-CREATE TYPE "UniversityType" AS ENUM ('UNIVERSITY', 'GRANDE_ECOLE', 'INSTITUTE', 'ACADEMY', 'ONLINE', 'OTHER');
-
--- CreateEnum
 CREATE TYPE "GovernmentType" AS ENUM ('REPUBLIC', 'CONSTITUTIONAL_MONARCHY', 'ABSOLUTE_MONARCHY', 'FEDERATION', 'PARLIAMENTARY', 'COMMUNIST', 'THEOCRACY', 'MILITARY_JUNTA', 'OTHER');
 
 -- CreateEnum
@@ -66,6 +63,9 @@ CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'SUSPENDED', 'DELETED', 'PENDING_VER
 
 -- CreateEnum
 CREATE TYPE "EducationFieldType" AS ENUM ('MAJOR', 'MINOR');
+
+-- CreateEnum
+CREATE TYPE "LanguageProficiency" AS ENUM ('BASIC', 'CONVERSATIONAL', 'PROFESSIONAL', 'FLUENT', 'NATIVE');
 
 -- CreateTable
 CREATE TABLE "industries" (
@@ -200,7 +200,6 @@ CREATE TABLE "organizations" (
     "description" TEXT,
     "facilities" TEXT[],
     "founders" TEXT[],
-    "graduates" TEXT,
     "jurisdiction" TEXT,
     "members" INTEGER,
     "offices" TEXT,
@@ -212,7 +211,9 @@ CREATE TABLE "organizations" (
     "subtype" "OrganizationSubType",
     "type1" TEXT,
     "type2" TEXT,
-    "undergraduates" TEXT,
+    "student_count" INTEGER,
+    "undergraduates" INTEGER,
+    "postgraduates" INTEGER,
 
     CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
 );
@@ -285,33 +286,6 @@ CREATE TABLE "certifications" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "certifications_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "universities" (
-    "id" UUID NOT NULL,
-    "name" TEXT NOT NULL,
-    "serial_number" TEXT NOT NULL,
-    "type" "UniversityType",
-    "description" TEXT,
-    "website_url" TEXT,
-    "logo_url" TEXT,
-    "country_id" CHAR(2),
-    "city_id" UUID,
-    "student_count" INTEGER,
-    "metadata" JSONB,
-    "score_university" DOUBLE PRECISION,
-    "local_name" TEXT,
-    "notes" TEXT,
-    "established" TEXT,
-    "score" INTEGER,
-    "undergraduates" INTEGER,
-    "postgraduates" INTEGER,
-    "deleted_at" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "universities_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -496,7 +470,7 @@ CREATE TABLE "user_certifications" (
 CREATE TABLE "user_educations" (
     "id" UUID NOT NULL,
     "user_profile_id" UUID NOT NULL,
-    "university_id" UUID,
+    "organization_id" UUID,
     "degree_id" UUID,
     "start_year" INTEGER,
     "end_year" INTEGER,
@@ -513,6 +487,43 @@ CREATE TABLE "user_education_fields" (
     "type" "EducationFieldType" NOT NULL,
 
     CONSTRAINT "user_education_fields_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_experiences" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "organization_id" UUID,
+    "job_id" UUID,
+    "title" TEXT,
+    "description" TEXT,
+    "start_year" INTEGER,
+    "end_year" INTEGER,
+    "current" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_experiences_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_languages" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "language" "Language" NOT NULL,
+    "proficiency" "LanguageProficiency",
+
+    CONSTRAINT "user_languages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_skills" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "skill_id" UUID NOT NULL,
+    "level" "DifficultyLevel",
+
+    CONSTRAINT "user_skills_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -645,18 +656,6 @@ CREATE INDEX "certifications_issuing_organization_id_idx" ON "certifications"("i
 CREATE INDEX "certifications_category_idx" ON "certifications"("category");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "universities_serial_number_key" ON "universities"("serial_number");
-
--- CreateIndex
-CREATE INDEX "universities_country_id_idx" ON "universities"("country_id");
-
--- CreateIndex
-CREATE INDEX "universities_city_id_idx" ON "universities"("city_id");
-
--- CreateIndex
-CREATE INDEX "universities_type_idx" ON "universities"("type");
-
--- CreateIndex
 CREATE UNIQUE INDEX "degrees_serial_number_key" ON "degrees"("serial_number");
 
 -- CreateIndex
@@ -750,7 +749,7 @@ CREATE INDEX "user_certifications_certification_id_idx" ON "user_certifications"
 CREATE UNIQUE INDEX "user_certifications_user_profile_id_certification_id_key" ON "user_certifications"("user_profile_id", "certification_id");
 
 -- CreateIndex
-CREATE INDEX "user_educations_university_id_idx" ON "user_educations"("university_id");
+CREATE INDEX "user_educations_organization_id_idx" ON "user_educations"("organization_id");
 
 -- CreateIndex
 CREATE INDEX "user_educations_user_profile_id_idx" ON "user_educations"("user_profile_id");
@@ -763,6 +762,24 @@ CREATE INDEX "user_education_fields_type_idx" ON "user_education_fields"("type")
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_education_fields_user_education_id_study_field_Id_key" ON "user_education_fields"("user_education_id", "study_field_Id");
+
+-- CreateIndex
+CREATE INDEX "user_experiences_user_profile_id_idx" ON "user_experiences"("user_profile_id");
+
+-- CreateIndex
+CREATE INDEX "user_experiences_organization_id_idx" ON "user_experiences"("organization_id");
+
+-- CreateIndex
+CREATE INDEX "user_experiences_job_id_idx" ON "user_experiences"("job_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_languages_user_profile_id_language_key" ON "user_languages"("user_profile_id", "language");
+
+-- CreateIndex
+CREATE INDEX "user_skills_skill_id_idx" ON "user_skills"("skill_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_skills_user_profile_id_skill_id_key" ON "user_skills"("user_profile_id", "skill_id");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
@@ -808,12 +825,6 @@ ALTER TABLE "jobs" ADD CONSTRAINT "jobs_industry_id_fkey" FOREIGN KEY ("industry
 
 -- AddForeignKey
 ALTER TABLE "certifications" ADD CONSTRAINT "certifications_issuing_organization_id_fkey" FOREIGN KEY ("issuing_organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "universities" ADD CONSTRAINT "universities_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "universities" ADD CONSTRAINT "universities_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "subjects" ADD CONSTRAINT "subjects_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -867,7 +878,7 @@ ALTER TABLE "user_certifications" ADD CONSTRAINT "user_certifications_user_profi
 ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_degree_id_fkey" FOREIGN KEY ("degree_id") REFERENCES "degrees"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_university_id_fkey" FOREIGN KEY ("university_id") REFERENCES "universities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -877,6 +888,24 @@ ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_study_
 
 -- AddForeignKey
 ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_user_education_id_fkey" FOREIGN KEY ("user_education_id") REFERENCES "user_educations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skills"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

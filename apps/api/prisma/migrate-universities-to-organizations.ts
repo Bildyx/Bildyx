@@ -33,7 +33,7 @@
 //   tsx prisma/migrate-universities-to-organizations.ts [--dry-run]
 
 import "dotenv/config";
-import { PrismaClient, OrganizationSubType } from "@prisma/client";
+import { PrismaClient, OrganizationSubType, Prisma } from "@prisma/client";
 import { slugify } from "./seed-utils";
 
 const prisma = new PrismaClient();
@@ -102,7 +102,7 @@ async function main() {
       studentCount: uni.student_count,
       undergraduates: uni.undergraduates,
       postgraduates: uni.postgraduates,
-      metadata: uni.metadata ?? undefined,
+      metadata: (uni.metadata ?? Prisma.JsonNull) as Prisma.InputJsonValue | typeof Prisma.JsonNull,
     };
 
     console.log(`${dryRun ? "[dry-run] " : ""}University "${uni.name}" -> Organization slug="${slug}"`);
