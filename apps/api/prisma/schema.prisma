@@ -467,6 +467,7 @@ model UserSession {
 
 /// Profil public user
 model UserProfile {
+<<<<<<< HEAD
   id                    String               @id @default(uuid()) @db.Uuid
   userId                String               @unique @map("user_id") @db.Uuid
   biography             String?
@@ -495,6 +496,36 @@ model UserProfile {
   currentJob            Job?                 @relation("UserCurrentJob", fields: [currentJobId], references: [id])
   currentOrganization   Organization?        @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
   user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+=======
+  id                       String                  @id @default(uuid()) @db.Uuid
+  userId                   String                  @unique @map("user_id") @db.Uuid
+  biography                String?
+  countryId                String?                 @map("country_id") @db.Char(2)
+  cityId                   String?                 @map("city_id") @db.Uuid
+  linkedinUrl              String?                 @map("linkedin_url")
+  githubUrl                String?                 @map("github_url")
+  websiteUrl               String?                 @map("website_url")
+  locale                   String?                 @default("fr")
+  timezone                 String?
+  isPublic                 Boolean                 @default(true) @map("is_public")
+  currentJobId             String?                 @map("current_job_id") @db.Uuid
+  currentJobStartedAt      DateTime?               @map("current_job_started_at")
+  currentOrganizationId    String?                 @map("current_organization_id") @db.Uuid
+  metadata                 Json?
+  createdAt                DateTime                @default(now()) @map("created_at")
+  updatedAt                DateTime                @updatedAt @map("updated_at")
+  user_certifications      UserCertifications[]
+  user_educations          UserEducations[]
+  user_experiences         UserExperience[]
+  user_languages           UserLanguage[]
+  user_skills              UserSkill[]
+  personality_test_results PersonalityTestResult[]
+  city                     City?                   @relation(fields: [cityId], references: [id])
+  country                  Country?                @relation("UserProfileCountry", fields: [countryId], references: [isoCode])
+  currentJob               Job?                    @relation("UserCurrentJob", fields: [currentJobId], references: [id])
+  currentOrganization      Organization?           @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
+  user                     User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+>>>>>>> worktree-personality-tests-schema
 
   @@index([countryId])
   @@index([cityId])
@@ -603,6 +634,7 @@ model UserSkill {
   @@map("user_skills")
 }
 
+<<<<<<< HEAD
 /// Une entreprise ciblée par un profil (liste personnelle d'organisations
 /// auxquelles le candidat prévoit ou souhaite postuler).
 model UserTargetList {
@@ -616,6 +648,111 @@ model UserTargetList {
   @@unique([user_profile_id, organization_id])
   @@index([organization_id])
   @@map("user_target_lists")
+=======
+/// Référentiel d'un questionnaire de personnalité (ex: Big 5, DISC...).
+/// Données de configuration, indépendantes des utilisateurs.
+model PersonalityTest {
+  id          String                  @id @default(uuid()) @db.Uuid
+  code        String                  @unique
+  name        String
+  description String?
+  is_active   Boolean                 @default(true)
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+  criteria    PersonalityCriterion[]
+  questions   PersonalityQuestion[]
+  results     PersonalityTestResult[]
+
+  @@map("personality_tests")
+}
+
+/// Un des critères notés (0-100) d'un PersonalityTest. Propre à chaque
+/// test (deux tests ne partagent pas leurs critères).
+model PersonalityCriterion {
+  id          String                      @id @default(uuid()) @db.Uuid
+  test_id     String                      @db.Uuid
+  code        String
+  name        String
+  description String?
+  order       Int
+  test        PersonalityTest             @relation(fields: [test_id], references: [id], onDelete: Cascade)
+  questions   PersonalityQuestion[]
+  scores      PersonalityCriterionScore[]
+
+  @@unique([test_id, code])
+  @@index([test_id])
+  @@map("personality_criteria")
+}
+
+/// Une question d'un questionnaire, rattachée au critère qu'elle mesure.
+/// Réponse attendue: note de 1 à 5 (échelle de Likert). `reverse_scored`
+/// indique une question formulée à l'envers, dont la note doit être
+/// inversée (6 - note) avant agrégation dans le score du critère.
+model PersonalityQuestion {
+  id             String               @id @default(uuid()) @db.Uuid
+  test_id        String               @db.Uuid
+  criterion_id   String               @db.Uuid
+  order          Int
+  text           String
+  reverse_scored Boolean              @default(false)
+  test           PersonalityTest      @relation(fields: [test_id], references: [id], onDelete: Cascade)
+  criterion      PersonalityCriterion @relation(fields: [criterion_id], references: [id])
+  answers        PersonalityAnswer[]
+
+  @@unique([test_id, order])
+  @@index([criterion_id])
+  @@map("personality_questions")
+}
+
+/// Résultat d'un utilisateur pour un test donné. Un seul résultat par
+/// (user_profile, test) - un nouveau passage écrase l'ancien (upsert
+/// applicatif, voir routes à venir).
+model PersonalityTestResult {
+  id               String                      @id @default(uuid()) @db.Uuid
+  user_profile_id  String                      @db.Uuid
+  test_id          String                      @db.Uuid
+  completedAt      DateTime                    @map("completed_at")
+  createdAt        DateTime                    @default(now()) @map("created_at")
+  updatedAt        DateTime                    @updatedAt @map("updated_at")
+  user_profile     UserProfile                 @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+  test             PersonalityTest             @relation(fields: [test_id], references: [id])
+  answers          PersonalityAnswer[]
+  criterion_scores PersonalityCriterionScore[]
+
+  @@unique([user_profile_id, test_id])
+  @@index([test_id])
+  @@map("personality_test_results")
+}
+
+/// Réponse brute (1-5) d'un utilisateur à une question, pour un résultat
+/// donné - le détail "score par question".
+model PersonalityAnswer {
+  id          String                @id @default(uuid()) @db.Uuid
+  result_id   String                @db.Uuid
+  question_id String                @db.Uuid
+  raw_score   Int
+  result      PersonalityTestResult @relation(fields: [result_id], references: [id], onDelete: Cascade)
+  question    PersonalityQuestion   @relation(fields: [question_id], references: [id])
+
+  @@unique([result_id, question_id])
+  @@index([question_id])
+  @@map("personality_answers")
+}
+
+/// Score agrégé (0-100) d'un critère pour un résultat donné - le "score
+/// général" par critère.
+model PersonalityCriterionScore {
+  id           String                @id @default(uuid()) @db.Uuid
+  result_id    String                @db.Uuid
+  criterion_id String                @db.Uuid
+  score        Int
+  result       PersonalityTestResult @relation(fields: [result_id], references: [id], onDelete: Cascade)
+  criterion    PersonalityCriterion  @relation(fields: [criterion_id], references: [id])
+
+  @@unique([result_id, criterion_id])
+  @@index([criterion_id])
+  @@map("personality_criterion_scores")
+>>>>>>> worktree-personality-tests-schema
 }
 
 /// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
