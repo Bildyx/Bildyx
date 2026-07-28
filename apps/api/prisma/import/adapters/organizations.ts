@@ -228,8 +228,12 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         jurisdiction: row.jurisdiction || null,
         members: toInt(row.members),
         collections: row.collections || null,
-        graduates: row.graduates || null,
-        undergraduates: row.undergraduates || null,
+        // Organization.graduates was dropped and replaced by postgraduates
+        // (Int) as part of the University merge - the CSV's "graduates"
+        // column carries the same data, just renamed/retyped on the schema
+        // side. undergraduates was also retyped String? -> Int?.
+        postgraduates: toInt(row.graduates),
+        undergraduates: toInt(row.undergraduates),
         score: toInt(row.score),
         city_id: cityId.value,
         numberOfEmployees,
