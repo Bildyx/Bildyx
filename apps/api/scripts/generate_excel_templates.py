@@ -4,15 +4,21 @@ Generates one Excel import template per targeted Prisma model.
 
 Reads apps/api/prisma/schema.prisma, keeps only the "reference data" models
 (industries, countries, cities, jobs, organizations, skills, certifications,
-universities, study fields, military capabilities, degrees) and writes an
-.xlsx file per model with the model's attributes as column headers, ready to
-be filled in and imported into the database. Relation fields (back-references
-to other models) and auto-managed columns (id, created_at, updated_at,
-deleted_at) are skipped since they aren't meant to be filled in manually -
-except implicit many-to-many relations (e.g. Organization<->Country), which
-have no foreign-key column anywhere in the schema to carry them. Those get a
-single free-text ";"-separated column instead (see M2M_COLUMNS), resolved by
-name/key at seed time the same way other array columns already are.
+study fields, degrees) and writes an .xlsx file per model with the model's
+attributes as column headers, ready to be filled in and imported into the
+database. Relation fields (back-references to other models) and
+auto-managed columns (id, created_at, updated_at, deleted_at) are skipped
+since they aren't meant to be filled in manually - except implicit
+many-to-many relations (e.g. Organization<->Country), which have no
+foreign-key column anywhere in the schema to carry them. Those get a single
+free-text ";"-separated column instead (see M2M_COLUMNS), resolved by
+name/key at import time the same way other array columns already are.
+
+Scalar foreign keys (e.g. Organization.city_id, a raw UUID column in the DB)
+are NEVER shown to the client as-is: the template exposes the *target
+model's natural key* instead (e.g. "city_serial_number"), resolved via
+FK_TARGET_MODEL below. This is what makes the whole pipeline usable by
+someone who shouldn't ever have to type or look up a UUID.
 
 Every generated template is locked down against import errors: the header
 row and any column outside the defined fields are protected (no limit on
@@ -22,12 +28,34 @@ matching its Prisma type (whole number, decimal, date, or enum dropdown)
 with an English error message. Sheet protection and workbook structure
 locking are both password-protected with TEMPLATE_PASSWORD.
 
+Two extra modes support downloading a template PRE-FILLED with the current
+database content (rather than an empty one):
+
+  --dump-spec PATH
+      Instead of writing .xlsx files, writes a JSON description of every
+      target model's columns (Prisma field name, CSV/template column name,
+      and how to resolve it - plain scalar, list, FK, or M2M) to PATH. This
+      JSON is the only thing scripts/export-current-data.ts needs to know
+      to query Prisma and produce a matching CSV per model, with no
+      per-model logic duplicated between Python and TypeScript.
+
+  --populate-from-db DIR
+      Looks for a "<table_name>.csv" file per model in DIR (the output of
+      export-current-data.ts) and writes it into the generated workbook
+      starting at row 2, with the exact same locking/validation as an empty
+      template. Implies --force (the whole point is to refresh the
+      downloadable file with current data).
+
 Usage:
     python3 generate_excel_templates.py [--schema PATH] [--output DIR]
     python3 generate_excel_templates.py --protect-existing [--schema PATH] [--output DIR]
+    python3 generate_excel_templates.py --dump-spec ./template-spec.json
+    python3 generate_excel_templates.py --populate-from-db ./data/exports
 """
 
 import argparse
+import csv as csv_module
+import json
 import re
 from datetime import date
 from pathlib import Path
@@ -50,9 +78,11 @@ TARGET_MODELS = [
     "Organization",
     "Skill",
     "Certification",
-    "University",
+    # "University" retiré : le modèle a été supprimé du schéma, ses champs
+    # (studentCount, undergraduates, postgraduates) vivent directement sur
+    # Organization désormais - voir la conversation sur la fusion
+    # University -> Organization.
     "StudyFields",
-    "MilitaryCapabilities",
     "Degree",
     "Subject",
 ]
@@ -84,6 +114,39 @@ M2M_COLUMNS = {
     ("Industry", "industries_A"): "related_industries",
 }
 
+# Every target model's natural (human-meaningful, stable, client-facing)
+# key field. Used two ways: (1) to rename a scalar FK column so it shows the
+# target's natural key instead of a raw UUID - irrelevant for Country since
+# none of its scalar FK columns are @db.Uuid in the first place (its @id IS
+# already the natural key, isoCode, so e.g. City.countryId is @db.Char(2)
+# and never flagged as is_uuid_fk); and (2) to know which field to pull for
+# M2M/list relations pointing at that model (e.g. Organization.countries),
+# where Country's entry below IS needed.
+NATURAL_KEY_FIELD_BY_MODEL = {
+    "Organization": "slug",
+    "City": "serial_number",
+    "Industry": "serial_number",
+    "Country": "isoCode",
+}
+
+# Prisma field name (as used in the schema, not the DB column) holding the
+# soft-delete timestamp for each target model. Used only by --dump-spec, so
+# export-current-data.ts can filter out soft-deleted rows without needing to
+# know each model's naming quirk itself (mirrors ImportAdapter.deletedAtField
+# in prisma/import/types.ts).
+DELETED_AT_FIELD_BY_MODEL = {
+    "Industry": "deletedAt",
+    "Country": "deletedAt",
+    "City": "deletedAt",
+    "Job": "deletedAt",
+    "Organization": "deletedAt",
+    "Skill": "deletedAt",
+    "Certification": "deletedAt",
+    "StudyFields": "deleted_at",
+    "Degree": "deletedAt",
+    "Subject": "deleted_at",
+}
+
 # Excel's actual row limit. Data validation ranges are cheap to extend this
 # far (stored as a single range reference, not per-cell), so every data
 # column is validated/unlockable for its entire length - only the column
@@ -101,12 +164,19 @@ ENUM_RE = re.compile(r"enum\s+(\w+)\s*\{(.*?)\n\}", re.S)
 FIELD_LINE_RE = re.compile(r"^([A-Za-z_]\w*)\s+([A-Za-z_]\w*(?:\[\])?\??)\s*(.*)$")
 MAP_ATTR_RE = re.compile(r'@map\("([^"]+)"\)')
 TABLE_MAP_RE = re.compile(r'@@map\("([^"]+)"\)')
+RELATION_FIELDS_RE = re.compile(r"@relation\([^)]*fields:\s*\[([^\]]+)\][^)]*\)")
 
 
 def camel_to_snake(name: str) -> str:
     s = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
     s = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s)
     return s.lower()
+
+
+def prisma_client_accessor(model_name: str) -> str:
+    """PrismaClient delegate name for a model: first letter lowercased,
+    rest unchanged (e.g. "StudyFields" -> "studyFields")."""
+    return model_name[0].lower() + model_name[1:]
 
 
 def parse_blocks(schema_text: str, pattern: re.Pattern) -> dict[str, str]:
@@ -134,6 +204,52 @@ def parse_field_type(raw_type: str) -> tuple[str, bool, bool]:
     return raw_type, is_optional, is_list
 
 
+def find_fk_target_model(body: str, fk_field_name: str) -> str | None:
+    """
+    Given a scalar FK field's own Prisma name (e.g. "parentOrganizationId"),
+    finds the model it points to by locating the relation line that
+    references it (`xxx Model? @relation(fields: [parentOrganizationId], ...)`)
+    - fields: always lists the scalar's Prisma field name, never its mapped
+    DB column name, so this must be matched against field_name, not
+    column_name.
+    """
+    for line in body.splitlines():
+        line = line.strip()
+        if not line or line.startswith("//") or line.startswith("@@"):
+            continue
+        rel_match = RELATION_FIELDS_RE.search(line)
+        if not rel_match:
+            continue
+        referenced = [f.strip() for f in rel_match.group(1).split(",")]
+        if fk_field_name in referenced:
+            m = FIELD_LINE_RE.match(line)
+            if m:
+                return m.group(2).rstrip("?")
+    return None
+
+
+def resolve_fk_column(
+    column_name: str, target_model: str | None, target_natural_key_field: str | None
+) -> str:
+    """
+    Renamed column shown in the template/export for a scalar FK, pointing at
+    the target's natural key rather than the raw UUID
+    (e.g. "city_id" -> "city_serial_number"). Falls back to the original
+    column name if the target model isn't in NATURAL_KEY_FIELD_BY_MODEL
+    (Country's FKs, which already hold a natural key, and any model not yet
+    added to the map - printed as a warning by the caller in that case).
+    """
+    if not target_model or not target_natural_key_field:
+        return column_name
+    base = column_name
+    if base.endswith("_id"):
+        base = base[: -len("_id")]
+    elif base.endswith("Id"):
+        base = camel_to_snake(base[: -len("Id")])
+    suffix = camel_to_snake(target_natural_key_field)
+    return f"{base}_{suffix}"
+
+
 def parse_model_fields(
     body: str, model_names: set[str], model_name: str
 ) -> list[dict]:
@@ -156,14 +272,18 @@ def parse_model_fields(
             m2m_column = M2M_COLUMNS.get((model_name, field_name))
             if m2m_column is None:
                 continue
+            target_natural_key_field = NATURAL_KEY_FIELD_BY_MODEL.get(base_type)
             fields.append(
                 {
                     "column": m2m_column,
+                    "field_name": field_name,
                     "base_type": base_type,
                     "is_list": is_list,
                     "required": False,
                     "is_uuid_fk": False,
                     "is_m2m": True,
+                    "target_model": base_type,
+                    "target_natural_key_field": target_natural_key_field,
                 }
             )
             continue
@@ -178,13 +298,34 @@ def parse_model_fields(
             field_name.endswith("Id") or field_name.endswith("_id")
         )
 
+        target_model = None
+        target_natural_key_field = None
+        resolved_column = column_name
+        if is_uuid_fk:
+            target_model = find_fk_target_model(body, field_name)
+            target_natural_key_field = NATURAL_KEY_FIELD_BY_MODEL.get(target_model or "")
+            if target_model and target_model not in NATURAL_KEY_FIELD_BY_MODEL and target_model != "Country":
+                print(
+                    f"  Warning: {model_name}.{field_name} -> {target_model}, but "
+                    f"{target_model} has no entry in NATURAL_KEY_FIELD_BY_MODEL. "
+                    f"Column left as raw id ('{column_name}') - add it if this FK "
+                    f"should be human-fillable."
+                )
+            resolved_column = resolve_fk_column(
+                column_name, target_model, target_natural_key_field
+            )
+
         fields.append(
             {
-                "column": column_name,
+                "column": resolved_column,
+                "field_name": field_name,
                 "base_type": base_type,
                 "is_list": is_list,
                 "required": required,
                 "is_uuid_fk": is_uuid_fk,
+                "is_m2m": False,
+                "target_model": target_model,
+                "target_natural_key_field": target_natural_key_field,
             }
         )
     return fields
@@ -194,7 +335,7 @@ def number_format_for(field: dict, enums: dict[str, list[str]]) -> str | None:
     """Excel number_format matching the field's Prisma type, or None for General."""
     base_type = field["base_type"]
 
-    if field["is_list"] or base_type in enums:
+    if field["is_list"] or field.get("is_uuid_fk") or field.get("is_m2m") or base_type in enums:
         return "@"
     if base_type in ("Int", "BigInt"):
         return "#,##0"
@@ -242,7 +383,13 @@ def data_validation_for(field: dict, enums: dict, list_refs: dict[str, str]) -> 
     Data validation enforcing only the field's Prisma type, with an English
     error message. Blank is always allowed, even for required fields - the
     template shouldn't block partially-filled rows, only wrong-typed values.
+    FK/M2M columns (now holding natural-key text, not the original scalar
+    type) never get numeric/date validation even if the underlying UUID
+    column's Prisma type happened to look numeric-adjacent.
     """
+    if field.get("is_uuid_fk") or field.get("is_m2m"):
+        return None
+
     base_type = field["base_type"]
 
     if base_type in enums and not field["is_list"]:
@@ -340,8 +487,47 @@ def lock_down_sheet(
     enable_sheet_protection(ws)
 
 
+def coerce_value(raw: str, field: dict):
+    """
+    Casts a raw CSV string to the type Excel/openpyxl should store the cell
+    as, so numeric/date columns sort and filter correctly instead of being
+    stored as text that merely looks numeric. Falls back to the raw string
+    on any parse failure rather than dropping the value silently - a
+    visibly-wrong cell is easier for the client to spot and fix than a
+    silently-emptied one.
+    """
+    if raw is None or raw == "":
+        return None
+    if field["is_list"] or field.get("is_m2m") or field.get("is_uuid_fk"):
+        return raw
+    base_type = field["base_type"]
+    try:
+        if base_type in ("Int", "BigInt"):
+            return int(raw)
+        if base_type in ("Float", "Decimal"):
+            return float(raw)
+        if base_type == "Boolean":
+            return raw.strip().upper() in ("TRUE", "1")
+    except ValueError:
+        return raw
+    return raw
+
+
+def load_data_rows(data_dir: Path, table_name: str) -> list[dict[str, str]] | None:
+    csv_path = data_dir / f"{table_name}.csv"
+    if not csv_path.exists():
+        return None
+    with csv_path.open("r", newline="", encoding="utf-8") as f:
+        reader = csv_module.DictReader(f, delimiter=";")
+        return list(reader)
+
+
 def write_workbook(
-    table_name: str, fields: list[dict], enums: dict, output_dir: Path
+    table_name: str,
+    fields: list[dict],
+    enums: dict,
+    output_dir: Path,
+    data_rows: list[dict[str, str]] | None = None,
 ) -> Path:
     wb = Workbook()
     ws = wb.active
@@ -353,7 +539,7 @@ def write_workbook(
     enums_used = {
         field["base_type"]: enums[field["base_type"]]
         for field in fields
-        if field["base_type"] in enums and not field["is_list"]
+        if field["base_type"] in enums and not field["is_list"] and not field.get("is_uuid_fk")
     }
     list_refs = write_lists_sheet(wb, enums_used)
 
@@ -369,6 +555,12 @@ def write_workbook(
         number_format = number_format_for(field, enums)
         if number_format:
             ws.column_dimensions[column_letter].number_format = number_format
+
+    if data_rows:
+        for row_idx, data_row in enumerate(data_rows, start=2):
+            for col_idx, field in enumerate(fields, start=1):
+                raw_value = data_row.get(field["column"], "")
+                ws.cell(row=row_idx, column=col_idx, value=coerce_value(raw_value, field))
 
     ws.freeze_panes = "A2"
     ws.auto_filter.ref = f"A1:{ws.cell(row=1, column=len(fields)).column_letter}1"
@@ -431,7 +623,7 @@ def protect_existing_workbook(
     enums_used = {
         field["base_type"]: enums[field["base_type"]]
         for field in ordered_fields
-        if field["base_type"] in enums and not field["is_list"]
+        if field["base_type"] in enums and not field["is_list"] and not field.get("is_uuid_fk")
     }
     if LISTS_SHEET_NAME in wb.sheetnames:
         del wb[LISTS_SHEET_NAME]
@@ -483,6 +675,25 @@ def main():
             "protection/validation is added or refreshed)"
         ),
     )
+    parser.add_argument(
+        "--dump-spec",
+        type=Path,
+        help=(
+            "Write a JSON field spec to PATH instead of generating "
+            "templates - consumed by scripts/export-current-data.ts to "
+            "know what to query from the DB and how to shape each column."
+        ),
+    )
+    parser.add_argument(
+        "--populate-from-db",
+        type=Path,
+        help=(
+            "Directory containing '<table_name>.csv' exports (see "
+            "scripts/export-current-data.ts) to pre-fill each generated "
+            "template with the database's current content. Implies "
+            "--force."
+        ),
+    )
     args = parser.parse_args()
 
     schema_text = args.schema.read_text()
@@ -490,6 +701,8 @@ def main():
     enum_bodies = parse_blocks(schema_text, ENUM_RE)
     model_names = set(model_bodies.keys())
     enums = {name: parse_enum_values(body) for name, body in enum_bodies.items()}
+
+    spec: dict[str, dict] = {}
 
     for model_name in TARGET_MODELS:
         if model_name not in model_bodies:
@@ -504,6 +717,35 @@ def main():
             print(f"Skipping {model_name}: no fillable fields found")
             continue
 
+        if args.dump_spec:
+            spec[model_name] = {
+                "prismaModel": prisma_client_accessor(model_name),
+                "tableName": table_name,
+                "deletedAtField": DELETED_AT_FIELD_BY_MODEL.get(model_name, "deletedAt"),
+                "fields": [
+                    {
+                        "column": f["column"],
+                        "fieldName": f["field_name"],
+                        "kind": (
+                            "m2m"
+                            if f.get("is_m2m")
+                            else "fk"
+                            if f.get("is_uuid_fk") and f.get("target_natural_key_field")
+                            else "list"
+                            if f["is_list"]
+                            else "scalar"
+                        ),
+                        **(
+                            {"targetNaturalKeyField": f["target_natural_key_field"]}
+                            if f.get("target_natural_key_field")
+                            else {}
+                        ),
+                    }
+                    for f in fields
+                ],
+            }
+            continue
+
         if args.protect_existing:
             if not output_path.exists():
                 print(f"Skipping {model_name}: {output_path} does not exist")
@@ -512,14 +754,25 @@ def main():
             print(f"{model_name} -> {output_path} (protected)")
             continue
 
-        if output_path.exists() and not args.force:
+        data_rows = None
+        if args.populate_from_db:
+            data_rows = load_data_rows(args.populate_from_db, table_name)
+            if data_rows is None:
+                print(f"  Note: no {table_name}.csv found in {args.populate_from_db}, template will be empty")
+
+        if output_path.exists() and not args.force and not args.populate_from_db:
             print(
                 f"Skipping {model_name}: {output_path} already exists (use --force to overwrite)"
             )
             continue
 
-        write_workbook(table_name, fields, enums, args.output)
-        print(f"{model_name} -> {output_path} ({len(fields)} columns)")
+        write_workbook(table_name, fields, enums, args.output, data_rows=data_rows)
+        row_note = f", {len(data_rows)} lignes" if data_rows else ""
+        print(f"{model_name} -> {output_path} ({len(fields)} columns{row_note})")
+
+    if args.dump_spec:
+        args.dump_spec.write_text(json.dumps(spec, indent=2), encoding="utf-8")
+        print(f"Spec écrite -> {args.dump_spec} ({len(spec)} modèles)")
 
 
 if __name__ == "__main__":
