@@ -12,6 +12,7 @@ import {
   mapIndustry,
   mapCertification,
   mapSubject,
+  mapDegree,
 } from "../services/cards/mappers.js";
 import { CardInputSchema } from "../models/card.js";
 import type { Request, Response } from "express";
@@ -523,6 +524,51 @@ export const cards = {
         const error = err as Error;
         console.error(
           `[cards] Error generating subject card for '${id}':`,
+          err,
+        );
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: error.message || "Internal server error",
+        });
+      }
+    }),
+
+  getDegree: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Generate degree card HTML",
+      path: "/cards/degree/{id}",
+      tags: ["Cards"],
+    })
+    .input(CardInputSchema)
+    .handler(async ({ input, context }) => {
+      const ctx = context as CardsContext;
+      if (!ctx.req || !ctx.res) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Express request/response context missing",
+        });
+      }
+      const { id } = input;
+      try {
+        const isUuid = /^[0-9a-f-]{36}$/.test(id);
+        const row = await database
+          .selectFrom("degrees")
+          .selectAll()
+          .where(isUuid ? "id" : "serial_number", "=", id)
+          .executeTakeFirst();
+        if (!row) {
+          throw new ORPCError("NOT_FOUND", {
+            message: "Degree not found",
+          });
+        }
+        const html = await renderCardHtml(
+          "degree-card",
+          mapDegree(row),
+        );
+        await sendHtmlResponse(ctx, html);
+      } catch (err) {
+        const error = err as Error;
+        console.error(
+          `[cards] Error generating degree card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {

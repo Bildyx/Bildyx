@@ -1,11 +1,11 @@
-/*
- * Bildyx — API client partagé
+﻿/*
+ * Bildyx — Shared API client
  *
  * Ce module centralise tous les appels vers l'API REST (http://localhost:3000/api).
- * Il gère :
+ * It handles:
  *  - l'envoi du cookie de session httpOnly via credentials: 'include'
- *  - la sérialisation / désérialisation JSON
- *  - la gestion cohérente des erreurs API
+ *  - JSON serialization / deserialization
+ *  - consistent API error handling
  *  - les helpers de session (getSession / clearSession)
  *
  * Usage :
@@ -13,7 +13,7 @@
  *   const profile = await apiFetch('GET', '/users/me/profile');
  *
  * Note : dans les pages PHP qui chargent ce script via <script src="js/api.js">,
- * les fonctions sont exposées sur `window.BilydxAPI`.
+ * functions are exposed on `window.BilydxAPI`.
  */
 
 const API_BASE = 'http://localhost:3000/api';
@@ -21,11 +21,11 @@ const API_BASE = 'http://localhost:3000/api';
 /**
  * Wrapper principal pour tous les appels API.
  *
- * @param {string} method   - Méthode HTTP : 'GET', 'POST', 'PATCH', 'DELETE'
- * @param {string} path     - Chemin relatif à API_BASE, ex: '/users/me'
- * @param {object} [body]   - Corps de la requête (sera sérialisé en JSON)
- * @param {object} [params] - Paramètres de query string
- * @returns {Promise<any>}  - Réponse JSON parsée ou null si 204
+ * @param {string} method   - HTTP method: 'GET', 'POST', 'PATCH', 'DELETE'
+ * @param {string} path     - Path relative to API_BASE, e.g. '/users/me'
+ * @param {object} [body]   - Request body (will be serialized as JSON)
+ * @param {object} [params] - Query string parameters
+ * @returns {Promise<any>}  - Parsed JSON response or null if 204
  * @throws  {ApiError}      - Objet { status, message, data }
  */
 async function apiFetch(method, path, body = null, params = null) {
@@ -55,7 +55,7 @@ async function apiFetch(method, path, body = null, params = null) {
 
   const resp = await fetch(url, options);
 
-  // 204 No Content — pas de corps à parser
+  // 204 No Content — no body to parse
   if (resp.status === 204) return null;
 
   const text = await resp.text();
@@ -81,8 +81,8 @@ async function apiFetch(method, path, body = null, params = null) {
    ─────────────────────────────────────────── */
 
 /**
- * Retourne les infos de session stockées en sessionStorage
- * (écrites par auth.js lors du login / verify-email).
+ * Returns session info stored in sessionStorage
+ * (written by auth.js during login / verify-email).
  *
  * @returns {{ userId: string, profileId: string|null, role: string, email: string }|null}
  */
@@ -96,7 +96,7 @@ function getSession() {
 }
 
 /**
- * Écrit les informations de session dans sessionStorage.
+ * Writes session information to sessionStorage.
  *
  * @param {{ userId: string, profileId?: string, role: string, email: string }} info
  */
@@ -105,14 +105,14 @@ function setSession(info) {
 }
 
 /**
- * Supprime la session côté client et appelle /auth/logout pour
- * invalider le cookie httpOnly côté serveur.
+ * Removes the client-side session and calls /auth/logout to
+ * invalidate the httpOnly cookie server-side.
  */
 async function logout() {
   try {
     await apiFetch('POST', '/auth/logout', {});
   } catch (_) {
-    // On ignore les erreurs réseau lors du logout
+    // Ignore network errors during logout
   } finally {
     sessionStorage.removeItem('bildyx_session');
     localStorage.removeItem('bildyx_profile_id');
@@ -121,8 +121,8 @@ async function logout() {
 }
 
 /**
- * Récupère (et met en cache dans sessionStorage) le profil de
- * l'utilisateur connecté. Renvoie null si non connecté.
+ * Fetches (and caches in sessionStorage) the profile of
+ * the logged-in user. Returns null if not logged in.
  *
  * @returns {Promise<{userId,profileId,role,email}|null>}
  */
@@ -130,12 +130,12 @@ async function requireSession() {
   let session = getSession();
   if (session) return session;
 
-  // Tentative de récupération depuis l'API (le cookie httpOnly est présent)
+  // Attempt to fetch from the API (httpOnly cookie is present)
   try {
     const meResp = await apiFetch('GET', '/auth/me');
     if (meResp?.user) {
       const { id: userId, email, role } = meResp.user;
-      // On essaie de récupérer le profileId
+      // Try to get the profileId
       let profileId = null;
       try {
         const profile = await apiFetch('GET', `/users/${userId}/profile`);

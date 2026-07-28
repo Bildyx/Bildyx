@@ -20,6 +20,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { randomUUID, randomBytes } from "node:crypto";
 import { hashPassword } from "./services/auth.service";
 import cors from "cors";
+import { LanguageSchema } from "./models/utils/enums";
 
 const app = express();
 
@@ -197,6 +198,11 @@ app.get("/spec.json", async (req, res) => {
 
   res.json(spec);
 });
+
+app.get("/enums/languages", (_req, res) => {
+  res.json(LanguageSchema.options);
+});
+
 
 app.use(async (req, res, next) => {
   try {

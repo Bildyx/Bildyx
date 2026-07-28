@@ -51,25 +51,6 @@
         return String(value || '').trim().split(/\s+/).filter(Boolean).length;
     }
 
-    function updateHeadlineCounter() {
-        const input = $('.headline-input');
-        const counter = $('#headlineCounter');
-        if (!input || !counter) return;
-        counter.textContent = input.value.length;
-        const help = input.nextElementSibling;
-        if (help) {
-            const wordCount = countWords(input.value);
-            help.innerHTML = `<span id="headlineCounter">${input.value.length}</span>/100 chars · ${wordCount}/12 words`;
-            if (wordCount > 12) {
-                input.classList.add('is-overflow');
-                help.classList.add('is-overflow');
-            } else {
-                input.classList.remove('is-overflow');
-                help.classList.remove('is-overflow');
-            }
-        }
-    }
-
     function updateWordCounter(textarea) {
         const max = Number(textarea.getAttribute('maxlength')) || 600;
         const maxWords = max >= 600 ? 60 : 50;
@@ -102,7 +83,141 @@
         button.classList.toggle('is-editing', isEditing);
         button.textContent = isEditing ? '✓' : '✎';
         setAreaEditable(target, isEditing);
-        showToast(isEditing ? 'Edition activée.' : 'Modification enregistrée localement.');
+        showToast(isEditing ? 'Editing enabled.' : 'Changes saved locally.');
+    }
+
+    // ─── Auto-save ─────────────────────────────────────────────
+    let autosaveTimer = null;
+    function scheduleAutosave() {
+        clearTimeout(autosaveTimer);
+        autosaveTimer = window.setTimeout(() => {
+            if (API && currentProfile?.id) {
+                saveProfile(true);
+            }
+        }, 1200);
+    }
+
+    function showAutosaveBadge(saving = false) {
+        let badge = document.querySelector('.autosave-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'autosave-badge';
+            document.body.appendChild(badge);
+        }
+        badge.classList.toggle('is-saving', saving);
+        badge.textContent = saving ? '⏳ Saving...' : '✓ Saved';
+        badge.classList.add('is-visible');
+        if (!saving) {
+            clearTimeout(badge._timer);
+            badge._timer = window.setTimeout(() => badge.classList.remove('is-visible'), 2200);
+        }
+    }
+
+    // ─── Language Modal ─────────────────────────────────────────
+    // Formate une clé enum en label lisible : CHINESE_MANDARIN → Chinese (Mandarin)
+    function formatLanguageLabel(key) {
+        const SPECIAL = {
+            'CHINESE_MANDARIN': 'Chinese (Mandarin)',
+            'CHINESE_CANTONESE': 'Chinese (Cantonese)',
+            'HAITIAN_CREOLE': 'Haitian Creole',
+            'AMBONESE_MALAY': 'Ambonese Malay',
+            'BAJAN_CREOLE': 'Bajan Creole',
+            'GUYANESE_CREOLE': 'Guyanese Creole',
+            'SCOTTISH_GAELIC': 'Scottish Gaelic',
+            'SEYCHELLOIS_CREOLE': 'Seychellois Creole',
+        };
+        if (SPECIAL[key]) return SPECIAL[key];
+        return key.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
+    }
+
+    // Chargé une seule fois depuis l'API (source unique = LanguageSchema dans enums.ts)
+    let _languagesCache = null;
+    async function getLanguages() {
+        if (_languagesCache) return _languagesCache;
+        try {
+            const apiBase = (API?.baseUrl || 'http://localhost:3000').replace(/\/$/, '');
+            const res = await fetch(`${apiBase}/enums/languages`);
+            const keys = await res.json();
+            _languagesCache = keys.map(formatLanguageLabel);
+        } catch (e) {
+            console.error('Failed to load languages:', e);
+            _languagesCache = [];
+        }
+        return _languagesCache;
+    }
+
+
+    async function openLanguageModal(onConfirm) {
+        const languages = await getLanguages();
+
+        let overlay = document.getElementById('langModalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'langModalOverlay';
+            overlay.className = 'lang-modal-overlay';
+            overlay.innerHTML = `
+                <div class="lang-modal" role="dialog" aria-modal="true" aria-labelledby="langModalTitle">
+                    <h3 id="langModalTitle">Add a Language</h3>
+                    <label for="langSelect">Language</label>
+                    <select id="langSelect">
+                        <option value="">— Select a language —</option>
+                    </select>
+                    <label>Level</label>
+                    <div class="lang-level-grid">
+                        <button type="button" class="lang-level-btn" data-level="Native">Native</button>
+                        <button type="button" class="lang-level-btn is-active" data-level="Fluent">Fluent</button>
+                        <button type="button" class="lang-level-btn" data-level="Intermediate">Intermediate</button>
+                    </div>
+                    <div class="lang-modal-actions">
+                        <button type="button" class="lang-modal-cancel" id="langModalCancel">Cancel</button>
+                        <button type="button" class="lang-modal-confirm" id="langModalConfirm">Add Language</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+
+            // Level selection
+            overlay.querySelectorAll('.lang-level-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    overlay.querySelectorAll('.lang-level-btn').forEach(b => b.classList.remove('is-active'));
+                    btn.classList.add('is-active');
+                });
+            });
+
+            // Cancel
+            overlay.querySelector('#langModalCancel').addEventListener('click', () => closeLangModal());
+            overlay.addEventListener('click', e => { if (e.target === overlay) closeLangModal(); });
+        }
+
+        // Populate select with fetched languages
+        const select = overlay.querySelector('#langSelect');
+        select.innerHTML = '<option value="">— Select a language —</option>' +
+            languages.map(l => `<option value="${l}">${l}</option>`).join('');
+
+        // Reset
+        select.value = '';
+        overlay.querySelectorAll('.lang-level-btn').forEach(b => b.classList.remove('is-active'));
+        overlay.querySelector('[data-level="Fluent"]').classList.add('is-active');
+
+        // Confirm handler
+        const confirmBtn = overlay.querySelector('#langModalConfirm');
+        const newConfirm = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+        newConfirm.addEventListener('click', () => {
+            const lang = overlay.querySelector('#langSelect').value;
+            if (!lang) { showToast('Please select a language.', 'error'); return; }
+            const level = overlay.querySelector('.lang-level-btn.is-active')?.dataset.level || 'Fluent';
+            closeLangModal();
+            onConfirm(lang, level);
+        });
+
+        requestAnimationFrame(() => overlay.classList.add('is-open'));
+    }
+
+    function closeLangModal() {
+        const overlay = document.getElementById('langModalOverlay');
+        if (overlay) {
+            overlay.classList.remove('is-open');
+        }
     }
 
     // ─── Chips ────────────────────────────────────────────────
@@ -113,51 +228,46 @@
         const current = $$('.chip', container).length;
 
         if (current >= limit) {
-            showToast(`Maximum ${limit} éléments.`);
+            showToast(`Maximum ${limit} items.`);
             return;
         }
 
-        let label = '';
-        let levelClass = '';
         if (containerId === 'languageChips') {
-            const name = window.prompt('Nom de la langue (ex: Anglais, Espagnol) :');
-            if (!name || !name.trim()) return;
-
-            const levelChoice = window.prompt('Niveau pour ' + name.trim() + ' :\n1: Native\n2: Fluent\n3: Intermediate', '2');
-            let levelSuffix = '';
-            if (levelChoice === '1') {
-                levelSuffix = ' (Native)';
-                levelClass = 'is-native';
-            } else if (levelChoice === '3') {
-                levelSuffix = ' (Intermediate)';
-                levelClass = 'is-intermediate';
-            } else {
-                levelSuffix = ' (Fluent)';
-                levelClass = 'is-fluent';
-            }
-            label = name.trim() + levelSuffix;
+            openLanguageModal((lang, level) => {
+                let levelClass = '', suffix = '';
+                if (level === 'Native')       { levelClass = 'is-native';       suffix = ' (Native)'; }
+                else if (level === 'Fluent')  { levelClass = 'is-fluent';       suffix = ' (Fluent)'; }
+                else                          { levelClass = 'is-intermediate';  suffix = ' (Intermediate)'; }
+                const label = lang + suffix;
+                const chip = document.createElement('span');
+                chip.className = `chip is-filled ${levelClass}`;
+                chip.innerHTML = `${label} <button type="button" aria-label="Remove ${label}">×</button>`;
+                container.appendChild(chip);
+                showToast('Language added.');
+                updateProfileMetaSummary();
+                scheduleAutosave();
+            });
         } else {
-            const val = window.prompt('Nom du nouvel élément :');
+            const val = window.prompt('Name of the new item:');
             if (!val || !val.trim()) return;
-            label = val.trim();
+            const label = val.trim();
+            const chip = document.createElement('span');
+            chip.className = 'chip is-outline';
+            chip.innerHTML = `${label} <button type="button" aria-label="Remove ${label}">×</button>`;
+            container.appendChild(chip);
+            showToast('Item added.');
+            updateProfileMetaSummary();
+            scheduleAutosave();
         }
-
-        const chip = document.createElement('span');
-        chip.className = containerId === 'languageChips' 
-            ? `chip is-filled ${levelClass}` 
-            : 'chip is-outline';
-        chip.innerHTML = `${label} <button type="button" aria-label="Remove ${label}">×</button>`;
-
-        const addButton = container.querySelector('.chip-add');
-        container.insertBefore(chip, addButton || null);
-        showToast('Élément ajouté.');
     }
 
     function removeChip(button) {
         const chip = button.closest('.chip');
         if (chip) chip.remove();
-        showToast('Élément supprimé.');
+        showToast('Item removed.');
+        scheduleAutosave();
     }
+
 
     // ─── Selectable Skills ────────────────────────────────────
     function updateSelectableCounter(container) {
@@ -173,7 +283,7 @@
         const willActivate = !button.classList.contains('is-active');
 
         if (willActivate && activeCount >= 5) {
-            showToast('Maximum 5 skills sélectionnés.');
+            showToast('Maximum 5 skills selected.');
             return;
         }
 
@@ -323,14 +433,16 @@
                     role: currentUser.role,
                     profileId: currentProfile.id,
                 });
-
-                const meta = currentProfile.metadata || {};
-
-                // Headline
-                const headline = meta.headline || '';
-                const headlineInput = document.querySelector('.headline-input');
-                if (headlineInput) {
-                    headlineInput.value = headline;
+                let meta = {};
+                if (currentProfile.metadata) {
+                    try {
+                        meta = typeof currentProfile.metadata === 'string'
+                            ? JSON.parse(currentProfile.metadata)
+                            : currentProfile.metadata;
+                    } catch (e) {
+                        console.error('Failed to parse metadata:', e);
+                        meta = currentProfile.metadata || {};
+                    }
                 }
 
                 // biography
@@ -357,7 +469,7 @@
                 }
 
                 // Languages
-                const langRow = document.querySelector('[aria-label="Languages"]');
+                const langRow = document.getElementById('languageChips');
                 if (langRow) {
                     langRow.querySelectorAll('.chip, .skeleton-loader').forEach(c => c.remove());
                     const langs = meta.languages || [];
@@ -367,15 +479,14 @@
                         if (lang.includes('(Native)')) levelClass = 'is-native';
                         else if (lang.includes('(Fluent)')) levelClass = 'is-fluent';
                         else if (lang.includes('(Intermediate)')) levelClass = 'is-intermediate';
-                        
                         chip.className = `chip is-filled ${levelClass}`;
                         chip.innerHTML = `${lang} <button type="button" aria-label="Remove ${lang}">×</button>`;
-                        langRow.insertBefore(chip, langRow.querySelector('.chip-add'));
+                        langRow.appendChild(chip);
                     });
                 }
 
                 // Top Skills
-                const skillRow = document.querySelector('.skill-row');
+                const skillRow = document.getElementById('skillChips');
                 if (skillRow) {
                     skillRow.querySelectorAll('.chip, .skeleton-loader').forEach(c => c.remove());
                     const skills = meta.skills || [];
@@ -383,7 +494,7 @@
                         const chip = document.createElement('span');
                         chip.className = 'chip';
                         chip.innerHTML = `${skill} <button type="button" aria-label="Remove ${skill}">×</button>`;
-                        skillRow.insertBefore(chip, skillRow.querySelector('.chip-add'));
+                        skillRow.appendChild(chip);
                     });
                 }
 
@@ -467,6 +578,27 @@
                 </div>
             `;
             list.appendChild(article);
+
+            if (exp.companyId) {
+                const slot = article.querySelector('[data-card-slot="company-card"]');
+                if (slot) fetchAndRenderCardSlot(slot, 'company-card', exp.companyId);
+            }
+            if (exp.productId) {
+                const slot = article.querySelector('[data-card-slot="product-card"]');
+                if (slot) fetchAndRenderCardSlot(slot, 'product-card', exp.productId);
+            }
+            if (exp.roleId) {
+                const slot = article.querySelector('[data-card-slot="role-card"]');
+                if (slot) fetchAndRenderCardSlot(slot, 'role-card', exp.roleId);
+            }
+            if (exp.brandId) {
+                const slot = article.querySelector('[data-card-slot="brand-card"]');
+                if (slot) fetchAndRenderCardSlot(slot, 'brand-card', exp.brandId);
+            }
+            if (exp.industryId) {
+                const slot = article.querySelector('[data-card-slot="client-card"]');
+                if (slot) fetchAndRenderCardSlot(slot, 'client-card', exp.industryId);
+            }
         });
     }
 
@@ -540,6 +672,15 @@
                     </div>
                 `;
                 list.appendChild(article);
+
+                if (edu.university_id) {
+                    const uniSlot = article.querySelector('[data-card-slot="university-card"]');
+                    if (uniSlot) fetchAndRenderCardSlot(uniSlot, 'university-card', edu.university_id);
+                }
+                if (edu.degree_id) {
+                    const degSlot = article.querySelector('[data-card-slot="degree-card"]');
+                    if (degSlot) fetchAndRenderCardSlot(degSlot, 'degree-card', edu.degree_id);
+                }
             }
         } catch (err) {
             console.error('Failed to load educations:', err);
@@ -585,16 +726,17 @@
                         <button class="entry-tool js-remove-entry" type="button" aria-label="Remove certification">×</button>
                     </div>
                     <div class="entry-body">
-                        <p>Issued by: <span contenteditable="true" class="cert-issuer" data-placeholder="Add issuer...">${issuerName}</span></p>
-                        <div class="date-row">
-                            <input type="date" aria-label="Issued date" />
-                            <span>–</span>
-                            <input type="date" aria-label="Expiry date" />
+                        <div class="backend-grid">
+                            <div class="backend-slot backend-slot--certification" data-card-slot="certification-card">Certification card</div>
                         </div>
-                        <div class="backend-slot backend-slot--certification" data-card-slot="certification-card">Certification card</div>
                     </div>
                 `;
                 grid.appendChild(article);
+
+                if (uc.certification_id) {
+                    const slot = article.querySelector('[data-card-slot="certification-card"]');
+                    if (slot) fetchAndRenderCardSlot(slot, 'certification-card', uc.certification_id);
+                }
             }
         } catch (err) {
             console.error('Failed to load certifications:', err);
@@ -603,9 +745,9 @@
     }
 
     // ─── Sauvegarde du profil via l'API ───────────────────────
-    async function saveProfile() {
+    async function saveProfile(isAuto = false) {
         const name      = document.querySelector('[data-field="name"]')?.textContent.trim() || $('[data-editable="name"]')?.textContent.trim() || '';
-        const headline  = document.querySelector('.headline-input')?.value.trim() || '';
+
         const biography = document.querySelector('[data-field="summary"]')?.textContent.trim() || $('[data-editable="career-summary"]')?.textContent.trim() || '';
         const role      = document.querySelector('[data-field="role"]')?.textContent.trim() || $('[data-editable="role-title"]')?.textContent.trim() || '';
         
@@ -616,6 +758,11 @@
 
         // 1. Collect experiences
         const experiences = $$('#experienceList [data-entry="experience"]').map(card => {
+            const companySlot = card.querySelector('[data-card-slot="company-card"]');
+            const productSlot = card.querySelector('[data-card-slot="product-card"]');
+            const roleSlot = card.querySelector('[data-card-slot="role-card"]');
+            const brandSlot = card.querySelector('[data-card-slot="brand-card"]');
+            const clientSlot = card.querySelector('[data-card-slot="client-card"]');
             return {
                 company: card.querySelector('.exp-company')?.textContent.trim() || '',
                 location: card.querySelector('.exp-location')?.textContent.trim() || '',
@@ -626,20 +773,35 @@
                 summary: card.querySelector('textarea')?.value.trim() || '',
                 image: card.querySelector('.round-place')?.style.backgroundImage || '',
                 skills: Array.from(card.querySelectorAll('[data-selectable-skills] .is-selectable.is-active')).map(btn => btn.textContent.trim()),
+                companyId: companySlot?.dataset.orgId || '',
+                productId: productSlot?.dataset.productId || '',
+                roleId: roleSlot?.dataset.roleId || '',
+                brandId: brandSlot?.dataset.productId || '',
+                industryId: clientSlot?.dataset.industryId || ''
             };
         });
 
         if (API && currentProfile?.id) {
             try {
-                showToast('Sauvegarde en cours...');
-                const existingMeta = currentProfile.metadata || {};
+                showAutosaveBadge(true);
+                if (!isAuto) showToast('Sauvegarde en cours...');
+                let existingMeta = {};
+                if (currentProfile.metadata) {
+                    try {
+                        existingMeta = typeof currentProfile.metadata === 'string'
+                            ? JSON.parse(currentProfile.metadata)
+                            : currentProfile.metadata;
+                    } catch (e) {
+                        console.error('Failed to parse metadata:', e);
+                        existingMeta = currentProfile.metadata || {};
+                    }
+                }
 
                 // A. Save profile & experiences in metadata
                 await API.apiFetch('PATCH', `/profiles/${currentProfile.id}`, {
                     biography: biography || null,
                     metadata: {
                         ...existingMeta,
-                        headline,
                         role,
                         skills,
                         languages,
@@ -662,8 +824,18 @@
                     const startYear = parseInt(card.querySelector('.start-year')?.value) || null;
                     const endYear = parseInt(card.querySelector('.end-year')?.value) || null;
 
-                    const uniId = await resolveOrCreateUniversity(uniName);
-                    const degId = await resolveOrCreateDegree(degName);
+                    const uniSlot = card.querySelector('[data-card-slot="university-card"]');
+                    const degSlot = card.querySelector('[data-card-slot="degree-card"]');
+                    
+                    let uniId = uniSlot?.dataset.universityId || null;
+                    let degId = degSlot?.dataset.degreeId || null;
+
+                    if (!uniId && uniName) {
+                        uniId = await resolveOrCreateUniversity(uniName);
+                    }
+                    if (!degId && degName) {
+                        degId = await resolveOrCreateDegree(degName);
+                    }
 
                     const eduData = {
                         university_id: uniId,
@@ -698,8 +870,13 @@
                     const certName = card.querySelector('.cert-name')?.textContent.trim();
                     const issuerName = card.querySelector('.cert-issuer')?.textContent.trim();
 
-                    const orgId = await resolveOrCreateOrganization(issuerName);
-                    const certId = await resolveOrCreateCertification(certName, orgId);
+                    const slot = card.querySelector('[data-card-slot="certification-card"]');
+                    let certId = slot?.dataset.certificationId || null;
+
+                    if (!certId && certName) {
+                        const orgId = await resolveOrCreateOrganization(issuerName);
+                        certId = await resolveOrCreateCertification(certName, orgId);
+                    }
 
                     const id = card.dataset.id;
                     if (certId) {
@@ -719,18 +896,18 @@
                     }
                 }
 
-                showToast('Profil synchronisé avec la base de données ✓');
-                await loadUserData();
+                showAutosaveBadge(false);
+                currentProfile = await API.apiFetch('GET', `/profiles/${currentProfile.id}`);
+                if (!isAuto) showToast('Profile synced ✓');
             } catch (err) {
                 console.error('[profile.js] Save profile error:', err);
-                showToast('Erreur lors de la synchronisation avec l\'API.', 'error');
+                showToast('Failed to sync with API.', 'error');
             }
         } else {
             // Backup local
             const payload = {
                 savedAt: new Date().toISOString(),
                 name,
-                headline,
                 summary: biography,
                 role,
                 languages,
@@ -738,7 +915,7 @@
                 experiences: experiences.length,
             };
             localStorage.setItem('bildyx_profile_draft', JSON.stringify(payload));
-            showToast('MicroResume sauvegardé en local.');
+            showToast('MicroResume saved locally.');
         }
     }
 
@@ -801,7 +978,7 @@
             </div>
         `;
         list.appendChild(article);
-        showToast('Work Experience ajouté.');
+        showToast('Work experience added.');
     }
 
     function addEducation() {
@@ -855,7 +1032,7 @@
             </div>
         `;
         list.appendChild(article);
-        showToast('Diplôme ajouté.');
+        showToast('Education added.');
     }
 
     function addCertification() {
@@ -876,17 +1053,13 @@
                 <button class="entry-tool js-remove-entry" type="button" aria-label="Remove certification">×</button>
             </div>
             <div class="entry-body">
-                <p>Issued by: <span contenteditable="true" class="cert-issuer" data-placeholder="Add issuer..."></span></p>
-                <div class="date-row">
-                    <input type="date" aria-label="Issued date" />
-                    <span>–</span>
-                    <input type="date" aria-label="Expiry date" />
+                <div class="backend-grid">
+                    <div class="backend-slot backend-slot--certification" data-card-slot="certification-card">Certification card</div>
                 </div>
-                <div class="backend-slot backend-slot--certification" data-card-slot="certification-card">Certification card</div>
             </div>
         `;
         grid.appendChild(article);
-        showToast('Certification ajoutée.');
+        showToast('Certification added.');
     }
 
     // ─── Entry collapse and delete triggers ───────────────────
@@ -920,7 +1093,8 @@
         entry.remove();
         renumberExperiences();
         updateProfileMetaSummary();
-        showToast('Élément retiré.');
+        showToast('Item removed.');
+        scheduleAutosave();
     }
 
     function fillBackendSlot(slot) {
@@ -1061,22 +1235,22 @@
         }
 
         if (button?.id === 'avatarButton') {
-            const initials = window.prompt('Initiales à afficher dans le rond avatar :', 'JT');
+            const initials = window.prompt('Initials to display in the avatar placeholder:', 'JT');
             if (initials && initials.trim()) {
                 const avatarEl = $('#profileAvatar');
                 if (avatarEl) avatarEl.textContent = initials.trim().slice(0, 3).toUpperCase();
-                showToast('Avatar placeholder modifié.');
+                showToast('Avatar updated.');
             }
             return;
         }
 
         if (button?.classList.contains('inline-link')) {
-            const value = window.prompt('Texte à ajouter :');
+            const value = window.prompt('Text to add:');
             if (value && value.trim()) {
                 button.textContent = value.trim();
                 button.style.fontStyle = 'normal';
                 button.style.fontWeight = '700';
-                showToast('Champ mis à jour.');
+                showToast('Field updated.');
             }
             return;
         }
@@ -1093,16 +1267,25 @@
     });
 
     document.addEventListener('input', event => {
-        if (event.target.matches('.headline-input')) {
-            updateHeadlineCounter();
-        }
         if (event.target.matches('[data-word-counter]')) {
             updateWordCounter(event.target);
         }
         if (event.target.closest('[data-entry]') || event.target.closest('.skill-row') || event.target.closest('[aria-label="Languages"]')) {
             updateProfileMetaSummary();
         }
+        // Auto-save on any text input within entries
+        if (event.target.closest('[data-entry]')) {
+            scheduleAutosave();
+        }
     });
+
+    // Auto-save when leaving a contenteditable field (role, name, summary, etc.)
+    document.addEventListener('focusout', event => {
+        if (event.target.matches('[contenteditable="true"]')) {
+            scheduleAutosave();
+        }
+    });
+
 
     document.addEventListener('change', event => {
         if (event.target.classList.contains('exp-image-input')) {
@@ -1118,7 +1301,7 @@
                     roundPlace.style.backgroundImage = `url("${reader.result}")`;
                     roundPlace.style.backgroundSize = 'cover';
                     roundPlace.style.backgroundPosition = 'center';
-                    showToast('Logo/image de l\'expérience mis à jour !');
+                    showToast('Experience image updated!');
                     updateProfileMetaSummary();
                 }
             };
@@ -1129,7 +1312,6 @@
     // ─── Initialisation Sécurisée sans Blocage ────────────────
     (async () => {
         try {
-            updateHeadlineCounter();
             $$('[data-word-counter]').forEach(updateWordCounter);
             
             if (API) {
@@ -1146,49 +1328,76 @@
     // ─── Gestion de la Modale de Recherche ──────────────────────────
     const SLOT_MAPPING = {
         'company-card': {
-            title: 'Sélectionner une Organisation',
-            placeholder: 'Rechercher une entreprise...',
+            title: 'Select an Organisation',
+            placeholder: 'Search for a company...',
             searchEndpoint: '/organizations',
             cardEndpointPrefix: '/cards/organization/',
             displayProp: 'name',
             subProp: 'subtype',
-            toastSuccess: 'Carte d\'organisation mise à jour !'
+            toastSuccess: 'Organisation card updated!'
         },
         'product-card': {
-            title: 'Sélectionner un Produit/Service',
-            placeholder: 'Rechercher un produit ou service...',
+            title: 'Select a Product / Service',
+            placeholder: 'Search for a product or service...',
             searchEndpoint: '/subjects',
             cardEndpointPrefix: '/cards/product/',
             displayProp: 'name',
             subProp: 'category',
-            toastSuccess: 'Carte de produit mise à jour !'
+            toastSuccess: 'Product card updated!'
         },
         'role-card': {
-            title: 'Sélectionner un Rôle/Poste',
-            placeholder: 'Rechercher un rôle...',
+            title: 'Select a Role / Position',
+            placeholder: 'Search for a role...',
             searchEndpoint: '/jobs',
             cardEndpointPrefix: '/cards/job/',
             displayProp: 'title',
             subProp: 'category',
-            toastSuccess: 'Carte de rôle mise à jour !'
+            toastSuccess: 'Role card updated!'
         },
         'brand-card': {
-            title: 'Sélectionner une Marque',
-            placeholder: 'Rechercher une marque...',
+            title: 'Select a Brand',
+            placeholder: 'Search for a brand...',
             searchEndpoint: '/subjects',
             cardEndpointPrefix: '/cards/product/',
             displayProp: 'name',
             subProp: 'category',
-            toastSuccess: 'Carte de marque mise à jour !'
+            toastSuccess: 'Brand card updated!'
         },
         'client-card': {
-            title: 'Sélectionner un Secteur / Industrie',
-            placeholder: 'Rechercher une industrie...',
+            title: 'Select a Sector / Industry',
+            placeholder: 'Search for an industry...',
             searchEndpoint: '/industries',
             cardEndpointPrefix: '/cards/industry/',
             displayProp: 'name',
             subProp: 'description',
-            toastSuccess: 'Carte de secteur mise à jour !'
+            toastSuccess: 'Industry card updated!'
+        },
+        'university-card': {
+            title: 'Select a University',
+            placeholder: 'Search for a university...',
+            searchEndpoint: '/universities',
+            cardEndpointPrefix: '/cards/university/',
+            displayProp: 'name',
+            subProp: 'location',
+            toastSuccess: 'University card updated!'
+        },
+        'degree-card': {
+            title: 'Select a Degree',
+            placeholder: 'Search for a degree...',
+            searchEndpoint: '/degrees',
+            cardEndpointPrefix: '/cards/degree/',
+            displayProp: 'name',
+            subProp: 'level',
+            toastSuccess: 'Degree card updated!'
+        },
+        'certification-card': {
+            title: 'Select a Certification',
+            placeholder: 'Search for a certification...',
+            searchEndpoint: '/certifications',
+            cardEndpointPrefix: '/cards/certification/',
+            displayProp: 'name',
+            subProp: 'level',
+            toastSuccess: 'Certification card updated!'
         }
     };
 
@@ -1205,12 +1414,12 @@
             modal.innerHTML = `
                 <div class="org-modal-card">
                     <div class="org-modal-header">
-                        <h3>Sélectionner une Organisation</h3>
-                        <button type="button" class="org-modal-close js-close-org-modal" aria-label="Fermer">&times;</button>
+                        <h3>Select an Organisation</h3>
+                        <button type="button" class="org-modal-close js-close-org-modal" aria-label="Close">&times;</button>
                     </div>
                     <div class="org-modal-body">
                         <div class="org-search-wrapper">
-                            <input type="text" id="orgSearchInput" class="org-search-input" placeholder="Rechercher une entreprise..." autocomplete="off" />
+                            <input type="text" id="orgSearchInput" class="org-search-input" placeholder="Search for a company..." autocomplete="off" />
                             <ul id="orgSearchResults" class="org-results-list" hidden></ul>
                         </div>
                     </div>
@@ -1295,7 +1504,7 @@
         const resultsList = $('#orgSearchResults', modal);
 
         try {
-            resultsList.innerHTML = '<li class="org-result-loading">Recherche en cours...</li>';
+            resultsList.innerHTML = '<li class="org-result-loading">Searching...</li>';
             resultsList.hidden = false;
 
             const data = await API.apiFetch('GET', config.searchEndpoint, null, { name: query });
@@ -1303,7 +1512,7 @@
             resultsList.innerHTML = '';
 
             if (!data || data.length === 0) {
-                resultsList.innerHTML = '<li class="org-result-empty">Aucun résultat trouvé</li>';
+                resultsList.innerHTML = '<li class="org-result-empty">No results found</li>';
                 return;
             }
 
@@ -1312,11 +1521,9 @@
                 li.className = 'org-result-item';
                 
                 const displayText = item[config.displayProp] || '';
-                const subText = item[config.subProp] || '';
 
                 li.innerHTML = `
                     <div class="org-item-name">${escapeHtml(displayText)}</div>
-                    ${subText ? `<div class="org-item-sub">${escapeHtml(subText)}</div>` : ''}
                 `;
                 li.addEventListener('click', () => selectOrganization(item.id));
                 resultsList.appendChild(li);
@@ -1327,87 +1534,29 @@
         }
     }
 
-    async function selectOrganization(orgId) {
-        const slotToUpdate = targetSlotForModal;
-
-        if (!slotToUpdate) {
-            console.error("Erreur : Aucun emplacement (slot) valide n'a été trouvé.");
-            showToast("Erreur : Emplacement introuvable.", 'error');
-            closeOrgModal();
-            return;
-        }
-
-        const slotType = slotToUpdate.dataset.cardSlot;
-        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
-
-        // On réinitialise la globale et on ferme la modale
-        targetSlotForModal = null;
-        closeOrgModal();
-        showToast('Chargement de la carte...');
-
+    async function fetchAndRenderCardSlot(slotToUpdate, slotType, entityId) {
+        if (!entityId || !slotToUpdate) return;
+        const config = SLOT_MAPPING[slotType];
+        if (!config) return;
         try {
-            // Appel API direct vers la route carte
-            const response = await API.apiFetch('GET', `${config.cardEndpointPrefix}${orgId}`);
-            console.log('Réponse API card :', response);
-
-            // On récupère le contenu HTML (soit response.message, soit la string directement)
+            const response = await API.apiFetch('GET', `${config.cardEndpointPrefix}${entityId}`);
             const htmlCard = typeof response === 'string' ? response : (response?.message || response?.html || '');
 
-            if (!htmlCard) {
-                throw new Error("L'API a renvoyé un contenu vide.");
-            }
+            if (!htmlCard) return;
 
             slotToUpdate.classList.add('is-filled');
-            
-            if (slotType === 'company-card') {
-                slotToUpdate.dataset.orgId = orgId;
-            } else if (slotType === 'product-card' || slotType === 'brand-card') {
-                slotToUpdate.dataset.productId = orgId;
-            } else if (slotType === 'role-card') {
-                slotToUpdate.dataset.roleId = orgId;
-                
-                // Charger dynamiquement les tools_and_tech liés au job (role)
-                (async () => {
-                    try {
-                        const job = await API.apiFetch('GET', `/jobs/${orgId}`);
-                        console.log('API Job loaded:', job);
-                        
-                        const entryCard = slotToUpdate.closest('.entry-card');
-                        if (entryCard) {
-                            const skillsSection = entryCard.querySelector('.entry-skills');
-                            if (skillsSection) {
-                                skillsSection.classList.add('is-visible');
-                                
-                                const chipRow = skillsSection.querySelector('[data-selectable-skills]');
-                                const countEl = skillsSection.querySelector('small');
-                                
-                                if (chipRow) {
-                                    chipRow.innerHTML = '';
-                                    const tools = job?.tools_and_tech || [];
-                                    tools.forEach(tool => {
-                                        const btn = document.createElement('button');
-                                        btn.className = 'chip is-outline is-selectable';
-                                        btn.type = 'button';
-                                        btn.textContent = tool;
-                                        chipRow.appendChild(btn);
-                                    });
-                                }
-                                if (countEl) {
-                                    countEl.textContent = '0/5 selected';
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.error('Erreur lors de la récupération des tools & tech du rôle :', err);
-                    }
-                })();
-            } else if (slotType === 'client-card') {
-                slotToUpdate.dataset.industryId = orgId;
-            }
+
+            if (slotType === 'company-card') slotToUpdate.dataset.orgId = entityId;
+            else if (slotType === 'product-card' || slotType === 'brand-card') slotToUpdate.dataset.productId = entityId;
+            else if (slotType === 'role-card') slotToUpdate.dataset.roleId = entityId;
+            else if (slotType === 'client-card') slotToUpdate.dataset.industryId = entityId;
+            else if (slotType === 'university-card') slotToUpdate.dataset.universityId = entityId;
+            else if (slotType === 'degree-card') slotToUpdate.dataset.degreeId = entityId;
+            else if (slotType === 'certification-card') slotToUpdate.dataset.certificationId = entityId;
 
             const iframe = document.createElement('iframe');
             iframe.className = 'org-card-frame';
-            iframe.sandbox = 'allow-same-origin';
+            iframe.sandbox = 'allow-same-origin allow-scripts';
 
             iframe.srcdoc = `
                 <html>
@@ -1447,12 +1596,109 @@
 
             slotToUpdate.innerHTML = '';
             slotToUpdate.appendChild(iframe);
+        } catch (err) {
+            console.error('Erreur récupération carte HTML pour le slot :', slotType, err);
+        }
+    }
 
+    async function selectOrganization(orgId) {
+        const slotToUpdate = targetSlotForModal;
+
+        if (!slotToUpdate) {
+            console.error("Erreur : Aucun emplacement (slot) valide n'a été trouvé.");
+            showToast("Error: slot not found.", 'error');
+            closeOrgModal();
+            return;
+        }
+
+        const slotType = slotToUpdate.dataset.cardSlot;
+        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
+
+        // On réinitialise la globale et on ferme la modale
+        targetSlotForModal = null;
+        closeOrgModal();
+        showToast('Loading card...');
+
+        try {
+            // Update corresponding text input/editable on the card
+            const entryCard = slotToUpdate.closest('.entry-card');
+            if (entryCard) {
+                try {
+                    if (slotType === 'company-card') {
+                        const el = entryCard.querySelector('.exp-company');
+                        const org = await API.apiFetch('GET', `/organizations/${orgId}`);
+                        if (el && org) el.textContent = org.name;
+                    } else if (slotType === 'university-card') {
+                        const el = entryCard.querySelector('.edu-university');
+                        const uni = await API.apiFetch('GET', `/universities/${orgId}`);
+                        if (el && uni) el.textContent = uni.name;
+                    } else if (slotType === 'degree-card') {
+                        const el = entryCard.querySelector('.edu-degree');
+                        const deg = await API.apiFetch('GET', `/degrees/${orgId}`);
+                        if (el && deg) el.textContent = deg.name;
+                    } else if (slotType === 'role-card') {
+                        const el = entryCard.querySelector('.exp-role-title');
+                        const job = await API.apiFetch('GET', `/jobs/${orgId}`);
+                        if (el && job) el.value = job.title;
+                    } else if (slotType === 'certification-card') {
+                        const el = entryCard.querySelector('.cert-name');
+                        const cert = await API.apiFetch('GET', `/certifications/${orgId}`);
+                        if (el && cert) el.textContent = cert.name;
+                        if (cert?.issuing_organization_id) {
+                            const issuerEl = entryCard.querySelector('.cert-issuer');
+                            const org = await API.apiFetch('GET', `/organizations/${cert.issuing_organization_id}`);
+                            if (issuerEl && org) issuerEl.textContent = org.name;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to update text field for selected card:', err);
+                }
+            }
+
+            if (slotType === 'role-card') {
+                // Charger dynamiquement les tools_and_tech liés au job (role)
+                (async () => {
+                    try {
+                        const job = await API.apiFetch('GET', `/jobs/${orgId}`);
+                        console.log('API Job loaded:', job);
+                        
+                        const entryCard = slotToUpdate.closest('.entry-card');
+                        if (entryCard) {
+                            const skillsSection = entryCard.querySelector('.entry-skills');
+                            if (skillsSection) {
+                                skillsSection.classList.add('is-visible');
+                                
+                                const chipRow = skillsSection.querySelector('[data-selectable-skills]');
+                                const countEl = skillsSection.querySelector('small');
+                                
+                                if (chipRow) {
+                                    chipRow.innerHTML = '';
+                                    const tools = job?.tools_and_tech || [];
+                                    tools.forEach(tool => {
+                                        const btn = document.createElement('button');
+                                        btn.className = 'chip is-outline is-selectable';
+                                        btn.type = 'button';
+                                        btn.textContent = tool;
+                                        chipRow.appendChild(btn);
+                                    });
+                                }
+                                if (countEl) {
+                                    countEl.textContent = '0/5 selected';
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Erreur lors de la récupération des tools & tech du rôle :', err);
+                    }
+                })();
+            }
+
+            await fetchAndRenderCardSlot(slotToUpdate, slotType, orgId);
             showToast(config.toastSuccess);
 
         } catch (err) {
-            console.error('Erreur récupération carte HTML :', err);
-            showToast('Erreur lors du chargement de la carte.', 'error');
+            console.error('Erreur sélection organisation :', err);
+            showToast('Failed to update the card.', 'error');
         }
     }
 
@@ -1462,17 +1708,14 @@
         const slots = $$('.backend-slot.is-filled', grid);
         if (slots.length === 0) return;
 
-        let maxRequiredHeight = 260; // min-height par défaut
-
-        // 1. Calculer les hauteurs requises pour chaque carte et trouver la hauteur max
-        const slotData = slots.map(slot => {
+        slots.forEach(slot => {
             const iframe = slot.querySelector('iframe');
-            if (!iframe) return null;
+            if (!iframe) return;
 
             try {
-                const doc = iframe.contentDocument;
+                const doc = iframe.contentDocument || iframe.contentWindow?.document;
                 const wrap = doc?.getElementById('scaleWrap');
-                if (!wrap) return null;
+                if (!wrap) return;
 
                 // Réinitialiser temporairement les hauteurs pour mesurer la taille réelle du contenu
                 wrap.style.height = 'auto';
@@ -1481,9 +1724,9 @@
                     mainCard.style.setProperty('height', 'auto', 'important');
                 }
 
-                const cardWidth = wrap.scrollWidth || 500;
+                const cardWidth = 500; // Les cartes Bildyx font toujours 500px de large
                 const cardHeight = wrap.scrollHeight || 400;
-                const containerWidth = iframe.clientWidth || slot.clientWidth;
+                const containerWidth = slot.clientWidth || iframe.clientWidth || 250;
 
                 const padding = 16;
                 const availableWidth = containerWidth - padding;
@@ -1491,47 +1734,26 @@
                 const scaledHeight = cardHeight * scale;
                 const requiredHeight = scaledHeight + padding;
 
-                if (requiredHeight > maxRequiredHeight) {
-                    maxRequiredHeight = requiredHeight;
-                }
+                // Appliquer la hauteur individuelle de cette carte spécifique
+                slot.style.minHeight = 'auto';
+                slot.style.height = `${requiredHeight}px`;
+                iframe.style.height = `${requiredHeight}px`;
 
-                return {
-                    slot,
-                    iframe,
-                    wrap,
-                    scale,
-                    cardWidth,
-                    padding
-                };
+                // Calculer la hauteur non-scalée requise à l'intérieur de l'iframe
+                const heightNeeded = (requiredHeight - padding) / scale;
+                wrap.style.height = `${heightNeeded}px`;
+
+                // Appliquer la transformation et le positionnement
+                wrap.style.transform = `scale(${scale})`;
+                wrap.style.top = `${padding / 2}px`;
+                wrap.style.left = `${(containerWidth - cardWidth * scale) / 2}px`;
+
+                // Forcer la carte interne à s'étirer sur toute la hauteur calculée
+                if (mainCard) {
+                    mainCard.style.setProperty('height', '100%', 'important');
+                }
             } catch (err) {
                 console.error('Erreur lors de la mesure de la carte :', err);
-                return null;
-            }
-        }).filter(Boolean);
-
-        // Appliquer un plafond de 550px pour éviter les hauteurs gigantesques
-        const finalMaxHeight = Math.min(maxRequiredHeight, 550);
-
-        // 2. Aligner tous les slots de la ligne sur cette hauteur max et ajuster la hauteur des cartes internes
-        slotData.forEach(data => {
-            const { slot, iframe, wrap, scale, cardWidth, padding } = data;
-
-            slot.style.minHeight = `${finalMaxHeight}px`;
-            iframe.style.height = `${finalMaxHeight}px`;
-
-            // Calculer la hauteur non-scalée requise à l'intérieur de l'iframe
-            const heightNeeded = (finalMaxHeight - padding) / scale;
-            wrap.style.height = `${heightNeeded}px`;
-
-            // Appliquer la transformation et le positionnement
-            wrap.style.transform = `scale(${scale})`;
-            wrap.style.top = `${padding / 2}px`;
-            wrap.style.left = `${(iframe.clientWidth - cardWidth * scale) / 2}px`;
-
-            // Forcer la carte interne à s'étirer sur toute la hauteur calculée
-            const mainCard = wrap.querySelector('.main-card');
-            if (mainCard) {
-                mainCard.style.setProperty('height', '100%', 'important');
             }
         });
     }

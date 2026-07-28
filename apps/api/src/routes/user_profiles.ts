@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -17,7 +17,7 @@ import type { Insertable } from "kysely";
 import type { UserProfiles } from "../db/types";
 
 export const user_profiles = {
-  // 1. Récupérer tous les profils
+  // 1. Get all profiles
   getAll: publicProcedure
     .route({
       method: "GET",
@@ -48,7 +48,7 @@ export const user_profiles = {
       return await query.orderBy("created_at", "desc").execute();
     }),
 
-  // 2. Récupérer un profil par son ID
+  // 2. Get a profile by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -73,7 +73,7 @@ export const user_profiles = {
       return profile;
     }),
 
-  // 3. Récupérer le profil d'un utilisateur par userId
+  // 3. Get a user's profile by userId
   getByUser: publicProcedure
     .route({
       method: "GET",
@@ -98,7 +98,7 @@ export const user_profiles = {
       return profile;
     }),
 
-  // 4. Créer un nouveau profil
+  // 4. Create a new profile
   create: publicProcedure
     .route({
       method: "POST",
@@ -144,7 +144,7 @@ export const user_profiles = {
       return profile;
     }),
 
-  // 5. Mettre à jour un profil
+  // 5. Update a profile
   update: publicProcedure
     .route({
       method: "PATCH",

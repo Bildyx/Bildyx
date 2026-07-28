@@ -392,20 +392,34 @@ body.profile-page {
     font-weight: 500;
 }
 
-.profile-meta-list span[contenteditable="true"],
-.summary-text[contenteditable="true"],
-.name-pill strong[contenteditable="true"],
-.title-line [contenteditable="true"] {
+[contenteditable="true"] {
+    min-height: 1.2em;
+    display: inline-block;
+    border: 1.5px dashed var(--profile-border) !important;
+    background: #fdfefe !important;
     border-radius: 6px;
-    padding: 2px 5px;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+    outline: none;
 }
 
-.profile-meta-list span[contenteditable="true"]:focus,
-.summary-text[contenteditable="true"]:focus,
-.name-pill strong[contenteditable="true"]:focus,
-.title-line [contenteditable="true"]:focus {
-    background: rgba(36, 69, 238, 0.08);
-    outline: 1px dashed rgba(36, 69, 238, 0.35);
+[contenteditable="true"]:hover {
+    border-color: var(--profile-blue) !important;
+    background: #f5f8ff !important;
+}
+
+[contenteditable="true"]:focus {
+    border-color: var(--profile-blue) !important;
+    background: #ffffff !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(36, 69, 238, 0.1);
+}
+
+[contenteditable="true"]:empty:not(:focus)::before {
+    content: attr(data-placeholder);
+    color: var(--profile-muted);
+    font-style: italic;
+    opacity: 0.7;
 }
 
 .skills-box {
@@ -727,8 +741,7 @@ body.profile-page {
 }
 
 .profile-side-nav {
-    position: sticky;
-    top: 96px;
+    position: relative;
     width: 190px;
     padding: 14px;
     border-radius: 12px;
@@ -998,6 +1011,32 @@ body.profile-page {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.org-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    background-color: #ffffff;
+}
+
+.org-result-item:last-child {
+    border-bottom: none;
+}
+
+.org-result-item:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+.org-result-item:hover {
+    background-color: #eff6ff !important;
+}
+
+.org-item-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
 /* --- Style pour l'image de l'expérience --- */
 .round-place {
     cursor: pointer;
@@ -1147,3 +1186,175 @@ input.is-overflow:focus {
     fill: none;
     flex-shrink: 0;
 }
+
+/* ─── Language Picker Modal ─────────────────────────── */
+.lang-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 18, 38, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.lang-modal-overlay.is-open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.lang-modal {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px 30px 24px;
+    width: min(420px, calc(100vw - 32px));
+    box-shadow: 0 24px 64px rgba(36, 69, 238, 0.18), 0 8px 24px rgba(0,0,0,0.1);
+    transform: translateY(12px) scale(0.97);
+    transition: transform 0.22s ease;
+}
+
+.lang-modal-overlay.is-open .lang-modal {
+    transform: translateY(0) scale(1);
+}
+
+.lang-modal h3 {
+    margin: 0 0 20px;
+    font-size: 1.1rem;
+    font-weight: 750;
+    color: var(--profile-text);
+    letter-spacing: -0.02em;
+}
+
+.lang-modal label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--profile-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.lang-modal select,
+.lang-modal input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border: 1.5px solid var(--profile-border);
+    border-radius: 10px;
+    font-family: var(--profile-font);
+    font-size: 0.92rem;
+    color: var(--profile-text);
+    background: #fff;
+    margin-bottom: 16px;
+    appearance: none;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.lang-modal select:focus,
+.lang-modal input[type="text"]:focus {
+    border-color: var(--profile-blue);
+    box-shadow: 0 0 0 3px rgba(36, 69, 238, 0.10);
+}
+
+.lang-level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.lang-level-btn {
+    padding: 9px 6px;
+    border: 1.5px solid var(--profile-border);
+    border-radius: 10px;
+    background: #fff;
+    font-family: var(--profile-font);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--profile-muted);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+}
+
+.lang-level-btn:hover {
+    border-color: var(--profile-blue);
+    color: var(--profile-blue);
+}
+
+.lang-level-btn.is-active {
+    background: var(--profile-blue);
+    border-color: var(--profile-blue);
+    color: #fff;
+}
+
+.lang-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.lang-modal-actions button {
+    padding: 9px 20px;
+    border-radius: 10px;
+    font-family: var(--profile-font);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+}
+
+.lang-modal-cancel {
+    background: var(--profile-soft);
+    color: var(--profile-muted);
+}
+
+.lang-modal-cancel:hover {
+    background: var(--profile-border);
+}
+
+.lang-modal-confirm {
+    background: var(--profile-blue);
+    color: #fff;
+}
+
+.lang-modal-confirm:hover {
+    background: var(--profile-blue-dark);
+}
+
+/* ─── Autosave status indicator ────────────────────── */
+.autosave-badge {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-family: var(--profile-font);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    background: #22c55e;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+    z-index: 8000;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.autosave-badge.is-saving {
+    background: var(--profile-blue);
+    box-shadow: 0 4px 16px rgba(36, 69, 238, 0.3);
+}
+
+.autosave-badge.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}

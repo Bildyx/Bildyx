@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -16,7 +16,7 @@ import type { Insertable } from "kysely";
 import type { UserCertifications } from "../db/types";
 
 export const user_certifications = {
-  // 1. Récupérer toutes les certifications d'un profil
+  // 1. Get all certifications d'un profil
   getByProfile: publicProcedure
     .route({
       method: "GET",
@@ -46,7 +46,7 @@ export const user_certifications = {
         .execute();
     }),
 
-  // 2. Récupérer une certification utilisateur par son ID
+  // 2. Get a user certification by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -73,7 +73,7 @@ export const user_certifications = {
       return cert;
     }),
 
-  // 3. Ajouter une certification à un profil
+  // 3. Add a certification to a profile
   create: publicProcedure
     .route({
       method: "POST",
@@ -126,7 +126,7 @@ export const user_certifications = {
       return cert;
     }),
 
-  // 4. Mettre à jour une certification utilisateur
+  // 4. Update a certification utilisateur
   update: publicProcedure
     .route({
       method: "PATCH",
