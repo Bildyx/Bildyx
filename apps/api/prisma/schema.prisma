@@ -1038,13 +1038,6 @@ enum EmployeeCountRange {
   CLASSIFIED
 }
 
-// enum UniversityType supprimé avec le modèle University : les valeurs
-// (GRANDE_ECOLE, INSTITUTE, ACADEMY, ONLINE, OTHER) ne sont plus contraintes
-// au niveau DB. Si un dropdown reste utile côté front pour Organization.type1
-// quand subtype=UNIVERSITY, garder cette liste dans une constante applicative
-// partagée (voir UniversityTypeValues dans models/utils/enums.ts) plutôt que
-// dans le schéma.
-
 enum GovernmentType {
   REPUBLIC
   CONSTITUTIONAL_MONARCHY
