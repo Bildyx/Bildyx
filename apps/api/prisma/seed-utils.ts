@@ -69,10 +69,41 @@ export function toStringArray(v?: string): string[] {
     .filter(Boolean);
 }
 
+// "Pekamix Global" -> "pekamix-global" - used to derive Organization.slug
+// from name when the CSV's slug column is blank.
+const COMBINING_DIACRITICS = new RegExp("[\\u0300-\\u036f]", "g");
+
+export function slugify(v: string): string {
+  return v
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(COMBINING_DIACRITICS, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// Source cost_of_living/quality_of_life cells use two interchangeable
+// vocabularies ("Medium"/"Moderate") and free-text compounds ("Low to
+// Medium", "Moderate to High", and the reverse order "Moderate to Low") -
+// canonicalised here to a single ordered "low medium"-style phrase that
+// normalizeEnumKey then turns into the matching enum key (LOW_MEDIUM, etc.).
+export function normalizeScaleValue(v: string): string {
+  let s = v.trim().toLowerCase().replace(/moderate/g, "medium");
+  s = s.replace(/\bto\b/g, " ").replace(/\s+/g, " ").trim();
+  if (s === "medium low") s = "low medium";
+  if (s === "high medium") s = "medium high";
+  return s;
+}
+
 // Normalise "Project Management" / "project-management" / "5000+" -> "PROJECT_MANAGEMENT" / "5000_"
+// Accents are folded first (e.g. "Māori" -> "MAORI") so they match the
+// plain-ASCII enum members instead of being stripped as invalid characters.
 export function normalizeEnumKey(v: string): string {
   return v
     .trim()
+    .normalize("NFD")
+    .replace(COMBINING_DIACRITICS, "")
     .toUpperCase()
     .replace(/[\s-]+/g, "_")
     .replace(/[^A-Z0-9_]/g, "");

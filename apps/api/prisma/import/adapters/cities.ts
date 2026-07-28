@@ -1,7 +1,15 @@
 import type { PrismaClient } from "@prisma/client";
 import { Currency, CostOfLiving, Language } from "@prisma/client";
 import { toInt, toIntLoose, toFloat, toBool } from "../../seed-utils";
-import { checkEnum, checkEnumArray, checkJson, checkRequiredFk, checkRequiredText } from "../checks";
+import {
+  checkEnum,
+  checkEnumArray,
+  checkJson,
+  checkRequiredFk,
+  checkRequiredText,
+  checkScaleEnum,
+  LANGUAGE_ALIASES,
+} from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -77,10 +85,10 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
     const currency = checkEnum(row.currency, Currency, "currency", true);
     if (currency.issue) errors.push(currency.issue);
 
-    const costOfLiving = checkEnum(row.cost_of_living, CostOfLiving, "cost_of_living", false);
+    const costOfLiving = checkScaleEnum(row.cost_of_living, CostOfLiving, "cost_of_living");
     if (costOfLiving.issue) warnings.push(costOfLiving.issue);
 
-    const language = checkEnumArray(row.language, Language, "language");
+    const language = checkEnumArray(row.language, Language, "language", LANGUAGE_ALIASES);
     warnings.push(...language.issues);
 
     const metadata = checkJson(row.metadata, "metadata");

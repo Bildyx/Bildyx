@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
-import { generateSerialNumber } from "../../../src/models/utils/enums.js";
 import {
   buildNameLookup,
   normalizeEnumKey,
+  slugify,
   toInt,
   toStringArray,
 } from "../../seed-utils";
@@ -89,20 +89,35 @@ export interface OrganizationsFk {
   // regardless of row order).
   resolveOrgIdByName: (raw?: string) => string | null;
   idBySlug: Map<string, string>;
+  // Ids confirmed to already exist in the DB - resolveOrgIdByName can also
+  // return a pre-generated id for a row that never actually gets written
+  // (e.g. it was rejected for having a duplicate natural key elsewhere in
+  // the file), so afterUpsert cross-checks against this set before linking.
+  existingIds: Set<string>;
 }
 
 export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   modelName: "Organization",
   prismaModel: "organization",
   csvFile: "organizations.csv",
-  naturalKeyColumn: "slug",
+  // organizations.csv's slug column is currently unfilled for every row, so
+  // the slug is derived from name instead (see mapRow) - naturalKeyColumn
+  // has to agree so plan.ts's pre-mapRow duplicate/diff check uses the same
+  // key (same pattern as Country's iso_code/normalizeIsoCode).
+  naturalKeyColumn: "name",
   naturalKeyField: "slug",
+  normalizeNaturalKey: slugify,
   deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
 
   async buildFkContext(prisma: PrismaClient, rows: CsvRow[]): Promise<OrganizationsFk> {
     const cities = await prisma.city.findMany({ select: { id: true, name: true } });
-    const resolveCityId = buildNameLookup(cities);
+    const resolveCityByExactName = buildNameLookup(cities);
+    // city_id cells are typically "City, Country" (e.g. "Paris, France") but
+    // City.name only holds the city ("Paris") - fall back to matching just
+    // the part before the first comma when the exact string doesn't resolve.
+    const resolveCityId = (raw?: string): string | null =>
+      resolveCityByExactName(raw) ?? resolveCityByExactName(raw?.split(",")[0]);
 
     const existingOrgs = await prisma.organization.findMany({
       select: { id: true, slug: true, name: true },
@@ -117,9 +132,9 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
     // of file order.
     const idByNameForBatch = new Map<string, string>();
     for (const row of rows) {
-      const slug = (row.slug ?? "").trim();
       const name = (row.name ?? "").trim().toLowerCase();
-      if (!slug || !name) continue;
+      if (!name) continue;
+      const slug = slugify(row.name ?? "");
       idByNameForBatch.set(name, idBySlug.get(slug) ?? idByNameFromDb.get(name) ?? randomUUID());
     }
 
@@ -129,18 +144,24 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       return idByNameForBatch.get(name) ?? idByNameFromDb.get(name) ?? null;
     };
 
-    return { resolveCityId, resolveOrgIdByName, idBySlug };
+    const existingIds = new Set(existingOrgs.map((o) => o.id));
+
+    return { resolveCityId, resolveOrgIdByName, idBySlug, existingIds };
   },
 
   mapRow(row, _rowIndex, fk): MappedRow {
     const errors: RowIssue[] = [];
     const warnings: RowIssue[] = [];
 
-    const slug = checkRequiredText(row.slug, "slug");
-    if (slug.issue) errors.push(slug.issue);
-
     const name = checkRequiredText(row.name, "name");
     if (name.issue) errors.push(name.issue);
+
+    // organizations.csv's slug column is unfilled for every row - derive it
+    // from name instead (see naturalKeyColumn/normalizeNaturalKey above).
+    const slug = slugify(name.value);
+
+    const serialNumber = checkRequiredText(row.serial_number, "serial_number");
+    if (serialNumber.issue) errors.push(serialNumber.issue);
 
     const subtype = checkEnum(row.subtype, OrganizationSubType, "subtype", false);
     if (subtype.issue) warnings.push(subtype.issue);
@@ -170,21 +191,21 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       });
     }
 
-    const id = fk.idBySlug.get(slug.value) ?? fk.resolveOrgIdByName(row.name);
+    const id = fk.idBySlug.get(slug) ?? fk.resolveOrgIdByName(row.name);
 
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
 
     return {
-      naturalKey: slug.value,
+      naturalKey: slug,
       data: {
         // Explicit id: reused if the org already exists (update), otherwise
         // the pre-generated id from buildFkContext (insert) - see
         // resolveOrgIdByName's role in cross-row parent resolution above.
         id: id ?? undefined,
         name: name.value,
-        slug: slug.value,
-        serial_number: row.serial_number || generateSerialNumber(subtype.value),
+        serial_number: serialNumber.value,
+        slug,
         subtype: subtype.value,
         type1: row.type1 || null,
         type2: row.type2 || null,
@@ -224,12 +245,18 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   },
 
   async afterUpsert(tx: PrismaTransactionClient, written, fk: OrganizationsFk) {
+    // A name pre-generates an id in buildFkContext regardless of whether its
+    // row actually makes it into `written` (e.g. it was dropped for having a
+    // duplicate natural key elsewhere in the file) - only link to ids that
+    // are confirmed to exist, either already in the DB or written this run.
+    const validIds = new Set([...fk.existingIds, ...written.map((w) => w.data.id)]);
+
     const parentLinks: { id: unknown; parentOrganizationId: string }[] = [];
     for (const { data, row } of written) {
       const rawParentName = row.parent_organization_id;
       if (!rawParentName || rawParentName.trim() === "") continue;
       const parentOrganizationId = fk.resolveOrgIdByName(rawParentName);
-      if (!parentOrganizationId) continue;
+      if (!parentOrganizationId || !validIds.has(parentOrganizationId)) continue;
       parentLinks.push({ id: data.id, parentOrganizationId });
     }
     await runBatched(parentLinks, ({ id, parentOrganizationId }) =>
