@@ -556,3 +556,18 @@ export function mapSubject(
     year: new Date().getFullYear(),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Degree
+// ---------------------------------------------------------------------------
+
+export function mapDegree(row: Record<string, any>) {
+  return {
+    name: row.name,
+    serialNumber: row.serial_number,
+    level: formatEnum(row.level),
+    area: str(row.area),
+    description: str(row.description),
+    year: new Date().getFullYear(),
+  };
+}

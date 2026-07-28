@@ -45,7 +45,7 @@ export async function sendResetEmail(
   email: string,
   token: string,
 ): Promise<void> {
-  const link = `${process.env.RESET_BASE_URL || "http://localhost:5500/reset-password.html"}?token=${token}&email=${encodeURIComponent(email)}`;
+  const link = `${process.env.RESET_BASE_URL || process.env.FRONTEND_URL || "http://localhost:8000/reset-password.html"}?token=${token}&email=${encodeURIComponent(email)}`;
   const subject = "Bildyx – Reset your password";
   const text =
     `We received a request to reset your Bildyx password.\n\n` +

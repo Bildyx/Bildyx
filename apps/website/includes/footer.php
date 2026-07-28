@@ -39,7 +39,8 @@
     </footer>
 
 <?php if (!empty($pageScript)): ?>
-    <script src="<?= htmlspecialchars($basePath . $pageScript, ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script src="<?= htmlspecialchars($basePath . 'js/api.js', ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script src="<?= htmlspecialchars($basePath . $pageScript, ENT_QUOTES, 'UTF-8') ?>" defer></script>
 <?php endif; ?>
 </body>
 </html>

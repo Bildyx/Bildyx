@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -16,7 +16,7 @@ import type { Insertable } from "kysely";
 import type { UserEducations } from "../db/types";
 
 export const user_educations = {
-  // 1. Récupérer toutes les formations d'un profil
+  // 1. Get all educations for a profile
   getByProfile: publicProcedure
     .route({
       method: "GET",
@@ -46,7 +46,7 @@ export const user_educations = {
         .execute();
     }),
 
-  // 2. Récupérer une formation par son ID
+  // 2. Get an education by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -73,7 +73,7 @@ export const user_educations = {
       return education;
     }),
 
-  // 3. Créer une nouvelle formation
+  // 3. Create a new education
   create: publicProcedure
     .route({
       method: "POST",
@@ -113,7 +113,7 @@ export const user_educations = {
       return education;
     }),
 
-  // 4. Mettre à jour une formation
+  // 4. Update an education
   update: publicProcedure
     .route({
       method: "PATCH",

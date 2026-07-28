@@ -531,7 +531,15 @@ if (loginForm) {
     });
       const data = await resp.json().catch(() => ({}));
       if (resp.status === 200) {
-        // Login successful: redirect to generic page
+        // Login successful: store session info and redirect to profile
+        if (window.BildyxAPI && data.user) {
+          window.BildyxAPI.setSession({
+            userId: data.user.id,
+            email: data.user.email,
+            role: data.user.role,
+            profileId: null, // will be fetched lazily by api.js
+          });
+        }
         window.location.href = 'profile.php';
       } else {
         // Record attempt on failure

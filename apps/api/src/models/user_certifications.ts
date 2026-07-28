@@ -21,14 +21,14 @@ export const GetUserCertificationSchema = z.object({
 export const PostUserCertificationSchema = z.object({
   user_profile_id: z.string().uuid(),
   certification_id: z.string().uuid(),
-  obtained_at: z.date().nullable().optional(),
-  expires_at: z.date().nullable().optional(),
+  obtained_at: z.coerce.date().nullable().optional(),
+  expires_at: z.coerce.date().nullable().optional(),
 });
 
 // PATCH
 export const PutUserCertificationSchema = z.object({
-  obtained_at: z.date().nullable().optional(),
-  expires_at: z.date().nullable().optional(),
+  obtained_at: z.coerce.date().nullable().optional(),
+  expires_at: z.coerce.date().nullable().optional(),
 });
 
 // DELETE
