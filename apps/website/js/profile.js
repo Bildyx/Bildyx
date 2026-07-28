@@ -784,7 +784,7 @@
         if (API && currentProfile?.id) {
             try {
                 showAutosaveBadge(true);
-                if (!isAuto) showToast('Sauvegarde en cours...');
+                if (!isAuto) showToast('Saving...');
                 let existingMeta = {};
                 if (currentProfile.metadata) {
                     try {
@@ -1556,8 +1556,6 @@
 
             const iframe = document.createElement('iframe');
             iframe.className = 'org-card-frame';
-            iframe.sandbox = 'allow-same-origin allow-scripts';
-
             iframe.srcdoc = `
                 <html>
                 <head>
