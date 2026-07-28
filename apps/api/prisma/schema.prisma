@@ -467,36 +467,6 @@ model UserSession {
 
 /// Profil public user
 model UserProfile {
-<<<<<<< HEAD
-  id                    String               @id @default(uuid()) @db.Uuid
-  userId                String               @unique @map("user_id") @db.Uuid
-  biography             String?
-  countryId             String?              @map("country_id") @db.Char(2)
-  cityId                String?              @map("city_id") @db.Uuid
-  linkedinUrl           String?              @map("linkedin_url")
-  githubUrl             String?              @map("github_url")
-  websiteUrl            String?              @map("website_url")
-  locale                String?              @default("fr")
-  timezone              String?
-  isPublic              Boolean              @default(true) @map("is_public")
-  currentJobId          String?              @map("current_job_id") @db.Uuid
-  currentJobStartedAt   DateTime?            @map("current_job_started_at")
-  currentOrganizationId String?              @map("current_organization_id") @db.Uuid
-  metadata              Json?
-  createdAt             DateTime             @default(now()) @map("created_at")
-  updatedAt             DateTime             @updatedAt @map("updated_at")
-  user_certifications   UserCertifications[]
-  user_educations       UserEducations[]
-  user_experiences      UserExperience[]
-  user_languages        UserLanguage[]
-  user_skills           UserSkill[]
-  user_target_lists     UserTargetList[]
-  city                  City?                @relation(fields: [cityId], references: [id])
-  country               Country?             @relation("UserProfileCountry", fields: [countryId], references: [isoCode])
-  currentJob            Job?                 @relation("UserCurrentJob", fields: [currentJobId], references: [id])
-  currentOrganization   Organization?        @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
-  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-=======
   id                       String                  @id @default(uuid()) @db.Uuid
   userId                   String                  @unique @map("user_id") @db.Uuid
   biography                String?
@@ -519,13 +489,13 @@ model UserProfile {
   user_experiences         UserExperience[]
   user_languages           UserLanguage[]
   user_skills              UserSkill[]
+  user_target_lists        UserTargetList[]
   personality_test_results PersonalityTestResult[]
   city                     City?                   @relation(fields: [cityId], references: [id])
   country                  Country?                @relation("UserProfileCountry", fields: [countryId], references: [isoCode])
   currentJob               Job?                    @relation("UserCurrentJob", fields: [currentJobId], references: [id])
   currentOrganization      Organization?           @relation("UserCurrentOrganization", fields: [currentOrganizationId], references: [id])
   user                     User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
->>>>>>> worktree-personality-tests-schema
 
   @@index([countryId])
   @@index([cityId])
@@ -634,7 +604,6 @@ model UserSkill {
   @@map("user_skills")
 }
 
-<<<<<<< HEAD
 /// Une entreprise ciblée par un profil (liste personnelle d'organisations
 /// auxquelles le candidat prévoit ou souhaite postuler).
 model UserTargetList {
@@ -648,7 +617,8 @@ model UserTargetList {
   @@unique([user_profile_id, organization_id])
   @@index([organization_id])
   @@map("user_target_lists")
-=======
+}
+
 /// Référentiel d'un questionnaire de personnalité (ex: Big 5, DISC...).
 /// Données de configuration, indépendantes des utilisateurs.
 model PersonalityTest {
@@ -752,7 +722,6 @@ model PersonalityCriterionScore {
   @@unique([result_id, criterion_id])
   @@index([criterion_id])
   @@map("personality_criterion_scores")
->>>>>>> worktree-personality-tests-schema
 }
 
 /// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
