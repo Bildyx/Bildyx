@@ -188,6 +188,7 @@ model Organization {
   userProfiles         UserProfile[]        @relation("UserCurrentOrganization")
   userEducations       UserEducations[]
   userExperiences      UserExperience[]
+  userTargetLists      UserTargetList[]
   user                 User?
   countries            Country[]            @relation("OrganizationCountries")
   industries           Industry[]           @relation("OrganizationIndustries")
@@ -488,6 +489,7 @@ model UserProfile {
   user_experiences      UserExperience[]
   user_languages        UserLanguage[]
   user_skills           UserSkill[]
+  user_target_lists     UserTargetList[]
   city                  City?                @relation(fields: [cityId], references: [id])
   country               Country?             @relation("UserProfileCountry", fields: [countryId], references: [isoCode])
   currentJob            Job?                 @relation("UserCurrentJob", fields: [currentJobId], references: [id])
@@ -599,6 +601,21 @@ model UserSkill {
   @@unique([user_profile_id, skill_id])
   @@index([skill_id])
   @@map("user_skills")
+}
+
+/// Une entreprise ciblée par un profil (liste personnelle d'organisations
+/// auxquelles le candidat prévoit ou souhaite postuler).
+model UserTargetList {
+  id              String       @id @default(uuid()) @db.Uuid
+  user_profile_id String       @db.Uuid
+  organization_id String       @db.Uuid
+  createdAt       DateTime     @default(now()) @map("created_at")
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  user_profile    UserProfile  @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_profile_id, organization_id])
+  @@index([organization_id])
+  @@map("user_target_lists")
 }
 
 /// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
