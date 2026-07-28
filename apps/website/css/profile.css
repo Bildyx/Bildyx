@@ -588,6 +588,14 @@ body.profile-page {
     content: none;
 }
 
+.org-card-frame {
+    width: 100%;
+    border: none;
+    display: block;
+    background: transparent;
+    overflow: hidden;
+}
+
 .entry-skills {
     margin-top: 18px;
 }

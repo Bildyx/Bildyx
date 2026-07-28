@@ -885,8 +885,7 @@
     function fillBackendSlot(slot) {
         const slotType = slot.dataset.cardSlot;
 
-        // Seule la carte company-card déclenche la modale de recherche
-        if (slotType === 'company-card') {
+        if (SLOT_MAPPING[slotType]) {
             openOrgModal(slot);
         }
     }
@@ -1073,6 +1072,54 @@
     })();
 
     // ─── Gestion de la Modale de Recherche ──────────────────────────
+    const SLOT_MAPPING = {
+        'company-card': {
+            title: 'Sélectionner une Organisation',
+            placeholder: 'Rechercher une entreprise...',
+            searchEndpoint: '/organizations',
+            cardEndpointPrefix: '/cards/organization/',
+            displayProp: 'name',
+            subProp: 'subtype',
+            toastSuccess: 'Carte d\'organisation mise à jour !'
+        },
+        'product-card': {
+            title: 'Sélectionner un Produit/Service',
+            placeholder: 'Rechercher un produit ou service...',
+            searchEndpoint: '/subjects',
+            cardEndpointPrefix: '/cards/product/',
+            displayProp: 'name',
+            subProp: 'category',
+            toastSuccess: 'Carte de produit mise à jour !'
+        },
+        'role-card': {
+            title: 'Sélectionner un Rôle/Poste',
+            placeholder: 'Rechercher un rôle...',
+            searchEndpoint: '/jobs',
+            cardEndpointPrefix: '/cards/job/',
+            displayProp: 'title',
+            subProp: 'category',
+            toastSuccess: 'Carte de rôle mise à jour !'
+        },
+        'brand-card': {
+            title: 'Sélectionner une Marque',
+            placeholder: 'Rechercher une marque...',
+            searchEndpoint: '/subjects',
+            cardEndpointPrefix: '/cards/product/',
+            displayProp: 'name',
+            subProp: 'category',
+            toastSuccess: 'Carte de marque mise à jour !'
+        },
+        'client-card': {
+            title: 'Sélectionner un Secteur / Industrie',
+            placeholder: 'Rechercher une industrie...',
+            searchEndpoint: '/industries',
+            cardEndpointPrefix: '/cards/industry/',
+            displayProp: 'name',
+            subProp: 'description',
+            toastSuccess: 'Carte de secteur mise à jour !'
+        }
+    };
+
     let orgSearchDebounceTimer = null;
     let targetSlotForModal = null; // Garde en mémoire le bloc cliqué
 
@@ -1129,22 +1176,33 @@
     }
 
     function openOrgModal(slotElement) {
-    if (!slotElement) return;
-    targetSlotForModal = slotElement;
-    
-    const modal = getOrCreateOrgModal();
-    const input = $('#orgSearchInput', modal);
-    const results = $('#orgSearchResults', modal);
+        if (!slotElement) return;
+        targetSlotForModal = slotElement;
+        
+        const slotType = slotElement.dataset.cardSlot;
+        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
+        
+        const modal = getOrCreateOrgModal();
+        const titleEl = modal.querySelector('.org-modal-header h3');
+        if (titleEl) titleEl.textContent = config.title;
 
-    input.value = '';
-    results.innerHTML = '';
-    results.hidden = true;
-    
-    // Réaffichage explicite
-    modal.hidden = false;
-    modal.style.display = 'flex'; // Forçage de l'affichage flex de la modale
+        const input = $('#orgSearchInput', modal);
+        if (input) {
+            input.value = '';
+            input.placeholder = config.placeholder;
+        }
 
-    setTimeout(() => input.focus(), 50);
+        const results = $('#orgSearchResults', modal);
+        if (results) {
+            results.innerHTML = '';
+            results.hidden = true;
+        }
+        
+        // Réaffichage explicite
+        modal.hidden = false;
+        modal.style.display = 'flex'; // Forçage de l'affichage flex de la modale
+
+        setTimeout(() => input.focus(), 50);
     }
 
     function closeOrgModal() {
@@ -1156,8 +1214,11 @@
         }
     }
 
-    // 1. Recherche : GET /organizations?name=xxx
     async function fetchOrganizations(query) {
+        if (!targetSlotForModal) return;
+        const slotType = targetSlotForModal.dataset.cardSlot;
+        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
+
         const modal = document.getElementById('orgSearchModal');
         const resultsList = $('#orgSearchResults', modal);
 
@@ -1165,23 +1226,27 @@
             resultsList.innerHTML = '<li class="org-result-loading">Recherche en cours...</li>';
             resultsList.hidden = false;
 
-            const data = await API.apiFetch('GET', '/organizations', null, { name: query });
+            const data = await API.apiFetch('GET', config.searchEndpoint, null, { name: query });
 
             resultsList.innerHTML = '';
 
             if (!data || data.length === 0) {
-                resultsList.innerHTML = '<li class="org-result-empty">Aucune organisation trouvée</li>';
+                resultsList.innerHTML = '<li class="org-result-empty">Aucun résultat trouvé</li>';
                 return;
             }
 
-            data.forEach(org => {
+            data.forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'org-result-item';
+                
+                const displayText = item[config.displayProp] || '';
+                const subText = item[config.subProp] || '';
+
                 li.innerHTML = `
-                    <div class="org-item-name">${escapeHtml(org.name)}</div>
-                    ${org.subtype ? `<div class="org-item-sub">${escapeHtml(org.subtype)}</div>` : ''}
+                    <div class="org-item-name">${escapeHtml(displayText)}</div>
+                    ${subText ? `<div class="org-item-sub">${escapeHtml(subText)}</div>` : ''}
                 `;
-                li.addEventListener('click', () => selectOrganization(org.id));
+                li.addEventListener('click', () => selectOrganization(item.id));
                 resultsList.appendChild(li);
             });
         } catch (err) {
@@ -1190,9 +1255,7 @@
         }
     }
 
-    // 2. Sélection & Récupération du HTML : GET /cards/organization/{id}
     async function selectOrganization(orgId) {
-        // FIX CRUCIAL : On sauvegarde l'élément DOM dans une variable locale TOUT DE SUITE
         const slotToUpdate = targetSlotForModal;
 
         if (!slotToUpdate) {
@@ -1202,6 +1265,9 @@
             return;
         }
 
+        const slotType = slotToUpdate.dataset.cardSlot;
+        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
+
         // On réinitialise la globale et on ferme la modale
         targetSlotForModal = null;
         closeOrgModal();
@@ -1209,7 +1275,7 @@
 
         try {
             // Appel API direct vers la route carte
-            const response = await API.apiFetch('GET', `/cards/organization/${orgId}`);
+            const response = await API.apiFetch('GET', `${config.cardEndpointPrefix}${orgId}`);
             console.log('Réponse API card :', response);
 
             // On récupère le contenu HTML (soit response.message, soit la string directement)
@@ -1220,68 +1286,79 @@
             }
 
             slotToUpdate.classList.add('is-filled');
-slotToUpdate.dataset.orgId = orgId;
-
-const iframe = document.createElement('iframe');
-iframe.className = 'org-card-frame';
-iframe.sandbox = 'allow-same-origin';
-
-iframe.srcdoc = `
-    <html>
-    <head>
-        <style>
-            html, body {
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+            
+            if (slotType === 'company-card') {
+                slotToUpdate.dataset.orgId = orgId;
+            } else if (slotType === 'product-card' || slotType === 'brand-card') {
+                slotToUpdate.dataset.productId = orgId;
+            } else if (slotType === 'role-card') {
+                slotToUpdate.dataset.roleId = orgId;
+            } else if (slotType === 'client-card') {
+                slotToUpdate.dataset.industryId = orgId;
             }
-            .scale-wrap {
-                position: absolute;
-                top: 0;
-                left: 0;
-                transform-origin: top left;
-                width: max-content;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="scale-wrap" id="scaleWrap">${htmlCard}</div>
-    </body>
-    </html>
-`;
 
-iframe.addEventListener('load', () => {
-    try {
-        const doc = iframe.contentDocument;
-        const wrap = doc.getElementById('scaleWrap');
-        if (!wrap) return;
+            const iframe = document.createElement('iframe');
+            iframe.className = 'org-card-frame';
+            iframe.sandbox = 'allow-same-origin';
 
-        const cardWidth = wrap.scrollWidth;
-        const cardHeight = wrap.scrollHeight;
-        const containerWidth = iframe.clientWidth;
+            iframe.srcdoc = `
+                <html>
+                <head>
+                    <style>
+                        html, body {
+                            margin: 0;
+                            padding: 0;
+                            overflow: hidden;
+                            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+                        }
+                        .scale-wrap {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            transform-origin: top left;
+                            width: 500px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="scale-wrap" id="scaleWrap">${htmlCard}</div>
+                </body>
+                </html>
+            `;
 
-        // On remplit la largeur disponible (avec une petite marge)
-        const scale = Math.min(containerWidth / cardWidth, 1);
-        const scaledHeight = cardHeight * scale;
+            iframe.addEventListener('load', () => {
+                try {
+                    const doc = iframe.contentDocument;
+                    const wrap = doc.getElementById('scaleWrap');
+                    if (!wrap) return;
 
-        wrap.style.transform = `scale(${scale})`;
-        wrap.style.top = '0px';
-        wrap.style.left = `${(containerWidth - cardWidth * scale) / 2}px`;
+                    const cardWidth = wrap.scrollWidth;
+                    const cardHeight = wrap.scrollHeight;
+                    const containerWidth = iframe.clientWidth;
 
-        // La hauteur du slot s'ajuste à la carte réduite (avec un plafond)
-        const finalHeight = Math.min(scaledHeight, 400); // plafond pour éviter une carte géante
-        iframe.style.height = `${finalHeight}px`;
-        slotToUpdate.style.minHeight = `${finalHeight}px`;
-    } catch (err) {
-        console.error('Erreur de calcul du scale de la carte :', err);
-    }
-});
+                    // On remplit la largeur disponible (avec une petite marge)
+                    const padding = 16; // 8px de marge de chaque côté
+                    const availableWidth = containerWidth - padding;
+                    const scale = Math.min(availableWidth / cardWidth, 1);
+                    const scaledHeight = cardHeight * scale;
 
-slotToUpdate.innerHTML = '';
-slotToUpdate.appendChild(iframe);
+                    wrap.style.transform = `scale(${scale})`;
+                    wrap.style.top = `${padding / 2}px`;
+                    wrap.style.left = `${(containerWidth - cardWidth * scale) / 2}px`;
 
-showToast('Carte d\'organisation mise à jour !');
+                    // La hauteur du slot s'ajuste à la carte réduite (avec un plafond de 550px pour afficher en entier)
+                    const finalHeight = Math.min(scaledHeight + padding, 550);
+                    iframe.style.height = `${finalHeight}px`;
+                    slotToUpdate.style.minHeight = `${finalHeight}px`;
+                } catch (err) {
+                    console.error('Erreur de calcul du scale de la carte :', err);
+                }
+            });
+
+            slotToUpdate.innerHTML = '';
+            slotToUpdate.appendChild(iframe);
+
+            showToast(config.toastSuccess);
 
         } catch (err) {
             console.error('Erreur récupération carte HTML :', err);
