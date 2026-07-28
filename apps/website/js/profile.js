@@ -58,16 +58,32 @@
         counter.textContent = input.value.length;
         const help = input.nextElementSibling;
         if (help) {
-            help.innerHTML = `<span id="headlineCounter">${input.value.length}</span>/100 chars · ${countWords(input.value)}/12 words`;
+            const wordCount = countWords(input.value);
+            help.innerHTML = `<span id="headlineCounter">${input.value.length}</span>/100 chars · ${wordCount}/12 words`;
+            if (wordCount > 12) {
+                input.classList.add('is-overflow');
+                help.classList.add('is-overflow');
+            } else {
+                input.classList.remove('is-overflow');
+                help.classList.remove('is-overflow');
+            }
         }
     }
 
     function updateWordCounter(textarea) {
         const max = Number(textarea.getAttribute('maxlength')) || 600;
         const maxWords = max >= 600 ? 60 : 50;
+        const wordsCount = countWords(textarea.value);
         const counter = textarea.nextElementSibling;
         if (!counter || !counter.classList.contains('word-counter')) return;
-        counter.textContent = `${countWords(textarea.value)}/${maxWords} words`;
+        counter.textContent = `${wordsCount}/${maxWords} words`;
+        if (wordsCount > maxWords) {
+            textarea.classList.add('is-overflow');
+            counter.classList.add('is-overflow');
+        } else {
+            textarea.classList.remove('is-overflow');
+            counter.classList.remove('is-overflow');
+        }
     }
 
     // ─── Édition de zone ──────────────────────────────────────
@@ -101,12 +117,36 @@
             return;
         }
 
-        const label = window.prompt('Nom du nouvel élément :');
-        if (!label || !label.trim()) return;
+        let label = '';
+        let levelClass = '';
+        if (containerId === 'languageChips') {
+            const name = window.prompt('Nom de la langue (ex: Anglais, Espagnol) :');
+            if (!name || !name.trim()) return;
+
+            const levelChoice = window.prompt('Niveau pour ' + name.trim() + ' :\n1: Native\n2: Fluent\n3: Intermediate', '2');
+            let levelSuffix = '';
+            if (levelChoice === '1') {
+                levelSuffix = ' (Native)';
+                levelClass = 'is-native';
+            } else if (levelChoice === '3') {
+                levelSuffix = ' (Intermediate)';
+                levelClass = 'is-intermediate';
+            } else {
+                levelSuffix = ' (Fluent)';
+                levelClass = 'is-fluent';
+            }
+            label = name.trim() + levelSuffix;
+        } else {
+            const val = window.prompt('Nom du nouvel élément :');
+            if (!val || !val.trim()) return;
+            label = val.trim();
+        }
 
         const chip = document.createElement('span');
-        chip.className = containerId === 'languageChips' ? 'chip is-filled' : 'chip is-outline';
-        chip.innerHTML = `${label.trim()} <button type="button" aria-label="Remove ${label.trim()}">×</button>`;
+        chip.className = containerId === 'languageChips' 
+            ? `chip is-filled ${levelClass}` 
+            : 'chip is-outline';
+        chip.innerHTML = `${label} <button type="button" aria-label="Remove ${label}">×</button>`;
 
         const addButton = container.querySelector('.chip-add');
         container.insertBefore(chip, addButton || null);
@@ -323,7 +363,12 @@
                     const langs = meta.languages || [];
                     langs.forEach(lang => {
                         const chip = document.createElement('span');
-                        chip.className = 'chip is-filled';
+                        let levelClass = '';
+                        if (lang.includes('(Native)')) levelClass = 'is-native';
+                        else if (lang.includes('(Fluent)')) levelClass = 'is-fluent';
+                        else if (lang.includes('(Intermediate)')) levelClass = 'is-intermediate';
+                        
+                        chip.className = `chip is-filled ${levelClass}`;
                         chip.innerHTML = `${lang} <button type="button" aria-label="Remove ${lang}">×</button>`;
                         langRow.insertBefore(chip, langRow.querySelector('.chip-add'));
                     });
@@ -383,7 +428,9 @@
                 </div>
                 <div class="entry-body">
                     <div class="entry-header-line">
-                        <div class="round-place"></div>
+                        <div class="round-place ${exp.image ? 'has-image' : ''}" style="${exp.image ? `background-image: ${exp.image}; background-size: cover; background-position: center;` : ''}">
+                            <input type="file" accept="image/*" class="exp-image-input" style="display: none;" />
+                        </div>
                         <div class="entry-controls">
                             <div class="date-row">
                                 <input type="date" class="start-date" aria-label="Start date" value="${exp.startDate || ''}" />
@@ -394,8 +441,6 @@
                                 <span contenteditable="true" class="exp-location" data-placeholder="Add location...">${exp.location || ''}</span> · 
                                 <span contenteditable="true" class="exp-company" data-placeholder="Add company...">${exp.company || ''}</span>
                             </p>
-                            <button class="inline-link" type="button">Add brand (optional)...</button>
-                            <button class="inline-link" type="button">Add client/industry served (optional)...</button>
                             <input type="text" class="exp-role-title" placeholder="Add role title..." value="${exp.role || ''}" />
                             <label>Type:<select><option>Optional</option><option>Internship</option><option>Full-time</option><option>Freelance</option></select></label>
                             <label>Level:<select><option>Optional</option><option>Junior</option><option>Mid</option><option>Senior</option></select></label>
@@ -412,14 +457,12 @@
                         <section><h4>Brands</h4><button class="inline-link" type="button">Add brand (optional)...</button><div class="backend-slot backend-slot--small" data-card-slot="brand-card">Brand card</div></section>
                         <section><h4>Client/Industry</h4><button class="inline-link" type="button">Add client/industry...</button><div class="backend-slot backend-slot--small" data-card-slot="client-card">Client/Industry card</div></section>
                     </div>
-                    <div class="entry-skills">
+                    <div class="entry-skills ${exp.skills && exp.skills.length > 0 ? 'is-visible' : ''}">
                         <p>Skills related to this role <span>(select up to 5)</span></p>
                         <div class="chip-row" data-selectable-skills>
-                            <button class="chip is-outline is-selectable" type="button">AI</button>
-                            <button class="chip is-outline is-selectable" type="button">customer_service</button>
-                            <button class="chip is-outline is-selectable" type="button">Programming</button>
+                            ${(exp.skills || []).map(skill => `<button class="chip is-outline is-selectable is-active" type="button">${escapeHtml(skill)}</button>`).join('')}
                         </div>
-                        <small>0/5 selected</small>
+                        <small>${(exp.skills || []).length}/5 selected</small>
                     </div>
                 </div>
             `;
@@ -581,6 +624,8 @@
                 startDate: card.querySelector('.start-date')?.value.trim() || '',
                 endDate: card.querySelector('.end-date')?.value.trim() || '',
                 summary: card.querySelector('textarea')?.value.trim() || '',
+                image: card.querySelector('.round-place')?.style.backgroundImage || '',
+                skills: Array.from(card.querySelectorAll('[data-selectable-skills] .is-selectable.is-active')).map(btn => btn.textContent.trim()),
             };
         });
 
@@ -719,7 +764,9 @@
             </div>
             <div class="entry-body">
                 <div class="entry-header-line">
-                    <div class="round-place"></div>
+                    <div class="round-place">
+                        <input type="file" accept="image/*" class="exp-image-input" style="display: none;" />
+                    </div>
                     <div class="entry-controls">
                         <div class="date-row">
                             <input type="date" class="start-date" aria-label="Start date" />
@@ -730,8 +777,6 @@
                             <span contenteditable="true" class="exp-location" data-placeholder="Add location..."></span> · 
                             <span contenteditable="true" class="exp-company" data-placeholder="Add company..."></span>
                         </p>
-                        <button class="inline-link" type="button">Add brand (optional)...</button>
-                        <button class="inline-link" type="button">Add client/industry served (optional)...</button>
                         <input type="text" class="exp-role-title" placeholder="Add role title..." />
                         <label>Type:<select><option>Optional</option><option>Internship</option><option>Full-time</option><option>Freelance</option></select></label>
                         <label>Level:<select><option>Optional</option><option>Junior</option><option>Mid</option><option>Senior</option></select></label>
@@ -750,11 +795,7 @@
                 </div>
                 <div class="entry-skills">
                     <p>Skills related to this role <span>(select up to 5)</span></p>
-                    <div class="chip-row" data-selectable-skills>
-                        <button class="chip is-outline is-selectable" type="button">AI</button>
-                        <button class="chip is-outline is-selectable" type="button">customer_service</button>
-                        <button class="chip is-outline is-selectable" type="button">Programming</button>
-                    </div>
+                    <div class="chip-row" data-selectable-skills></div>
                     <small>0/5 selected</small>
                 </div>
             </div>
@@ -885,8 +926,7 @@
     function fillBackendSlot(slot) {
         const slotType = slot.dataset.cardSlot;
 
-        // Seule la carte company-card déclenche la modale de recherche
-        if (slotType === 'company-card') {
+        if (SLOT_MAPPING[slotType]) {
             openOrgModal(slot);
         }
     }
@@ -944,6 +984,15 @@
 
     // ─── Event Delegation ─────────────────────────────────────
     document.addEventListener('click', event => {
+        const roundPlace = event.target.closest('.round-place');
+        if (roundPlace && event.target !== roundPlace.querySelector('.exp-image-input')) {
+            const fileInput = roundPlace.querySelector('.exp-image-input');
+            if (fileInput) {
+                fileInput.click();
+                return;
+            }
+        }
+
         const button = event.target.closest('button');
 
         if (button?.classList.contains('side-nav-button')) {
@@ -1055,6 +1104,28 @@
         }
     });
 
+    document.addEventListener('change', event => {
+        if (event.target.classList.contains('exp-image-input')) {
+            const fileInput = event.target;
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const roundPlace = fileInput.closest('.round-place');
+                if (roundPlace) {
+                    roundPlace.classList.add('has-image');
+                    roundPlace.style.backgroundImage = `url("${reader.result}")`;
+                    roundPlace.style.backgroundSize = 'cover';
+                    roundPlace.style.backgroundPosition = 'center';
+                    showToast('Logo/image de l\'expérience mis à jour !');
+                    updateProfileMetaSummary();
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
     // ─── Initialisation Sécurisée sans Blocage ────────────────
     (async () => {
         try {
@@ -1073,6 +1144,54 @@
     })();
 
     // ─── Gestion de la Modale de Recherche ──────────────────────────
+    const SLOT_MAPPING = {
+        'company-card': {
+            title: 'Sélectionner une Organisation',
+            placeholder: 'Rechercher une entreprise...',
+            searchEndpoint: '/organizations',
+            cardEndpointPrefix: '/cards/organization/',
+            displayProp: 'name',
+            subProp: 'subtype',
+            toastSuccess: 'Carte d\'organisation mise à jour !'
+        },
+        'product-card': {
+            title: 'Sélectionner un Produit/Service',
+            placeholder: 'Rechercher un produit ou service...',
+            searchEndpoint: '/subjects',
+            cardEndpointPrefix: '/cards/product/',
+            displayProp: 'name',
+            subProp: 'category',
+            toastSuccess: 'Carte de produit mise à jour !'
+        },
+        'role-card': {
+            title: 'Sélectionner un Rôle/Poste',
+            placeholder: 'Rechercher un rôle...',
+            searchEndpoint: '/jobs',
+            cardEndpointPrefix: '/cards/job/',
+            displayProp: 'title',
+            subProp: 'category',
+            toastSuccess: 'Carte de rôle mise à jour !'
+        },
+        'brand-card': {
+            title: 'Sélectionner une Marque',
+            placeholder: 'Rechercher une marque...',
+            searchEndpoint: '/subjects',
+            cardEndpointPrefix: '/cards/product/',
+            displayProp: 'name',
+            subProp: 'category',
+            toastSuccess: 'Carte de marque mise à jour !'
+        },
+        'client-card': {
+            title: 'Sélectionner un Secteur / Industrie',
+            placeholder: 'Rechercher une industrie...',
+            searchEndpoint: '/industries',
+            cardEndpointPrefix: '/cards/industry/',
+            displayProp: 'name',
+            subProp: 'description',
+            toastSuccess: 'Carte de secteur mise à jour !'
+        }
+    };
+
     let orgSearchDebounceTimer = null;
     let targetSlotForModal = null; // Garde en mémoire le bloc cliqué
 
@@ -1129,22 +1248,33 @@
     }
 
     function openOrgModal(slotElement) {
-    if (!slotElement) return;
-    targetSlotForModal = slotElement;
-    
-    const modal = getOrCreateOrgModal();
-    const input = $('#orgSearchInput', modal);
-    const results = $('#orgSearchResults', modal);
+        if (!slotElement) return;
+        targetSlotForModal = slotElement;
+        
+        const slotType = slotElement.dataset.cardSlot;
+        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
+        
+        const modal = getOrCreateOrgModal();
+        const titleEl = modal.querySelector('.org-modal-header h3');
+        if (titleEl) titleEl.textContent = config.title;
 
-    input.value = '';
-    results.innerHTML = '';
-    results.hidden = true;
-    
-    // Réaffichage explicite
-    modal.hidden = false;
-    modal.style.display = 'flex'; // Forçage de l'affichage flex de la modale
+        const input = $('#orgSearchInput', modal);
+        if (input) {
+            input.value = '';
+            input.placeholder = config.placeholder;
+        }
 
-    setTimeout(() => input.focus(), 50);
+        const results = $('#orgSearchResults', modal);
+        if (results) {
+            results.innerHTML = '';
+            results.hidden = true;
+        }
+        
+        // Réaffichage explicite
+        modal.hidden = false;
+        modal.style.display = 'flex'; // Forçage de l'affichage flex de la modale
+
+        setTimeout(() => input.focus(), 50);
     }
 
     function closeOrgModal() {
@@ -1156,8 +1286,11 @@
         }
     }
 
-    // 1. Recherche : GET /organizations?name=xxx
     async function fetchOrganizations(query) {
+        if (!targetSlotForModal) return;
+        const slotType = targetSlotForModal.dataset.cardSlot;
+        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
+
         const modal = document.getElementById('orgSearchModal');
         const resultsList = $('#orgSearchResults', modal);
 
@@ -1165,23 +1298,27 @@
             resultsList.innerHTML = '<li class="org-result-loading">Recherche en cours...</li>';
             resultsList.hidden = false;
 
-            const data = await API.apiFetch('GET', '/organizations', null, { name: query });
+            const data = await API.apiFetch('GET', config.searchEndpoint, null, { name: query });
 
             resultsList.innerHTML = '';
 
             if (!data || data.length === 0) {
-                resultsList.innerHTML = '<li class="org-result-empty">Aucune organisation trouvée</li>';
+                resultsList.innerHTML = '<li class="org-result-empty">Aucun résultat trouvé</li>';
                 return;
             }
 
-            data.forEach(org => {
+            data.forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'org-result-item';
+                
+                const displayText = item[config.displayProp] || '';
+                const subText = item[config.subProp] || '';
+
                 li.innerHTML = `
-                    <div class="org-item-name">${escapeHtml(org.name)}</div>
-                    ${org.subtype ? `<div class="org-item-sub">${escapeHtml(org.subtype)}</div>` : ''}
+                    <div class="org-item-name">${escapeHtml(displayText)}</div>
+                    ${subText ? `<div class="org-item-sub">${escapeHtml(subText)}</div>` : ''}
                 `;
-                li.addEventListener('click', () => selectOrganization(org.id));
+                li.addEventListener('click', () => selectOrganization(item.id));
                 resultsList.appendChild(li);
             });
         } catch (err) {
@@ -1190,9 +1327,7 @@
         }
     }
 
-    // 2. Sélection & Récupération du HTML : GET /cards/organization/{id}
     async function selectOrganization(orgId) {
-        // FIX CRUCIAL : On sauvegarde l'élément DOM dans une variable locale TOUT DE SUITE
         const slotToUpdate = targetSlotForModal;
 
         if (!slotToUpdate) {
@@ -1202,6 +1337,9 @@
             return;
         }
 
+        const slotType = slotToUpdate.dataset.cardSlot;
+        const config = SLOT_MAPPING[slotType] || SLOT_MAPPING['company-card'];
+
         // On réinitialise la globale et on ferme la modale
         targetSlotForModal = null;
         closeOrgModal();
@@ -1209,7 +1347,7 @@
 
         try {
             // Appel API direct vers la route carte
-            const response = await API.apiFetch('GET', `/cards/organization/${orgId}`);
+            const response = await API.apiFetch('GET', `${config.cardEndpointPrefix}${orgId}`);
             console.log('Réponse API card :', response);
 
             // On récupère le contenu HTML (soit response.message, soit la string directement)
@@ -1220,73 +1358,182 @@
             }
 
             slotToUpdate.classList.add('is-filled');
-slotToUpdate.dataset.orgId = orgId;
-
-const iframe = document.createElement('iframe');
-iframe.className = 'org-card-frame';
-iframe.sandbox = 'allow-same-origin';
-
-iframe.srcdoc = `
-    <html>
-    <head>
-        <style>
-            html, body {
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+            
+            if (slotType === 'company-card') {
+                slotToUpdate.dataset.orgId = orgId;
+            } else if (slotType === 'product-card' || slotType === 'brand-card') {
+                slotToUpdate.dataset.productId = orgId;
+            } else if (slotType === 'role-card') {
+                slotToUpdate.dataset.roleId = orgId;
+                
+                // Charger dynamiquement les tools_and_tech liés au job (role)
+                (async () => {
+                    try {
+                        const job = await API.apiFetch('GET', `/jobs/${orgId}`);
+                        console.log('API Job loaded:', job);
+                        
+                        const entryCard = slotToUpdate.closest('.entry-card');
+                        if (entryCard) {
+                            const skillsSection = entryCard.querySelector('.entry-skills');
+                            if (skillsSection) {
+                                skillsSection.classList.add('is-visible');
+                                
+                                const chipRow = skillsSection.querySelector('[data-selectable-skills]');
+                                const countEl = skillsSection.querySelector('small');
+                                
+                                if (chipRow) {
+                                    chipRow.innerHTML = '';
+                                    const tools = job?.tools_and_tech || [];
+                                    tools.forEach(tool => {
+                                        const btn = document.createElement('button');
+                                        btn.className = 'chip is-outline is-selectable';
+                                        btn.type = 'button';
+                                        btn.textContent = tool;
+                                        chipRow.appendChild(btn);
+                                    });
+                                }
+                                if (countEl) {
+                                    countEl.textContent = '0/5 selected';
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Erreur lors de la récupération des tools & tech du rôle :', err);
+                    }
+                })();
+            } else if (slotType === 'client-card') {
+                slotToUpdate.dataset.industryId = orgId;
             }
-            .scale-wrap {
-                position: absolute;
-                top: 0;
-                left: 0;
-                transform-origin: top left;
-                width: max-content;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="scale-wrap" id="scaleWrap">${htmlCard}</div>
-    </body>
-    </html>
-`;
 
-iframe.addEventListener('load', () => {
-    try {
-        const doc = iframe.contentDocument;
-        const wrap = doc.getElementById('scaleWrap');
-        if (!wrap) return;
+            const iframe = document.createElement('iframe');
+            iframe.className = 'org-card-frame';
+            iframe.sandbox = 'allow-same-origin';
 
-        const cardWidth = wrap.scrollWidth;
-        const cardHeight = wrap.scrollHeight;
-        const containerWidth = iframe.clientWidth;
+            iframe.srcdoc = `
+                <html>
+                <head>
+                    <style>
+                        html, body {
+                            margin: 0;
+                            padding: 0;
+                            overflow: hidden;
+                            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+                        }
+                        .scale-wrap {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            transform-origin: top left;
+                            width: 500px;
+                        }
+                        .main-card {
+                            height: 100% !important;
+                            box-sizing: border-box;
+                        }
+                        .footer-row {
+                            margin-top: auto !important;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="scale-wrap" id="scaleWrap">${htmlCard}</div>
+                </body>
+                </html>
+            `;
 
-        // On remplit la largeur disponible (avec une petite marge)
-        const scale = Math.min(containerWidth / cardWidth, 1);
-        const scaledHeight = cardHeight * scale;
+            iframe.addEventListener('load', () => {
+                alignCardsHeight(slotToUpdate.closest('.backend-grid'));
+            });
 
-        wrap.style.transform = `scale(${scale})`;
-        wrap.style.top = '0px';
-        wrap.style.left = `${(containerWidth - cardWidth * scale) / 2}px`;
+            slotToUpdate.innerHTML = '';
+            slotToUpdate.appendChild(iframe);
 
-        // La hauteur du slot s'ajuste à la carte réduite (avec un plafond)
-        const finalHeight = Math.min(scaledHeight, 400); // plafond pour éviter une carte géante
-        iframe.style.height = `${finalHeight}px`;
-        slotToUpdate.style.minHeight = `${finalHeight}px`;
-    } catch (err) {
-        console.error('Erreur de calcul du scale de la carte :', err);
-    }
-});
-
-slotToUpdate.innerHTML = '';
-slotToUpdate.appendChild(iframe);
-
-showToast('Carte d\'organisation mise à jour !');
+            showToast(config.toastSuccess);
 
         } catch (err) {
             console.error('Erreur récupération carte HTML :', err);
             showToast('Erreur lors du chargement de la carte.', 'error');
         }
+    }
+
+    function alignCardsHeight(grid) {
+        if (!grid) return;
+
+        const slots = $$('.backend-slot.is-filled', grid);
+        if (slots.length === 0) return;
+
+        let maxRequiredHeight = 260; // min-height par défaut
+
+        // 1. Calculer les hauteurs requises pour chaque carte et trouver la hauteur max
+        const slotData = slots.map(slot => {
+            const iframe = slot.querySelector('iframe');
+            if (!iframe) return null;
+
+            try {
+                const doc = iframe.contentDocument;
+                const wrap = doc?.getElementById('scaleWrap');
+                if (!wrap) return null;
+
+                // Réinitialiser temporairement les hauteurs pour mesurer la taille réelle du contenu
+                wrap.style.height = 'auto';
+                const mainCard = wrap.querySelector('.main-card');
+                if (mainCard) {
+                    mainCard.style.setProperty('height', 'auto', 'important');
+                }
+
+                const cardWidth = wrap.scrollWidth || 500;
+                const cardHeight = wrap.scrollHeight || 400;
+                const containerWidth = iframe.clientWidth || slot.clientWidth;
+
+                const padding = 16;
+                const availableWidth = containerWidth - padding;
+                const scale = Math.min(availableWidth / cardWidth, 1);
+                const scaledHeight = cardHeight * scale;
+                const requiredHeight = scaledHeight + padding;
+
+                if (requiredHeight > maxRequiredHeight) {
+                    maxRequiredHeight = requiredHeight;
+                }
+
+                return {
+                    slot,
+                    iframe,
+                    wrap,
+                    scale,
+                    cardWidth,
+                    padding
+                };
+            } catch (err) {
+                console.error('Erreur lors de la mesure de la carte :', err);
+                return null;
+            }
+        }).filter(Boolean);
+
+        // Appliquer un plafond de 550px pour éviter les hauteurs gigantesques
+        const finalMaxHeight = Math.min(maxRequiredHeight, 550);
+
+        // 2. Aligner tous les slots de la ligne sur cette hauteur max et ajuster la hauteur des cartes internes
+        slotData.forEach(data => {
+            const { slot, iframe, wrap, scale, cardWidth, padding } = data;
+
+            slot.style.minHeight = `${finalMaxHeight}px`;
+            iframe.style.height = `${finalMaxHeight}px`;
+
+            // Calculer la hauteur non-scalée requise à l'intérieur de l'iframe
+            const heightNeeded = (finalMaxHeight - padding) / scale;
+            wrap.style.height = `${heightNeeded}px`;
+
+            // Appliquer la transformation et le positionnement
+            wrap.style.transform = `scale(${scale})`;
+            wrap.style.top = `${padding / 2}px`;
+            wrap.style.left = `${(iframe.clientWidth - cardWidth * scale) / 2}px`;
+
+            // Forcer la carte interne à s'étirer sur toute la hauteur calculée
+            const mainCard = wrap.querySelector('.main-card');
+            if (mainCard) {
+                mainCard.style.setProperty('height', '100%', 'important');
+            }
+        });
     }
 
     function escapeHtml(str) {

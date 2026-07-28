@@ -256,19 +256,26 @@ body.profile-page {
 }
 
 .profile-main-grid {
-    margin-top: 28px;
+    margin-top: 24px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    gap: 30px;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 40px;
 }
 
 .title-line {
     justify-content: flex-start;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
-.title-line h1,
+.title-line h1 {
+    margin: 0;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #111827;
+}
+
 .section-title-row h2 {
     margin: 0;
     font-size: 1.9rem;
@@ -277,15 +284,18 @@ body.profile-page {
 
 .title-line--small h2 {
     margin: 0;
-    font-size: 0.88rem;
-    letter-spacing: 0.05em;
+    font-size: 0.82rem;
+    font-weight: 750;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    color: #374151;
 }
 
 .mini-label {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
     color: var(--profile-muted);
-    font-size: 0.86rem;
+    font-size: 0.88rem;
+    font-weight: 500;
 }
 
 .mini-label span {
@@ -344,6 +354,7 @@ body.profile-page {
 
 .level-legend {
     margin: 8px 0 18px;
+    display: none;
 }
 
 .level-legend span {
@@ -356,19 +367,29 @@ body.profile-page {
 }
 
 .profile-meta-list {
-    margin: 0;
+    margin: 20px 0 0;
     padding: 0;
     list-style: none;
     color: var(--profile-text);
-    font-size: 0.9rem;
-    line-height: 1.55;
+    font-size: 0.94rem;
+    line-height: 1.6;
 }
 
 .profile-meta-list li {
-    display: grid;
-    grid-template-columns: 150px 1fr;
+    display: flex;
+    align-items: center;
     gap: 8px;
-    margin-bottom: 3px;
+    margin-bottom: 8px;
+}
+
+.profile-meta-list li strong {
+    font-weight: 500;
+    color: var(--profile-muted);
+}
+
+.profile-meta-list li span {
+    color: var(--profile-text);
+    font-weight: 500;
 }
 
 .profile-meta-list span[contenteditable="true"],
@@ -388,7 +409,7 @@ body.profile-page {
 }
 
 .skills-box {
-    padding-top: 110px;
+    padding-top: 6px;
 }
 
 .skill-row {
@@ -520,6 +541,16 @@ body.profile-page {
     margin-top: 12px;
 }
 
+.backend-grid section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.backend-slot {
+    flex: 1;
+}
+
 .backend-grid--three {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -588,8 +619,22 @@ body.profile-page {
     content: none;
 }
 
+.org-card-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: transparent;
+    overflow: hidden;
+}
+
 .entry-skills {
     margin-top: 18px;
+    display: none;
+}
+
+.entry-skills.is-visible {
+    display: block;
 }
 
 .entry-skills p {
@@ -951,4 +996,154 @@ body.profile-page {
     list-style: none;
     padding: 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Style pour l'image de l'expérience --- */
+.round-place {
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.round-place:hover {
+    border-color: var(--profile-blue);
+    background: rgba(36, 69, 238, 0.05);
+}
+
+.round-place.has-image::after {
+    content: none !important;
+}
+
+/* --- Style global pour rendre les zones de saisie et de modification très visibles --- */
+.headline-input,
+.entry-card textarea,
+.entry-card select,
+.entry-card input[type="text"],
+.entry-card input[type="number"],
+.entry-card input[type="date"] {
+    border: 1.5px solid #b0c4de !important; /* Bordure plus visible et colorée */
+    background: #fdfeff !important;
+    border-radius: 6px !important;
+    padding: 6px 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+.headline-input:hover,
+.entry-card textarea:hover,
+.entry-card select:hover,
+.entry-card input[type="text"]:hover,
+.entry-card input[type="number"]:hover,
+.entry-card input[type="date"]:hover {
+    border-color: var(--profile-blue) !important;
+    background: #ffffff !important;
+}
+
+.headline-input:focus,
+.entry-card textarea:focus,
+.entry-card select:focus,
+.entry-card input[type="text"]:focus,
+.entry-card input[type="number"]:focus,
+.entry-card input[type="date"]:focus {
+    border-color: var(--profile-blue) !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(36, 69, 238, 0.15) !important;
+    outline: none !important;
+}
+
+/* Éléments éditables (contenteditable) */
+[contenteditable="true"] {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    transition: all 0.2s ease !important;
+    cursor: text !important;
+    display: inline-block;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+[contenteditable="true"]:hover {
+    background: rgba(36, 69, 238, 0.04) !important;
+}
+
+[contenteditable="true"]:focus {
+    background: rgba(36, 69, 238, 0.06) !important;
+    box-shadow: 0 0 0 2px rgba(36, 69, 238, 0.1) !important;
+    border-radius: 4px !important;
+}
+
+/* Placeholders automatiques pour les éléments contenteditable vides */
+[contenteditable="true"]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--profile-muted);
+    opacity: 0.7;
+}
+
+/* --- Style rouge en cas de dépassement du nombre de mots --- */
+.headline-input.is-overflow,
+textarea.is-overflow,
+input.is-overflow {
+    border-color: #ff4d4f !important;
+    box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.15) !important;
+}
+
+.headline-input.is-overflow:focus,
+textarea.is-overflow:focus,
+input.is-overflow:focus {
+    border-color: #ff4d4f !important;
+    box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.25) !important;
+}
+
+.field-help.is-overflow,
+.word-counter.is-overflow {
+    color: #ff4d4f !important;
+    font-weight: bold;
+}
+
+/* --- Organisation & Couleurs des Langages --- */
+.level-legend span:nth-of-type(1) {
+    background: var(--profile-blue) !important;
+}
+
+.level-legend span:nth-of-type(2) {
+    background: #5c7cfa !important;
+}
+
+.level-legend span:nth-of-type(3) {
+    background: #ced4da !important;
+}
+
+/* Chips de langues par niveau */
+.chip.is-filled.is-native {
+    background: var(--profile-blue) !important;
+    color: #ffffff !important;
+    border-color: var(--profile-blue) !important;
+}
+
+.chip.is-filled.is-fluent {
+    background: #e8ecff !important;
+    color: var(--profile-blue) !important;
+    border-color: #5c7cfa !important;
+}
+
+.chip.is-filled.is-intermediate {
+    background: #f1f3f5 !important;
+    color: #495057 !important;
+    border-color: #ced4da !important;
+    border-style: dashed !important;
+}
+
+/* Icones SVG pour la section métadonnées */
+.mini-label, .profile-meta-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.meta-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--profile-muted);
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
 }
