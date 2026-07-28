@@ -580,6 +580,7 @@ body.profile-page {
 }
 
 .backend-slot {
+    position: relative;
     min-height: 260px;
     display: grid;
     place-items: center;
@@ -621,12 +622,42 @@ body.profile-page {
     border-style: solid;
     border-color: var(--profile-blue);
     background: var(--profile-blue-soft);
-}
-
-.backend-slot.is-filled {
     display: block;
     padding: 0;
     overflow: hidden;
+}
+
+.slot-clear-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1.5px solid var(--profile-border);
+    color: var(--profile-muted);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.backend-slot.is-filled .slot-clear-btn {
+    display: flex;
+}
+
+.slot-clear-btn:hover {
+    background: #ff4d4f;
+    color: #ffffff;
+    border-color: #ff4d4f;
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
 }
 
 .backend-slot.is-filled::before {

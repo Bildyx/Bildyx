@@ -92,25 +92,9 @@
         clearTimeout(autosaveTimer);
         autosaveTimer = window.setTimeout(() => {
             if (API && currentProfile?.id) {
-                saveProfile(true);
+                saveProfile();
             }
         }, 1200);
-    }
-
-    function showAutosaveBadge(saving = false) {
-        let badge = document.querySelector('.autosave-badge');
-        if (!badge) {
-            badge = document.createElement('div');
-            badge.className = 'autosave-badge';
-            document.body.appendChild(badge);
-        }
-        badge.classList.toggle('is-saving', saving);
-        badge.textContent = saving ? '⏳ Saving...' : '✓ Saved';
-        badge.classList.add('is-visible');
-        if (!saving) {
-            clearTimeout(badge._timer);
-            badge._timer = window.setTimeout(() => badge.classList.remove('is-visible'), 2200);
-        }
     }
 
     // ─── Language Modal ─────────────────────────────────────────
@@ -745,7 +729,7 @@
     }
 
     // ─── Sauvegarde du profil via l'API ───────────────────────
-    async function saveProfile(isAuto = false) {
+    async function saveProfile() {
         const name      = document.querySelector('[data-field="name"]')?.textContent.trim() || $('[data-editable="name"]')?.textContent.trim() || '';
 
         const biography = document.querySelector('[data-field="summary"]')?.textContent.trim() || $('[data-editable="career-summary"]')?.textContent.trim() || '';
@@ -783,8 +767,6 @@
 
         if (API && currentProfile?.id) {
             try {
-                showAutosaveBadge(true);
-                if (!isAuto) showToast('Saving...');
                 let existingMeta = {};
                 if (currentProfile.metadata) {
                     try {
@@ -896,9 +878,8 @@
                     }
                 }
 
-                showAutosaveBadge(false);
                 currentProfile = await API.apiFetch('GET', `/profiles/${currentProfile.id}`);
-                if (!isAuto) showToast('Profile synced ✓');
+                showToast('Profile saved');
             } catch (err) {
                 console.error('[profile.js] Save profile error:', err);
                 showToast('Failed to sync with API.', 'error');
@@ -1260,6 +1241,71 @@
             return;
         }
 
+        if (event.target.classList.contains('slot-clear-btn') || event.target.closest('.slot-clear-btn')) {
+            const btn = event.target.closest('.slot-clear-btn');
+            const slot = btn.closest('.backend-slot');
+            if (slot) {
+                // Clear datasets
+                delete slot.dataset.orgId;
+                delete slot.dataset.productId;
+                delete slot.dataset.roleId;
+                delete slot.dataset.industryId;
+                delete slot.dataset.universityId;
+                delete slot.dataset.degreeId;
+                delete slot.dataset.certificationId;
+
+                // Reset class
+                slot.classList.remove('is-filled');
+
+                // Restore original placeholder text based on data-card-slot
+                const slotType = slot.dataset.cardSlot;
+                let placeholderText = 'Backend Slot';
+                if (slotType === 'company-card') placeholderText = 'Company card';
+                else if (slotType === 'product-card') placeholderText = 'Product/Service card';
+                else if (slotType === 'role-card') placeholderText = 'Role card';
+                else if (slotType === 'brand-card') placeholderText = 'Brand card';
+                else if (slotType === 'client-card') placeholderText = 'Client/Industry card';
+                else if (slotType === 'university-card') placeholderText = 'University card';
+                else if (slotType === 'degree-card') placeholderText = 'Degree card';
+                else if (slotType === 'certification-card') placeholderText = 'Certification card';
+
+                slot.innerHTML = placeholderText;
+
+                // Clear inline styles applied by alignCardsHeight
+                slot.style.height = '';
+                slot.style.minHeight = '';
+
+                // If role card, clear tools & tech selectable skills
+                if (slotType === 'role-card') {
+                    const entryCard = slot.closest('.entry-card');
+                    if (entryCard) {
+                        const skillsSection = entryCard.querySelector('.entry-skills');
+                        if (skillsSection) {
+                            skillsSection.classList.remove('is-visible');
+                            const chipRow = skillsSection.querySelector('[data-selectable-skills]');
+                            if (chipRow) chipRow.innerHTML = '';
+                            const countEl = skillsSection.querySelector('small');
+                            if (countEl) countEl.textContent = '0/5 selected';
+                        }
+                    }
+                }
+
+                // If certification, reset text field
+                if (slotType === 'certification-card') {
+                    const entryCard = slot.closest('.entry-card');
+                    if (entryCard) {
+                        const nameEl = entryCard.querySelector('.cert-name');
+                        if (nameEl) nameEl.textContent = '';
+                    }
+                }
+
+                showToast('Card removed.');
+                updateProfileMetaSummary();
+                scheduleAutosave();
+            }
+            return;
+        }
+
         const slot = event.target.closest('.backend-slot');
         if (slot) {
             fillBackendSlot(slot);
@@ -1536,6 +1582,16 @@
 
     async function fetchAndRenderCardSlot(slotToUpdate, slotType, entityId) {
         if (!entityId || !slotToUpdate) return;
+
+        // Set the ID synchronously to avoid race conditions with autosave during fetching
+        if (slotType === 'company-card') slotToUpdate.dataset.orgId = entityId;
+        else if (slotType === 'product-card' || slotType === 'brand-card') slotToUpdate.dataset.productId = entityId;
+        else if (slotType === 'role-card') slotToUpdate.dataset.roleId = entityId;
+        else if (slotType === 'client-card') slotToUpdate.dataset.industryId = entityId;
+        else if (slotType === 'university-card') slotToUpdate.dataset.universityId = entityId;
+        else if (slotType === 'degree-card') slotToUpdate.dataset.degreeId = entityId;
+        else if (slotType === 'certification-card') slotToUpdate.dataset.certificationId = entityId;
+
         const config = SLOT_MAPPING[slotType];
         if (!config) return;
         try {
@@ -1545,14 +1601,6 @@
             if (!htmlCard) return;
 
             slotToUpdate.classList.add('is-filled');
-
-            if (slotType === 'company-card') slotToUpdate.dataset.orgId = entityId;
-            else if (slotType === 'product-card' || slotType === 'brand-card') slotToUpdate.dataset.productId = entityId;
-            else if (slotType === 'role-card') slotToUpdate.dataset.roleId = entityId;
-            else if (slotType === 'client-card') slotToUpdate.dataset.industryId = entityId;
-            else if (slotType === 'university-card') slotToUpdate.dataset.universityId = entityId;
-            else if (slotType === 'degree-card') slotToUpdate.dataset.degreeId = entityId;
-            else if (slotType === 'certification-card') slotToUpdate.dataset.certificationId = entityId;
 
             const iframe = document.createElement('iframe');
             iframe.className = 'org-card-frame';
@@ -1594,6 +1642,13 @@
 
             slotToUpdate.innerHTML = '';
             slotToUpdate.appendChild(iframe);
+
+            const clearBtn = document.createElement('button');
+            clearBtn.type = 'button';
+            clearBtn.className = 'slot-clear-btn';
+            clearBtn.innerHTML = '×';
+            clearBtn.title = 'Remove card';
+            slotToUpdate.appendChild(clearBtn);
         } catch (err) {
             console.error('Erreur récupération carte HTML pour le slot :', slotType, err);
         }
@@ -1693,6 +1748,8 @@
 
             await fetchAndRenderCardSlot(slotToUpdate, slotType, orgId);
             showToast(config.toastSuccess);
+            updateProfileMetaSummary();
+            scheduleAutosave();
 
         } catch (err) {
             console.error('Erreur sélection organisation :', err);
