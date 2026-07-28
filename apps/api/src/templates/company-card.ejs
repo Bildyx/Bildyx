@@ -43,16 +43,16 @@
                 <div class="info-value"><%= industry %></div>
             </div>
             <% } %>
-            <% if (companyType) { %>
+            <% if (type1) { %>
             <div class="info-row">
                 <div class="info-icon"><img src="<%= getIcon('icons', 'Type.png') %>" alt="" /></div>
                 <div class="info-label">Type</div>
-                <div class="info-value" style="padding-top: 8px;"><%= companyType %></div>
+                <div class="info-value" style="padding-top: 8px;"><%= type1 %></div>
             </div>
             <% } %>
             <% if (founded) { %>
             <div class="info-row">
-                <div class="info-icon"><img src="<%= getIcon('icons', 'creation_date.png') %>" alt="" /></div>
+                <div class="info-icon"><img src="<%= getIcon('icons', 'monument.png') %>" alt="" /></div>
                 <div class="info-label">Founded</div>
                 <div class="info-value" style="padding-top: 8px;"><%= founded %></div>
             </div>
@@ -71,11 +71,11 @@
                 <div class="info-value" style="padding-top: 8px;"><%= parent %></div>
             </div>
             <% } %>
-            <% if (numberOfOffices) { %>
+            <% if (offices) { %>
             <div class="info-row">
                 <div class="info-icon"><img src="<%= getIcon('icons', 'offices.png') %>" alt="" /></div>
                 <div class="info-label">No. of offices</div>
-                <div class="info-value" style="padding-top: 8px;"><%= numberOfOffices %></div>
+                <div class="info-value" style="padding-top: 8px;"><%= offices %></div>
             </div>
             <% } %>
             <% if (numberOfEmployees) { %>

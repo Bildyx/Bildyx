@@ -5,6 +5,7 @@ import { user_certifications } from "../routes/user_certifications";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
+import { generateSerialNumber } from "../models/utils/enums.js";
 
 describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
   let testUserId: string;
@@ -50,6 +51,7 @@ describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
         id: testOrgId,
         name: "Test Org for UserCerts",
         slug: `test-org-user-certs-${testOrgId}`,
+        serial_number: generateSerialNumber("COMPANY"),
         updated_at: new Date(),
       })
       .execute();
