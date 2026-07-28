@@ -81,7 +81,6 @@ model Country {
   updatedAt                     DateTime        @updatedAt @map("updated_at")
   cities                        City[]
   jobAds                        JobAd[]
-  universities                  University[]
   userProfiles                  UserProfile[]   @relation("UserProfileCountry")
   organizations                 Organization[]  @relation("OrganizationCountries")
 
@@ -122,7 +121,6 @@ model City {
   country                    Country        @relation(fields: [countryId], references: [isoCode])
   jobAds                     JobAd[]
   headquarteredOrganizations Organization[] @relation("OrganizationHeadquarters")
-  universities               University[]
   userProfiles               UserProfile[]
   mainIndustries             Industry[]     @relation("CityMainIndustries")
   organizations_working_area Organization[] @relation("working_area")
@@ -157,7 +155,6 @@ model Organization {
   description          String?
   facilities           String[]
   founders             String[]
-  graduates            String?
   jurisdiction         String?
   members              Int?
   offices              String?
@@ -167,9 +164,21 @@ model Organization {
   serial_number        String               @unique
   subsidiaries         String?
   subtype              OrganizationSubType?
+  // Sous-catégorie libre, dépendante du subtype (ex: pour subtype=UNIVERSITY,
+  // valeurs suggérées "GRANDE_ECOLE" / "INSTITUTE" / "ACADEMY" / "ONLINE" /
+  // "OTHER" - ancien enum UniversityType, supprimé du schéma avec le modèle
+  // University; non contraint côté DB, à valider/proposer côté front si besoin
+  // d'un dropdown).
   type1                String?
   type2                String?
-  undergraduates       String?
+  // Champs académiques (pertinents surtout pour subtype=UNIVERSITY, mais
+  // laissés directement sur Organization par choix - anciennement portés par
+  // le modèle University, supprimé). Retypés en Int (l'ancien
+  // Organization.undergraduates/graduates était en String, ce qui empêchait
+  // tri/agrégation).
+  studentCount         Int?                 @map("student_count")
+  undergraduates       Int?
+  postgraduates        Int?
   issuedCertifications Certification[]      @relation("CertificationIssuer")
   jobAds               JobAd[]
   headquartersCity     City?                @relation("OrganizationHeadquarters", fields: [city_id], references: [id])
@@ -177,6 +186,8 @@ model Organization {
   childAgencies        Organization[]       @relation("OrganizationHierarchy")
   subjects             Subject[]
   userProfiles         UserProfile[]        @relation("UserCurrentOrganization")
+  userEducations       UserEducations[]
+  userExperiences      UserExperience[]
   user                 User?
   countries            Country[]            @relation("OrganizationCountries")
   industries           Industry[]           @relation("OrganizationIndustries")
@@ -189,24 +200,25 @@ model Organization {
 }
 
 model Job {
-  id             String          @id @default(uuid()) @db.Uuid
-  title          String
-  serial_number  String          @unique
-  category       JobCategory?
-  description    String?
-  seniorityLevel SeniorityLevel? @map("seniority_level")
-  industryId     String?         @map("industry_id") @db.Uuid
-  products       String[]
-  toolsAndTech   String[]        @map("tools_and_tech")
-  tags           String[]
-  metadata       Json?
-  score          Int?
-  deletedAt      DateTime?       @map("deleted_at")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  jobAds         JobAd[]
-  industry       Industry?       @relation(fields: [industryId], references: [id])
-  userProfiles   UserProfile[]   @relation("UserCurrentJob")
+  id              String           @id @default(uuid()) @db.Uuid
+  title           String
+  serial_number   String           @unique
+  category        JobCategory?
+  description     String?
+  seniorityLevel  SeniorityLevel?  @map("seniority_level")
+  industryId      String?          @map("industry_id") @db.Uuid
+  products        String[]
+  toolsAndTech    String[]         @map("tools_and_tech")
+  tags            String[]
+  metadata        Json?
+  score           Int?
+  deletedAt       DateTime?        @map("deleted_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  jobAds          JobAd[]
+  industry        Industry?        @relation(fields: [industryId], references: [id])
+  userProfiles    UserProfile[]    @relation("UserCurrentJob")
+  userExperiences UserExperience[]
 
   @@index([industryId])
   @@index([category])
@@ -236,6 +248,7 @@ model Skill {
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
   jobAdSkills         JobAdSkill[]
+  userSkills          UserSkill[]
 
   @@index([category])
   @@map("skills")
@@ -267,37 +280,12 @@ model Certification {
   @@map("certifications")
 }
 
-model University {
-  id              String           @id @default(uuid()) @db.Uuid
-  name            String
-  serial_number   String           @unique
-  type            UniversityType?
-  description     String?
-  websiteUrl      String?          @map("website_url")
-  logoUrl         String?          @map("logo_url")
-  countryId       String?          @map("country_id") @db.Char(2)
-  cityId          String?          @map("city_id") @db.Uuid
-  studentCount    Int?             @map("student_count")
-  metadata        Json?
-  scoreUniversity Float?           @map("score_university")
-  localName       String?          @map("local_name")
-  notes           String?
-  established     String?
-  score           Int?
-  undergraduates  Int?
-  postgraduates   Int?
-  deletedAt       DateTime?        @map("deleted_at")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-  city            City?            @relation(fields: [cityId], references: [id])
-  country         Country?         @relation(fields: [countryId], references: [isoCode])
-  user_educations UserEducations[]
-
-  @@index([countryId])
-  @@index([cityId])
-  @@index([type])
-  @@map("universities")
-}
+// model University supprimé - les universités sont désormais des Organization
+// avec subtype=UNIVERSITY ; leurs champs spécifiques (studentCount,
+// undergraduates, postgraduates) sont directement portés par Organization
+// (voir ci-dessus). Migration des lignes existantes + UserEducations à
+// exécuter avant d'appliquer cette suppression en prod (voir
+// prisma/migrate-universities-to-organizations.ts).
 
 model Degree {
   id              String           @id @default(uuid()) @db.Uuid
@@ -497,6 +485,9 @@ model UserProfile {
   updatedAt             DateTime             @updatedAt @map("updated_at")
   user_certifications   UserCertifications[]
   user_educations       UserEducations[]
+  user_experiences      UserExperience[]
+  user_languages        UserLanguage[]
+  user_skills           UserSkill[]
   city                  City?                @relation(fields: [cityId], references: [id])
   country               Country?             @relation("UserProfileCountry", fields: [countryId], references: [isoCode])
   currentJob            Job?                 @relation("UserCurrentJob", fields: [currentJobId], references: [id])
@@ -527,17 +518,20 @@ model UserCertifications {
 model UserEducations {
   id                    String                @id @default(uuid()) @db.Uuid
   user_profile_id       String                @db.Uuid
-  university_id         String?               @db.Uuid
+  // Remplace university_id : pointe désormais vers Organization (subtype
+  // filtré à UNIVERSITY côté application/import, PAS au niveau de la
+  // contrainte DB - voir validation explicite dans routes/user_educations.ts).
+  organization_id       String?               @db.Uuid
   degree_id             String?               @db.Uuid
   start_year            Int?
   end_year              Int?
   graduated             Boolean               @default(false)
   user_education_fields UserEducationFields[]
   degree                Degree?               @relation(fields: [degree_id], references: [id])
-  university            University?           @relation(fields: [university_id], references: [id])
+  organization          Organization?         @relation(fields: [organization_id], references: [id])
   user_profile          UserProfile           @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
 
-  @@index([university_id])
+  @@index([organization_id])
   @@index([user_profile_id])
   @@map("user_educations")
 }
@@ -554,6 +548,57 @@ model UserEducationFields {
   @@index([study_field_Id])
   @@index([type])
   @@map("user_education_fields")
+}
+
+/// Une expérience professionnelle du parcours d'un profil (poste occupé,
+/// éventuellement lié à une Organization/Job de référence).
+model UserExperience {
+  id              String        @id @default(uuid()) @db.Uuid
+  user_profile_id String        @db.Uuid
+  organization_id String?       @db.Uuid
+  job_id          String?       @db.Uuid
+  title           String?
+  description     String?
+  start_year      Int?
+  end_year        Int?
+  current         Boolean       @default(false)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  organization    Organization? @relation(fields: [organization_id], references: [id])
+  job             Job?          @relation(fields: [job_id], references: [id])
+  user_profile    UserProfile   @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+
+  @@index([user_profile_id])
+  @@index([organization_id])
+  @@index([job_id])
+  @@map("user_experiences")
+}
+
+/// Une langue parlée par un profil, avec son niveau de maîtrise.
+model UserLanguage {
+  id              String               @id @default(uuid()) @db.Uuid
+  user_profile_id String               @db.Uuid
+  language        Language
+  proficiency     LanguageProficiency?
+  user_profile    UserProfile          @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_profile_id, language])
+  @@map("user_languages")
+}
+
+/// Une compétence (Skill de référence) maîtrisée par un profil, avec son
+/// niveau.
+model UserSkill {
+  id              String           @id @default(uuid()) @db.Uuid
+  user_profile_id String           @db.Uuid
+  skill_id        String           @db.Uuid
+  level           DifficultyLevel?
+  skill           Skill            @relation(fields: [skill_id], references: [id])
+  user_profile    UserProfile      @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_profile_id, skill_id])
+  @@index([skill_id])
+  @@map("user_skills")
 }
 
 /// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
@@ -993,14 +1038,12 @@ enum EmployeeCountRange {
   CLASSIFIED
 }
 
-enum UniversityType {
-  UNIVERSITY
-  GRANDE_ECOLE
-  INSTITUTE
-  ACADEMY
-  ONLINE
-  OTHER
-}
+// enum UniversityType supprimé avec le modèle University : les valeurs
+// (GRANDE_ECOLE, INSTITUTE, ACADEMY, ONLINE, OTHER) ne sont plus contraintes
+// au niveau DB. Si un dropdown reste utile côté front pour Organization.type1
+// quand subtype=UNIVERSITY, garder cette liste dans une constante applicative
+// partagée (voir UniversityTypeValues dans models/utils/enums.ts) plutôt que
+// dans le schéma.
 
 enum GovernmentType {
   REPUBLIC
@@ -1064,4 +1107,12 @@ enum UserStatus {
 enum EducationFieldType {
   MAJOR
   MINOR
+}
+
+enum LanguageProficiency {
+  BASIC
+  CONVERSATIONAL
+  PROFESSIONAL
+  FLUENT
+  NATIVE
 }
