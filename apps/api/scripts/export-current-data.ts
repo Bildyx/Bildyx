@@ -40,7 +40,12 @@ interface ModelSpec {
 type TemplateSpec = Record<string, ModelSpec>; // keyed by Prisma model name
 
 function csvEscape(value: string): string {
-  if (value.includes(DELIMITER) || value.includes('"') || value.includes("\n")) {
+  if (
+    value.includes(DELIMITER) ||
+    value.includes('"') ||
+    value.includes("\n") ||
+    value.includes("\r")
+  ) {
     return `"${value.replace(/"/g, '""')}"`;
   }
   return value;

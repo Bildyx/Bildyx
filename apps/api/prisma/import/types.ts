@@ -19,6 +19,24 @@ export interface MappedRow {
   warnings: RowIssue[];
 }
 
+// Une relation many-to-many implicite exposée comme colonne texte dans le
+// CSV/template.
+export interface M2mColumn {
+  // Nom de la colonne CSV (ex: "industries", "main_industries").
+  column: string;
+  // Champ de relation Prisma sur le modèle courant (ex: "mainIndustries").
+  relationField: string;
+  // Delegate PrismaClient du modèle cible (ex: "industry", "country").
+  targetModel: string;
+  // Champ du modèle cible auquel la cellule fait référence, comparé sans
+  // tenir compte de la casse (ex: "name" pour Industry, "isoCode" pour
+  // Country).
+  targetLookupField: string;
+  // Champ unique du modèle cible à utiliser dans le `connect` Prisma
+  // (ex: "id" pour Industry/City, "isoCode" pour Country).
+  targetConnectField: string;
+}
+
 // Fk is whatever per-model lookup context (e.g. name->id maps) a model's
 // mapRow needs to resolve its foreign keys; built once per import batch by
 // buildFkContext so mapRow itself stays a pure function.
@@ -48,6 +66,17 @@ export interface ImportAdapter<Row extends CsvRow = CsvRow, Fk = unknown> {
   // scalar fields + M2M free-text columns). Used for header validation and
   // as the row-hash input.
   expectedColumns: string[];
+  // Relations many-to-many implicites, portées dans le CSV par une colonne
+  // texte ";"-séparée (voir M2M_COLUMNS dans
+  // scripts/generate_excel_templates.py).
+  //
+  // Ces colonnes étaient déclarées dans expectedColumns - donc acceptées par
+  // la validation d'en-tête - mais AUCUN adaptateur ne les écrivait : le
+  // moteur d'import ignorait purement et simplement toutes les relations
+  // M2M, que seul l'ancien seeds_relations.ts savait poser. Déclarées ici,
+  // elles sont appliquées génériquement par run.ts après écriture des
+  // lignes (voir applyM2mLinks).
+  m2mColumns?: M2mColumn[];
   buildFkContext: (prisma: PrismaClient, rows: Row[]) => Promise<Fk>;
   mapRow: (row: Row, rowIndex: number, fk: Fk) => MappedRow;
   // Optional second pass after every insert/update of this model has been

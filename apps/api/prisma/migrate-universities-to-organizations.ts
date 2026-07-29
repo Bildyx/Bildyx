@@ -69,15 +69,40 @@ async function main() {
   console.log(`Found ${universities.length} universities to migrate.`);
 
   const existingOrgs = await prisma.organization.findMany({
-    select: { id: true, slug: true, serial_number: true },
+    select: { id: true, slug: true, serial_number: true, subtype: true },
   });
   const orgIdBySlug = new Map(existingOrgs.map((o) => [o.slug, o.id]));
   const usedSerialNumbers = new Set(existingOrgs.map((o) => o.serial_number));
+  // Un slug déjà porté par une organisation qui N'EST PAS une université :
+  // l'écraser reviendrait à transformer une entreprise réelle en université.
+  // Le garde-fou existait pour serial_number, pas pour le slug.
+  const nonUniversitySlugs = new Set(
+    existingOrgs.filter((o) => o.subtype !== OrganizationSubType.UNIVERSITY).map((o) => o.slug),
+  );
+  // Slugs produits pendant CE run, pour que deux universités dont les noms
+  // se réduisent au même slug ne s'écrasent pas l'une l'autre.
+  const slugsWrittenThisRun = new Set<string>();
+  let conflicts = 0;
 
   const orgIdByUniversityId = new Map<string, string>();
 
   for (const uni of universities) {
-    const slug = slugify(uni.name);
+    let slug = slugify(uni.name);
+
+    // slugify() rend "" pour un nom entièrement non-ASCII (ex: "東京大学").
+    // Toutes ces universités auraient partagé le slug "" et se seraient
+    // écrasées mutuellement.
+    if (!slug) slug = `universite-${uni.serial_number.toLowerCase()}`;
+
+    if (nonUniversitySlugs.has(slug) || slugsWrittenThisRun.has(slug)) {
+      const disambiguated = `${slug}-${uni.serial_number.toLowerCase()}`;
+      console.warn(
+        `  Conflit de slug "${slug}" pour "${uni.name}" (déjà pris par une autre organisation) -> "${disambiguated}"`,
+      );
+      slug = disambiguated;
+      conflicts++;
+    }
+    slugsWrittenThisRun.add(slug);
     // Organization.serial_number is unique across ALL organizations, while
     // University.serial_number was only unique among universities - guard
     // against a real collision instead of letting the upsert crash.
@@ -140,6 +165,9 @@ async function main() {
     }
   }
 
+  if (conflicts > 0) {
+    console.warn(`\n${conflicts} slug(s) désambiguïsé(s) pour éviter d'écraser une organisation existante.`);
+  }
   console.log(dryRun ? "\nDry run complete - no data was written." : "\nMigration complete.");
 }
 

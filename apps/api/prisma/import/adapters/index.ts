@@ -4,7 +4,6 @@ import { citiesAdapter } from "./cities";
 import { organizationsAdapter } from "./organizations";
 import { jobsAdapter } from "./jobs";
 import { certificationsAdapter } from "./certifications";
-import { universitiesAdapter } from "./universities";
 import { subjectsAdapter } from "./subjects";
 import { skillsAdapter } from "./skills";
 import { degreesAdapter } from "./degrees";
@@ -12,7 +11,7 @@ import { studyFieldsAdapter } from "./studyFields";
 import type { ImportAdapter } from "../types";
 
 // Same dependency order as apps/api/prisma/seed.ts: industries -> countries
-// -> cities -> organizations -> (jobs/certifications/universities/subjects)
+// -> cities -> organizations -> (jobs/certifications/subjects)
 // -> skills/degrees/studyFields.
 export const ADAPTERS: ImportAdapter<any, any>[] = [
   industriesAdapter,
@@ -21,7 +20,6 @@ export const ADAPTERS: ImportAdapter<any, any>[] = [
   organizationsAdapter,
   jobsAdapter,
   certificationsAdapter,
-  universitiesAdapter,
   subjectsAdapter,
   skillsAdapter,
   degreesAdapter,
@@ -40,7 +38,6 @@ export {
   organizationsAdapter,
   jobsAdapter,
   certificationsAdapter,
-  universitiesAdapter,
   subjectsAdapter,
   skillsAdapter,
   degreesAdapter,

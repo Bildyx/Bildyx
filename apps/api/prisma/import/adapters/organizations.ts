@@ -5,11 +5,16 @@ import {
   buildNameLookup,
   normalizeEnumKey,
   slugify,
-  toInt,
   toStringArray,
 } from "../../seed-utils";
 import { runBatched } from "../batch";
-import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
+import {
+  checkEnum,
+  checkInt,
+  checkJson,
+  checkOptionalFk,
+  checkRequiredText,
+} from "../checks";
 import type {
   CsvRow,
   ImportAdapter,
@@ -44,14 +49,15 @@ const EXPECTED_COLUMNS = [
   "jurisdiction",
   "members",
   "collections",
-  "graduates",
+  "student_count",
   "undergraduates",
+  "postgraduates",
   "score",
-  "city_id",
+  "city_name",
   "numberOfEmployees",
   "personnel",
   "subsidiaries",
-  "parent_organization_id",
+  "parent_organization_name",
   "metadata",
   // M2M free-text columns.
   "countries",
@@ -109,6 +115,29 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   normalizeNaturalKey: slugify,
   deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  m2mColumns: [
+    {
+      column: "countries",
+      relationField: "countries",
+      targetModel: "country",
+      targetLookupField: "isoCode",
+      targetConnectField: "isoCode",
+    },
+    {
+      column: "industries",
+      relationField: "industries",
+      targetModel: "industry",
+      targetLookupField: "name",
+      targetConnectField: "id",
+    },
+    {
+      column: "working_area_cities",
+      relationField: "cities_working_area",
+      targetModel: "city",
+      targetLookupField: "name",
+      targetConnectField: "id",
+    },
+  ],
 
   async buildFkContext(prisma: PrismaClient, rows: CsvRow[]): Promise<OrganizationsFk> {
     const cities = await prisma.city.findMany({ select: { id: true, name: true } });
@@ -166,18 +195,18 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
     const subtype = checkEnum(row.subtype, OrganizationSubType, "subtype", false);
     if (subtype.issue) warnings.push(subtype.issue);
 
-    const cityId = checkOptionalFk(row.city_id, fk.resolveCityId, "city_id");
+    const cityId = checkOptionalFk(row.city_name, fk.resolveCityId, "city_name");
     if (cityId.issue) warnings.push(cityId.issue);
 
     // parent_organization_id is only checked for resolvability here -
     // actually written by afterUpsert (see types.ts for why).
-    if (row.parent_organization_id && row.parent_organization_id.trim() !== "") {
-      const resolved = fk.resolveOrgIdByName(row.parent_organization_id);
+    if (row.parent_organization_name && row.parent_organization_name.trim() !== "") {
+      const resolved = fk.resolveOrgIdByName(row.parent_organization_name);
       if (!resolved) {
         warnings.push({
           row: 0,
-          column: "parent_organization_id",
-          message: `parent_organization_id: référence "${row.parent_organization_id}" non résolue (mise à null)`,
+          column: "parent_organization_name",
+          message: `parent_organization_name: référence "${row.parent_organization_name}" non résolue (mise à null)`,
         });
       }
     }
@@ -192,6 +221,19 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
     }
 
     const id = fk.idBySlug.get(slug) ?? fk.resolveOrgIdByName(row.name);
+
+    const members = checkInt(row.members, "members");
+    if (members.issue) warnings.push(members.issue);
+    const personnel = checkInt(row.personnel, "personnel");
+    if (personnel.issue) warnings.push(personnel.issue);
+    const studentCount = checkInt(row.student_count, "student_count");
+    if (studentCount.issue) warnings.push(studentCount.issue);
+    const undergraduates = checkInt(row.undergraduates, "undergraduates");
+    if (undergraduates.issue) warnings.push(undergraduates.issue);
+    const postgraduates = checkInt(row.postgraduates, "postgraduates");
+    if (postgraduates.issue) warnings.push(postgraduates.issue);
+    const score = checkInt(row.score, "score");
+    if (score.issue) warnings.push(score.issue);
 
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
@@ -226,14 +268,20 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         offices: row.offices || null,
         authority: row.authority || null,
         jurisdiction: row.jurisdiction || null,
-        members: toInt(row.members),
+        members: members.value,
         collections: row.collections || null,
-        graduates: row.graduates || null,
-        undergraduates: row.undergraduates || null,
-        score: toInt(row.score),
+        // graduates a été supprimée de la base (migration
+        // 20260728120100) ; student_count/postgraduates l'ont remplacée et
+        // undergraduates est passée de TEXT à INTEGER lors de la fusion
+        // University -> Organization. L'adaptateur écrivait encore
+        // l'ancienne forme, ce qui faisait échouer tout import Organization.
+        studentCount: studentCount.value,
+        undergraduates: undergraduates.value,
+        postgraduates: postgraduates.value,
+        score: score.value,
         city_id: cityId.value,
         numberOfEmployees,
-        personnel: toInt(row.personnel),
+        personnel: personnel.value,
         subsidiaries: row.subsidiaries || null,
         // Always null here - see afterUpsert.
         parentOrganizationId: null,
@@ -253,7 +301,7 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
 
     const parentLinks: { id: unknown; parentOrganizationId: string }[] = [];
     for (const { data, row } of written) {
-      const rawParentName = row.parent_organization_id;
+      const rawParentName = row.parent_organization_name;
       if (!rawParentName || rawParentName.trim() === "") continue;
       const parentOrganizationId = fk.resolveOrgIdByName(rawParentName);
       if (!parentOrganizationId || !validIds.has(parentOrganizationId)) continue;

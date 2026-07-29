@@ -5,10 +5,11 @@ import {
   CostOfLiving,
   Language,
 } from "@prisma/client";
-import { toInt, toFloat } from "../../seed-utils";
 import {
   checkEnum,
   checkEnumArray,
+  checkFloat,
+  checkInt,
   checkJson,
   checkRequiredText,
   checkScaleEnum,
@@ -120,6 +121,27 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
     );
     warnings.push(...officialLanguages.issues);
 
+    const areaKm2 = checkInt(row.area_km2, "area_km2");
+    if (areaKm2.issue) warnings.push(areaKm2.issue);
+    const gdpUsd = checkFloat(row.gdp_usd, "gdp_usd");
+    if (gdpUsd.issue) warnings.push(gdpUsd.issue);
+    const gdpPerCapitaUsd = checkFloat(row.gdp_per_capita_usd, "gdp_per_capita_usd");
+    if (gdpPerCapitaUsd.issue) warnings.push(gdpPerCapitaUsd.issue);
+    const hdi = checkFloat(row.hdi, "hdi");
+    if (hdi.issue) warnings.push(hdi.issue);
+    const medianSalary = checkInt(row.median_salary, "median_salary");
+    if (medianSalary.issue) warnings.push(medianSalary.issue);
+    const medianHomePrice = checkInt(row.median_home_price, "median_home_price");
+    if (medianHomePrice.issue) warnings.push(medianHomePrice.issue);
+    const averageRent = checkInt(row.average_rent, "average_rent");
+    if (averageRent.issue) warnings.push(averageRent.issue);
+    const numberOfInternationalStudents = checkInt(row.number_of_international_students, "number_of_international_students");
+    if (numberOfInternationalStudents.issue) warnings.push(numberOfInternationalStudents.issue);
+    const numberOfForeignOrganizations = checkInt(row.number_of_foreign_organizations, "number_of_foreign_organizations");
+    if (numberOfForeignOrganizations.issue) warnings.push(numberOfForeignOrganizations.issue);
+    const numberOfUniversities = checkInt(row.number_of_universities, "number_of_universities");
+    if (numberOfUniversities.issue) warnings.push(numberOfUniversities.issue);
+
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
 
@@ -131,11 +153,11 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
         serial_number: serialNumber.value,
         capitalName: row.capital_name || null,
         flagUrl: row.flag_url || null,
-        population: row.population ?? null,
-        areaKm2: toInt(row.area_km2),
-        gdpUsd: toFloat(row.gdp_usd),
-        gdpPerCapitaUsd: toFloat(row.gdp_per_capita_usd),
-        hdi: toFloat(row.hdi),
+        population: row.population || null,
+        areaKm2: areaKm2.value,
+        gdpUsd: gdpUsd.value,
+        gdpPerCapitaUsd: gdpPerCapitaUsd.value,
+        hdi: hdi.value,
         officialLanguages: officialLanguages.value,
         callingCode: row.calling_code || null,
         governmentType: governmentType.value,
@@ -146,25 +168,25 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
         incomeInequality: row.income_inequality || null,
         workLifeBalance: row.work_life_balance || null,
         mainIndustries: row.main_industries || null,
-        numberOfMultinationalHqs: row.number_of_multinational_hqs ?? null,
+        numberOfMultinationalHqs: row.number_of_multinational_hqs || null,
         currency: currency.value,
-        medianSalary: toInt(row.median_salary),
+        medianSalary: medianSalary.value,
         costOfLiving: costOfLiving.value,
-        medianHomePrice: toInt(row.median_home_price),
-        averageRent: toInt(row.average_rent),
+        medianHomePrice: medianHomePrice.value,
+        averageRent: averageRent.value,
         interestingFact: row.interesting_fact || null,
         citizenshipProcess: row.citizenship_process || null,
         workPermit: row.work_permit || null,
-        globalCompetitivenessIndex: row.global_competitiveness_index ?? null,
+        globalCompetitivenessIndex: row.global_competitiveness_index || null,
         levelOfGlobalisation: row.level_of_globalisation || null,
-        numberOfInternationalStudents: toInt(row.number_of_international_students),
-        numberOfForeignOrganizations: toInt(row.number_of_foreign_organizations),
+        numberOfInternationalStudents: numberOfInternationalStudents.value,
+        numberOfForeignOrganizations: numberOfForeignOrganizations.value,
         personalIncomeTax: row.personal_income_tax || null,
-        numberOfTourists: row.number_of_tourists ?? null,
-        numberOfAirports: row.number_of_airports ?? null,
+        numberOfTourists: row.number_of_tourists || null,
+        numberOfAirports: row.number_of_airports || null,
         qualityOfEducation: row.quality_of_education || null,
         degreeHolders: row.degree_holders || null,
-        numberOfUniversities: toInt(row.number_of_universities),
+        numberOfUniversities: numberOfUniversities.value,
         top_universities: row.top_universities || null,
         ethnicGroups: row.ethnic_groups || null,
         religion: row.religion || null,

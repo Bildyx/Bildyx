@@ -6,7 +6,7 @@
 // Usage:
 //   tsx scripts/import.ts --model Country --file ../data/countries.csv
 //   tsx scripts/import.ts --model Country --file ../data/countries.csv --commit
-//   tsx scripts/import.ts --all [--commit] [--allow-partial] [--prune]
+//   tsx scripts/import.ts --all [--commit] [--allow-partial] [--prune] [--force-prune]
 //
 // Must be run with apps/api as the working directory (same convention as
 // `npm run seed`) so --all's default data directory resolves correctly.
@@ -15,7 +15,7 @@ import "dotenv/config";
 import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { ADAPTERS, findAdapterByModelName } from "../prisma/import/adapters/index";
-import { runImportForModel } from "../prisma/import/run";
+import { PRUNE_RATIO_LIMIT, runImportForModel } from "../prisma/import/run";
 import type { RunResult } from "../prisma/import/run";
 import type { ImportAdapter, CsvRow } from "../prisma/import/types";
 
@@ -26,10 +26,11 @@ interface Args {
   commit: boolean;
   allowPartial: boolean;
   prune: boolean;
+  forcePrune: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { all: false, commit: false, allowPartial: false, prune: false };
+  const args: Args = { all: false, commit: false, allowPartial: false, prune: false, forcePrune: false };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -39,6 +40,12 @@ function parseArgs(argv: string[]): Args {
     else if (arg === "--commit") args.commit = true;
     else if (arg === "--allow-partial") args.allowPartial = true;
     else if (arg === "--prune") args.prune = true;
+    // --force-prune implique --prune : passer outre le seuil de sécurité
+    // n'a de sens que si l'on élague effectivement.
+    else if (arg === "--force-prune") {
+      args.prune = true;
+      args.forcePrune = true;
+    }
     else {
       throw new Error(`Argument inconnu: ${arg}`);
     }
@@ -92,6 +99,20 @@ function printPlanSummary(adapter: ImportAdapter<CsvRow, unknown>, result: RunRe
 
   if (plan.orphans.length > 0) {
     console.log(`Orphelines (en base mais absentes du fichier, non touchées): ${plan.orphans.join(", ")}`);
+  }
+
+  if (result.m2mWarnings.length > 0) {
+    console.log(`Relations non résolues:`);
+    for (const w of result.m2mWarnings) console.log(`  ${w}`);
+  }
+
+  if (result.pruneRefused) {
+    const { orphans, tracked, ratio } = result.pruneRefused;
+    console.log(
+      `--prune REFUSÉ: ${orphans}/${tracked} clés suivies absentes du fichier ` +
+        `(${(ratio * 100).toFixed(1)}%, seuil ${(PRUNE_RATIO_LIMIT * 100).toFixed(0)}%). ` +
+        `Fichier tronqué ou mauvais onglet Excel ? Relancer avec --force-prune si c'est voulu.`,
+    );
   }
 
   switch (result.skippedReason) {
@@ -148,6 +169,7 @@ async function main() {
         commit: args.commit,
         allowPartial: args.allowPartial,
         prune: args.prune,
+        forcePrune: args.forcePrune,
         sourceFile: path.basename(filePath),
       });
 

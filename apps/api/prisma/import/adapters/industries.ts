@@ -1,5 +1,8 @@
-import { toInt } from "../../seed-utils";
-import { checkJson, checkRequiredText } from "../checks";
+import {
+  checkInt,
+  checkJson,
+  checkRequiredText,
+} from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -24,6 +27,15 @@ export const industriesAdapter: ImportAdapter<CsvRow, void> = {
   naturalKeyField: "serial_number",
   deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  m2mColumns: [
+    {
+      column: "related_industries",
+      relationField: "industries_A",
+      targetModel: "industry",
+      targetLookupField: "name",
+      targetConnectField: "id",
+    },
+  ],
 
   async buildFkContext() {},
 
@@ -37,6 +49,9 @@ export const industriesAdapter: ImportAdapter<CsvRow, void> = {
     const name = checkRequiredText(row.name, "name");
     if (name.issue) errors.push(name.issue);
 
+    const score = checkInt(row.score, "score");
+    if (score.issue) warnings.push(score.issue);
+
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
 
@@ -48,7 +63,7 @@ export const industriesAdapter: ImportAdapter<CsvRow, void> = {
         description: row.description || null,
         iconUrl: row.icon_url || null,
         metadata: metadata.value,
-        score: toInt(row.score),
+        score: score.value,
       },
       errors,
       warnings,

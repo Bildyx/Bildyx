@@ -122,10 +122,19 @@ M2M_COLUMNS = {
 # and never flagged as is_uuid_fk); and (2) to know which field to pull for
 # M2M/list relations pointing at that model (e.g. Organization.countries),
 # where Country's entry below IS needed.
+# Le nom est retenu plutôt que slug/serial_number : c'est ce qu'un humain
+# remplit dans le template, ce que contiennent déjà les CSV, et ce que les
+# adaptateurs d'import résolvent (buildNameLookup). Exposer "slug" ou
+# "serial_number" aurait rendu les colonnes FK illisibles ET désynchronisées
+# des fichiers existants - c'est exactement ce qui faisait diverger le
+# générateur, les adaptateurs et les .csv/.xlsx (colonnes "city_id"
+# contenant en réalité "Paris, France").
+# Country reste isoCode : son @id EST déjà la clé lisible, et les cellules
+# de la colonne M2M "countries" contiennent bien des codes ISO.
 NATURAL_KEY_FIELD_BY_MODEL = {
-    "Organization": "slug",
-    "City": "serial_number",
-    "Industry": "serial_number",
+    "Organization": "name",
+    "City": "name",
+    "Industry": "name",
     "Country": "isoCode",
 }
 
@@ -204,14 +213,23 @@ def parse_field_type(raw_type: str) -> tuple[str, bool, bool]:
     return raw_type, is_optional, is_list
 
 
-def find_fk_target_model(body: str, fk_field_name: str) -> str | None:
+def find_fk_relation(body: str, fk_field_name: str) -> tuple[str | None, str | None]:
     """
     Given a scalar FK field's own Prisma name (e.g. "parentOrganizationId"),
-    finds the model it points to by locating the relation line that
-    references it (`xxx Model? @relation(fields: [parentOrganizationId], ...)`)
-    - fields: always lists the scalar's Prisma field name, never its mapped
-    DB column name, so this must be matched against field_name, not
-    column_name.
+    finds the relation line that references it
+    (`parentOrganization Organization? @relation(fields: [parentOrganizationId], ...)`)
+    and returns (relation_field_name, target_model).
+
+    Le nom du champ de relation compte autant que le modèle cible : c'est
+    lui, et non le scalaire, qu'il faut passer à un `select` Prisma
+    imbriqué. --dump-spec émettait le scalaire, si bien que
+    export-current-data.ts construisait
+    `select: { industryId: { select: { name: true } } }` - une erreur Prisma
+    sur Job, Organization, Certification et Subject.
+
+    `fields:` liste toujours le nom du champ Prisma du scalaire, jamais son
+    nom de colonne mappé : la comparaison se fait donc sur field_name, pas
+    sur column_name.
     """
     for line in body.splitlines():
         line = line.strip()
@@ -224,8 +242,8 @@ def find_fk_target_model(body: str, fk_field_name: str) -> str | None:
         if fk_field_name in referenced:
             m = FIELD_LINE_RE.match(line)
             if m:
-                return m.group(2).rstrip("?")
-    return None
+                return m.group(1), m.group(2).rstrip("?")
+    return None, None
 
 
 def resolve_fk_column(
@@ -300,9 +318,10 @@ def parse_model_fields(
 
         target_model = None
         target_natural_key_field = None
+        relation_field = None
         resolved_column = column_name
         if is_uuid_fk:
-            target_model = find_fk_target_model(body, field_name)
+            relation_field, target_model = find_fk_relation(body, field_name)
             target_natural_key_field = NATURAL_KEY_FIELD_BY_MODEL.get(target_model or "")
             if target_model and target_model not in NATURAL_KEY_FIELD_BY_MODEL and target_model != "Country":
                 print(
@@ -324,6 +343,7 @@ def parse_model_fields(
                 "required": required,
                 "is_uuid_fk": is_uuid_fk,
                 "is_m2m": False,
+                "relation_field": relation_field,
                 "target_model": target_model,
                 "target_natural_key_field": target_natural_key_field,
             }
@@ -725,7 +745,13 @@ def main():
                 "fields": [
                     {
                         "column": f["column"],
-                        "fieldName": f["field_name"],
+                        # Pour un fk, c'est le champ de RELATION qui doit
+                        # être interrogé (select imbriqué), pas le scalaire.
+                        "fieldName": (
+                            f["relation_field"]
+                            if f.get("is_uuid_fk") and f.get("relation_field")
+                            else f["field_name"]
+                        ),
                         "kind": (
                             "m2m"
                             if f.get("is_m2m")

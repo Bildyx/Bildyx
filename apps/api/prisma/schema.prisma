@@ -31,7 +31,7 @@ model Industry {
 }
 
 model Country {
-  isoCode                       String          @id @unique @map("iso_code") @db.Char(2)
+  isoCode                       String          @id @map("iso_code") @db.Char(2)
   name                          String
   serial_number                 String          @unique
   capitalName                   String?         @map("capital_name")
@@ -482,6 +482,7 @@ model UserProfile {
   currentJobStartedAt      DateTime?               @map("current_job_started_at")
   currentOrganizationId    String?                 @map("current_organization_id") @db.Uuid
   metadata                 Json?
+  deletedAt                DateTime?               @map("deleted_at")
   createdAt                DateTime                @default(now()) @map("created_at")
   updatedAt                DateTime                @updatedAt @map("updated_at")
   user_certifications      UserCertifications[]
@@ -650,6 +651,7 @@ model PersonalityCriterion {
   scores      PersonalityCriterionScore[]
 
   @@unique([test_id, code])
+  @@unique([test_id, id])
   @@index([test_id])
   @@map("personality_criteria")
 }
@@ -666,7 +668,7 @@ model PersonalityQuestion {
   text           String
   reverse_scored Boolean              @default(false)
   test           PersonalityTest      @relation(fields: [test_id], references: [id], onDelete: Cascade)
-  criterion      PersonalityCriterion @relation(fields: [criterion_id], references: [id])
+  criterion      PersonalityCriterion @relation(fields: [test_id, criterion_id], references: [test_id, id])
   answers        PersonalityAnswer[]
 
   @@unique([test_id, order])
