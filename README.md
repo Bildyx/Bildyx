@@ -40,23 +40,74 @@ php -S localhost:8000
 
 Le site sera accessible via l'url : http://localhost:8000/
 
-# Import script testing
+# 5. Database
 
-1. Full dry run (no writes, just a report)
-cd apps/api
-npx tsx scripts/import.ts --all
-This reads all the CSV files in `data/`, resolves foreign keys against your actual database (read-only), and displays for each model: how many rows would be created, updated, remain unchanged, or result in errors, plus any warnings (unrecognized enum values, unresolved foreign keys, etc.). Nothing is written to disk until you run `--commit`.
+All commands below run from `apps/api`, unless noted otherwise.
 
-2. One model, one file
-npx tsx scripts/import.ts --model Organization --file data/organizations.csv
-Useful for verifying that the 4 restored rows (8kSec, ACI, Adobe, Adobe (Magento)) are correctly recognized.
+## 5.1 Schema & migrations
 
-3. For real (written to the database)
-npx tsx scripts/import.ts --all --commit
-This is where the critical fix (upsert instead of create) really matters: before, it would have crashed on the first unique key collision since `ImportRowHash` is empty in your database even though it already contains data. Now it should run smoothly.
+| Command | Effect |
+|---|---|
+| `npx prisma validate` | Checks `schema.prisma` is syntactically valid (offline) |
+| `npx prisma generate` | Regenerates the Prisma client in `node_modules/@prisma/client` — rerun after any schema change or `npm install` |
+| `npx prisma migrate dev` | Creates a new migration from the schema diff and applies it (dev only) |
+| `npx prisma migrate deploy` | Applies pending migrations without creating one — prod/CI usage |
+| `npx prisma migrate status` | Compares the database state against the available migrations |
+| `npx prisma migrate reset [--skip-seed] [-f]` | **Destructive**: drops the entire `public` schema, recreates it, replays every migration. `--skip-seed` skips `prisma/seed.ts` (partial, legacy ingestion path — `import` below is authoritative) |
+| `npm run db:check-drift` | Offline check (PGlite, no real database) that the migrations produce exactly `schema.prisma` — run before any risky operation |
+| `npm run db:pull` | Introspects the real database and rewrites `schema.prisma` from it (reverse direction, rarely used here) |
+| `npm run db:types` | Regenerates `src/db/types.ts` (Kysely types) from the real database — required after a schema change for the API layer to compile |
 
-4. Automated tests
-npx tsx --test src/tests/import_diff.test.ts
-17 tests, no database required (pure logic).
+## 5.2 CSV → database import (the authoritative path)
 
-Useful options: --allow-partial to import valid rows and set aside those with errors rather than rejecting the entire file; --prune to mark as deleted keys that were imported previously but are now missing from the file (off by default; use with caution given the case-sensitivity bug on `Country` that we just fixed).
+| Command | Effect |
+|---|---|
+| `npm run import -- --all` | Dry run over the 10 CSVs in `data/`, in dependency order. Nothing is written |
+| `npm run import -- --all --commit` | Real import |
+| `npm run import -- --model Country --file ../data/countries.csv [--commit]` | Import a single model |
+| `npm run import -- --all --commit --allow-partial` | Imports valid rows, quarantines the rest instead of rejecting the whole file |
+| `npm run import -- --all --commit --prune` | Soft-deletes (`deletedAt`) keys previously imported but now absent from the file — refused past 20% orphans unless `--force-prune` |
+| `npm run db:export` (= `tsx scripts/export-current-data.ts --spec ... --output ...`) | Exports the database's current content to CSV — see the round-trip workflow below |
+
+On a freshly reset (empty) database, run `--all --commit` directly rather than dry-running first: a pure dry run never writes between models, so cross-model foreign keys (e.g. `City.country_id`) will show as unresolved purely because the upstream model hasn't actually landed in the database yet — that's expected, not a bug.
+
+## 5.3 Excel templates (generation and full round-trip with the database)
+
+| Command | Effect |
+|---|---|
+| `python3 scripts/generate_excel_templates.py` | Generates one blank `.xlsx` per reference model into `data/excel_templates/` |
+| `python3 scripts/generate_excel_templates.py --force` | Overwrites existing templates (wipes their data!) |
+| `python3 scripts/generate_excel_templates.py --protect-existing` | Re-applies protection/validation to already-filled templates, **without touching the data** — use after a minor schema change (new enum value, etc.) |
+| `python3 scripts/excel_to_csv.py [--force]` | Converts `data/excel_templates/*.xlsx` → `data/*.csv`. Refuses by default if it would shrink an existing CSV (data-loss guardrail) |
+
+**Download templates pre-filled with the database's current data**:
+
+```bash
+python3 scripts/generate_excel_templates.py --dump-spec ./template-spec.json
+npx tsx scripts/export-current-data.ts --spec ./template-spec.json --output ./data/exports
+python3 scripts/generate_excel_templates.py --populate-from-db ./data/exports
+```
+
+The third command implies `--force` and regenerates `data/excel_templates/*.xlsx` filled with the database's real content, ready to download/edit.
+
+## 5.4 Misc
+
+| Command | Effect |
+|---|---|
+| `npm run seed` | Minimal test seed (`src/seed.ts`) — 1 organization, 2 certifications. Not for reference data |
+| `npm run seed:reference` | Legacy seeder (`prisma/seed.ts`) — partial, superseded by `npm run import` |
+| `npm run seed:personality -- --check` | Offline validation of the personality-questionnaire JSON (`prisma/seeds/personality/*.json`), no database needed |
+| `npm run seed:personality` | Actually inserts the questionnaire content into the database |
+| `npm test` | Full test suite (PGlite, offline) |
+
+## 5.5 Typical sequence for a fresh database
+
+```bash
+npm install && npx prisma generate
+npm run db:check-drift
+npx prisma migrate reset --skip-seed
+npx prisma migrate status
+npm run import -- --all --commit
+npm run import -- --all              # should plan 0 creates (idempotence check)
+npm run db:types
+```
