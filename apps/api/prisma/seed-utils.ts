@@ -16,8 +16,8 @@ export function toInt(v?: string): number | null {
   return v && v.trim() !== "" ? Number(v) : null;
 }
 
-// Comme toInt, mais tolère du texte autour du nombre (ex: "1 (via Cairo Intl.
-// Airport)", "20+", "30% Bachelor's..."). Prend le premier entier trouvé.
+// Like toInt, but tolerates text around the number (e.g. "1 (via Cairo Intl.
+// Airport)", "20+", "30% Bachelor's..."). Takes the first integer found.
 export function toIntLoose(v?: string): number | null {
   if (!v || v.trim() === "") return null;
   const match = v.match(/\d+/);
@@ -37,8 +37,8 @@ export function toBool(v?: string): boolean {
   return ["true", "1", "yes", "t"].includes(v.trim().toLowerCase());
 }
 
-// fallbackToNow=true -> renvoie new Date() si vide (utile pour createdAt/updatedAt)
-// fallbackToNow=false -> renvoie null si vide (utile pour deletedAt)
+// fallbackToNow=true -> returns new Date() if empty (useful for createdAt/updatedAt)
+// fallbackToNow=false -> returns null if empty (useful for deletedAt)
 export function toDate(v?: string, fallbackToNow = false): Date | null {
   if (v && v.trim() !== "") return new Date(v);
   return fallbackToNow ? new Date() : null;
@@ -50,7 +50,7 @@ export function toJson(
   return v && v.trim() !== "" ? JSON.parse(v) : Prisma.JsonNull;
 }
 
-// Assume une cellule du type "a,b,c" ou un tableau JSON '["a","b","c"]'
+// Assumes a cell like "a,b,c" or a JSON array '["a","b","c"]'
 export function toStringArray(v?: string): string[] {
   if (!v || v.trim() === "") return [];
   const trimmed = v.trim();
@@ -59,7 +59,7 @@ export function toStringArray(v?: string): string[] {
     try {
       return JSON.parse(trimmed);
     } catch {
-      // fall through vers le split classique
+      // fall through to the classic split
     }
   }
 
@@ -127,17 +127,17 @@ export function parseEnumArray<T extends object>(
     .filter((v): v is T[keyof T] => v !== null);
 }
 
-// Resout un nom lisible (ex: "Adobe") vers l'id genere en base pour des
-// lignes CSV qui referencent une autre table par nom plutot que par sa vraie
-// cle etrangere (laquelle n'existe pas encore au moment ou le CSV a ete
-// rempli). Retourne null (sans lever d'erreur) si aucune correspondance.
+// Resolves a human-readable name (e.g. "Adobe") to the id generated in the
+// database, for CSV rows that reference another table by name rather than by
+// its real foreign key (which does not exist yet when the CSV is filled in).
+// Returns null (without throwing) if there is no match.
 export function buildNameLookup(rows: { id: string; name: string }[]) {
   const byName = new Map<string, string>();
-  // Deux lignes homonymes produisaient une Map ou la derniere ecrasait la
-  // precedente : la reference etait alors resolue vers une ligne arbitraire,
-  // silencieusement et sans moyen de s'en apercevoir. On memorise les noms
-  // ambigus pour renvoyer null a la place - l'appelant (checkOptionalFk /
-  // checkRequiredFk) le remonte alors comme reference non resolue.
+  // Two rows sharing a name produced a Map where the last one overwrote the
+  // previous: the reference was then resolved to an arbitrary row, silently
+  // and with no way to notice. We record the ambiguous names so as to return
+  // null instead - the caller (checkOptionalFk / checkRequiredFk) then
+  // reports it as an unresolved reference.
   const ambiguous = new Set<string>();
 
   for (const r of rows) {
@@ -155,9 +155,9 @@ export function buildNameLookup(rows: { id: string; name: string }[]) {
   };
 }
 
-// Resout une cellule "NomA;NomB" (colonne de relation many-to-many, meme
-// convention ";"-separee que toStringArray) en ids via un lookup (typiquement
-// buildNameLookup), en ignorant silencieusement les noms non resolus.
+// Resolves a "NameA;NameB" cell (many-to-many relation column, same
+// ";"-separated convention as toStringArray) into ids via a lookup (typically
+// buildNameLookup), silently ignoring unresolved names.
 export function resolveNameList(
   value: string | undefined,
   resolve: (rawName?: string) => string | null,

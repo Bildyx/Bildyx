@@ -42,8 +42,8 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
   return null;
 }
 
-// Colonnes reellement presentes dans organizations.csv (le fichier ne
-// contient pas d'id/created_at/updated_at/deleted_at).
+// Columns actually present in organizations.csv (the file contains no
+// id/created_at/updated_at/deleted_at).
 type OrganizationCsv = {
   name: string;
   serial_number?: string;
@@ -75,13 +75,13 @@ type OrganizationCsv = {
 export async function seedOrganizations(prisma: PrismaClient) {
   const rows = readCsv<OrganizationCsv>("organizations.csv");
 
-  // organizations.csv renseigne city_name avec le nom de la ville (les villes
-  // sont deja seedees a ce stade) et parent_organization_name avec le nom
-  // d'une autre organisation du meme fichier (elle n'a pas encore d'id reel
-  // puisqu'aucune ligne organization n'est encore en base) -> resolution par
-  // nom, avec des uuid generes nous-memes en amont pour
-  // parent_organization_name afin de pouvoir la resoudre en une seule passe
-  // quel que soit l'ordre des lignes dans le CSV.
+  // organizations.csv fills city_name with the city's name (cities are
+  // already seeded at this point) and parent_organization_name with the name
+  // of another organization from the same file (which has no real id yet
+  // since no organization row is in the database) -> resolution by name,
+  // with uuids we generate ourselves up front for parent_organization_name
+  // so it can be resolved in a single pass whatever the row order in the
+  // CSV.
   const cities = await prisma.city.findMany({ select: { id: true, name: true } });
   const resolveCityId = buildNameLookup(cities);
   const unmatchedCities = new Set<string>();
@@ -128,11 +128,11 @@ export async function seedOrganizations(prisma: PrismaClient) {
       founders: r.founders ? [r.founders] : [],
       facilities: r.facilities ? [r.facilities] : [],
 
-      // organizations.csv porte aussi description/offices/authority/
+      // organizations.csv also carries description/offices/authority/
       // jurisdiction/members/collections/student_count/undergraduates/
-      // postgraduates/personnel, non repris ici : ce seeder est l'ancien
-      // chemin d'ingestion, c'est `npm run import` qui couvre le modele
-      // complet (voir prisma/import/adapters/organizations.ts).
+      // postgraduates/personnel, not handled here: this seeder is the legacy
+      // ingestion path, `npm run import` is what covers the full model (see
+      // prisma/import/adapters/organizations.ts).
 
       score: toInt(r.score),
 
@@ -141,10 +141,10 @@ export async function seedOrganizations(prisma: PrismaClient) {
       numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
       subsidiaries: r.subsidiaries || null,
 
-      // parentOrganizationId est une self-reference : renseignee dans la 2e
-      // passe ci-dessous, une fois toutes les lignes en base, pour ne jamais
-      // violer la contrainte de cle etrangere si un enfant apparait dans le
-      // CSV avant son parent.
+      // parentOrganizationId is a self-reference: filled in the 2nd pass
+      // below, once every row is in the database, so the foreign key
+      // constraint is never violated if a child appears in the CSV before
+      // its parent.
       parentOrganizationId: null,
 
       metadata: toJson(r.metadata),

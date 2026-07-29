@@ -14,8 +14,8 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
-# Onglet technique écrit par generate_excel_templates.py pour alimenter les
-# listes déroulantes. Il ne doit jamais être pris pour la feuille de données.
+# Technical sheet written by generate_excel_templates.py to feed the
+# dropdown lists. It must never be mistaken for the data sheet.
 LISTS_SHEET_NAME = "_lists"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -25,14 +25,13 @@ DEFAULT_OUTPUT = SCRIPT_DIR.parent / "data"
 
 def pick_data_sheet(wb, expected_title: str):
     """
-    Feuille de données du classeur.
+    The workbook's data sheet.
 
-    wb.active était utilisé jusqu'ici : si le client enregistrait le fichier
-    en ayant l'onglet "_lists" sélectionné, la conversion écrasait le CSV
-    métier avec la liste des valeurs d'enum. Le garde-fou anti-rétrécissement
-    ne protégeait pas de ce cas (les enums comptent plus de lignes que la
-    plupart des tables). On cible donc la feuille par son nom, avec repli sur
-    la première feuille non technique.
+    wb.active was used until now: if the client saved the file with the
+    "_lists" tab selected, the conversion overwrote the business CSV with the
+    list of enum values. The anti-shrinking guard did not protect against
+    that case (enums have more rows than most tables). We therefore target
+    the sheet by name, falling back to the first non-technical sheet.
     """
     if expected_title in wb.sheetnames:
         return wb[expected_title]
@@ -44,14 +43,13 @@ def pick_data_sheet(wb, expected_title: str):
 
 def normalize_cell(value):
     """
-    Rend une cellule sous la forme exactement attendue par le moteur
-    d'import.
+    Renders a cell in exactly the form the import engine expects.
 
-    openpyxl restitue les types natifs d'Excel : csv.writer écrivait donc
-    "1234.0" pour un entier stocké en flottant, "2024-01-01 00:00:00" pour
-    une date, et "True"/"False" (capitalisation Python) pour un booléen -
-    trois formes que toStringArray/toBool/checkInt côté import ne
-    reconnaissent pas.
+    openpyxl returns Excel's native types: csv.writer therefore wrote
+    "1234.0" for an integer stored as a float, "2024-01-01 00:00:00" for a
+    date, and "True"/"False" (Python capitalisation) for a boolean - three
+    forms that toStringArray/toBool/checkInt on the import side do not
+    recognise.
     """
     if value is None:
         return ""
@@ -94,9 +92,9 @@ def convert(input_dir: Path, output_dir: Path, force: bool = False) -> None:
             new_rows.append([normalize_cell(cell) for cell in row])
         wb.close()
 
-        # Colonnes vides en fin de ligne, héritées d'un ";" traînant dans le
-        # classeur : elles n'appartiennent pas à l'en-tête et feraient
-        # échouer la validation stricte des colonnes côté import.
+        # Empty trailing columns, inherited from a stray ";" in the
+        # workbook: they are not part of the header and would fail the
+        # import's strict column validation.
         if new_rows:
             width = len(new_rows[0])
             while width > 0 and new_rows[0][width - 1] == "":

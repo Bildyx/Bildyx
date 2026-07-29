@@ -19,27 +19,27 @@ export interface MappedRow {
   warnings: RowIssue[];
 }
 
-// Une relation many-to-many implicite exposée comme colonne texte dans le
+// An implicit many-to-many relation exposed as a text column in the
 // CSV/template.
 export interface M2mColumn {
-  // Nom de la colonne CSV (ex: "industries", "main_industries").
+  // CSV column name (e.g. "industries", "main_industries").
   column: string;
-  // Champ de relation Prisma sur le modèle courant (ex: "mainIndustries").
+  // Prisma relation field on the current model (e.g. "mainIndustries").
   relationField: string;
-  // Delegate PrismaClient du modèle cible (ex: "industry", "country").
+  // PrismaClient delegate of the target model (e.g. "industry", "country").
   targetModel: string;
-  // Champ du modèle cible auquel la cellule fait référence, comparé sans
-  // tenir compte de la casse (ex: "name" pour Industry, "isoCode" pour
+  // Field of the target model the cell refers to, compared
+  // case-insensitively (e.g. "name" for Industry, "isoCode" for
   // Country).
   targetLookupField: string;
-  // Second champ accepté pour la même cellule, essayé seulement si la valeur
-  // ne correspond à aucun targetLookupField. La colonne `countries`
-  // d'organizations.csv est renseignée avec des noms de pays ("France") alors
-  // que le contrat attend un code ISO : sans ce repli, aucun des liens
-  // organisation<->pays n'était posé.
+  // Second field accepted for the same cell, tried only if the value matches
+  // no targetLookupField. The `countries` column of organizations.csv is
+  // filled with country names ("France") whereas the contract expects an ISO
+  // code: without this fallback, none of the organization<->country links
+  // were set.
   targetAltLookupField?: string;
-  // Champ unique du modèle cible à utiliser dans le `connect` Prisma
-  // (ex: "id" pour Industry/City, "isoCode" pour Country).
+  // Unique field of the target model to use in the Prisma `connect`
+  // (e.g. "id" for Industry/City, "isoCode" for Country).
   targetConnectField: string;
 }
 
@@ -72,16 +72,15 @@ export interface ImportAdapter<Row extends CsvRow = CsvRow, Fk = unknown> {
   // scalar fields + M2M free-text columns). Used for header validation and
   // as the row-hash input.
   expectedColumns: string[];
-  // Relations many-to-many implicites, portées dans le CSV par une colonne
-  // texte ";"-séparée (voir M2M_COLUMNS dans
+  // Implicit many-to-many relations, carried in the CSV by a ";"-separated
+  // text column (see M2M_COLUMNS in
   // scripts/generate_excel_templates.py).
   //
-  // Ces colonnes étaient déclarées dans expectedColumns - donc acceptées par
-  // la validation d'en-tête - mais AUCUN adaptateur ne les écrivait : le
-  // moteur d'import ignorait purement et simplement toutes les relations
-  // M2M, que seul l'ancien seeds_relations.ts savait poser. Déclarées ici,
-  // elles sont appliquées génériquement par run.ts après écriture des
-  // lignes (voir applyM2mLinks).
+  // These columns were declared in expectedColumns - hence accepted by header
+  // validation - but NO adapter ever wrote them: the import engine simply
+  // ignored every M2M relation, which only the legacy seeds_relations.ts knew
+  // how to set. Declared here, they are applied generically by run.ts after
+  // the rows are written (see applyM2mLinks).
   m2mColumns?: M2mColumn[];
   buildFkContext: (prisma: PrismaClient, rows: Row[]) => Promise<Fk>;
   mapRow: (row: Row, rowIndex: number, fk: Fk) => MappedRow;

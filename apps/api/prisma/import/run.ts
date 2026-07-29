@@ -6,10 +6,10 @@ import type { ImportPlan, PlannedRow } from "./plan";
 import { toStringArray } from "../seed-utils";
 import type { CsvRow, ImportAdapter, M2mColumn, PrismaTransactionClient } from "./types";
 
-// Au-delà de cette proportion d'orphelines, --prune s'arrête au lieu de
-// soft-supprimer. Sans ce seuil, un CSV tronqué, vide, ou converti depuis le
-// mauvais onglet Excel soft-supprimait l'intégralité du modèle sans la
-// moindre confirmation. --force-prune permet de passer outre sciemment.
+// Past this proportion of orphans, --prune stops instead of soft-deleting.
+// Without this threshold, a truncated or empty CSV, or one converted from the
+// wrong Excel sheet, soft-deleted the entire model without any confirmation
+// whatsoever. --force-prune allows knowingly overriding it.
 export const PRUNE_RATIO_LIMIT = 0.2;
 
 export interface RunOptions {
@@ -27,17 +27,16 @@ export interface RunResult {
   committed: boolean;
   skippedReason?: SkipReason;
   prunedCount: number;
-  // Renseigné quand --prune a été refusé par le seuil de sécurité.
+  // Set when --prune was refused by the safety threshold.
   pruneRefused?: { orphans: number; tracked: number; ratio: number };
-  // Références M2M non résolues, remontées comme avertissements.
+  // Unresolved M2M references, reported as warnings.
   m2mWarnings: string[];
 }
 
-// Résout une colonne M2M pour toutes les lignes écrites, puis pose les
-// liens. `set` plutôt que `connect` : un réimport doit refléter exactement
-// le contenu du fichier, y compris la suppression d'un lien retiré de la
-// cellule - `connect` ne sait qu'ajouter, ce qui rendait l'import non
-// idempotent sur ces colonnes.
+// Resolves an M2M column for every written row, then sets the links. `set`
+// rather than `connect`: a re-import must reflect the file's contents
+// exactly, including the removal of a link taken out of the cell - `connect`
+// can only add, which made the import non-idempotent on those columns.
 async function applyM2mLinks(
   client: PrismaTransactionClient,
   adapter: ImportAdapter<CsvRow, unknown>,
@@ -62,9 +61,9 @@ async function applyM2mLinks(
     byLookup.set(key, t[m2m.targetConnectField]);
   }
 
-  // Index secondaire, construit après le principal et sans jamais l'écraser :
-  // une valeur reconnue comme code ISO reste résolue comme telle même si un
-  // autre pays porte ce nom.
+  // Secondary index, built after the primary one and never overwriting it:
+  // a value recognized as an ISO code stays resolved as such even if another
+  // country bears that name.
   const byAltLookup = new Map<string, unknown>();
   if (m2m.targetAltLookupField) {
     for (const t of targets) {
@@ -80,8 +79,8 @@ async function applyM2mLinks(
   for (const planned of written) {
     const cell = planned.row[m2m.column];
     const tokens = toStringArray(cell);
-    // Cellule vide : on pose quand même `set: []` pour que le retrait de
-    // toutes les valeurs soit répercuté.
+    // Empty cell: still issue `set: []` so that removing every value is
+    // propagated.
     const connect: Record<string, unknown>[] = [];
     const seen = new Set<unknown>();
 
@@ -220,10 +219,9 @@ export async function runImportForModel(
     await adapter.afterUpsert(client, written, fkContext);
   }
 
-  // Relations M2M : posées après afterUpsert (les cibles peuvent provenir
-  // de n'importe quel chunk) et avant l'enregistrement des hash, pour qu'un
-  // plantage ici rejoue les lignes au run suivant au lieu de les considérer
-  // à jour.
+  // M2M relations: set after afterUpsert (targets may come from any chunk)
+  // and before hashes are recorded, so a crash here replays the rows on the
+  // next run instead of treating them as up to date.
   const m2mWarnings: string[] = [];
   for (const m2m of adapter.m2mColumns ?? []) {
     await applyM2mLinks(client, adapter, m2m, written, m2mWarnings);
@@ -251,8 +249,8 @@ export async function runImportForModel(
 
   let pruneRefused: RunResult["pruneRefused"];
   if (options.prune) {
-    // Nombre de clés suivies avant ce run : orphelines + lignes retrouvées
-    // dans le fichier. Un fichier tronqué fait grimper le ratio.
+    // Number of keys tracked before this run: orphans + rows found again in
+    // the file. A truncated file drives the ratio up.
     const tracked = plan.orphans.length + plan.toUpdate.length + plan.unchanged.length;
     const ratio = tracked > 0 ? plan.orphans.length / tracked : 0;
     if (!options.forcePrune && plan.orphans.length > 0 && ratio > PRUNE_RATIO_LIMIT) {

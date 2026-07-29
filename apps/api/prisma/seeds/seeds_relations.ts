@@ -1,11 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { readCsv, resolveNameList, buildNameLookup, slugify } from "../seed-utils";
 
-// Colonnes de relation many-to-many ajoutees par
-// scripts/generate_excel_templates.py (voir M2M_COLUMNS) : chacune contient
-// une liste "Nom1;Nom2" de cles lisibles plutot qu'un id, puisque les
-// relations M2M implicites de Prisma n'ont aucune colonne de cle etrangere
-// pour les porter.
+// Many-to-many relation columns added by
+// scripts/generate_excel_templates.py (see M2M_COLUMNS): each holds a
+// "Name1;Name2" list of human-readable keys rather than an id, since Prisma's
+// implicit M2M relations have no foreign key column to carry them.
 
 type OrganizationRelationsCsv = {
   name: string;
@@ -30,9 +29,9 @@ type IndustryRelationsCsv = {
   related_industries?: string;
 };
 
-// Doit tourner apres tous les autres seeders : chaque relation reference des
-// lignes creees par un seeder different (voire, pour la self-relation
-// industries, par le seeder industries lui-meme).
+// Must run after every other seeder: each relation references rows created
+// by a different seeder (or, for the industries self-relation, by the
+// industries seeder itself).
 export async function seedManyToManyRelations(prisma: PrismaClient) {
   const validCountryIsoCodes = new Set(
     (await prisma.country.findMany({ select: { isoCode: true } })).map(
@@ -46,11 +45,11 @@ export async function seedManyToManyRelations(prisma: PrismaClient) {
     await prisma.city.findMany({ select: { id: true, name: true } }),
   );
 
-  // organizations.csv laissait sa colonne slug vide sur la totalité de ses
-  // lignes : `where: { slug: r.slug }` levait donc un P2025 qui interrompait
-  // tout le seed à sa dernière étape. On résout désormais l'organisation par
-  // son slug s'il est renseigné, sinon par slugify(name), et on ignore
-  // proprement une ligne introuvable au lieu de faire échouer le seed.
+  // organizations.csv left its slug column empty on every one of its rows:
+  // `where: { slug: r.slug }` therefore raised a P2025 that aborted the whole
+  // seed at its last step. We now resolve the organization by its slug when
+  // set, otherwise by slugify(name), and cleanly skip a row that cannot be
+  // found instead of failing the seed.
   const organizations = await prisma.organization.findMany({
     select: { id: true, slug: true },
   });
@@ -135,8 +134,8 @@ export async function seedManyToManyRelations(prisma: PrismaClient) {
     linked++;
   }
 
-  // Industry <-> Industry (self-relation, symmetrique : relier depuis
-  // industries_A suffit, industries_B refletera la meme relation).
+  // Industry <-> Industry (self-relation, symmetric: linking from
+  // industries_A is enough, industries_B will reflect the same relation).
   const industryRows = readCsv<IndustryRelationsCsv>("industries.csv");
   for (const r of industryRows) {
     const relatedIds = resolveNameList(

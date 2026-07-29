@@ -63,11 +63,11 @@ const EXPECTED_COLUMNS = [
 // EmployeeCountRange values look like RANGE_1_10, RANGE_5000_PLUS - handles
 // CSV cells such as "1-10", "1_10", "5000+" (same logic as the previous
 // seeds_organizations.ts).
-// Effectif brut ("~20,000", "35", "~2,000 employees", "1.2 million") ramené
-// au nombre qu'il désigne. organizations.csv renseigne un effectif réel et
-// non une tranche sur 127 de ses 129 cellules non vides : sans cette
-// conversion, parseEmployeeRange ne reconnaissait que la forme littérale de
-// l'enum et perdait donc la quasi-totalité de la colonne (warning + null).
+// Raw headcount ("~20,000", "35", "~2,000 employees", "1.2 million") reduced
+// to the number it denotes. organizations.csv holds an actual headcount
+// rather than a range in 127 of its 129 non-empty cells: without this
+// conversion, parseEmployeeRange only recognized the literal enum form and
+// therefore lost almost the entire column (warning + null).
 function parseEmployeeCount(v: string): number | null {
   const cleaned = v.replace(/,/g, "").toLowerCase();
   const match = /(\d+(?:\.\d+)?)\s*(million|thousand|k|m)?/.exec(cleaned);
@@ -107,9 +107,9 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
 
   if (key === "5000_PLUS" || key === "5000") return EmployeeCountRange.RANGE_5000_PLUS;
 
-  // Dernier recours seulement : une cellule qui nomme explicitement une
-  // tranche a déjà été traitée ci-dessus, donc on ne risque pas de
-  // reclasser à tort une borne ("1-10" -> 1) en effectif brut.
+  // Last resort only: a cell that explicitly names a range has already been
+  // handled above, so there is no risk of wrongly reclassifying a bound
+  // ("1-10" -> 1) as a raw headcount.
   const count = parseEmployeeCount(v);
   if (count !== null) return bucketEmployeeCount(count);
 
@@ -150,8 +150,8 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       relationField: "countries",
       targetModel: "country",
       targetLookupField: "isoCode",
-      // organizations.csv renseigne cette colonne avec des noms de pays
-      // ("France", "Australia") et non des codes ISO.
+      // organizations.csv fills this column with country names
+      // ("France", "Australia") rather than ISO codes.
       targetAltLookupField: "name",
       targetConnectField: "isoCode",
     },
@@ -176,12 +176,12 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       select: { id: true, name: true, stateProvince: true, countryId: true },
     });
 
-    // Plusieurs villes peuvent porter le même nom (cities.csv contient trois
-    // "Alexandria" : EG, RO, US). buildNameLookup construit une Map par nom,
-    // donc la dernière écrasait les autres et une organisation d'Alexandria
-    // (Virginie) pouvait se retrouver rattachée à Alexandrie (Égypte), sans
-    // le moindre avertissement. On indexe donc toutes les candidates par nom
-    // et on tranche avec les qualificatifs de la cellule.
+    // Several cities can share the same name (cities.csv contains three
+    // "Alexandria": EG, RO, US). buildNameLookup builds a Map keyed by name,
+    // so the last one overwrote the others and an organization in Alexandria
+    // (Virginia) could end up attached to Alexandria (Egypt), without any
+    // warning at all. We therefore index every candidate by name and
+    // disambiguate using the qualifiers in the cell.
     const candidatesByName = new Map<string, typeof cities>();
     for (const city of cities) {
       const key = city.name.trim().toLowerCase();
@@ -190,8 +190,8 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       else candidatesByName.set(key, [city]);
     }
 
-    // Les cellules city_name s'écrivent "Ville", "Ville, État" ou
-    // "Ville, État, Pays" (e.g. "Alexandria, Virginia",
+    // city_name cells are written as "City", "City, State" or
+    // "City, State, Country" (e.g. "Alexandria, Virginia",
     // "Boston, Massachusetts, USA").
     const resolveCityId = (raw?: string): string | null => {
       if (!raw || raw.trim() === "") return null;
@@ -199,16 +199,16 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
       if (parts.length === 0) return null;
 
-      // Nom exact d'abord (une ville peut légitimement contenir une virgule),
-      // puis la portion avant la première virgule.
+      // Exact name first (a city name may legitimately contain a comma),
+      // then the portion before the first comma.
       const candidates =
         candidatesByName.get(raw.trim().toLowerCase()) ??
         candidatesByName.get(parts[0]!.toLowerCase());
       if (!candidates || candidates.length === 0) return null;
       if (candidates.length === 1) return candidates[0]!.id;
 
-      // Homonymes : on cherche un qualificatif qui désigne sans ambiguïté une
-      // seule candidate (état/province, ou code ISO du pays).
+      // Homonyms: look for a qualifier that unambiguously designates a
+      // single candidate (state/province, or the country ISO code).
       const qualifiers = parts.slice(1).map((q) => q.toLowerCase());
       const matches = candidates.filter((c) =>
         qualifiers.some(
@@ -218,9 +218,9 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         ),
       );
 
-      // Toujours ambigu (aucun ou plusieurs qualificatifs correspondants) :
-      // null plutôt qu'un rattachement arbitraire - checkOptionalFk le
-      // remonte alors en avertissement.
+      // Still ambiguous (no or several matching qualifiers): null rather
+      // than an arbitrary attachment - checkOptionalFk then reports it as a
+      // warning.
       return matches.length === 1 ? matches[0]!.id : null;
     };
 
@@ -346,11 +346,11 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         jurisdiction: row.jurisdiction || null,
         members: members.value,
         collections: row.collections || null,
-        // graduates a été supprimée de la base (migration
-        // 20260728120100) ; student_count/postgraduates l'ont remplacée et
-        // undergraduates est passée de TEXT à INTEGER lors de la fusion
-        // University -> Organization. L'adaptateur écrivait encore
-        // l'ancienne forme, ce qui faisait échouer tout import Organization.
+        // graduates was dropped from the database (migration
+        // 20260728120100); student_count/postgraduates replaced it and
+        // undergraduates went from TEXT to INTEGER during the
+        // University -> Organization merge. The adapter was still writing
+        // the old shape, which made every Organization import fail.
         studentCount: studentCount.value,
         undergraduates: undergraduates.value,
         postgraduates: postgraduates.value,
