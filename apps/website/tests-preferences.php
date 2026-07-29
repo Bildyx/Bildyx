@@ -57,35 +57,35 @@ echo str_replace('</head>', "    {$testsStylesheet}\n</head>", $sharedHeader);
                     <span role="cell"><span class="tp-result-button">View Result</span></span>
                 </a>
 
-                <a class="tp-test-row" role="row" href="#">
+                <a class="tp-test-row" role="row" href="tests-preferences/assertiveness.php">
                     <span class="tp-test-name" role="cell"><span class="tp-icon">✧</span> Assertiveness</span>
                     <span role="cell">Personality Test</span>
                     <span class="tp-status" role="cell">Completed</span>
                     <span role="cell"><span class="tp-result-button">View Result</span></span>
                 </a>
 
-                <a class="tp-test-row" role="row" href="#">
+                <a class="tp-test-row" role="row" href="tests-preferences/creative-analytical.php">
                     <span class="tp-test-name" role="cell"><span class="tp-icon">♙</span> Creative or Analytical</span>
                     <span role="cell">Personality Test</span>
                     <span class="tp-status" role="cell">Completed</span>
                     <span role="cell"><span class="tp-result-button">View Result</span></span>
                 </a>
 
-                <a class="tp-test-row" role="row" href="#">
+                <a class="tp-test-row" role="row" href="tests-preferences/intellectual-curiosity.php">
                     <span class="tp-test-name" role="cell"><span class="tp-icon">♧</span> Intellectual Curiosity</span>
                     <span role="cell">Personality Test</span>
                     <span class="tp-status" role="cell">Completed</span>
                     <span role="cell"><span class="tp-result-button">View Result</span></span>
                 </a>
 
-                <a class="tp-test-row" role="row" href="#">
+                <a class="tp-test-row" role="row" href="tests-preferences/entrepreneur.php">
                     <span class="tp-test-name" role="cell"><span class="tp-icon">↗</span> Entrepreneur</span>
                     <span role="cell">Personality Test</span>
                     <span class="tp-status" role="cell">Completed</span>
                     <span role="cell"><span class="tp-result-button">View Result</span></span>
                 </a>
 
-                <a class="tp-test-row" role="row" href="#">
+                <a class="tp-test-row" role="row" href="tests-preferences/self-motivation.php">
                     <span class="tp-test-name" role="cell"><span class="tp-icon">♙</span> Self-Motivation</span>
                     <span role="cell">Personality Test</span>
                     <span class="tp-status" role="cell">Completed</span>

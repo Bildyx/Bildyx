@@ -85,12 +85,12 @@ export function planImport<Row extends CsvRow, Fk>(
     const rowNumber = index + 1;
     const naturalKey = normalize((row[adapter.naturalKeyColumn] ?? "").trim());
 
-    // Une clé naturelle vide échappait à tous les contrôles :
-    // findDuplicateNaturalKeys ignore les clés vides, donc deux lignes s'y
-    // réduisant (nom entièrement non-ASCII passé à slugify(), colonne clé
-    // laissée vide) n'étaient pas signalées comme doublons et allaient se
-    // percuter sur la contrainte unique en base - ou pire, s'écraser l'une
-    // l'autre. On les rejette explicitement.
+    // An empty natural key slipped past every check:
+    // findDuplicateNaturalKeys ignores empty keys, so two rows reducing to
+    // one (a fully non-ASCII name passed through slugify(), a key column left
+    // empty) were not reported as duplicates and would collide on the
+    // database's unique constraint - or worse, overwrite each other. We
+    // reject them explicitly.
     if (!naturalKey) {
       plan.rowErrors.push({
         row: rowNumber,
@@ -125,10 +125,9 @@ export function planImport<Row extends CsvRow, Fk>(
 
     if (mapped.errors.length > 0) return;
 
-    // Filet de sécurité : mapRow doit produire la même clé que la
-    // normalisation appliquée ci-dessus. Un adaptateur qui divergerait
-    // écrirait sous une clé que ni la détection de doublons ni le suivi des
-    // orphelines n'auraient vue.
+    // Safety net: mapRow must produce the same key as the normalization
+    // applied above. An adapter that diverged would write under a key that
+    // neither duplicate detection nor orphan tracking had seen.
     if (!mapped.naturalKey) {
       plan.rowErrors.push({
         row: rowNumber,

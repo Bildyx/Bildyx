@@ -11,16 +11,15 @@ export interface LoadedCsv {
 // from Object.keys(rows[0])) so header validation still works on a file
 // with zero data rows (e.g. subjects.csv today - see structure.md).
 //
-// Deux pièges silencieux corrigés ici :
-//   - `bom: true` : un CSV réenregistré à la main depuis Excel commence par
-//     un BOM UTF-8, qui se collait au nom de la première colonne. La
-//     validation d'en-tête rejetait alors le fichier entier pour une
-//     colonne "manquante" pourtant présente.
-//   - les noms de colonnes sont trimés à la source. validateHeader trimait
-//     déjà de son côté, mais csv-parse indexait les lignes sur les noms
-//     BRUTS : un en-tête " name" passait la validation, puis row["name"]
-//     valait undefined et toute la colonne partait à null sans le moindre
-//     avertissement.
+// Two silent traps fixed here:
+//   - `bom: true`: a CSV re-saved by hand from Excel starts with a UTF-8 BOM,
+//     which got glued onto the first column's name. Header validation then
+//     rejected the whole file over a "missing" column that was in fact
+//     present.
+//   - column names are trimmed at the source. validateHeader already trimmed
+//     on its side, but csv-parse indexed rows on the RAW names: a " name"
+//     header passed validation, then row["name"] was undefined and the whole
+//     column went to null without any warning.
 const PARSE_OPTIONS = {
   delimiter: ";",
   bom: true,

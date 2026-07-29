@@ -36,8 +36,9 @@ type CertificationCsv = {
 export async function seedCertifications(prisma: PrismaClient) {
   const rows = readCsv<CertificationCsv>("certifications.csv");
 
-  // certifications.csv renseigne issuing_organization_name avec le nom de
-  // l'organisation (ex: "Adobe") plutot que son UUID -> resolution par nom.
+  // certifications.csv fills issuing_organization_name with the
+  // organization's name (e.g. "Adobe") rather than its UUID -> resolution by
+  // name.
   const organizations = await prisma.organization.findMany({
     select: { id: true, name: true },
   });
@@ -92,8 +93,8 @@ export async function seedCertifications(prisma: PrismaClient) {
     );
   }
 
-  // NOTE: depend de organizations.ts (issuing_organization_name) -> a seeder
-  // avant.
+  // NOTE: depends on organizations.ts (issuing_organization_name) -> seed
+  // that first.
   const result = await prisma.certification.createMany({
     data,
     skipDuplicates: true,

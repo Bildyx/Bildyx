@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "type": "module",
   "devDependencies": {
+    "@electric-sql/pglite": "^0.4.1",
     "@types/cookie-parser": "^1.4.10",
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",

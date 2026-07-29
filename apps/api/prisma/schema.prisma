@@ -164,18 +164,18 @@ model Organization {
   serial_number        String               @unique
   subsidiaries         String?
   subtype              OrganizationSubType?
-  // Sous-catégorie libre, dépendante du subtype (ex: pour subtype=UNIVERSITY,
-  // valeurs suggérées "GRANDE_ECOLE" / "INSTITUTE" / "ACADEMY" / "ONLINE" /
-  // "OTHER" - ancien enum UniversityType, supprimé du schéma avec le modèle
-  // University; non contraint côté DB, à valider/proposer côté front si besoin
-  // d'un dropdown).
+  // Free-form sub-category, dependent on subtype (e.g. for subtype=UNIVERSITY,
+  // suggested values "GRANDE_ECOLE" / "INSTITUTE" / "ACADEMY" / "ONLINE" /
+  // "OTHER" - former UniversityType enum, dropped from the schema along with
+  // the University model; not constrained on the DB side, to be
+  // validated/suggested on the front end if a dropdown is needed).
   type1                String?
   type2                String?
-  // Champs académiques (pertinents surtout pour subtype=UNIVERSITY, mais
-  // laissés directement sur Organization par choix - anciennement portés par
-  // le modèle University, supprimé). Retypés en Int (l'ancien
-  // Organization.undergraduates/graduates était en String, ce qui empêchait
-  // tri/agrégation).
+  // Academic fields (relevant mostly for subtype=UNIVERSITY, but kept
+  // directly on Organization by choice - formerly carried by the University
+  // model, which was dropped). Retyped to Int (the former
+  // Organization.undergraduates/graduates was a String, which prevented
+  // sorting/aggregation).
   studentCount         Int?                 @map("student_count")
   undergraduates       Int?
   postgraduates        Int?
@@ -281,11 +281,11 @@ model Certification {
   @@map("certifications")
 }
 
-// model University supprimé - les universités sont désormais des Organization
-// avec subtype=UNIVERSITY ; leurs champs spécifiques (studentCount,
-// undergraduates, postgraduates) sont directement portés par Organization
-// (voir ci-dessus). Migration des lignes existantes + UserEducations à
-// exécuter avant d'appliquer cette suppression en prod (voir
+// model University dropped - universities are now Organization rows with
+// subtype=UNIVERSITY; their specific fields (studentCount, undergraduates,
+// postgraduates) are carried directly by Organization (see above). Migration
+// of the existing rows + UserEducations must be run before applying this
+// removal in production (see
 // prisma/migrate-universities-to-organizations.ts).
 
 model Degree {
@@ -390,7 +390,7 @@ model JobAd {
   @@map("job_ads")
 }
 
-/// Compétence requise pour une offre d'emploi (avec niveau d'importance)
+/// Skill required for a job ad (with importance level)
 model JobAdSkill {
   id         String          @id @default(uuid()) @db.Uuid
   jobAdId    String          @map("job_ad_id") @db.Uuid
@@ -404,7 +404,7 @@ model JobAdSkill {
   @@map("job_ad_skills")
 }
 
-/// Utilisateur (authentification & identité)
+/// User (authentication & identity)
 model User {
   id                     String        @id @default(uuid()) @db.Uuid
   email                  String        @unique
@@ -465,7 +465,7 @@ model UserSession {
   @@map("user_sessions")
 }
 
-/// Profil public user
+/// Public user profile
 model UserProfile {
   id                       String                  @id @default(uuid()) @db.Uuid
   userId                   String                  @unique @map("user_id") @db.Uuid
@@ -522,9 +522,9 @@ model UserCertifications {
 model UserEducations {
   id                    String                @id @default(uuid()) @db.Uuid
   user_profile_id       String                @db.Uuid
-  // Remplace university_id : pointe désormais vers Organization (subtype
-  // filtré à UNIVERSITY côté application/import, PAS au niveau de la
-  // contrainte DB - voir validation explicite dans routes/user_educations.ts).
+  // Replaces university_id: now points to Organization (subtype filtered to
+  // UNIVERSITY on the application/import side, NOT at the DB constraint level
+  // - see the explicit validation in routes/user_educations.ts).
   organization_id       String?               @db.Uuid
   degree_id             String?               @db.Uuid
   start_year            Int?
@@ -554,8 +554,8 @@ model UserEducationFields {
   @@map("user_education_fields")
 }
 
-/// Une expérience professionnelle du parcours d'un profil (poste occupé,
-/// éventuellement lié à une Organization/Job de référence).
+/// A work experience in a profile's career history (position held,
+/// optionally linked to a reference Organization/Job).
 model UserExperience {
   id              String        @id @default(uuid()) @db.Uuid
   user_profile_id String        @db.Uuid
@@ -578,7 +578,7 @@ model UserExperience {
   @@map("user_experiences")
 }
 
-/// Une langue parlée par un profil, avec son niveau de maîtrise.
+/// A language spoken by a profile, with its proficiency level.
 model UserLanguage {
   id              String               @id @default(uuid()) @db.Uuid
   user_profile_id String               @db.Uuid
@@ -590,8 +590,8 @@ model UserLanguage {
   @@map("user_languages")
 }
 
-/// Une compétence (Skill de référence) maîtrisée par un profil, avec son
-/// niveau.
+/// A skill (reference Skill) mastered by a profile, with its
+/// level.
 model UserSkill {
   id              String           @id @default(uuid()) @db.Uuid
   user_profile_id String           @db.Uuid
@@ -605,8 +605,8 @@ model UserSkill {
   @@map("user_skills")
 }
 
-/// Une entreprise ciblée par un profil (liste personnelle d'organisations
-/// auxquelles le candidat prévoit ou souhaite postuler).
+/// A company targeted by a profile (personal list of organizations the
+/// candidate plans or wants to apply to).
 model UserTargetList {
   id              String       @id @default(uuid()) @db.Uuid
   user_profile_id String       @db.Uuid
@@ -620,8 +620,8 @@ model UserTargetList {
   @@map("user_target_lists")
 }
 
-/// Référentiel d'un questionnaire de personnalité (ex: Big 5, DISC...).
-/// Données de configuration, indépendantes des utilisateurs.
+/// Reference definition of a personality questionnaire (e.g. Big 5, DISC...).
+/// Configuration data, independent of users.
 model PersonalityTest {
   id          String                  @id @default(uuid()) @db.Uuid
   code        String                  @unique
@@ -637,8 +637,8 @@ model PersonalityTest {
   @@map("personality_tests")
 }
 
-/// Un des critères notés (0-100) d'un PersonalityTest. Propre à chaque
-/// test (deux tests ne partagent pas leurs critères).
+/// One of the scored criteria (0-100) of a PersonalityTest. Specific to each
+/// test (two tests do not share their criteria).
 model PersonalityCriterion {
   id          String                      @id @default(uuid()) @db.Uuid
   test_id     String                      @db.Uuid
@@ -656,10 +656,10 @@ model PersonalityCriterion {
   @@map("personality_criteria")
 }
 
-/// Une question d'un questionnaire, rattachée au critère qu'elle mesure.
-/// Réponse attendue: note de 1 à 5 (échelle de Likert). `reverse_scored`
-/// indique une question formulée à l'envers, dont la note doit être
-/// inversée (6 - note) avant agrégation dans le score du critère.
+/// A question of a questionnaire, attached to the criterion it measures.
+/// Expected answer: a score from 1 to 5 (Likert scale). `reverse_scored`
+/// flags a reverse-worded question, whose score must be inverted
+/// (6 - score) before being aggregated into the criterion score.
 model PersonalityQuestion {
   id             String               @id @default(uuid()) @db.Uuid
   test_id        String               @db.Uuid
@@ -676,9 +676,9 @@ model PersonalityQuestion {
   @@map("personality_questions")
 }
 
-/// Résultat d'un utilisateur pour un test donné. Un seul résultat par
-/// (user_profile, test) - un nouveau passage écrase l'ancien (upsert
-/// applicatif, voir routes à venir).
+/// A user's result for a given test. Only one result per
+/// (user_profile, test) - a new attempt overwrites the previous one
+/// (application-level upsert, see upcoming routes).
 model PersonalityTestResult {
   id               String                      @id @default(uuid()) @db.Uuid
   user_profile_id  String                      @db.Uuid
@@ -696,8 +696,8 @@ model PersonalityTestResult {
   @@map("personality_test_results")
 }
 
-/// Réponse brute (1-5) d'un utilisateur à une question, pour un résultat
-/// donné - le détail "score par question".
+/// A user's raw answer (1-5) to a question, for a given result - the
+/// per-question score breakdown.
 model PersonalityAnswer {
   id          String                @id @default(uuid()) @db.Uuid
   result_id   String                @db.Uuid
@@ -711,8 +711,8 @@ model PersonalityAnswer {
   @@map("personality_answers")
 }
 
-/// Score agrégé (0-100) d'un critère pour un résultat donné - le "score
-/// général" par critère.
+/// Aggregated score (0-100) of a criterion for a given result - the
+/// "overall score" per criterion.
 model PersonalityCriterionScore {
   id           String                @id @default(uuid()) @db.Uuid
   result_id    String                @db.Uuid
@@ -726,7 +726,7 @@ model PersonalityCriterionScore {
   @@map("personality_criterion_scores")
 }
 
-/// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
+/// Audit log of sensitive actions (auth, role changes, etc.)
 model AuditLog {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
@@ -742,9 +742,9 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-/// Suivi des hash de contenu par ligne pour l'import incrémental
-/// Excel/CSV -> DB (voir apps/api/prisma/import/). Une seule table pour les
-/// 11 modèles de référence, plutôt qu'une colonne de hash sur chacun d'eux.
+/// Per-row content hash tracking for the incremental Excel/CSV -> DB import
+/// (see apps/api/prisma/import/). A single table for the 11 reference
+/// models, rather than a hash column on each of them.
 model ImportRowHash {
   id             String   @id @default(uuid()) @db.Uuid
   modelName      String   @map("model_name")

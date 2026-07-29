@@ -455,7 +455,7 @@ model Organization {
   founders              String?
   established           String?
 
-  // Localisation
+  // Location
   location              City[]
   locations             String[]
   headquarters          String?
@@ -467,7 +467,7 @@ model Organization {
   capital               String?
   areaSize              String?              @map("area_size")
 
-  // Taille & Effectifs
+  // Size & Headcount
   offices                        Int?
   employees                      EmployeeCountRange?
   members                        Int?
@@ -491,7 +491,7 @@ model Organization {
   visitors                       String?
   scope                          String?
 
-  // Structure & Organisation
+  // Structure & Organization
   branchesChapters               String[]     @map("branches_chapters")
   departmentsOverseen            String[]     @map("departments_overseen")
   departmentsDivisions           String[]     @map("departments_divisions")
@@ -503,7 +503,7 @@ model Organization {
   subordinateUnitsBranches       String[]     @map("subordinate_units_branches")
   subordinateRegionalOffices     String[]     @map("subordinate_regional_offices")
 
-  // Fonctions & Programmes
+  // Functions & Programs
   functions                      String[]
   functionsPrograms              String[]     @map("functions_programs")
   programsCenters                String[]     @map("programs_centers")
@@ -515,14 +515,14 @@ model Organization {
   caseTypes                      String[]     @map("case_types")
   typesOfAudits                  String[]     @map("types_of_audits")
 
-  // Juridique & Gouvernance
+  // Legal & Governance
   jurisdiction                   String?
   courtLevel                     String?      @map("court_level")
   appointingAuthority            String?      @map("appointing_authority")
   administeringAgency            String?      @map("administering_agency")
   currencyIssued                 String?      @map("currency_issued")
 
-  // Spécifique
+  // Specific
   hospitalType                   String?      @map("hospital_type")
   parkType                       String?      @map("park_type")
   educationLevel                 String?      @map("education_level")
@@ -540,12 +540,12 @@ model Organization {
   collectionsSize                String?      @map("collections_size")
   specialCollections             String[]     @map("special_collections")
 
-  // Installations & Structures
+  // Facilities & Structures
   labs                           String[]
   facilities                     String[]
   nationalParks                  String[]     @map("national_parks")
 
-  // Hiérarchie
+  // Hierarchy
   parentOrganizationId           String?      @map("parent_organization_id") @db.Uuid
   parentOrganization             Organization?  @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
   childAgencies                  Organization[] @relation("OrganizationHierarchy")
@@ -556,12 +556,12 @@ model Organization {
   supersedingAgencies            String[]     @map("superseding_agencies")
   supersedingPostalSystem        String?      @map("superseding_postal_system")
 
-  // Militaire : Terrestre
+  // Military: Land
   armoredVehicles                Int?         @map("armored_vehicles")
   battleTanks                    Int?         @map("battle_tanks")
   nuclearWarheads                Int?         @map("nuclear_warheads")
 
-  // Militaire : Marine
+  // Military: Navy
   activeNavyPersonnel            Int?         @map("active_navy_personnel")
   destroyers                     Int?
   submarinesDiesel               Int?         @map("submarines_diesel")
@@ -571,7 +571,7 @@ model Organization {
   stealthFleet                   Int?         @map("stealth_fleet")
   patrolBoats                    Int?         @map("patrol_boats")
 
-  // Militaire : Aérien
+  // Military: Air
   aircraft                       Int?
   fighterJets                    Int?         @map("fighter_jets")
   fighterInterceptorJets         Int?         @map("fighter_interceptor_jets")
@@ -580,7 +580,7 @@ model Organization {
   tankerPlanes                   Int?         @map("tanker_planes")
   transportPlanes                Int?         @map("transport_planes")
 
-  // Spatial
+  // Space
   militaryCommunicationSatellites  Int?       @map("military_communication_satellites")
   missileWarningSatellites         Int?       @map("missile_warning_satellites")
   militaryNavigationSatellites     Int?       @map("military_navigation_satellites")
@@ -756,7 +756,7 @@ model Degree {
   @@map("degrees")
 }
 
-/// Produit / Service / Solution
+/// Product / Service / Solution
 model Subject {
   id               String           @id @default(uuid()) @db.Uuid
   name             String
@@ -826,7 +826,7 @@ model JobAd {
   @@map("job_ads")
 }
 
-/// Compétence requise pour une offre d'emploi (avec niveau d'importance)
+/// Skill required for a job ad (with importance level)
 model JobAdSkill {
   id         String          @id @default(uuid()) @db.Uuid
   jobAdId    String          @map("job_ad_id") @db.Uuid
@@ -842,7 +842,7 @@ model JobAdSkill {
 
 // layer 2 : Users
 
-/// Utilisateur (authentification & identité)
+/// User (authentication & identity)
 model User {
   id                  String     @id @default(uuid()) @db.Uuid
   email               String     @unique
@@ -903,7 +903,7 @@ model UserSession {
   @@map("user_sessions")
 }
 
-/// Profil public user
+/// Public user profile
 model UserProfile {
   id                     String        @id @default(uuid()) @db.Uuid
   userId                 String        @unique @map("user_id") @db.Uuid
@@ -935,7 +935,7 @@ model UserProfile {
   @@map("user_profiles")
 }
 
-/// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
+/// Audit log of sensitive actions (auth, role changes, etc.)
 model AuditLog {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
