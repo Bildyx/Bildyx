@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
-import {
-  buildNameLookup,
-  normalizeEnumKey,
-  slugify,
-  toInt,
-  toStringArray,
-} from "../../seed-utils";
+import { normalizeEnumKey, slugify, toStringArray } from "../../seed-utils";
 import { runBatched } from "../batch";
-import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
+import {
+  checkEnum,
+  checkInt,
+  checkJson,
+  checkOptionalFk,
+  checkRequiredText,
+} from "../checks";
 import type {
   CsvRow,
   ImportAdapter,
@@ -44,14 +44,15 @@ const EXPECTED_COLUMNS = [
   "jurisdiction",
   "members",
   "collections",
-  "graduates",
+  "student_count",
   "undergraduates",
+  "postgraduates",
   "score",
-  "city_id",
+  "city_name",
   "numberOfEmployees",
   "personnel",
   "subsidiaries",
-  "parent_organization_id",
+  "parent_organization_name",
   "metadata",
   // M2M free-text columns.
   "countries",
@@ -62,6 +63,34 @@ const EXPECTED_COLUMNS = [
 // EmployeeCountRange values look like RANGE_1_10, RANGE_5000_PLUS - handles
 // CSV cells such as "1-10", "1_10", "5000+" (same logic as the previous
 // seeds_organizations.ts).
+// Effectif brut ("~20,000", "35", "~2,000 employees", "1.2 million") ramené
+// au nombre qu'il désigne. organizations.csv renseigne un effectif réel et
+// non une tranche sur 127 de ses 129 cellules non vides : sans cette
+// conversion, parseEmployeeRange ne reconnaissait que la forme littérale de
+// l'enum et perdait donc la quasi-totalité de la colonne (warning + null).
+function parseEmployeeCount(v: string): number | null {
+  const cleaned = v.replace(/,/g, "").toLowerCase();
+  const match = /(\d+(?:\.\d+)?)\s*(million|thousand|k|m)?/.exec(cleaned);
+  if (!match) return null;
+
+  const n = Number(match[1]);
+  if (!Number.isFinite(n)) return null;
+
+  const unit = match[2];
+  if (unit === "million" || unit === "m") return Math.round(n * 1_000_000);
+  if (unit === "thousand" || unit === "k") return Math.round(n * 1_000);
+  return Math.round(n);
+}
+
+function bucketEmployeeCount(n: number): EmployeeCountRange {
+  if (n <= 10) return EmployeeCountRange.RANGE_1_10;
+  if (n <= 50) return EmployeeCountRange.RANGE_11_50;
+  if (n <= 200) return EmployeeCountRange.RANGE_51_200;
+  if (n <= 1000) return EmployeeCountRange.RANGE_201_1000;
+  if (n <= 5000) return EmployeeCountRange.RANGE_1001_5000;
+  return EmployeeCountRange.RANGE_5000_PLUS;
+}
+
 function parseEmployeeRange(v?: string): EmployeeCountRange | null {
   if (!v || v.trim() === "") return null;
   if (v.trim() === "5000+") return EmployeeCountRange.RANGE_5000_PLUS;
@@ -77,6 +106,12 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
   }
 
   if (key === "5000_PLUS" || key === "5000") return EmployeeCountRange.RANGE_5000_PLUS;
+
+  // Dernier recours seulement : une cellule qui nomme explicitement une
+  // tranche a déjà été traitée ci-dessus, donc on ne risque pas de
+  // reclasser à tort une borne ("1-10" -> 1) en effectif brut.
+  const count = parseEmployeeCount(v);
+  if (count !== null) return bucketEmployeeCount(count);
 
   return null;
 }
@@ -109,15 +144,85 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   normalizeNaturalKey: slugify,
   deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  m2mColumns: [
+    {
+      column: "countries",
+      relationField: "countries",
+      targetModel: "country",
+      targetLookupField: "isoCode",
+      // organizations.csv renseigne cette colonne avec des noms de pays
+      // ("France", "Australia") et non des codes ISO.
+      targetAltLookupField: "name",
+      targetConnectField: "isoCode",
+    },
+    {
+      column: "industries",
+      relationField: "industries",
+      targetModel: "industry",
+      targetLookupField: "name",
+      targetConnectField: "id",
+    },
+    {
+      column: "working_area_cities",
+      relationField: "cities_working_area",
+      targetModel: "city",
+      targetLookupField: "name",
+      targetConnectField: "id",
+    },
+  ],
 
   async buildFkContext(prisma: PrismaClient, rows: CsvRow[]): Promise<OrganizationsFk> {
-    const cities = await prisma.city.findMany({ select: { id: true, name: true } });
-    const resolveCityByExactName = buildNameLookup(cities);
-    // city_id cells are typically "City, Country" (e.g. "Paris, France") but
-    // City.name only holds the city ("Paris") - fall back to matching just
-    // the part before the first comma when the exact string doesn't resolve.
-    const resolveCityId = (raw?: string): string | null =>
-      resolveCityByExactName(raw) ?? resolveCityByExactName(raw?.split(",")[0]);
+    const cities = await prisma.city.findMany({
+      select: { id: true, name: true, stateProvince: true, countryId: true },
+    });
+
+    // Plusieurs villes peuvent porter le même nom (cities.csv contient trois
+    // "Alexandria" : EG, RO, US). buildNameLookup construit une Map par nom,
+    // donc la dernière écrasait les autres et une organisation d'Alexandria
+    // (Virginie) pouvait se retrouver rattachée à Alexandrie (Égypte), sans
+    // le moindre avertissement. On indexe donc toutes les candidates par nom
+    // et on tranche avec les qualificatifs de la cellule.
+    const candidatesByName = new Map<string, typeof cities>();
+    for (const city of cities) {
+      const key = city.name.trim().toLowerCase();
+      const bucket = candidatesByName.get(key);
+      if (bucket) bucket.push(city);
+      else candidatesByName.set(key, [city]);
+    }
+
+    // Les cellules city_name s'écrivent "Ville", "Ville, État" ou
+    // "Ville, État, Pays" (e.g. "Alexandria, Virginia",
+    // "Boston, Massachusetts, USA").
+    const resolveCityId = (raw?: string): string | null => {
+      if (!raw || raw.trim() === "") return null;
+
+      const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
+      if (parts.length === 0) return null;
+
+      // Nom exact d'abord (une ville peut légitimement contenir une virgule),
+      // puis la portion avant la première virgule.
+      const candidates =
+        candidatesByName.get(raw.trim().toLowerCase()) ??
+        candidatesByName.get(parts[0]!.toLowerCase());
+      if (!candidates || candidates.length === 0) return null;
+      if (candidates.length === 1) return candidates[0]!.id;
+
+      // Homonymes : on cherche un qualificatif qui désigne sans ambiguïté une
+      // seule candidate (état/province, ou code ISO du pays).
+      const qualifiers = parts.slice(1).map((q) => q.toLowerCase());
+      const matches = candidates.filter((c) =>
+        qualifiers.some(
+          (q) =>
+            (c.stateProvince && c.stateProvince.trim().toLowerCase() === q) ||
+            c.countryId.trim().toLowerCase() === q,
+        ),
+      );
+
+      // Toujours ambigu (aucun ou plusieurs qualificatifs correspondants) :
+      // null plutôt qu'un rattachement arbitraire - checkOptionalFk le
+      // remonte alors en avertissement.
+      return matches.length === 1 ? matches[0]!.id : null;
+    };
 
     const existingOrgs = await prisma.organization.findMany({
       select: { id: true, slug: true, name: true },
@@ -166,18 +271,18 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
     const subtype = checkEnum(row.subtype, OrganizationSubType, "subtype", false);
     if (subtype.issue) warnings.push(subtype.issue);
 
-    const cityId = checkOptionalFk(row.city_id, fk.resolveCityId, "city_id");
+    const cityId = checkOptionalFk(row.city_name, fk.resolveCityId, "city_name");
     if (cityId.issue) warnings.push(cityId.issue);
 
     // parent_organization_id is only checked for resolvability here -
     // actually written by afterUpsert (see types.ts for why).
-    if (row.parent_organization_id && row.parent_organization_id.trim() !== "") {
-      const resolved = fk.resolveOrgIdByName(row.parent_organization_id);
+    if (row.parent_organization_name && row.parent_organization_name.trim() !== "") {
+      const resolved = fk.resolveOrgIdByName(row.parent_organization_name);
       if (!resolved) {
         warnings.push({
           row: 0,
-          column: "parent_organization_id",
-          message: `parent_organization_id: référence "${row.parent_organization_id}" non résolue (mise à null)`,
+          column: "parent_organization_name",
+          message: `parent_organization_name: référence "${row.parent_organization_name}" non résolue (mise à null)`,
         });
       }
     }
@@ -192,6 +297,19 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
     }
 
     const id = fk.idBySlug.get(slug) ?? fk.resolveOrgIdByName(row.name);
+
+    const members = checkInt(row.members, "members");
+    if (members.issue) warnings.push(members.issue);
+    const personnel = checkInt(row.personnel, "personnel");
+    if (personnel.issue) warnings.push(personnel.issue);
+    const studentCount = checkInt(row.student_count, "student_count");
+    if (studentCount.issue) warnings.push(studentCount.issue);
+    const undergraduates = checkInt(row.undergraduates, "undergraduates");
+    if (undergraduates.issue) warnings.push(undergraduates.issue);
+    const postgraduates = checkInt(row.postgraduates, "postgraduates");
+    if (postgraduates.issue) warnings.push(postgraduates.issue);
+    const score = checkInt(row.score, "score");
+    if (score.issue) warnings.push(score.issue);
 
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
@@ -226,14 +344,20 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         offices: row.offices || null,
         authority: row.authority || null,
         jurisdiction: row.jurisdiction || null,
-        members: toInt(row.members),
+        members: members.value,
         collections: row.collections || null,
-        graduates: row.graduates || null,
-        undergraduates: row.undergraduates || null,
-        score: toInt(row.score),
+        // graduates a été supprimée de la base (migration
+        // 20260728120100) ; student_count/postgraduates l'ont remplacée et
+        // undergraduates est passée de TEXT à INTEGER lors de la fusion
+        // University -> Organization. L'adaptateur écrivait encore
+        // l'ancienne forme, ce qui faisait échouer tout import Organization.
+        studentCount: studentCount.value,
+        undergraduates: undergraduates.value,
+        postgraduates: postgraduates.value,
+        score: score.value,
         city_id: cityId.value,
         numberOfEmployees,
-        personnel: toInt(row.personnel),
+        personnel: personnel.value,
         subsidiaries: row.subsidiaries || null,
         // Always null here - see afterUpsert.
         parentOrganizationId: null,
@@ -253,7 +377,7 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
 
     const parentLinks: { id: unknown; parentOrganizationId: string }[] = [];
     for (const { data, row } of written) {
-      const rawParentName = row.parent_organization_id;
+      const rawParentName = row.parent_organization_name;
       if (!rawParentName || rawParentName.trim() === "") continue;
       const parentOrganizationId = fk.resolveOrgIdByName(rawParentName);
       if (!parentOrganizationId || !validIds.has(parentOrganizationId)) continue;

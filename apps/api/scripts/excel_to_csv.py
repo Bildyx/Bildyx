@@ -9,13 +9,61 @@ Usage:
 
 import argparse
 import csv
+import datetime as dt
 from pathlib import Path
 
 from openpyxl import load_workbook
 
+# Onglet technique écrit par generate_excel_templates.py pour alimenter les
+# listes déroulantes. Il ne doit jamais être pris pour la feuille de données.
+LISTS_SHEET_NAME = "_lists"
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_INPUT = SCRIPT_DIR.parent / "data" / "excel_templates"
 DEFAULT_OUTPUT = SCRIPT_DIR.parent / "data"
+
+
+def pick_data_sheet(wb, expected_title: str):
+    """
+    Feuille de données du classeur.
+
+    wb.active était utilisé jusqu'ici : si le client enregistrait le fichier
+    en ayant l'onglet "_lists" sélectionné, la conversion écrasait le CSV
+    métier avec la liste des valeurs d'enum. Le garde-fou anti-rétrécissement
+    ne protégeait pas de ce cas (les enums comptent plus de lignes que la
+    plupart des tables). On cible donc la feuille par son nom, avec repli sur
+    la première feuille non technique.
+    """
+    if expected_title in wb.sheetnames:
+        return wb[expected_title]
+    for name in wb.sheetnames:
+        if name != LISTS_SHEET_NAME:
+            return wb[name]
+    raise ValueError(f"aucune feuille de données dans le classeur (onglets: {wb.sheetnames})")
+
+
+def normalize_cell(value):
+    """
+    Rend une cellule sous la forme exactement attendue par le moteur
+    d'import.
+
+    openpyxl restitue les types natifs d'Excel : csv.writer écrivait donc
+    "1234.0" pour un entier stocké en flottant, "2024-01-01 00:00:00" pour
+    une date, et "True"/"False" (capitalisation Python) pour un booléen -
+    trois formes que toStringArray/toBool/checkInt côté import ne
+    reconnaissent pas.
+    """
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "TRUE" if value else "FALSE"
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    if isinstance(value, dt.datetime):
+        return value.date().isoformat() if value.time() == dt.time() else value.isoformat(sep=" ")
+    if isinstance(value, dt.date):
+        return value.isoformat()
+    return str(value)
 
 
 def existing_data_row_count(csv_path: Path) -> int:
@@ -37,14 +85,23 @@ def convert(input_dir: Path, output_dir: Path, force: bool = False) -> None:
     for excel_path in excel_files:
         csv_path = output_dir / f"{excel_path.stem}.csv"
         wb = load_workbook(excel_path, read_only=True, data_only=True)
-        sheet = wb.active
+        sheet = pick_data_sheet(wb, excel_path.stem)
 
         new_rows = []
         for row in sheet.iter_rows(values_only=True):
             if all(cell is None for cell in row):
                 continue
-            new_rows.append(["" if cell is None else cell for cell in row])
+            new_rows.append([normalize_cell(cell) for cell in row])
         wb.close()
+
+        # Colonnes vides en fin de ligne, héritées d'un ";" traînant dans le
+        # classeur : elles n'appartiennent pas à l'en-tête et feraient
+        # échouer la validation stricte des colonnes côté import.
+        if new_rows:
+            width = len(new_rows[0])
+            while width > 0 and new_rows[0][width - 1] == "":
+                width -= 1
+            new_rows = [row[:width] for row in new_rows]
 
         # Guard against silently wiping real business data: if the template
         # currently has fewer data rows than the CSV it's about to overwrite

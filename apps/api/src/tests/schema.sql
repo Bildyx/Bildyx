@@ -449,6 +449,7 @@ CREATE TABLE "user_profiles" (
     "current_job_started_at" TIMESTAMP(3),
     "current_organization_id" UUID,
     "metadata" JSONB,
+    "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -681,9 +682,6 @@ CREATE TABLE "_working_area" (
 CREATE UNIQUE INDEX "industries_serial_number_key" ON "industries"("serial_number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "countries_iso_code_key" ON "countries"("iso_code");
-
--- CreateIndex
 CREATE UNIQUE INDEX "countries_serial_number_key" ON "countries"("serial_number");
 
 -- CreateIndex
@@ -876,6 +874,9 @@ CREATE INDEX "personality_criteria_test_id_idx" ON "personality_criteria"("test_
 CREATE UNIQUE INDEX "personality_criteria_test_id_code_key" ON "personality_criteria"("test_id", "code");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "personality_criteria_test_id_id_key" ON "personality_criteria"("test_id", "id");
+
+-- CreateIndex
 CREATE INDEX "personality_questions_criterion_id_idx" ON "personality_questions"("criterion_id");
 
 -- CreateIndex
@@ -1038,7 +1039,7 @@ ALTER TABLE "personality_criteria" ADD CONSTRAINT "personality_criteria_test_id_
 ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_criterion_id_fkey" FOREIGN KEY ("criterion_id") REFERENCES "personality_criteria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_criterion_id_fkey" FOREIGN KEY ("test_id", "criterion_id") REFERENCES "personality_criteria"("test_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "personality_test_results" ADD CONSTRAINT "personality_test_results_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;

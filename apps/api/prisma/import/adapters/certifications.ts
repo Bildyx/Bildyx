@@ -1,13 +1,19 @@
 import type { PrismaClient } from "@prisma/client";
 import { CertificationCategory, DifficultyLevel } from "@prisma/client";
-import { buildNameLookup, toInt, toStringArray } from "../../seed-utils";
-import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
+import { buildNameLookup, toStringArray } from "../../seed-utils";
+import {
+  checkEnum,
+  checkInt,
+  checkJson,
+  checkOptionalFk,
+  checkRequiredText,
+} from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
   "name",
   "serial_number",
-  "issuing_organization_id",
+  "issuing_organization_name",
   "description",
   "level",
   "category",
@@ -55,11 +61,16 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
     if (difficulty.issue) warnings.push(difficulty.issue);
 
     const issuingOrganizationId = checkOptionalFk(
-      row.issuing_organization_id,
+      row.issuing_organization_name,
       fk.resolveOrganizationId,
-      "issuing_organization_id",
+      "issuing_organization_name",
     );
     if (issuingOrganizationId.issue) warnings.push(issuingOrganizationId.issue);
+
+    const validityDurationMonths = checkInt(row.validity_duration_months, "validity_duration_months");
+    if (validityDurationMonths.issue) warnings.push(validityDurationMonths.issue);
+    const score = checkInt(row.score, "score");
+    if (score.issue) warnings.push(score.issue);
 
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
@@ -75,10 +86,10 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
         category: category.value,
         products: toStringArray(row.products),
         jobs: toStringArray(row.jobs),
-        validityDurationMonths: toInt(row.validity_duration_months),
+        validityDurationMonths: validityDurationMonths.value,
         difficulty: difficulty.value,
         websiteUrl: row.website_url || null,
-        score: toInt(row.score),
+        score: score.value,
         metadata: metadata.value,
       },
       errors,

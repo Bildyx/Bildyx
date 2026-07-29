@@ -132,11 +132,26 @@ export function parseEnumArray<T extends object>(
 // cle etrangere (laquelle n'existe pas encore au moment ou le CSV a ete
 // rempli). Retourne null (sans lever d'erreur) si aucune correspondance.
 export function buildNameLookup(rows: { id: string; name: string }[]) {
-  const byName = new Map(rows.map((r) => [r.name.trim().toLowerCase(), r.id]));
+  const byName = new Map<string, string>();
+  // Deux lignes homonymes produisaient une Map ou la derniere ecrasait la
+  // precedente : la reference etait alors resolue vers une ligne arbitraire,
+  // silencieusement et sans moyen de s'en apercevoir. On memorise les noms
+  // ambigus pour renvoyer null a la place - l'appelant (checkOptionalFk /
+  // checkRequiredFk) le remonte alors comme reference non resolue.
+  const ambiguous = new Set<string>();
+
+  for (const r of rows) {
+    const key = r.name.trim().toLowerCase();
+    if (!key) continue;
+    if (byName.has(key)) ambiguous.add(key);
+    else byName.set(key, r.id);
+  }
 
   return (rawName?: string): string | null => {
     if (!rawName || rawName.trim() === "") return null;
-    return byName.get(rawName.trim().toLowerCase()) ?? null;
+    const key = rawName.trim().toLowerCase();
+    if (ambiguous.has(key)) return null;
+    return byName.get(key) ?? null;
   };
 }
 

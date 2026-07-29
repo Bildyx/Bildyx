@@ -1,9 +1,11 @@
 import type { PrismaClient } from "@prisma/client";
 import { Currency, CostOfLiving, Language } from "@prisma/client";
-import { toInt, toIntLoose, toFloat, toBool } from "../../seed-utils";
+import { toBool, toIntLoose } from "../../seed-utils";
 import {
   checkEnum,
   checkEnumArray,
+  checkFloat,
+  checkInt,
   checkJson,
   checkRequiredFk,
   checkRequiredText,
@@ -55,6 +57,15 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
   naturalKeyField: "serial_number",
   deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  m2mColumns: [
+    {
+      column: "main_industries",
+      relationField: "mainIndustries",
+      targetModel: "industry",
+      targetLookupField: "name",
+      targetConnectField: "id",
+    },
+  ],
 
   async buildFkContext(prisma: PrismaClient): Promise<CitiesFk> {
     const countries = await prisma.country.findMany({ select: { isoCode: true } });
@@ -91,6 +102,34 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
     const language = checkEnumArray(row.language, Language, "language", LANGUAGE_ALIASES);
     warnings.push(...language.issues);
 
+    // La colonne reste INTEGER en base (voir la note de la migration
+    // 20260728160000) alors que la source est annotée ("1 (via Cairo Intl.
+    // Airport)"). toIntLoose en extrait le premier entier ; l'annotation est
+    // perdue, mais l'avertissement ci-dessous la rend au moins visible au
+    // lieu de disparaître en silence.
+    const numberOfAirports = { value: toIntLoose(row.number_of_airports) };
+    const rawAirports = (row.number_of_airports ?? "").trim();
+    if (rawAirports && String(numberOfAirports.value) !== rawAirports) {
+      warnings.push({
+        row: 0,
+        column: "number_of_airports",
+        message: `number_of_airports: "${rawAirports}" réduit à ${numberOfAirports.value} (colonne entière)`,
+      });
+    }
+
+    const medianSalary = checkInt(row.median_salary, "median_salary");
+    if (medianSalary.issue) warnings.push(medianSalary.issue);
+    const medianHomePrice = checkInt(row.median_home_price, "median_home_price");
+    if (medianHomePrice.issue) warnings.push(medianHomePrice.issue);
+    const averageRent = checkInt(row.average_rent, "average_rent");
+    if (averageRent.issue) warnings.push(averageRent.issue);
+    const numberOfUniversities = checkInt(row.number_of_universities, "number_of_universities");
+    if (numberOfUniversities.issue) warnings.push(numberOfUniversities.issue);
+    const latitude = checkFloat(row.latitude, "latitude");
+    if (latitude.issue) warnings.push(latitude.issue);
+    const longitude = checkFloat(row.longitude, "longitude");
+    if (longitude.issue) warnings.push(longitude.issue);
+
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
 
@@ -102,26 +141,26 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
         countryId: countryId.value,
         isCapital: toBool(row.is_capital),
         stateProvince: row.state_province || null,
-        population: row.population ?? null,
-        numberOfMultinationalHqs: row.number_of_multinational_hqs ?? null,
-        numberOfAirports: toIntLoose(row.number_of_airports),
+        population: row.population || null,
+        numberOfMultinationalHqs: row.number_of_multinational_hqs || null,
+        numberOfAirports: numberOfAirports.value,
         largest_organization: row.largest_organization || null,
         currency: currency.value,
-        medianSalary: toInt(row.median_salary),
+        medianSalary: medianSalary.value,
         costOfLiving: costOfLiving.value,
-        medianHomePrice: toInt(row.median_home_price),
-        averageRent: toInt(row.average_rent),
+        medianHomePrice: medianHomePrice.value,
+        averageRent: averageRent.value,
         temperatures: row.temperatures || null,
         climate: row.climate || null,
         interestingFact: row.interesting_fact || null,
         degreeHolders: row.degree_holders || null,
-        numberOfUniversities: toInt(row.number_of_universities),
+        numberOfUniversities: numberOfUniversities.value,
         top_universities: row.top_universities || null,
-        numberOfNationalities: row.number_of_nationalities ?? null,
+        numberOfNationalities: row.number_of_nationalities || null,
         language: language.value,
         peopleDescription: row.people_description || null,
-        latitude: toFloat(row.latitude),
-        longitude: toFloat(row.longitude),
+        latitude: latitude.value,
+        longitude: longitude.value,
         metadata: metadata.value,
       },
       errors,

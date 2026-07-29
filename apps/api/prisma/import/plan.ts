@@ -85,7 +85,22 @@ export function planImport<Row extends CsvRow, Fk>(
     const rowNumber = index + 1;
     const naturalKey = normalize((row[adapter.naturalKeyColumn] ?? "").trim());
 
-    if (naturalKey) currentNaturalKeys.add(naturalKey);
+    // Une clé naturelle vide échappait à tous les contrôles :
+    // findDuplicateNaturalKeys ignore les clés vides, donc deux lignes s'y
+    // réduisant (nom entièrement non-ASCII passé à slugify(), colonne clé
+    // laissée vide) n'étaient pas signalées comme doublons et allaient se
+    // percuter sur la contrainte unique en base - ou pire, s'écraser l'une
+    // l'autre. On les rejette explicitement.
+    if (!naturalKey) {
+      plan.rowErrors.push({
+        row: rowNumber,
+        column: adapter.naturalKeyColumn,
+        message: `${adapter.naturalKeyColumn}: clé naturelle vide après normalisation (valeur source: "${(row[adapter.naturalKeyColumn] ?? "").trim()}")`,
+      });
+      return;
+    }
+
+    currentNaturalKeys.add(naturalKey);
 
     if (plan.duplicateNaturalKeys.has(naturalKey)) {
       plan.rowErrors.push({
@@ -109,6 +124,20 @@ export function planImport<Row extends CsvRow, Fk>(
     }
 
     if (mapped.errors.length > 0) return;
+
+    // Filet de sécurité : mapRow doit produire la même clé que la
+    // normalisation appliquée ci-dessus. Un adaptateur qui divergerait
+    // écrirait sous une clé que ni la détection de doublons ni le suivi des
+    // orphelines n'auraient vue.
+    if (!mapped.naturalKey) {
+      plan.rowErrors.push({
+        row: rowNumber,
+        naturalKey,
+        column: adapter.naturalKeyColumn,
+        message: `${adapter.naturalKeyColumn}: mapRow a produit une clé naturelle vide`,
+      });
+      return;
+    }
 
     const rowHash = computeRowHash(row, adapter.expectedColumns);
     const action = classifyRow(mapped.naturalKey, rowHash, existingHashes);

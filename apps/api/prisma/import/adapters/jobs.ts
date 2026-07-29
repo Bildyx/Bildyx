@@ -1,7 +1,13 @@
 import type { PrismaClient } from "@prisma/client";
 import { JobCategory, SeniorityLevel } from "@prisma/client";
-import { buildNameLookup, toStringArray, toInt } from "../../seed-utils";
-import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
+import { buildNameLookup, toStringArray } from "../../seed-utils";
+import {
+  checkEnum,
+  checkInt,
+  checkJson,
+  checkOptionalFk,
+  checkRequiredText,
+} from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -10,7 +16,7 @@ const EXPECTED_COLUMNS = [
   "category",
   "description",
   "seniority_level",
-  "industry_id",
+  "industry_name",
   "products",
   "tools_and_tech",
   "tags",
@@ -52,8 +58,11 @@ export const jobsAdapter: ImportAdapter<CsvRow, JobsFk> = {
     const seniorityLevel = checkEnum(row.seniority_level, SeniorityLevel, "seniority_level", false);
     if (seniorityLevel.issue) warnings.push(seniorityLevel.issue);
 
-    const industryId = checkOptionalFk(row.industry_id, fk.resolveIndustryId, "industry_id");
+    const industryId = checkOptionalFk(row.industry_name, fk.resolveIndustryId, "industry_name");
     if (industryId.issue) warnings.push(industryId.issue);
+
+    const score = checkInt(row.score, "score");
+    if (score.issue) warnings.push(score.issue);
 
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
@@ -71,7 +80,7 @@ export const jobsAdapter: ImportAdapter<CsvRow, JobsFk> = {
         toolsAndTech: toStringArray(row.tools_and_tech),
         tags: toStringArray(row.tags),
         metadata: metadata.value,
-        score: toInt(row.score),
+        score: score.value,
       },
       errors,
       warnings,

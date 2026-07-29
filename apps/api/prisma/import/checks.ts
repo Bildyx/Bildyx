@@ -18,6 +18,56 @@ function stripParenthetical(raw: string): string {
   return raw.replace(/\([^)]*\)/g, " ");
 }
 
+// Les colonnes numériques passaient directement par toInt()/toFloat(), qui
+// se réduisent à Number() : une cellule comme "Thousands" ou "~6 million"
+// (45 et 5 occurrences respectivement dans organizations.csv) produisait
+// NaN, transmis tel quel à Prisma - donc soit une erreur au commit, soit un
+// null silencieux, dans les deux cas sans le moindre avertissement en
+// dry-run, contrairement à tous les autres contrôles de ce fichier.
+// checkInt/checkFloat rendent ces cellules visibles comme warnings et
+// stockent null, comme checkEnum le fait déjà pour une valeur d'enum
+// inconnue.
+export function checkFloat(
+  raw: string | undefined,
+  column: string,
+): { value: number | null; issue?: RowIssue } {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) return { value: null };
+
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed)) {
+    return {
+      value: null,
+      issue: {
+        row: 0,
+        column,
+        message: `${column}: "${raw}" n'est pas un nombre (mis à null)`,
+      },
+    };
+  }
+  return { value: parsed };
+}
+
+export function checkInt(
+  raw: string | undefined,
+  column: string,
+): { value: number | null; issue?: RowIssue } {
+  const parsed = checkFloat(raw, column);
+  if (parsed.issue || parsed.value === null) return parsed;
+
+  if (!Number.isInteger(parsed.value)) {
+    return {
+      value: null,
+      issue: {
+        row: 0,
+        column,
+        message: `${column}: "${raw}" n'est pas un entier (mis à null)`,
+      },
+    };
+  }
+  return { value: parsed.value };
+}
+
 export function checkRequiredText(
   raw: string | undefined,
   column: string,
@@ -132,7 +182,9 @@ export function checkEnumArray<T extends object>(
         column,
         message: `${column}: valeur "${token}" non reconnue (ignorée)`,
       });
-    } else {
+    } else if (!value.includes(parsed)) {
+      // Une même langue listée deux fois dans la cellule source produisait
+      // un doublon dans le tableau d'enum stocké en base.
       value.push(parsed);
     }
   }
@@ -169,18 +221,23 @@ export function checkRequiredFk(
 // single malformed cell must not be allowed to propagate an uncaught
 // exception out of mapRow (it would abort the whole --all batch instead of
 // rejecting just this value, unlike every other check in this file).
+//
+// DbNull et non JsonNull : sur une colonne Json?, Prisma.JsonNull écrit la
+// valeur JSON `null` ('null'::jsonb), pas un NULL SQL. Toutes les lignes
+// sans metadata se retrouvaient donc avec 'null'::jsonb, invisible pour un
+// `WHERE metadata IS NULL`. DbNull écrit bien un NULL SQL.
 export function checkJson(
   raw: string | undefined,
   column: string,
-): { value: Prisma.InputJsonValue | typeof Prisma.JsonNull; issue?: RowIssue } {
+): { value: Prisma.InputJsonValue | typeof Prisma.DbNull; issue?: RowIssue } {
   const trimmed = (raw ?? "").trim();
-  if (!trimmed) return { value: Prisma.JsonNull };
+  if (!trimmed) return { value: Prisma.DbNull };
 
   try {
     return { value: JSON.parse(trimmed) };
   } catch {
     return {
-      value: Prisma.JsonNull,
+      value: Prisma.DbNull,
       issue: { row: 0, column, message: `${column}: JSON invalide (mis à null)` },
     };
   }

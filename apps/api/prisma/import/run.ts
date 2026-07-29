@@ -3,12 +3,20 @@ import { CHUNK_SIZE, chunk, runBatched } from "./batch";
 import { loadCsvFile } from "./csv";
 import { planImport } from "./plan";
 import type { ImportPlan, PlannedRow } from "./plan";
-import type { CsvRow, ImportAdapter, PrismaTransactionClient } from "./types";
+import { toStringArray } from "../seed-utils";
+import type { CsvRow, ImportAdapter, M2mColumn, PrismaTransactionClient } from "./types";
+
+// Au-delà de cette proportion d'orphelines, --prune s'arrête au lieu de
+// soft-supprimer. Sans ce seuil, un CSV tronqué, vide, ou converti depuis le
+// mauvais onglet Excel soft-supprimait l'intégralité du modèle sans la
+// moindre confirmation. --force-prune permet de passer outre sciemment.
+export const PRUNE_RATIO_LIMIT = 0.2;
 
 export interface RunOptions {
   commit: boolean;
   allowPartial: boolean;
   prune: boolean;
+  forcePrune: boolean;
   sourceFile: string;
 }
 
@@ -19,6 +27,91 @@ export interface RunResult {
   committed: boolean;
   skippedReason?: SkipReason;
   prunedCount: number;
+  // Renseigné quand --prune a été refusé par le seuil de sécurité.
+  pruneRefused?: { orphans: number; tracked: number; ratio: number };
+  // Références M2M non résolues, remontées comme avertissements.
+  m2mWarnings: string[];
+}
+
+// Résout une colonne M2M pour toutes les lignes écrites, puis pose les
+// liens. `set` plutôt que `connect` : un réimport doit refléter exactement
+// le contenu du fichier, y compris la suppression d'un lien retiré de la
+// cellule - `connect` ne sait qu'ajouter, ce qui rendait l'import non
+// idempotent sur ces colonnes.
+async function applyM2mLinks(
+  client: PrismaTransactionClient,
+  adapter: ImportAdapter<CsvRow, unknown>,
+  m2m: M2mColumn,
+  written: PlannedRow<CsvRow>[],
+  warnings: string[],
+): Promise<void> {
+  const select: Record<string, boolean> = {
+    [m2m.targetLookupField]: true,
+    [m2m.targetConnectField]: true,
+  };
+  if (m2m.targetAltLookupField) select[m2m.targetAltLookupField] = true;
+
+  const targets: Record<string, unknown>[] = await client[m2m.targetModel].findMany({ select });
+
+  const byLookup = new Map<string, unknown>();
+  const ambiguous = new Set<string>();
+  for (const t of targets) {
+    const key = String(t[m2m.targetLookupField] ?? "").trim().toLowerCase();
+    if (!key) continue;
+    if (byLookup.has(key)) ambiguous.add(key);
+    byLookup.set(key, t[m2m.targetConnectField]);
+  }
+
+  // Index secondaire, construit après le principal et sans jamais l'écraser :
+  // une valeur reconnue comme code ISO reste résolue comme telle même si un
+  // autre pays porte ce nom.
+  const byAltLookup = new Map<string, unknown>();
+  if (m2m.targetAltLookupField) {
+    for (const t of targets) {
+      const key = String(t[m2m.targetAltLookupField] ?? "").trim().toLowerCase();
+      if (!key || byLookup.has(key)) continue;
+      if (byAltLookup.has(key)) ambiguous.add(key);
+      byAltLookup.set(key, t[m2m.targetConnectField]);
+    }
+  }
+
+  const updates: { naturalKey: string; connect: Record<string, unknown>[] }[] = [];
+
+  for (const planned of written) {
+    const cell = planned.row[m2m.column];
+    const tokens = toStringArray(cell);
+    // Cellule vide : on pose quand même `set: []` pour que le retrait de
+    // toutes les valeurs soit répercuté.
+    const connect: Record<string, unknown>[] = [];
+    const seen = new Set<unknown>();
+
+    for (const token of tokens) {
+      const key = token.trim().toLowerCase();
+      const resolved = byLookup.get(key) ?? byAltLookup.get(key);
+      if (resolved === undefined) {
+        warnings.push(`[${planned.naturalKey}] ${m2m.column}: "${token}" non résolu (ignoré)`);
+        continue;
+      }
+      if (ambiguous.has(key)) {
+        warnings.push(
+          `[${planned.naturalKey}] ${m2m.column}: "${token}" ambigu (plusieurs ${m2m.targetModel} portent ce ${m2m.targetLookupField}), lien ignoré`,
+        );
+        continue;
+      }
+      if (seen.has(resolved)) continue;
+      seen.add(resolved);
+      connect.push({ [m2m.targetConnectField]: resolved });
+    }
+
+    updates.push({ naturalKey: planned.naturalKey, connect });
+  }
+
+  await runBatched(updates, ({ naturalKey, connect }) =>
+    client[adapter.prismaModel].update({
+      where: { [adapter.naturalKeyField]: naturalKey },
+      data: { [m2m.relationField]: { set: connect } },
+    }),
+  );
 }
 
 async function loadExistingHashes(
@@ -58,15 +151,15 @@ export async function runImportForModel(
   const plan = planImport(header, rows, adapter, fkContext, existingHashes);
 
   if (plan.headerError) {
-    return { plan, committed: false, skippedReason: "header_mismatch", prunedCount: 0 };
+    return { plan, committed: false, skippedReason: "header_mismatch", prunedCount: 0, m2mWarnings: [] };
   }
 
   if (plan.rowErrors.length > 0 && !options.allowPartial) {
-    return { plan, committed: false, skippedReason: "row_errors_reject_all", prunedCount: 0 };
+    return { plan, committed: false, skippedReason: "row_errors_reject_all", prunedCount: 0, m2mWarnings: [] };
   }
 
   if (!options.commit) {
-    return { plan, committed: false, skippedReason: "dry_run", prunedCount: 0 };
+    return { plan, committed: false, skippedReason: "dry_run", prunedCount: 0, m2mWarnings: [] };
   }
 
   const client = prisma as unknown as PrismaTransactionClient;
@@ -127,6 +220,15 @@ export async function runImportForModel(
     await adapter.afterUpsert(client, written, fkContext);
   }
 
+  // Relations M2M : posées après afterUpsert (les cibles peuvent provenir
+  // de n'importe quel chunk) et avant l'enregistrement des hash, pour qu'un
+  // plantage ici rejoue les lignes au run suivant au lieu de les considérer
+  // à jour.
+  const m2mWarnings: string[] = [];
+  for (const m2m of adapter.m2mColumns ?? []) {
+    await applyM2mLinks(client, adapter, m2m, written, m2mWarnings);
+  }
+
   // Hash bookkeeping, bulk per chunk: delete + createMany is the bulk
   // equivalent of the previous per-row upsert.
   for (const batch of chunk(written, CHUNK_SIZE)) {
@@ -147,7 +249,18 @@ export async function runImportForModel(
     });
   }
 
+  let pruneRefused: RunResult["pruneRefused"];
   if (options.prune) {
+    // Nombre de clés suivies avant ce run : orphelines + lignes retrouvées
+    // dans le fichier. Un fichier tronqué fait grimper le ratio.
+    const tracked = plan.orphans.length + plan.toUpdate.length + plan.unchanged.length;
+    const ratio = tracked > 0 ? plan.orphans.length / tracked : 0;
+    if (!options.forcePrune && plan.orphans.length > 0 && ratio > PRUNE_RATIO_LIMIT) {
+      pruneRefused = { orphans: plan.orphans.length, tracked, ratio };
+    }
+  }
+
+  if (options.prune && !pruneRefused) {
     for (const batch of chunk(plan.orphans, CHUNK_SIZE)) {
       const result = await delegate.updateMany({
         where: { [adapter.naturalKeyField]: { in: batch } },
@@ -160,5 +273,5 @@ export async function runImportForModel(
     }
   }
 
-  return { plan, committed: true, prunedCount };
+  return { plan, committed: true, prunedCount, ...(pruneRefused ? { pruneRefused } : {}), m2mWarnings };
 }

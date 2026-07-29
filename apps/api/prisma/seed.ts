@@ -9,7 +9,6 @@ import { seedOrganizations } from "./seeds/seeds_organizations";
 import { seedJobs } from "./seeds/seeds_jobs";
 import { seedSkills } from "./seeds/seeds_skills";
 import { seedCertifications } from "./seeds/seeds_certifications";
-import { seedUniversities } from "./seeds/seeds_universities";
 import { seedDegrees } from "./seeds/seeds_degrees";
 import { seedSubjects } from "./seeds/seeds_subjects";
 import { seedStudyFields } from "./seeds/seeds_studyFields";
@@ -22,7 +21,7 @@ async function main() {
 
   // Ordre important a cause des foreign keys :
   // industries -> countries -> cities -> organizations
-  //   -> jobs / certifications / universities / subjects (dependent des precedents)
+  //   -> jobs / certifications / subjects (dependent des precedents)
   // skills / degrees / studyFields n'ont pas de dependances, peuvent etre
   // placés n'importe où, mais laissés en fin ici par simplicité.
 
@@ -32,7 +31,6 @@ async function main() {
   await seedOrganizations(prisma);
   await seedJobs(prisma);
   await seedCertifications(prisma);
-  await seedUniversities(prisma);
   await seedSubjects(prisma);
   await seedSkills(prisma);
   await seedDegrees(prisma);

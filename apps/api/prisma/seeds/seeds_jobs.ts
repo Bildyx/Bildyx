@@ -20,7 +20,7 @@ type JobCsv = {
   category?: string;
   description?: string;
   seniority_level?: string;
-  industry_id?: string;
+  industry_name?: string;
   products?: string;
   tools_and_tech?: string;
   tags?: string;
@@ -34,7 +34,7 @@ type JobCsv = {
 export async function seedJobs(prisma: PrismaClient) {
   const rows = readCsv<JobCsv>("jobs.csv");
 
-  // jobs.csv renseigne industry_id avec le nom de l'industrie plutot que son
+  // jobs.csv renseigne industry_name avec le nom de l'industrie plutot que son
   // uuid -> resolution par nom (meme pattern que
   // certifications.issuing_organization_id).
   const industries = await prisma.industry.findMany({
@@ -44,8 +44,8 @@ export async function seedJobs(prisma: PrismaClient) {
   const unmatchedIndustries = new Set<string>();
 
   const data: Prisma.JobCreateManyInput[] = rows.map((r) => {
-    const industryId = resolveIndustryId(r.industry_id);
-    if (r.industry_id && !industryId) unmatchedIndustries.add(r.industry_id);
+    const industryId = resolveIndustryId(r.industry_name);
+    if (r.industry_name && !industryId) unmatchedIndustries.add(r.industry_name);
 
     return {
       id: r.id,
@@ -76,11 +76,11 @@ export async function seedJobs(prisma: PrismaClient) {
 
   if (unmatchedIndustries.size > 0) {
     console.warn(
-      `Jobs: industry_id non resolus (mis a null): ${[...unmatchedIndustries].join(", ")}`,
+      `Jobs: industry_name non resolus (mis a null): ${[...unmatchedIndustries].join(", ")}`,
     );
   }
 
-  // NOTE: depend de industries.ts (industry_id) -> a seeder avant.
+  // NOTE: depend de industries.ts (industry_name) -> a seeder avant.
   const result = await prisma.job.createMany({
     data,
     skipDuplicates: true,
