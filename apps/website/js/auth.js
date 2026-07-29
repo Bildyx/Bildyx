@@ -447,7 +447,7 @@ if (signupForm) {
       signupForm.querySelectorAll('input').forEach(input => setError(input, ''));
 
       if (resp.status === 200) {
-        window.location.href = `verify-email.html?userId=${encodeURIComponent(data.userId)}`;
+        window.location.href = `verify-email.php?userId=${encodeURIComponent(data.userId)}`;
       } else if (resp.status === 400 && data.data.issues) {
         
         // 2. On boucle sur chaque erreur renvoyée par le serveur

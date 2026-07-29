@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -121,7 +121,7 @@
             const USERS_API = API_BASE.replace('/auth', '/users');
 
             if (!userId) {
-                window.location.href = 'login.html';
+                window.location.href = 'login.php';
                 return;
             }
 
@@ -129,7 +129,7 @@
             try {
                 const resp = await fetch(`${USERS_API}/${userId}`);
                 if (resp.status !== 200) {
-                    window.location.href = 'login.html';
+                    window.location.href = 'login.php';
                     return;
                 }
                 const user = await resp.json();
@@ -147,7 +147,7 @@
             $$('a[href]').forEach(link => {
                 link.addEventListener('click', event => {
                     const href = link.getAttribute('href');
-                    if (email && href && href !== '#' && (href.includes('login.html') || href.includes('index.html'))) {
+                    if (email && href && href !== '#' && (href.includes('login.php') || href.includes('index.php'))) {
                         event.preventDefault();
                         cancelUnverifiedAccountAndGo(href);
                     }
@@ -179,6 +179,7 @@
                     }
                 }
 
+                email = ''; // Prevent beforeunload prompt
                 window.location.href = targetUrl;
             }
 
@@ -213,6 +214,7 @@
                         const data = await resp.json().catch(() => ({}));
                         if (resp.status === 200) {
                             toast.success('Email verified! Redirecting to your profile...');
+                            email = ''; // Prevent beforeunload prompt
                             // Stocker la session
                             if (window.BildyxAPI && data.user) {
                                 window.BildyxAPI.setSession({

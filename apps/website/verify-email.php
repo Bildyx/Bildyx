@@ -140,6 +140,7 @@ echo str_replace('</head>', "    {$authStylesheet}\n</head>", $sharedHeader);
             }
         }
 
+        email = ''; // Prevent beforeunload prompt
         window.location.href = targetUrl;
     }
 
@@ -166,15 +167,25 @@ echo str_replace('</head>', "    {$authStylesheet}\n</head>", $sharedHeader);
                 stopLoading = startButtonLoading(verifyForm.querySelector('.submit-btn'));
                 const resp = await fetch(`${API_BASE}/verify-email`, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email.trim(), code: codeInput.value.trim() })
                 });
                 const data = await resp.json().catch(() => ({}));
                 if (resp.status === 200) {
-                    toast.success('Email verified! You can now log in.');
+                    toast.success('Email verified! Redirecting to your profile...');
+                    email = ''; // Prevent beforeunload prompt
+                    if (window.BildyxAPI && data.user) {
+                        window.BildyxAPI.setSession({
+                            userId: data.user.id,
+                            email: data.user.email,
+                            role: data.user.role,
+                            profileId: null,
+                        });
+                    }
                     setTimeout(() => {
-                        window.location.href = 'login.php';
-                    }, 2000);
+                        window.location.href = 'profile.php';
+                    }, 1500);
                 } else if (resp.status === 410 || (data && (data.message || '').includes('expired'))) {
                     showVerificationError(data.message || 'Verification expired. Your account has been deleted. Please create a new account.');
                 } else {

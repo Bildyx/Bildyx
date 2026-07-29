@@ -527,6 +527,16 @@ CREATE TABLE "user_skills" (
 );
 
 -- CreateTable
+CREATE TABLE "user_target_lists" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "organization_id" UUID NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_target_lists_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "personality_tests" (
     "id" UUID NOT NULL,
     "code" TEXT NOT NULL,
@@ -851,6 +861,12 @@ CREATE INDEX "user_skills_skill_id_idx" ON "user_skills"("skill_id");
 CREATE UNIQUE INDEX "user_skills_user_profile_id_skill_id_key" ON "user_skills"("user_profile_id", "skill_id");
 
 -- CreateIndex
+CREATE INDEX "user_target_lists_organization_id_idx" ON "user_target_lists"("organization_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_target_lists_user_profile_id_organization_id_key" ON "user_target_lists"("user_profile_id", "organization_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "personality_tests_code_key" ON "personality_tests"("code");
 
 -- CreateIndex
@@ -1008,6 +1024,12 @@ ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_skill_id_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_target_lists" ADD CONSTRAINT "user_target_lists_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_target_lists" ADD CONSTRAINT "user_target_lists_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "personality_criteria" ADD CONSTRAINT "personality_criteria_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;

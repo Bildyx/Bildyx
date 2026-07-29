@@ -169,26 +169,24 @@ export const auth = {
               updated_at: new Date(),
             })
             .execute();
-
-          await trx
-            .insertInto("user_profiles")
-            .values({
-              id: randomUUID(),
-              user_id: userId,
-              is_public: true,
-              updated_at: new Date(),
-            })
-            .execute();
         }
+
+        await trx
+          .insertInto("user_profiles")
+          .values({
+            id: randomUUID(),
+            user_id: userId,
+            is_public: true,
+            updated_at: new Date(),
+          })
+          .execute();
       });
 
-      try {
-        await sendVerificationEmail(emailLower, verificationCode);
-      } catch (err: any) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: `${err?.message || String(err)}`,
-        });
-      }
+      sendVerificationEmail(emailLower, verificationCode).catch((err) => {
+        console.error(
+          `[Signup] Failed to send verification email asynchronously: ${err?.message || String(err)}`,
+        );
+      });
 
       return {
         message: "Registration successful. Please verify your email.",
@@ -470,13 +468,11 @@ export const auth = {
         .where("id", "=", user.id)
         .execute();
 
-      try {
-        await sendResetEmail(emailLower, resetToken);
-      } catch (err: any) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: `${err?.message || String(err)}`,
-        });
-      }
+      sendResetEmail(emailLower, resetToken).catch((err) => {
+        console.error(
+          `[ForgotPassword] Failed to send reset email asynchronously: ${err?.message || String(err)}`,
+        );
+      });
 
       return {
         message: "Password reset code sent successfully.",
@@ -611,13 +607,11 @@ export const auth = {
         .where("id", "=", user.id)
         .execute();
 
-      try {
-        await sendVerificationEmail(user.email, code);
-      } catch (err: any) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: `${err?.message || String(err)}`,
-        });
-      }
+      sendVerificationEmail(user.email, code).catch((err) => {
+        console.error(
+          `[ResendVerification] Failed to send verification email asynchronously: ${err?.message || String(err)}`,
+        );
+      });
 
       return {
         message: "Verification code resent successfully.",
@@ -779,7 +773,9 @@ export const auth = {
       }
 
       if (!user) {
-        ctx.res.redirect(`${process.env.FRONTEND_URL || "http://localhost:8000"}/login.html?tab=login`);
+        ctx.res.redirect(
+          `${process.env.FRONTEND_URL || "http://localhost:8000"}/login.html?tab=login`,
+        );
         return;
       }
 
@@ -877,7 +873,16 @@ export const auth = {
 
       const user = await database
         .selectFrom("users")
-        .select(["id", "email", "first_name", "last_name", "display_name", "role", "avatar_url", "organization_id"])
+        .select([
+          "id",
+          "email",
+          "first_name",
+          "last_name",
+          "display_name",
+          "role",
+          "avatar_url",
+          "organization_id",
+        ])
         .where("id", "=", session.user_id)
         .where("deleted_at", "is", null)
         .executeTakeFirst();
