@@ -1,7 +1,13 @@
 import type { PrismaClient } from "@prisma/client";
 import { SubjectCategory } from "@prisma/client";
-import { buildNameLookup, toInt, toStringArray } from "../../seed-utils";
-import { checkEnum, checkJson, checkOptionalFk, checkRequiredText } from "../checks";
+import { buildNameLookup, toStringArray } from "../../seed-utils";
+import {
+  checkEnum,
+  checkInt,
+  checkJson,
+  checkOptionalFk,
+  checkRequiredText,
+} from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -14,7 +20,7 @@ const EXPECTED_COLUMNS = [
   "competitors",
   "vendors",
   "fun_fact",
-  "organization_id",
+  "organization_name",
   "website_url",
   "logo_url",
   "tags",
@@ -36,6 +42,15 @@ export const subjectsAdapter: ImportAdapter<CsvRow, SubjectsFk> = {
   naturalKeyField: "serial_number",
   deletedAtField: "deleted_at",
   expectedColumns: EXPECTED_COLUMNS,
+  m2mColumns: [
+    {
+      column: "industries",
+      relationField: "industries",
+      targetModel: "industry",
+      targetLookupField: "name",
+      targetConnectField: "id",
+    },
+  ],
 
   async buildFkContext(prisma: PrismaClient): Promise<SubjectsFk> {
     const organizations = await prisma.organization.findMany({ select: { id: true, name: true } });
@@ -55,8 +70,11 @@ export const subjectsAdapter: ImportAdapter<CsvRow, SubjectsFk> = {
     const category = checkEnum(row.category, SubjectCategory, "category", false);
     if (category.issue) warnings.push(category.issue);
 
-    const organizationId = checkOptionalFk(row.organization_id, fk.resolveOrganizationId, "organization_id");
+    const organizationId = checkOptionalFk(row.organization_name, fk.resolveOrganizationId, "organization_name");
     if (organizationId.issue) warnings.push(organizationId.issue);
+
+    const score = checkInt(row.score, "score");
+    if (score.issue) warnings.push(score.issue);
 
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
@@ -77,7 +95,7 @@ export const subjectsAdapter: ImportAdapter<CsvRow, SubjectsFk> = {
         website_url: row.website_url || null,
         logo_url: row.logo_url || null,
         tags: toStringArray(row.tags),
-        score: toInt(row.score),
+        score: score.value,
         metadata: metadata.value,
       },
       errors,

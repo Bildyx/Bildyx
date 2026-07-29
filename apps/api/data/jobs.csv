@@ -1,4 +1,4 @@
-title;serial_number;category;description;seniority_level;industry_id;products;tools_and_tech;tags;metadata;score
+title;serial_number;category;description;seniority_level;industry_name;products;tools_and_tech;tags;metadata;score
 Product Analyst;JOB-000001;;Product analysts assess market trends, customer needs, and product performance. They use data to make recommendations for product improvements or new launches.;;;Product insights, data reports, market analysis;Excel, SQL, Tableau, Google Analytics, Python, JIRA;;;
 Outsourcing Manager;JOB-000006;;Outsourcing managers are responsible for managing the relationship with external vendors and service providers, ensuring services are delivered on time and within budget.;;;Vendor contracts, service agreements, cost-saving initiatives;Excel, SAP, Microsoft Project, Vendor management software;;;
 Procurement Specialist;JOB-000007;;Procurement specialists manage the sourcing of materials or services needed by a company, ensuring quality, cost-efficiency, and timely delivery from suppliers.;;;Supplier contracts, cost-efficient procurement strategies;SAP, Oracle Procurement, Excel, Purchase Order Software;;;

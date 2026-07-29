@@ -1,6 +1,11 @@
 import { DifficultyLevel } from "@prisma/client";
-import { toInt, toStringArray } from "../../seed-utils";
-import { checkEnum, checkJson, checkRequiredText } from "../checks";
+import { toStringArray } from "../../seed-utils";
+import {
+  checkEnum,
+  checkInt,
+  checkJson,
+  checkRequiredText,
+} from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
 
 const EXPECTED_COLUMNS = [
@@ -46,6 +51,9 @@ export const skillsAdapter: ImportAdapter<CsvRow, void> = {
     const difficulty = checkEnum(row.difficulty, DifficultyLevel, "difficulty", false);
     if (difficulty.issue) warnings.push(difficulty.issue);
 
+    const score = checkInt(row.score, "score");
+    if (score.issue) warnings.push(score.issue);
+
     const metadata = checkJson(row.metadata, "metadata");
     if (metadata.issue) warnings.push(metadata.issue);
 
@@ -66,7 +74,7 @@ export const skillsAdapter: ImportAdapter<CsvRow, void> = {
         commonFieldsOfStudy: toStringArray(row.common_fields_of_study),
         relatedAbilities: toStringArray(row.related_abilities),
         timeToMaster: row.time_to_master || null,
-        score: toInt(row.score),
+        score: score.value,
         metadata: metadata.value,
       },
       errors,
