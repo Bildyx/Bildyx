@@ -7,6 +7,7 @@
   ],
   "devDependencies": {
     "@types/node": "^25.9.3",
+    "@types/pg": "^8.20.0",
     "prisma": "^7.8.0",
     "typescript": "^6.0.3"
   },
@@ -21,8 +22,8 @@
     "autoprefixer": "10.4.21",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
-    "csv-parse": "^7.0.1",
     "cors": "^2.8.6",
+    "csv-parse": "^7.0.1",
     "dayjs": "^1.11.21",
     "dotenv": "^17.4.2",
     "express": "^4.22.2",
@@ -35,6 +36,7 @@
     "nodemailer": "^9.0.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "pg": "^8.22.0",
     "postcss": "^8.5.15",
     "pptxgenjs": "4.0.0",
     "prismjs": "1.30.0",
