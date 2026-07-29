@@ -1,0 +1,106 @@
+{
+  "code": "INTELLECTUAL_CURIOSITY",
+  "name": "Intellectual Curiosity",
+  "description": "Are you curious and looking for deeper answers?",
+  "is_active": true,
+  "criteria": [
+    {
+      "code": "INTELLECTUAL_CURIOSITY",
+      "name": "Intellectual Curiosity",
+      "description": "Curiosité intellectuelle : goût du questionnement, de l'apprentissage et de la recherche d'information.",
+      "order": 1
+    }
+  ],
+  "questions": [
+    {
+      "order": 1,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I constantly ask questions",
+      "reverse_scored": false
+    },
+    {
+      "order": 2,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "Asking questions makes me feel stupid or ignorant",
+      "reverse_scored": true
+    },
+    {
+      "order": 3,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I like to learn new things",
+      "reverse_scored": false
+    },
+    {
+      "order": 4,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I am fascinated by how everyday object work",
+      "reverse_scored": false
+    },
+    {
+      "order": 5,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "Too much information at once is overwhelming to me",
+      "reverse_scored": true
+    },
+    {
+      "order": 6,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I have many hobbies",
+      "reverse_scored": false
+    },
+    {
+      "order": 7,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I get frustrated when I do not understand how something works",
+      "reverse_scored": false
+    },
+    {
+      "order": 8,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I find it hard to learn new things",
+      "reverse_scored": true
+    },
+    {
+      "order": 9,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I tend to ask people what their thoughts and feelings are about topics",
+      "reverse_scored": false
+    },
+    {
+      "order": 10,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I feel anxious when I have to ask someone a question",
+      "reverse_scored": true
+    },
+    {
+      "order": 11,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I am good at trivia games",
+      "reverse_scored": false
+    },
+    {
+      "order": 12,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I like that some questions can have many answers",
+      "reverse_scored": false
+    },
+    {
+      "order": 13,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "When I am solve a problem, I usually know where to look to find an answer",
+      "reverse_scored": false
+    },
+    {
+      "order": 14,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I am constantly looking to experience new things",
+      "reverse_scored": false
+    },
+    {
+      "order": 15,
+      "criterion_code": "INTELLECTUAL_CURIOSITY",
+      "text": "I am constantly seeking new information",
+      "reverse_scored": false
+    }
+  ]
+}
