@@ -1,12 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
-import {
-  buildNameLookup,
-  normalizeEnumKey,
-  slugify,
-  toStringArray,
-} from "../../seed-utils";
+import { normalizeEnumKey, slugify, toStringArray } from "../../seed-utils";
 import { runBatched } from "../batch";
 import {
   checkEnum,
@@ -68,6 +63,34 @@ const EXPECTED_COLUMNS = [
 // EmployeeCountRange values look like RANGE_1_10, RANGE_5000_PLUS - handles
 // CSV cells such as "1-10", "1_10", "5000+" (same logic as the previous
 // seeds_organizations.ts).
+// Effectif brut ("~20,000", "35", "~2,000 employees", "1.2 million") ramené
+// au nombre qu'il désigne. organizations.csv renseigne un effectif réel et
+// non une tranche sur 127 de ses 129 cellules non vides : sans cette
+// conversion, parseEmployeeRange ne reconnaissait que la forme littérale de
+// l'enum et perdait donc la quasi-totalité de la colonne (warning + null).
+function parseEmployeeCount(v: string): number | null {
+  const cleaned = v.replace(/,/g, "").toLowerCase();
+  const match = /(\d+(?:\.\d+)?)\s*(million|thousand|k|m)?/.exec(cleaned);
+  if (!match) return null;
+
+  const n = Number(match[1]);
+  if (!Number.isFinite(n)) return null;
+
+  const unit = match[2];
+  if (unit === "million" || unit === "m") return Math.round(n * 1_000_000);
+  if (unit === "thousand" || unit === "k") return Math.round(n * 1_000);
+  return Math.round(n);
+}
+
+function bucketEmployeeCount(n: number): EmployeeCountRange {
+  if (n <= 10) return EmployeeCountRange.RANGE_1_10;
+  if (n <= 50) return EmployeeCountRange.RANGE_11_50;
+  if (n <= 200) return EmployeeCountRange.RANGE_51_200;
+  if (n <= 1000) return EmployeeCountRange.RANGE_201_1000;
+  if (n <= 5000) return EmployeeCountRange.RANGE_1001_5000;
+  return EmployeeCountRange.RANGE_5000_PLUS;
+}
+
 function parseEmployeeRange(v?: string): EmployeeCountRange | null {
   if (!v || v.trim() === "") return null;
   if (v.trim() === "5000+") return EmployeeCountRange.RANGE_5000_PLUS;
@@ -83,6 +106,12 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
   }
 
   if (key === "5000_PLUS" || key === "5000") return EmployeeCountRange.RANGE_5000_PLUS;
+
+  // Dernier recours seulement : une cellule qui nomme explicitement une
+  // tranche a déjà été traitée ci-dessus, donc on ne risque pas de
+  // reclasser à tort une borne ("1-10" -> 1) en effectif brut.
+  const count = parseEmployeeCount(v);
+  if (count !== null) return bucketEmployeeCount(count);
 
   return null;
 }
@@ -121,6 +150,9 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
       relationField: "countries",
       targetModel: "country",
       targetLookupField: "isoCode",
+      // organizations.csv renseigne cette colonne avec des noms de pays
+      // ("France", "Australia") et non des codes ISO.
+      targetAltLookupField: "name",
       targetConnectField: "isoCode",
     },
     {
@@ -140,13 +172,57 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   ],
 
   async buildFkContext(prisma: PrismaClient, rows: CsvRow[]): Promise<OrganizationsFk> {
-    const cities = await prisma.city.findMany({ select: { id: true, name: true } });
-    const resolveCityByExactName = buildNameLookup(cities);
-    // city_id cells are typically "City, Country" (e.g. "Paris, France") but
-    // City.name only holds the city ("Paris") - fall back to matching just
-    // the part before the first comma when the exact string doesn't resolve.
-    const resolveCityId = (raw?: string): string | null =>
-      resolveCityByExactName(raw) ?? resolveCityByExactName(raw?.split(",")[0]);
+    const cities = await prisma.city.findMany({
+      select: { id: true, name: true, stateProvince: true, countryId: true },
+    });
+
+    // Plusieurs villes peuvent porter le même nom (cities.csv contient trois
+    // "Alexandria" : EG, RO, US). buildNameLookup construit une Map par nom,
+    // donc la dernière écrasait les autres et une organisation d'Alexandria
+    // (Virginie) pouvait se retrouver rattachée à Alexandrie (Égypte), sans
+    // le moindre avertissement. On indexe donc toutes les candidates par nom
+    // et on tranche avec les qualificatifs de la cellule.
+    const candidatesByName = new Map<string, typeof cities>();
+    for (const city of cities) {
+      const key = city.name.trim().toLowerCase();
+      const bucket = candidatesByName.get(key);
+      if (bucket) bucket.push(city);
+      else candidatesByName.set(key, [city]);
+    }
+
+    // Les cellules city_name s'écrivent "Ville", "Ville, État" ou
+    // "Ville, État, Pays" (e.g. "Alexandria, Virginia",
+    // "Boston, Massachusetts, USA").
+    const resolveCityId = (raw?: string): string | null => {
+      if (!raw || raw.trim() === "") return null;
+
+      const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
+      if (parts.length === 0) return null;
+
+      // Nom exact d'abord (une ville peut légitimement contenir une virgule),
+      // puis la portion avant la première virgule.
+      const candidates =
+        candidatesByName.get(raw.trim().toLowerCase()) ??
+        candidatesByName.get(parts[0]!.toLowerCase());
+      if (!candidates || candidates.length === 0) return null;
+      if (candidates.length === 1) return candidates[0]!.id;
+
+      // Homonymes : on cherche un qualificatif qui désigne sans ambiguïté une
+      // seule candidate (état/province, ou code ISO du pays).
+      const qualifiers = parts.slice(1).map((q) => q.toLowerCase());
+      const matches = candidates.filter((c) =>
+        qualifiers.some(
+          (q) =>
+            (c.stateProvince && c.stateProvince.trim().toLowerCase() === q) ||
+            c.countryId.trim().toLowerCase() === q,
+        ),
+      );
+
+      // Toujours ambigu (aucun ou plusieurs qualificatifs correspondants) :
+      // null plutôt qu'un rattachement arbitraire - checkOptionalFk le
+      // remonte alors en avertissement.
+      return matches.length === 1 ? matches[0]!.id : null;
+    };
 
     const existingOrgs = await prisma.organization.findMany({
       select: { id: true, slug: true, name: true },

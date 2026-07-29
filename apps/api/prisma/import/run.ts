@@ -45,9 +45,13 @@ async function applyM2mLinks(
   written: PlannedRow<CsvRow>[],
   warnings: string[],
 ): Promise<void> {
-  const targets: Record<string, unknown>[] = await client[m2m.targetModel].findMany({
-    select: { [m2m.targetLookupField]: true, [m2m.targetConnectField]: true },
-  });
+  const select: Record<string, boolean> = {
+    [m2m.targetLookupField]: true,
+    [m2m.targetConnectField]: true,
+  };
+  if (m2m.targetAltLookupField) select[m2m.targetAltLookupField] = true;
+
+  const targets: Record<string, unknown>[] = await client[m2m.targetModel].findMany({ select });
 
   const byLookup = new Map<string, unknown>();
   const ambiguous = new Set<string>();
@@ -56,6 +60,19 @@ async function applyM2mLinks(
     if (!key) continue;
     if (byLookup.has(key)) ambiguous.add(key);
     byLookup.set(key, t[m2m.targetConnectField]);
+  }
+
+  // Index secondaire, construit après le principal et sans jamais l'écraser :
+  // une valeur reconnue comme code ISO reste résolue comme telle même si un
+  // autre pays porte ce nom.
+  const byAltLookup = new Map<string, unknown>();
+  if (m2m.targetAltLookupField) {
+    for (const t of targets) {
+      const key = String(t[m2m.targetAltLookupField] ?? "").trim().toLowerCase();
+      if (!key || byLookup.has(key)) continue;
+      if (byAltLookup.has(key)) ambiguous.add(key);
+      byAltLookup.set(key, t[m2m.targetConnectField]);
+    }
   }
 
   const updates: { naturalKey: string; connect: Record<string, unknown>[] }[] = [];
@@ -70,7 +87,7 @@ async function applyM2mLinks(
 
     for (const token of tokens) {
       const key = token.trim().toLowerCase();
-      const resolved = byLookup.get(key);
+      const resolved = byLookup.get(key) ?? byAltLookup.get(key);
       if (resolved === undefined) {
         warnings.push(`[${planned.naturalKey}] ${m2m.column}: "${token}" non résolu (ignoré)`);
         continue;

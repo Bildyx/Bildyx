@@ -449,6 +449,7 @@ CREATE TABLE "user_profiles" (
     "current_job_started_at" TIMESTAMP(3),
     "current_organization_id" UUID,
     "metadata" JSONB,
+    "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -524,6 +525,16 @@ CREATE TABLE "user_skills" (
     "level" "DifficultyLevel",
 
     CONSTRAINT "user_skills_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_target_lists" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "organization_id" UUID NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_target_lists_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -669,9 +680,6 @@ CREATE TABLE "_working_area" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "industries_serial_number_key" ON "industries"("serial_number");
-
--- CreateIndex
-CREATE UNIQUE INDEX "countries_iso_code_key" ON "countries"("iso_code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "countries_serial_number_key" ON "countries"("serial_number");
@@ -851,6 +859,12 @@ CREATE INDEX "user_skills_skill_id_idx" ON "user_skills"("skill_id");
 CREATE UNIQUE INDEX "user_skills_user_profile_id_skill_id_key" ON "user_skills"("user_profile_id", "skill_id");
 
 -- CreateIndex
+CREATE INDEX "user_target_lists_organization_id_idx" ON "user_target_lists"("organization_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_target_lists_user_profile_id_organization_id_key" ON "user_target_lists"("user_profile_id", "organization_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "personality_tests_code_key" ON "personality_tests"("code");
 
 -- CreateIndex
@@ -858,6 +872,9 @@ CREATE INDEX "personality_criteria_test_id_idx" ON "personality_criteria"("test_
 
 -- CreateIndex
 CREATE UNIQUE INDEX "personality_criteria_test_id_code_key" ON "personality_criteria"("test_id", "code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_criteria_test_id_id_key" ON "personality_criteria"("test_id", "id");
 
 -- CreateIndex
 CREATE INDEX "personality_questions_criterion_id_idx" ON "personality_questions"("criterion_id");
@@ -1010,13 +1027,19 @@ ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_skill_id_fkey" FOREIGN KEY
 ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "user_target_lists" ADD CONSTRAINT "user_target_lists_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_target_lists" ADD CONSTRAINT "user_target_lists_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "personality_criteria" ADD CONSTRAINT "personality_criteria_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_criterion_id_fkey" FOREIGN KEY ("criterion_id") REFERENCES "personality_criteria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_criterion_id_fkey" FOREIGN KEY ("test_id", "criterion_id") REFERENCES "personality_criteria"("test_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "personality_test_results" ADD CONSTRAINT "personality_test_results_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
