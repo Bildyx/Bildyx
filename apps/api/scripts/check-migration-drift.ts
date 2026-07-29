@@ -1,19 +1,19 @@
 #!/usr/bin/env -S npx tsx
-// Vérifie que la chaîne de migrations produit exactement la base décrite par
+// Checks that the migration chain produces exactly the database described by
 // schema.prisma.
 //
-// Jusqu'ici rien ne le garantissait : src/tests/setup.ts génère son
+// Until now nothing guaranteed it: src/tests/setup.ts generates its
 // schema.sql via `prisma migrate diff --from-empty --to-schema-datamodel`,
-// donc les tests tournent sur le *datamodel* et ne touchent jamais aux
-// migrations écrites à la main. Une migration fausse ou oubliée passait
-// inaperçue jusqu'au déploiement.
+// so the tests run against the *datamodel* and never touch the hand-written
+// migrations. A wrong or forgotten migration went unnoticed until
+// deployment.
 //
-// Fonctionne 100% hors-ligne via PGlite (déjà utilisé par la suite de
-// tests), donc exécutable en CI sans service Postgres :
-//   A = base obtenue en rejouant prisma/migrations/ dans l'ordre
-//   B = base obtenue en appliquant le DDL dérivé de schema.prisma
-// puis comparaison de information_schema (colonnes, types, nullabilité,
-// défauts) et des index/contraintes.
+// Runs 100% offline via PGlite (already used by the test suite), so it is
+// executable in CI without a Postgres service:
+//   A = database obtained by replaying prisma/migrations/ in order
+//   B = database obtained by applying the DDL derived from schema.prisma
+// then a comparison of information_schema (columns, types, nullability,
+// defaults) and of the indexes/constraints.
 
 import fs from "node:fs";
 import path from "node:path";

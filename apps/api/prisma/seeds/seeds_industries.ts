@@ -41,8 +41,8 @@ export async function seedIndustries(prisma: PrismaClient) {
 
   console.log(`Industries rows imported: ${result.count}`);
 
-  // NOTE: la self-relation "relatedIndustries" (table implicite Prisma) n'est
-  // pas seedée ici car absente du CSV.
+  // NOTE: the "relatedIndustries" self-relation (implicit Prisma table) is
+  // not seeded here as it is absent from the CSV.
 
   return result.count;
 }

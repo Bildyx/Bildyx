@@ -124,7 +124,7 @@ export async function seedCities(prisma: PrismaClient) {
 
   console.log(`Cities rows imported: ${result.count}`);
 
-  // NOTE: la relation M2M "mainIndustries" (Industry[]) n'est pas seedée ici.
+  // NOTE: the "mainIndustries" M2M relation (Industry[]) is not seeded here.
 
   return result.count;
 }

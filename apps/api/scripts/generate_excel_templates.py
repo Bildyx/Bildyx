@@ -78,10 +78,10 @@ TARGET_MODELS = [
     "Organization",
     "Skill",
     "Certification",
-    # "University" retiré : le modèle a été supprimé du schéma, ses champs
-    # (studentCount, undergraduates, postgraduates) vivent directement sur
-    # Organization désormais - voir la conversation sur la fusion
-    # University -> Organization.
+    # "University" removed: the model was dropped from the schema, its fields
+    # (studentCount, undergraduates, postgraduates) now live directly on
+    # Organization - see the discussion on the University -> Organization
+    # merge.
     "StudyFields",
     "Degree",
     "Subject",
@@ -122,15 +122,15 @@ M2M_COLUMNS = {
 # and never flagged as is_uuid_fk); and (2) to know which field to pull for
 # M2M/list relations pointing at that model (e.g. Organization.countries),
 # where Country's entry below IS needed.
-# Le nom est retenu plutôt que slug/serial_number : c'est ce qu'un humain
-# remplit dans le template, ce que contiennent déjà les CSV, et ce que les
-# adaptateurs d'import résolvent (buildNameLookup). Exposer "slug" ou
-# "serial_number" aurait rendu les colonnes FK illisibles ET désynchronisées
-# des fichiers existants - c'est exactement ce qui faisait diverger le
-# générateur, les adaptateurs et les .csv/.xlsx (colonnes "city_id"
-# contenant en réalité "Paris, France").
-# Country reste isoCode : son @id EST déjà la clé lisible, et les cellules
-# de la colonne M2M "countries" contiennent bien des codes ISO.
+# The name is used rather than slug/serial_number: it is what a human fills
+# in the template, what the CSVs already contain, and what the import
+# adapters resolve (buildNameLookup). Exposing "slug" or "serial_number"
+# would have made the FK columns unreadable AND out of sync with the
+# existing files - which is exactly what made the generator, the adapters
+# and the .csv/.xlsx files diverge ("city_id" columns actually containing
+# "Paris, France").
+# Country stays on isoCode: its @id IS already the human-readable key, and
+# the cells of the "countries" M2M column do contain ISO codes.
 NATURAL_KEY_FIELD_BY_MODEL = {
     "Organization": "name",
     "City": "name",
@@ -220,16 +220,15 @@ def find_fk_relation(body: str, fk_field_name: str) -> tuple[str | None, str | N
     (`parentOrganization Organization? @relation(fields: [parentOrganizationId], ...)`)
     and returns (relation_field_name, target_model).
 
-    Le nom du champ de relation compte autant que le modèle cible : c'est
-    lui, et non le scalaire, qu'il faut passer à un `select` Prisma
-    imbriqué. --dump-spec émettait le scalaire, si bien que
-    export-current-data.ts construisait
-    `select: { industryId: { select: { name: true } } }` - une erreur Prisma
-    sur Job, Organization, Certification et Subject.
+    The relation field's name matters as much as the target model: it is the
+    one, not the scalar, that must be passed to a nested Prisma `select`.
+    --dump-spec emitted the scalar, so export-current-data.ts built
+    `select: { industryId: { select: { name: true } } }` - a Prisma error on
+    Job, Organization, Certification and Subject.
 
-    `fields:` liste toujours le nom du champ Prisma du scalaire, jamais son
-    nom de colonne mappé : la comparaison se fait donc sur field_name, pas
-    sur column_name.
+    `fields:` always lists the scalar's Prisma field name, never its mapped
+    column name: the comparison is therefore done on field_name, not on
+    column_name.
     """
     for line in body.splitlines():
         line = line.strip()
@@ -745,8 +744,8 @@ def main():
                 "fields": [
                     {
                         "column": f["column"],
-                        # Pour un fk, c'est le champ de RELATION qui doit
-                        # être interrogé (select imbriqué), pas le scalaire.
+                        # For an fk, it is the RELATION field that must be
+                        # queried (nested select), not the scalar.
                         "fieldName": (
                             f["relation_field"]
                             if f.get("is_uuid_fk") and f.get("relation_field")

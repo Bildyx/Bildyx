@@ -40,8 +40,8 @@ export async function seedSkills(prisma: PrismaClient) {
 
     type: r.type || null,
 
-    // "category" peut contenir plusieurs valeurs separees par des virgules,
-    // mais Skill.category est un simple champ texte -> stockee telle quelle.
+    // "category" may hold several comma-separated values, but Skill.category
+    // is a plain text field -> stored as-is.
     category: r.category || null,
 
     description: r.description || null,

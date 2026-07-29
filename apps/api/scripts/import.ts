@@ -40,8 +40,8 @@ function parseArgs(argv: string[]): Args {
     else if (arg === "--commit") args.commit = true;
     else if (arg === "--allow-partial") args.allowPartial = true;
     else if (arg === "--prune") args.prune = true;
-    // --force-prune implique --prune : passer outre le seuil de sécurité
-    // n'a de sens que si l'on élague effectivement.
+    // --force-prune implies --prune: overriding the safety threshold only
+    // makes sense if we actually prune.
     else if (arg === "--force-prune") {
       args.prune = true;
       args.forcePrune = true;

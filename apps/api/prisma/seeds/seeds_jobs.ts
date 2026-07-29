@@ -34,8 +34,8 @@ type JobCsv = {
 export async function seedJobs(prisma: PrismaClient) {
   const rows = readCsv<JobCsv>("jobs.csv");
 
-  // jobs.csv renseigne industry_name avec le nom de l'industrie plutot que son
-  // uuid -> resolution par nom (meme pattern que
+  // jobs.csv fills industry_name with the industry's name rather than its
+  // uuid -> resolution by name (same pattern as
   // certifications.issuing_organization_id).
   const industries = await prisma.industry.findMany({
     select: { id: true, name: true },
@@ -80,7 +80,7 @@ export async function seedJobs(prisma: PrismaClient) {
     );
   }
 
-  // NOTE: depend de industries.ts (industry_name) -> a seeder avant.
+  // NOTE: depends on industries.ts (industry_name) -> seed that first.
   const result = await prisma.job.createMany({
     data,
     skipDuplicates: true,

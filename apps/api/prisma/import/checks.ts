@@ -18,15 +18,13 @@ function stripParenthetical(raw: string): string {
   return raw.replace(/\([^)]*\)/g, " ");
 }
 
-// Les colonnes numériques passaient directement par toInt()/toFloat(), qui
-// se réduisent à Number() : une cellule comme "Thousands" ou "~6 million"
-// (45 et 5 occurrences respectivement dans organizations.csv) produisait
-// NaN, transmis tel quel à Prisma - donc soit une erreur au commit, soit un
-// null silencieux, dans les deux cas sans le moindre avertissement en
-// dry-run, contrairement à tous les autres contrôles de ce fichier.
-// checkInt/checkFloat rendent ces cellules visibles comme warnings et
-// stockent null, comme checkEnum le fait déjà pour une valeur d'enum
-// inconnue.
+// Numeric columns went straight through toInt()/toFloat(), which boil down
+// to Number(): a cell like "Thousands" or "~6 million" (45 and 5 occurrences
+// respectively in organizations.csv) produced NaN, passed as-is to Prisma -
+// hence either an error at commit time or a silent null, in both cases
+// without any warning in dry-run, unlike every other check in this file.
+// checkInt/checkFloat make those cells visible as warnings and store null,
+// just as checkEnum already does for an unknown enum value.
 export function checkFloat(
   raw: string | undefined,
   column: string,
@@ -183,8 +181,8 @@ export function checkEnumArray<T extends object>(
         message: `${column}: valeur "${token}" non reconnue (ignorée)`,
       });
     } else if (!value.includes(parsed)) {
-      // Une même langue listée deux fois dans la cellule source produisait
-      // un doublon dans le tableau d'enum stocké en base.
+      // The same language listed twice in the source cell produced a
+      // duplicate in the enum array stored in the database.
       value.push(parsed);
     }
   }
@@ -222,10 +220,10 @@ export function checkRequiredFk(
 // exception out of mapRow (it would abort the whole --all batch instead of
 // rejecting just this value, unlike every other check in this file).
 //
-// DbNull et non JsonNull : sur une colonne Json?, Prisma.JsonNull écrit la
-// valeur JSON `null` ('null'::jsonb), pas un NULL SQL. Toutes les lignes
-// sans metadata se retrouvaient donc avec 'null'::jsonb, invisible pour un
-// `WHERE metadata IS NULL`. DbNull écrit bien un NULL SQL.
+// DbNull and not JsonNull: on a Json? column, Prisma.JsonNull writes the
+// JSON value `null` ('null'::jsonb), not a SQL NULL. Every row without
+// metadata therefore ended up with 'null'::jsonb, invisible to a
+// `WHERE metadata IS NULL`. DbNull does write a proper SQL NULL.
 export function checkJson(
   raw: string | undefined,
   column: string,

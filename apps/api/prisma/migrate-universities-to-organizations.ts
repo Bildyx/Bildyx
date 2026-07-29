@@ -73,14 +73,14 @@ async function main() {
   });
   const orgIdBySlug = new Map(existingOrgs.map((o) => [o.slug, o.id]));
   const usedSerialNumbers = new Set(existingOrgs.map((o) => o.serial_number));
-  // Un slug déjà porté par une organisation qui N'EST PAS une université :
-  // l'écraser reviendrait à transformer une entreprise réelle en université.
-  // Le garde-fou existait pour serial_number, pas pour le slug.
+  // A slug already held by an organization that is NOT a university:
+  // overwriting it would turn a real company into a university. The guard
+  // existed for serial_number, but not for the slug.
   const nonUniversitySlugs = new Set(
     existingOrgs.filter((o) => o.subtype !== OrganizationSubType.UNIVERSITY).map((o) => o.slug),
   );
-  // Slugs produits pendant CE run, pour que deux universités dont les noms
-  // se réduisent au même slug ne s'écrasent pas l'une l'autre.
+  // Slugs produced during THIS run, so that two universities whose names
+  // reduce to the same slug do not overwrite each other.
   const slugsWrittenThisRun = new Set<string>();
   let conflicts = 0;
 
@@ -89,9 +89,9 @@ async function main() {
   for (const uni of universities) {
     let slug = slugify(uni.name);
 
-    // slugify() rend "" pour un nom entièrement non-ASCII (ex: "東京大学").
-    // Toutes ces universités auraient partagé le slug "" et se seraient
-    // écrasées mutuellement.
+    // slugify() returns "" for a fully non-ASCII name (e.g. "東京大学").
+    // All such universities would have shared the slug "" and overwritten
+    // each other.
     if (!slug) slug = `universite-${uni.serial_number.toLowerCase()}`;
 
     if (nonUniversitySlugs.has(slug) || slugsWrittenThisRun.has(slug)) {
