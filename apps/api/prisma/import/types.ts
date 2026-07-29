@@ -32,6 +32,12 @@ export interface M2mColumn {
   // tenir compte de la casse (ex: "name" pour Industry, "isoCode" pour
   // Country).
   targetLookupField: string;
+  // Second champ accepté pour la même cellule, essayé seulement si la valeur
+  // ne correspond à aucun targetLookupField. La colonne `countries`
+  // d'organizations.csv est renseignée avec des noms de pays ("France") alors
+  // que le contrat attend un code ISO : sans ce repli, aucun des liens
+  // organisation<->pays n'était posé.
+  targetAltLookupField?: string;
   // Champ unique du modèle cible à utiliser dans le `connect` Prisma
   // (ex: "id" pour Industry/City, "isoCode" pour Country).
   targetConnectField: string;

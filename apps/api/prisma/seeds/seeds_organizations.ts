@@ -48,41 +48,40 @@ type OrganizationCsv = {
   name: string;
   serial_number?: string;
   slug: string;
-  type?: string;
+  subtype?: string;
   type1?: string;
   type2?: string;
-  legal_status?: string;
   ownership?: string;
   mission?: string;
   known_for?: string;
-  activities?: string;
+  programs_activities?: string;
   project?: string;
   research_areas?: string;
   products?: string;
   services?: string;
-  partnerships?: string;
+  partners?: string;
   budget?: string;
   founded?: string;
-  founder?: string;
-  equipments?: string;
+  founders?: string;
+  facilities?: string;
   score?: string;
-  city_id?: string;
+  city_name?: string;
   numberOfEmployees?: string;
-  numberOfSubsidiaries?: string;
-  parent_organization_id?: string;
+  subsidiaries?: string;
+  parent_organization_name?: string;
   metadata?: string;
 };
 
 export async function seedOrganizations(prisma: PrismaClient) {
   const rows = readCsv<OrganizationCsv>("organizations.csv");
 
-  // organizations.csv renseigne city_id avec le nom de la ville (les villes
-  // sont deja seedees a ce stade) et parent_organization_id avec le nom
+  // organizations.csv renseigne city_name avec le nom de la ville (les villes
+  // sont deja seedees a ce stade) et parent_organization_name avec le nom
   // d'une autre organisation du meme fichier (elle n'a pas encore d'id reel
   // puisqu'aucune ligne organization n'est encore en base) -> resolution par
-  // nom, avec des uuid generes nous-memes en amont pour parent_organization_id
-  // afin de pouvoir la resoudre en une seule passe quel que soit l'ordre des
-  // lignes dans le CSV.
+  // nom, avec des uuid generes nous-memes en amont pour
+  // parent_organization_name afin de pouvoir la resoudre en une seule passe
+  // quel que soit l'ordre des lignes dans le CSV.
   const cities = await prisma.city.findMany({ select: { id: true, name: true } });
   const resolveCityId = buildNameLookup(cities);
   const unmatchedCities = new Set<string>();
@@ -97,50 +96,50 @@ export async function seedOrganizations(prisma: PrismaClient) {
   const unmatchedParents = new Set<string>();
 
   const data: Prisma.OrganizationCreateManyInput[] = rows.map((r) => {
-    const city_id = resolveCityId(r.city_id);
-    if (r.city_id && !city_id) unmatchedCities.add(r.city_id);
+    const city_id = resolveCityId(r.city_name);
+    if (r.city_name && !city_id) unmatchedCities.add(r.city_name);
 
     return {
       id: idByOrgName.get(r.name.trim().toLowerCase())!,
       name: r.name,
       slug: r.slug,
-      serial_number: r.serial_number || generateSerialNumber(parseEnum(r.type, OrganizationSubType)),
+      serial_number:
+        r.serial_number || generateSerialNumber(parseEnum(r.subtype, OrganizationSubType)),
 
-      subtype: parseEnum(r.type, OrganizationSubType),
+      subtype: parseEnum(r.subtype, OrganizationSubType),
       type1: r.type1 || null,
       type2: r.type2 || null,
-
-      // legal_status n'a plus de champ correspondant dans le schema actuel
-      // (retire de Organization) -> non stocke.
 
       ownership: r.ownership || null,
       mission: r.mission || null,
 
       knownFor: r.known_for || null,
-      programsActivities: toStringArray(r.activities),
+      programsActivities: toStringArray(r.programs_activities),
 
       project: r.project || null,
 
       researchAreas: toStringArray(r.research_areas),
       products: toStringArray(r.products),
       services: toStringArray(r.services),
-      partners: toStringArray(r.partnerships),
+      partners: toStringArray(r.partners),
 
       budget: r.budget || null,
       founded: r.founded || null,
-      founders: r.founder ? [r.founder] : [],
-      facilities: r.equipments ? [r.equipments] : [],
+      founders: r.founders ? [r.founders] : [],
+      facilities: r.facilities ? [r.facilities] : [],
 
-      // authority/jurisdiction/members/collections/graduates/undergraduates/
-      // personnel n'ont pas de colonne dans organizations.csv -> laisses a
-      // null (champs optionnels dans le schema).
+      // organizations.csv porte aussi description/offices/authority/
+      // jurisdiction/members/collections/student_count/undergraduates/
+      // postgraduates/personnel, non repris ici : ce seeder est l'ancien
+      // chemin d'ingestion, c'est `npm run import` qui couvre le modele
+      // complet (voir prisma/import/adapters/organizations.ts).
 
       score: toInt(r.score),
 
       city_id,
 
       numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
-      subsidiaries: r.numberOfSubsidiaries || null,
+      subsidiaries: r.subsidiaries || null,
 
       // parentOrganizationId est une self-reference : renseignee dans la 2e
       // passe ci-dessous, une fois toutes les lignes en base, pour ne jamais
@@ -164,9 +163,9 @@ export async function seedOrganizations(prisma: PrismaClient) {
   console.log(`Organizations rows imported: ${result.count}`);
 
   for (const r of rows) {
-    const parentOrganizationId = resolveParentId(r.parent_organization_id);
-    if (r.parent_organization_id && !parentOrganizationId) {
-      unmatchedParents.add(r.parent_organization_id);
+    const parentOrganizationId = resolveParentId(r.parent_organization_name);
+    if (r.parent_organization_name && !parentOrganizationId) {
+      unmatchedParents.add(r.parent_organization_name);
     }
     if (!parentOrganizationId) continue;
 
@@ -178,12 +177,12 @@ export async function seedOrganizations(prisma: PrismaClient) {
 
   if (unmatchedCities.size > 0) {
     console.warn(
-      `Organizations: city_id non resolus (mis a null): ${[...unmatchedCities].join(", ")}`,
+      `Organizations: city_name non resolus (mis a null): ${[...unmatchedCities].join(", ")}`,
     );
   }
   if (unmatchedParents.size > 0) {
     console.warn(
-      `Organizations: parent_organization_id non resolus (mis a null): ${[...unmatchedParents].join(", ")}`,
+      `Organizations: parent_organization_name non resolus (mis a null): ${[...unmatchedParents].join(", ")}`,
     );
   }
 

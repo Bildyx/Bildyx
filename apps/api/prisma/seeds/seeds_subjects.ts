@@ -19,7 +19,7 @@ type SubjectCsv = {
   competitors?: string;
   vendors?: string;
   fun_fact?: string;
-  organization_id?: string;
+  organization_name?: string;
   website_url?: string;
   logo_url?: string;
   tags?: string;
@@ -33,9 +33,9 @@ type SubjectCsv = {
 export async function seedSubjects(prisma: PrismaClient) {
   const rows = readCsv<SubjectCsv>("subjects.csv");
 
-  // subjects.csv renseigne organization_id avec le nom de l'organisation
+  // subjects.csv renseigne organization_name avec le nom de l'organisation
   // plutot que son UUID -> resolution par nom (meme pattern que
-  // certifications.issuing_organization_id).
+  // certifications.issuing_organization_name).
   const organizations = await prisma.organization.findMany({
     select: { id: true, name: true },
   });
@@ -43,9 +43,9 @@ export async function seedSubjects(prisma: PrismaClient) {
   const unmatchedOrganizations = new Set<string>();
 
   const data: Prisma.SubjectCreateManyInput[] = rows.map((r) => {
-    const organization_id = resolveOrganizationId(r.organization_id);
-    if (r.organization_id && !organization_id) {
-      unmatchedOrganizations.add(r.organization_id);
+    const organization_id = resolveOrganizationId(r.organization_name);
+    if (r.organization_name && !organization_id) {
+      unmatchedOrganizations.add(r.organization_name);
     }
 
     return {
@@ -84,11 +84,11 @@ export async function seedSubjects(prisma: PrismaClient) {
 
   if (unmatchedOrganizations.size > 0) {
     console.warn(
-      `Subjects: organization_id non resolus (mis a null): ${[...unmatchedOrganizations].join(", ")}`,
+      `Subjects: organization_name non resolus (mis a null): ${[...unmatchedOrganizations].join(", ")}`,
     );
   }
 
-  // NOTE: depend de organizations.ts (organization_id) -> a seeder avant.
+  // NOTE: depend de organizations.ts (organization_name) -> a seeder avant.
   const result = await prisma.subject.createMany({
     data,
     skipDuplicates: true,
