@@ -21,6 +21,25 @@ npm install
 npm run db:pull
 npm run db:generate
 ```
+
+## 3. Start the API
+
+```bash
+cd apps/api
+npm run dev
+```
+
+L'API sera accessible via l'url : http://localhost:3000/
+
+## 4. Start the website
+
+```bash
+cd apps/website
+php -S localhost:8000
+```
+
+Le site sera accessible via l'url : http://localhost:8000/
+
 # Import script testing
 
 1. Full dry run (no writes, just a report)
@@ -41,23 +60,3 @@ npx tsx --test src/tests/import_diff.test.ts
 17 tests, no database required (pure logic).
 
 Useful options: --allow-partial to import valid rows and set aside those with errors rather than rejecting the entire file; --prune to mark as deleted keys that were imported previously but are now missing from the file (off by default; use with caution given the case-sensitivity bug on `Country` that we just fixed).
-
-Translated with DeepL.com (free version)
-
-## 3. Start the API
-
-```bash
-cd apps/api
-npm run dev
-```
-
-L'API sera accessible via l'url : http://localhost:3000/
-
-## 4. Start the website
-
-```bash
-cd apps/website
-npx http-server . -p 5500
-```
-
-Le site sera accessible via l'url : http://localhost:5500/
