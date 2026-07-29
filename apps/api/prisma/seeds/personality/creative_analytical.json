@@ -1,0 +1,142 @@
+{
+  "code": "CREATIVE_ANALYTICAL",
+  "name": "Creative or Analytical",
+  "description": "Are you a creative or analytical thinker?",
+  "is_active": true,
+  "criteria": [
+    {
+      "code": "CREATIVE",
+      "name": "Creative",
+      "description": "Pensée divergente : imagination, sensibilité artistique, goût des solutions nouvelles.",
+      "order": 1
+    },
+    {
+      "code": "ANALYTICAL",
+      "name": "Analytical",
+      "description": "Pensée convergente : objectivité, méthode, structuration et optimisation.",
+      "order": 2
+    }
+  ],
+  "questions": [
+    {
+      "order": 1,
+      "criterion_code": "CREATIVE",
+      "text": "I daydream constantly",
+      "reverse_scored": false
+    },
+    {
+      "order": 2,
+      "criterion_code": "ANALYTICAL",
+      "text": "I am able to focus on a task for long periods of time",
+      "reverse_scored": false
+    },
+    {
+      "order": 3,
+      "criterion_code": "CREATIVE",
+      "text": "I am fascinated by art and design",
+      "reverse_scored": false
+    },
+    {
+      "order": 4,
+      "criterion_code": "ANALYTICAL",
+      "text": "I enjoy thinking deeply about a topic",
+      "reverse_scored": false
+    },
+    {
+      "order": 5,
+      "criterion_code": "CREATIVE",
+      "text": "Drawing and painting are entertaining activities",
+      "reverse_scored": false
+    },
+    {
+      "order": 6,
+      "criterion_code": "ANALYTICAL",
+      "text": "I prefer objective thought to subjective thought",
+      "reverse_scored": false
+    },
+    {
+      "order": 7,
+      "criterion_code": "CREATIVE",
+      "text": "Creating new things excites me",
+      "reverse_scored": false
+    },
+    {
+      "order": 8,
+      "criterion_code": "ANALYTICAL",
+      "text": "I am good at math",
+      "reverse_scored": false
+    },
+    {
+      "order": 9,
+      "criterion_code": "CREATIVE",
+      "text": "I find most art difficult to understand",
+      "reverse_scored": true
+    },
+    {
+      "order": 10,
+      "criterion_code": "ANALYTICAL",
+      "text": "I find it hard to think in an organized manner",
+      "reverse_scored": true
+    },
+    {
+      "order": 11,
+      "criterion_code": "CREATIVE",
+      "text": "I like finding new solutions to old problems",
+      "reverse_scored": false
+    },
+    {
+      "order": 12,
+      "criterion_code": "ANALYTICAL",
+      "text": "I try finding ways to automate my daily activities",
+      "reverse_scored": false
+    },
+    {
+      "order": 13,
+      "criterion_code": "CREATIVE",
+      "text": "I prefer to work in an unorganized manner",
+      "reverse_scored": false
+    },
+    {
+      "order": 14,
+      "criterion_code": "ANALYTICAL",
+      "text": "I am constantly thinking of ways to optimize the efficiency of many of my daily activities",
+      "reverse_scored": false
+    },
+    {
+      "order": 15,
+      "criterion_code": "CREATIVE",
+      "text": "I work best with minimal guidance",
+      "reverse_scored": false
+    },
+    {
+      "order": 16,
+      "criterion_code": "ANALYTICAL",
+      "text": "I like to have specific steps for solving a problem",
+      "reverse_scored": false
+    },
+    {
+      "order": 17,
+      "criterion_code": "CREATIVE",
+      "text": "I like solving problems",
+      "reverse_scored": false
+    },
+    {
+      "order": 18,
+      "criterion_code": "ANALYTICAL",
+      "text": "I am comfortable with new technology",
+      "reverse_scored": false
+    },
+    {
+      "order": 19,
+      "criterion_code": "CREATIVE",
+      "text": "I enjoy consistency",
+      "reverse_scored": true
+    },
+    {
+      "order": 20,
+      "criterion_code": "ANALYTICAL",
+      "text": "I find it hard to think in a linear fashion",
+      "reverse_scored": true
+    }
+  ]
+}

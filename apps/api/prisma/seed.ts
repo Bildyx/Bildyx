@@ -13,6 +13,7 @@ import { seedDegrees } from "./seeds/seeds_degrees";
 import { seedSubjects } from "./seeds/seeds_subjects";
 import { seedStudyFields } from "./seeds/seeds_studyFields";
 import { seedManyToManyRelations } from "./seeds/seeds_relations";
+import { seedPersonalityTests } from "./seeds/seeds_personality";
 
 const prisma = new PrismaClient();
 
@@ -35,6 +36,11 @@ async function main() {
   await seedSkills(prisma);
   await seedDegrees(prisma);
   await seedStudyFields(prisma);
+
+  // Contenu des questionnaires de personnalite (tests, criteres,
+  // questions). Aucune dependance sur les autres modeles de reference,
+  // la source est prisma/seeds/personality/*.json et non un CSV.
+  await seedPersonalityTests(prisma);
 
   // Doit tourner en dernier : lie les relations many-to-many implicites
   // (Organization<->Country/Industry/City, City<->Industry, Subject<->

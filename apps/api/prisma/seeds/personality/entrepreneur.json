@@ -1,0 +1,106 @@
+{
+  "code": "ENTREPRENEUR",
+  "name": "Entrepreneur",
+  "description": "Do you want to be your own boss?",
+  "is_active": true,
+  "criteria": [
+    {
+      "code": "ENTREPRENEURSHIP",
+      "name": "Entrepreneurship",
+      "description": "Appétence entrepreneuriale : leadership, sens commercial, rapport au risque et au profit.",
+      "order": 1
+    }
+  ],
+  "questions": [
+    {
+      "order": 1,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I am comfortable leading a large number of people",
+      "reverse_scored": false
+    },
+    {
+      "order": 2,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I am not good at selling things",
+      "reverse_scored": true
+    },
+    {
+      "order": 3,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "Everything has a price that it can be sold for",
+      "reverse_scored": false
+    },
+    {
+      "order": 4,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "When preforming an action, I am concerned with maximizing my profit above all else",
+      "reverse_scored": false
+    },
+    {
+      "order": 5,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I could not run a business",
+      "reverse_scored": true
+    },
+    {
+      "order": 6,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I am a good leader",
+      "reverse_scored": false
+    },
+    {
+      "order": 7,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "Time spent not working is equivalent to time spent wasting money",
+      "reverse_scored": false
+    },
+    {
+      "order": 8,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I find it hard to separate personal relationships from professional relationships",
+      "reverse_scored": true
+    },
+    {
+      "order": 9,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "High-risk investments are smart if the possible profit is large enough",
+      "reverse_scored": false
+    },
+    {
+      "order": 10,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I avoid risky monetary situations",
+      "reverse_scored": true
+    },
+    {
+      "order": 11,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I am good at creating goals for others",
+      "reverse_scored": false
+    },
+    {
+      "order": 12,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I build strong professional relationships",
+      "reverse_scored": false
+    },
+    {
+      "order": 13,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I could make a living as a salesperson",
+      "reverse_scored": false
+    },
+    {
+      "order": 14,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I make wise investments",
+      "reverse_scored": false
+    },
+    {
+      "order": 15,
+      "criterion_code": "ENTREPRENEURSHIP",
+      "text": "I prefer to follow others as opposed to lead others",
+      "reverse_scored": true
+    }
+  ]
+}

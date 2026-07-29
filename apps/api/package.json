@@ -45,6 +45,7 @@
     "db:types": "kysely-codegen --out-file src/db/types.ts",
     "seed:reference": "tsx prisma/seed.ts",
     "import": "tsx scripts/import.ts",
+    "seed:personality": "tsx scripts/seed-personality.ts",
     "db:check-drift": "tsx scripts/check-migration-drift.ts",
     "db:export": "tsx scripts/export-current-data.ts"
   }
