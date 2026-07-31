@@ -102,11 +102,11 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
     const language = checkEnumArray(row.language, Language, "language", LANGUAGE_ALIASES);
     warnings.push(...language.issues);
 
-    // La colonne reste INTEGER en base (voir la note de la migration
-    // 20260728160000) alors que la source est annotée ("1 (via Cairo Intl.
-    // Airport)"). toIntLoose en extrait le premier entier ; l'annotation est
-    // perdue, mais l'avertissement ci-dessous la rend au moins visible au
-    // lieu de disparaître en silence.
+    // The column stays INTEGER in the database (see the note on migration
+    // 20260728160000) while the source is annotated ("1 (via Cairo Intl.
+    // Airport)"). toIntLoose extracts the first integer from it; the
+    // annotation is lost, but the warning below at least makes it visible
+    // instead of disappearing silently.
     const numberOfAirports = { value: toIntLoose(row.number_of_airports) };
     const rawAirports = (row.number_of_airports ?? "").trim();
     if (rawAirports && String(numberOfAirports.value) !== rawAirports) {

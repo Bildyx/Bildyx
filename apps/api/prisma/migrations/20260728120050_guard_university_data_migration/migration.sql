@@ -1,19 +1,18 @@
--- Garde-fou de la fusion University -> Organization.
+-- Guard for the University -> Organization merge.
 --
--- La migration suivante (20260728120100_drop_university_after_data_migration)
--- supprime définitivement la table "universities" et la colonne
--- user_educations.university_id. Elle n'est valide QUE si
--- prisma/migrate-universities-to-organizations.ts a déjà tourné.
+-- The next migration (20260728120100_drop_university_after_data_migration)
+-- permanently drops the "universities" table and the
+-- user_educations.university_id column. It is only valid IF
+-- prisma/migrate-universities-to-organizations.ts has already run.
 --
--- Jusqu'ici cette dépendance n'existait qu'en commentaire : un simple
--- `prisma migrate deploy` enchaînait 120000 puis 120100 et détruisait les
--- données universités sans que rien ne s'y oppose. Cette migration
--- intercalée transforme ce commentaire en contrainte : elle échoue
--- bruyamment plutôt que de laisser la suivante détruire des lignes non
--- migrées.
+-- Until now this dependency existed only as a comment: a plain
+-- `prisma migrate deploy` chained 120000 then 120100 and destroyed the
+-- university data with nothing standing in its way. This intermediate
+-- migration turns that comment into a constraint: it fails loudly rather
+-- than letting the next one destroy unmigrated rows.
 --
--- Sur une base neuve, "universities" est vide (elle vient d'être créée par
--- la migration init) et ce garde-fou passe sans rien faire.
+-- On a fresh database, "universities" is empty (it has just been created by
+-- the init migration) and this guard passes without doing anything.
 
 DO $$
 DECLARE
@@ -21,7 +20,7 @@ DECLARE
   migrated_count        BIGINT;
   dangling_education    BIGINT;
 BEGIN
-  -- Base sur laquelle la table n'existe déjà plus : rien à protéger.
+  -- Database where the table no longer exists: nothing to protect.
   IF to_regclass('public.universities') IS NULL THEN
     RETURN;
   END IF;

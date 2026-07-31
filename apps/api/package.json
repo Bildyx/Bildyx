@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "type": "module",
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.4",
+    "@electric-sql/pglite": "^0.4.1",
     "@types/cookie-parser": "^1.4.10",
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
@@ -48,6 +48,7 @@
     "db:types": "kysely-codegen --out-file src/db/types.ts",
     "seed:reference": "tsx prisma/seed.ts",
     "import": "tsx scripts/import.ts",
+    "seed:personality": "tsx scripts/seed-personality.ts",
     "db:check-drift": "tsx scripts/check-migration-drift.ts",
     "db:export": "tsx scripts/export-current-data.ts"
   }

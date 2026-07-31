@@ -423,7 +423,7 @@ model JobAd {
   @@map("job_ads")
 }
 
-/// Compétence requise pour une offre d'emploi (avec niveau d'importance)
+/// Skill required for a job ad (with importance level)
 model JobAdSkill {
   id         String          @id @default(uuid()) @db.Uuid
   jobAdId    String          @map("job_ad_id") @db.Uuid
@@ -437,7 +437,7 @@ model JobAdSkill {
   @@map("job_ad_skills")
 }
 
-/// Utilisateur (authentification & identité)
+/// User (authentication & identity)
 model User {
   id                     String        @id @default(uuid()) @db.Uuid
   email                  String        @unique
@@ -498,7 +498,7 @@ model UserSession {
   @@map("user_sessions")
 }
 
-/// Profil public user
+/// Public user profile
 model UserProfile {
   id                    String               @id @default(uuid()) @db.Uuid
   userId                String               @unique @map("user_id") @db.Uuid
@@ -578,7 +578,7 @@ model UserEducationFields {
   @@map("user_education_fields")
 }
 
-/// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
+/// Audit log of sensitive actions (auth, role changes, etc.)
 model AuditLog {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
@@ -1169,15 +1169,15 @@ model Organization {
   founder           String?
   equipments        String?
 
-  // Localisation
+  // Location
   headquarters City?  @relation("OrganizationHeadquarters", fields: [cityId], references: [id])
   workingArea  City[] @relation("working_area")
 
-  // Taille & Effectifs
+  // Size & Headcount
   numberOfEmployees    EmployeeCountRange?
   numberOfSubsidiaries Int?
 
-  // Hiérarchie
+  // Hierarchy
   parentOrganizationId String?        @map("parent_organization_id") @db.Uuid
   parentOrganization   Organization?  @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
   childOrganization    Organization[] @relation("OrganizationHierarchy")
@@ -1348,7 +1348,7 @@ model Degree {
   @@map("degrees")
 }
 
-/// Produit / Service / Solution
+/// Product / Service / Solution
 model Subject {
   id               String           @id @default(uuid()) @db.Uuid
   name             String
@@ -1418,7 +1418,7 @@ model JobAd {
   @@map("job_ads")
 }
 
-/// Compétence requise pour une offre d'emploi (avec niveau d'importance)
+/// Skill required for a job ad (with importance level)
 model JobAdSkill {
   id         String          @id @default(uuid()) @db.Uuid
   jobAdId    String          @map("job_ad_id") @db.Uuid
@@ -1434,7 +1434,7 @@ model JobAdSkill {
 
 // layer 2 : Users
 
-/// Utilisateur (authentification & identité)
+/// User (authentication & identity)
 model User {
   id                     String     @id @default(uuid()) @db.Uuid
   email                  String     @unique
@@ -1496,7 +1496,7 @@ model UserSession {
   @@map("user_sessions")
 }
 
-/// Profil public user
+/// Public user profile
 model UserProfile {
   id                    String        @id @default(uuid()) @db.Uuid
   userId                String        @unique @map("user_id") @db.Uuid
@@ -1528,7 +1528,7 @@ model UserProfile {
   @@map("user_profiles")
 }
 
-/// Journal d'audit des actions sensibles (auth, changements de rôle, etc.)
+/// Audit log of sensitive actions (auth, role changes, etc.)
 model AuditLog {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid

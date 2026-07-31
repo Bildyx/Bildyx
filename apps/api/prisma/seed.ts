@@ -13,17 +13,18 @@ import { seedDegrees } from "./seeds/seeds_degrees";
 import { seedSubjects } from "./seeds/seeds_subjects";
 import { seedStudyFields } from "./seeds/seeds_studyFields";
 import { seedManyToManyRelations } from "./seeds/seeds_relations";
+import { seedPersonalityTests } from "./seeds/seeds_personality";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding database...\n");
 
-  // Ordre important a cause des foreign keys :
+  // Order matters because of the foreign keys:
   // industries -> countries -> cities -> organizations
-  //   -> jobs / certifications / subjects (dependent des precedents)
-  // skills / degrees / studyFields n'ont pas de dependances, peuvent etre
-  // placés n'importe où, mais laissés en fin ici par simplicité.
+  //   -> jobs / certifications / subjects (depend on the previous ones)
+  // skills / degrees / studyFields have no dependencies and could go
+  // anywhere, but are kept at the end here for simplicity.
 
   await seedIndustries(prisma);
   await seedCountries(prisma);
@@ -36,10 +37,17 @@ async function main() {
   await seedDegrees(prisma);
   await seedStudyFields(prisma);
 
-  // Doit tourner en dernier : lie les relations many-to-many implicites
+<<<<<<< HEAD
+  // Personality questionnaire content (tests, criteria, questions). No
+  // dependency on the other reference models, the source is
+  // prisma/seeds/personality/*.json rather than a CSV.
+  await seedPersonalityTests(prisma);
+
+  // Must run last: links the implicit many-to-many relations
+>>>>>>> 4fae4b938625ef746d255c4875e03d5857fddddf
   // (Organization<->Country/Industry/City, City<->Industry, Subject<->
-  // Industry, Industry<->Industry) une fois que toutes les lignes qu'elles
-  // referencent existent en base.
+  // Industry, Industry<->Industry) once every row they reference exists in
+  // the database.
   await seedManyToManyRelations(prisma);
 
   console.log("\nSeed completed successfully.");

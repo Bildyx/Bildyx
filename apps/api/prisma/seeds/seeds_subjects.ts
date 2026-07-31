@@ -33,8 +33,8 @@ type SubjectCsv = {
 export async function seedSubjects(prisma: PrismaClient) {
   const rows = readCsv<SubjectCsv>("subjects.csv");
 
-  // subjects.csv renseigne organization_name avec le nom de l'organisation
-  // plutot que son UUID -> resolution par nom (meme pattern que
+  // subjects.csv fills organization_name with the organization's name rather
+  // than its UUID -> resolution by name (same pattern as
   // certifications.issuing_organization_name).
   const organizations = await prisma.organization.findMany({
     select: { id: true, name: true },
@@ -88,7 +88,7 @@ export async function seedSubjects(prisma: PrismaClient) {
     );
   }
 
-  // NOTE: depend de organizations.ts (organization_name) -> a seeder avant.
+  // NOTE: depends on organizations.ts (organization_name) -> seed that first.
   const result = await prisma.subject.createMany({
     data,
     skipDuplicates: true,
