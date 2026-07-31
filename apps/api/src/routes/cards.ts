@@ -7,7 +7,6 @@ import {
   mapCity,
   mapJob,
   mapOrganization,
-  mapUniversity,
   mapSkill,
   mapIndustry,
   mapCertification,
@@ -24,10 +23,12 @@ interface CardsContext {
   res?: Response;
 }
 
-async function sendHtmlResponse(
-  ctx: CardsContext,
-  html: string,
-): Promise<void> {
+async function sendHtmlResponse(ctx: CardsContext, html: string): Promise<any> {
+  const isRpc =
+    ctx.req?.path?.startsWith("/rpc") || ctx.req?.url?.includes("/rpc");
+  if (isRpc) {
+    return html;
+  }
   if (!ctx.res) {
     throw new ORPCError("INTERNAL_SERVER_ERROR", {
       message: "Express response context missing",
@@ -71,7 +72,7 @@ export const cards = {
           ...mappedData,
           extended: isExtended,
         });
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(
@@ -114,7 +115,7 @@ export const cards = {
         }
         const mappedData = await mapCity(row);
         const html = await renderCardHtml("city-card", mappedData);
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(`[cards] Error generating city card for '${id}':`, err);
@@ -153,7 +154,7 @@ export const cards = {
           });
         }
         const html = await renderCardHtml("job-card", mapJob(row));
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(`[cards] Error generating job card for '${id}':`, err);
@@ -199,8 +200,12 @@ export const cards = {
             template = "government-card";
             break;
           }
+          case OrganizationSubtypeEnum.enum.UNIVERSITY: {
+            template = "university-card";
+            break;
+          }
         }
-        await sendHtmlResponse(
+        return await sendHtmlResponse(
           ctx,
           await renderCardHtml(template, await mapOrganization(row)),
         );
@@ -208,51 +213,6 @@ export const cards = {
         const error = err as Error;
         console.error(
           `[cards] Error generating organization card for '${id}':`,
-          err,
-        );
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: error.message || "Internal server error",
-        });
-      }
-    }),
-
-  getUniversity: publicProcedure
-    .route({
-      method: "GET",
-      summary: "Generate university card HTML",
-      path: "/cards/university/{id}",
-      tags: ["Cards"],
-    })
-    .input(CardInputSchema)
-    .handler(async ({ input, context }) => {
-      const ctx = context as CardsContext;
-      if (!ctx.req || !ctx.res) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Express request/response context missing",
-        });
-      }
-      const { id } = input;
-      try {
-        const isUuid = /^[0-9a-f-]{36}$/.test(id);
-        const row = await database
-          .selectFrom("universities")
-          .selectAll()
-          .where(isUuid ? "id" : "serial_number", "=", id)
-          .executeTakeFirst();
-        if (!row) {
-          throw new ORPCError("NOT_FOUND", {
-            message: "University not found",
-          });
-        }
-        const html = await renderCardHtml(
-          "university-card",
-          mapUniversity(row),
-        );
-        await sendHtmlResponse(ctx, html);
-      } catch (err) {
-        const error = err as Error;
-        console.error(
-          `[cards] Error generating university card for '${id}':`,
           err,
         );
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -290,7 +250,7 @@ export const cards = {
           });
         }
         const html = await renderCardHtml("skill-card", mapSkill(row));
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(`[cards] Error generating skill card for '${id}':`, err);
@@ -329,7 +289,7 @@ export const cards = {
           });
         }
         const html = await renderCardHtml("industry-card", mapIndustry(row));
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(
@@ -383,7 +343,7 @@ export const cards = {
           "certification-card",
           mapCertification(row, issuingOrgName),
         );
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(
@@ -451,7 +411,7 @@ export const cards = {
           "product-card",
           mapSubject(row, organizationName, industriesStr),
         );
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(
@@ -519,7 +479,7 @@ export const cards = {
           "product-card",
           mapSubject(row, organizationName, industriesStr),
         );
-        await sendHtmlResponse(ctx, html);
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(
@@ -560,17 +520,11 @@ export const cards = {
             message: "Degree not found",
           });
         }
-        const html = await renderCardHtml(
-          "degree-card",
-          mapDegree(row),
-        );
-        await sendHtmlResponse(ctx, html);
+        const html = await renderCardHtml("degree-card", mapDegree(row));
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
-        console.error(
-          `[cards] Error generating degree card for '${id}':`,
-          err,
-        );
+        console.error(`[cards] Error generating degree card for '${id}':`, err);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: error.message || "Internal server error",
         });

@@ -39,6 +39,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
     "seed": "tsx src/seed.ts",
     "test": "cross-env NODE_ENV=test tsx --import ./src/tests/setup.ts --test \"src/tests/**/*.test.ts\"",
     "db:pull": "prisma db pull",

@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Privacy Policy — Bildyx';
 $pageDescription = 'Bildyx Privacy Policy.';
-$pageScript = 'js/privacy-policy.js';
+$pageScript = 'js/privacy-policy.ts';
 $bodyClass = 'privacy-policy-page';
 $showMainNav = false;
 

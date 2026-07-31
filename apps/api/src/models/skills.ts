@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DifficultyLevelEnum, SkillCategoryEnum } from "./utils/enums";
+import { DifficultyLevelEnum } from "./utils/enums";
 import { zStringArray } from "./utils/preprocessors";
 
 export const SkillSchema = z.object({
@@ -7,7 +7,7 @@ export const SkillSchema = z.object({
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   type: z.string().nullable().optional(),
-  category: SkillCategoryEnum.nullable().optional(),
+  category: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   icon_url: z.string().nullable().optional(),
   industry: z.string().nullable().optional(),
@@ -28,7 +28,7 @@ export const SkillSchema = z.object({
 // GET
 export const GetSkillsSchema = z.object({
   name: z.string().optional(),
-  category: SkillCategoryEnum.optional(),
+  category: z.string().optional(),
   difficulty: DifficultyLevelEnum.optional(),
   industry: z.string().optional(),
 });

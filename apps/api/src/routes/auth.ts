@@ -26,6 +26,8 @@ import {
   hashPassword,
   verifyPassword,
   parseDbDate,
+  getLoginUrl,
+  getFrontendUrl,
 } from "../services/auth.service";
 import {
   sendVerificationEmail,
@@ -773,9 +775,7 @@ export const auth = {
       }
 
       if (!user) {
-        ctx.res.redirect(
-          `${process.env.FRONTEND_URL || "http://localhost:8000"}/login.html?tab=login`,
-        );
+        ctx.res.redirect(getLoginUrl("login"));
         return;
       }
 
@@ -806,7 +806,7 @@ export const auth = {
         expires: expiresAt,
       });
 
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:8000";
+      const frontendUrl = getFrontendUrl();
       ctx.res.send(`
         <!DOCTYPE html>
         <html>

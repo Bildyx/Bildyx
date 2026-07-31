@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Why We Built It — Bildyx';
 $pageDescription = 'Why Bildyx was built: clarity, chemistry, and confidence in hiring.';
-$pageScript = 'js/why-built-it.js';
+$pageScript = 'js/why-built-it.ts';
 $bodyClass = 'why-built-page';
 $showMainNav = false;
 

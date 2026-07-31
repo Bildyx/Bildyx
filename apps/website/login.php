@@ -7,7 +7,7 @@ $showMainNav = false;
 /*
  * Header/footer partagés conservés.
  * Cette page utilise ton CSS existant : css/auth.css
- * Cette page utilise ton JS existant : js/auth.js
+ * Cette page utilise ton JS existant : js/auth.ts
  */
 ob_start();
 require __DIR__ . '/includes/header.php';
@@ -228,6 +228,6 @@ echo str_replace('</head>', "    {$authStylesheet}\n</head>", $sharedHeader);
 </main>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/auth.js"></script>
+<script src="js/dist/auth.js" defer></script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>

@@ -4,8 +4,8 @@ export const UserCertificationSchema = z.object({
   id: z.string().uuid(),
   user_profile_id: z.string().uuid(),
   certification_id: z.string().uuid(),
-  obtained_at: z.date().nullable().optional(),
-  expires_at: z.date().nullable().optional(),
+  obtained_at: z.coerce.date().nullable().optional(),
+  expires_at: z.coerce.date().nullable().optional(),
 });
 
 // GET

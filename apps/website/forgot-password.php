@@ -80,52 +80,6 @@ echo str_replace('</head>', "    {$authStylesheet}\n</head>", $sharedHeader);
 </main>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/auth.js"></script>
-<script>
-const forgotForm = document.getElementById('forgot-form');
-if (forgotForm) {
-    forgotForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        const emailInput = document.getElementById('forgotEmail');
-        let ok = true;
-
-        if (!validEmail(emailInput.value.trim())) {
-            setError(emailInput, 'Enter a valid email.');
-            ok = false;
-        } else {
-            setError(emailInput, '');
-        }
-
-        if (!checkCaptcha('forgot')) ok = false;
-        if (!ok) return;
-
-        let stopLoading;
-        try {
-            stopLoading = startButtonLoading(forgotForm.querySelector('.submit-btn'));
-            const resp = await fetch(`${API_BASE}/forgot-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailInput.value.trim() })
-            });
-            const data = await resp.json().catch(() => ({}));
-            if (resp.status === 200) {
-                toast.success('If an account exists, a reset link has been sent. Check your email.');
-            } else if (resp.status === 429) {
-                toast.warning(data.message || 'Please wait before requesting another reset link.');
-            } else {
-                toast.error(data.message || 'Unable to send reset email');
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error('Could not connect to server');
-        } finally {
-            if (stopLoading) stopLoading();
-        }
-
-        generateCaptcha('forgot');
-        forgotForm.reset();
-    });
-}
-</script>
+<script src="js/dist/forgot-password.js" defer></script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>

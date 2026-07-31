@@ -29,3 +29,7 @@ build/
 
 # Claude Code system files
 .claude/
+
+# Turborepo
+.turbo/
+*.log

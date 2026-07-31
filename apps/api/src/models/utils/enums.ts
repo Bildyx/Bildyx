@@ -339,18 +339,6 @@ export const SkillCategoryEnum = z.enum([
   "TOOL",
 ]);
 
-// ---------------------------------------------------------------------------
-// Universities
-// ---------------------------------------------------------------------------
-
-export const UniversityTypeEnum = z.enum([
-  "ACADEMY",
-  "GRANDE_ECOLE",
-  "INSTITUTE",
-  "ONLINE",
-  "OTHER",
-  "UNIVERSITY",
-]);
 
 // ---------------------------------------------------------------------------
 // Users
@@ -363,6 +351,14 @@ export const UserStatusEnum = z.enum([
   "DELETED",
   "PENDING_VERIFICATION",
   "SUSPENDED",
+]);
+
+export const LanguageProficiencyEnum = z.enum([
+  "BASIC",
+  "CONVERSATIONAL",
+  "FLUENT",
+  "NATIVE",
+  "PROFESSIONAL",
 ]);
 
 const SUBTYPE_PREFIX_MAP: Record<string, string> = {

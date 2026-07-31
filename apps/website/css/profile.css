@@ -212,6 +212,13 @@ body.profile-page {
     font-size: 1.3rem;
     font-weight: 900;
     border: 2px solid #eef1f8;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.profile-avatar:hover {
+    opacity: 0.85;
+    border-color: var(--profile-blue);
 }
 
 .hidden-file-input {
@@ -376,10 +383,17 @@ body.profile-page {
 }
 
 .profile-meta-list li {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 20px 135px 1fr;
+    align-items: flex-start;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.profile-meta-list li svg {
+    margin-top: 3px;
+    justify-self: center;
 }
 
 .profile-meta-list li strong {
@@ -618,7 +632,8 @@ body.profile-page {
     min-height: 240px;
 }
 
-.backend-slot.is-filled {
+.backend-slot.is-filled,
+.backend-slot.is-loading {
     border-style: solid;
     border-color: var(--profile-blue);
     background: var(--profile-blue-soft);
@@ -660,7 +675,8 @@ body.profile-page {
     box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
 }
 
-.backend-slot.is-filled::before {
+.backend-slot.is-filled::before,
+.backend-slot.is-loading::before {
     content: none;
 }
 
@@ -1203,7 +1219,7 @@ input.is-overflow:focus {
 }
 
 /* Icones SVG pour la section métadonnées */
-.mini-label, .profile-meta-list li {
+.mini-label {
     display: flex;
     align-items: center;
     gap: 8px;

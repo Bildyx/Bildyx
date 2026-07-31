@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Terms of Service — Bildyx';
 $pageDescription = 'Bildyx Terms of Service.';
-$pageScript = 'js/terms-service.js';
+$pageScript = 'js/terms-service.ts';
 $bodyClass = 'terms-service-page';
 $showMainNav = false;
 

@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'My Target List — Bildyx';
 $pageDescription = 'Saved target companies and opportunities on Bildyx.';
-$pageScript = 'js/target-list.js';
+$pageScript = 'js/target-list.ts';
 $bodyClass = 'target-list-page';
 $showMainNav = false;
 

@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Company — Bildyx';
 $pageDescription = 'About Bildyx, our mission, our values, and the people behind the platform.';
-$pageScript = 'js/company.js';
+$pageScript = 'js/company.ts';
 $bodyClass = 'company-page';
 $showMainNav = false;
 

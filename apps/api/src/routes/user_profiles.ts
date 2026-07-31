@@ -1,4 +1,4 @@
-﻿import { ORPCError } from "@orpc/server";
+import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -15,6 +15,7 @@ import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import type { Insertable } from "kysely";
 import type { UserProfiles } from "../db/types";
+import { jsonArrayFrom } from "kysely/helpers/postgres";
 
 export const user_profiles = {
   // 1. Get all profiles
@@ -74,28 +75,74 @@ export const user_profiles = {
     }),
 
   // 3. Get a user's profile by userId
-  getByUser: publicProcedure
+  getFullProfileByUser: publicProcedure
     .route({
       method: "GET",
-      summary: "Get user profile by user ID",
-      description: "Get a user profile by the owner's user ID",
-      path: "/users/{userId}/profile",
+      summary: "Get full user profile with all relations ",
+      path: "/users/{userId}/full-profile",
       tags: ["UserProfile"],
     })
     .input(GetUserProfileByUserSchema)
-    .output(UserProfileSchema)
     .handler(async ({ input }) => {
-      const profile = await database
-        .selectFrom("user_profiles")
-        .selectAll()
-        .where("user_id", "=", input.userId)
+      const fullProfile = await database
+        .selectFrom("user_profiles as p")
+        .selectAll("p")
+        .select((eb) => [
+          // Jointure JSON pour les langues
+          jsonArrayFrom(
+            eb
+              .selectFrom("user_languages as l")
+              .selectAll("l")
+              .whereRef("l.user_profile_id", "=", "p.id"),
+          ).as("languages"),
+
+          // Jointure JSON pour les compétences
+          jsonArrayFrom(
+            eb
+              .selectFrom("user_skills as s")
+              .innerJoin("skills as sk", "sk.id", "s.skill_id")
+              .select([
+                "s.id as id",
+                "s.user_profile_id as user_profile_id",
+                "s.skill_id as skill_id",
+                "s.level as level",
+                "sk.name as name",
+              ])
+              .whereRef("s.user_profile_id", "=", "p.id"),
+          ).as("skills"),
+
+          // Jointure JSON pour les expériences
+          jsonArrayFrom(
+            eb
+              .selectFrom("user_experiences as ex")
+              .selectAll("ex")
+              .whereRef("ex.user_profile_id", "=", "p.id"),
+          ).as("experiences"),
+
+          // Jointure JSON pour les diplômes / formations
+          jsonArrayFrom(
+            eb
+              .selectFrom("user_educations as ed")
+              .selectAll("ed")
+              .whereRef("ed.user_profile_id", "=", "p.id"),
+          ).as("educations"),
+
+          // Jointure JSON pour les certifications
+          jsonArrayFrom(
+            eb
+              .selectFrom("user_certifications as c")
+              .selectAll("c")
+              .whereRef("c.user_profile_id", "=", "p.id"),
+          ).as("certifications"),
+        ])
+        .where("p.user_id", "=", input.userId)
         .executeTakeFirst();
 
-      if (!profile) {
+      if (!fullProfile) {
         throw new ORPCError("NOT_FOUND", { message: "User profile not found" });
       }
 
-      return profile;
+      return fullProfile;
     }),
 
   // 4. Create a new profile
@@ -154,9 +201,7 @@ export const user_profiles = {
       tags: ["UserProfile"],
     })
     .input(
-      z
-        .object({ profileId: z.string().uuid() })
-        .merge(PutUserProfileSchema),
+      z.object({ profileId: z.string().uuid() }).merge(PutUserProfileSchema),
     )
     .output(UserProfileSchema)
     .handler(async ({ input }) => {

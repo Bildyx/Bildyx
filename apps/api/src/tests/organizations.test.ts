@@ -85,6 +85,7 @@ describe("Organizations API Endpoints", () => {
       const result = await callProcedure(organizations.create, {
         name: "Open Source Foundation",
         slug: "open-source-foundation",
+        serial_number: "ORG-01",
         subtype: "ASSOCIATION",
         ownership: "Public",
         mission: "Support open source initiatives",
@@ -113,6 +114,7 @@ describe("Organizations API Endpoints", () => {
         callProcedure(organizations.create, {
           name: "Duplicate Slug Org",
           slug: "open-source-foundation",
+          serial_number: "ORG-01-DUP",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -122,6 +124,7 @@ describe("Organizations API Endpoints", () => {
       const result = await callProcedure(organizations.create, {
         name: "Cyber Security Agency",
         slug: "cyber-security-agency",
+        serial_number: "ORG-02",
         subtype: "GOVERNMENT",
       });
 
@@ -230,6 +233,7 @@ describe("Organizations API Endpoints", () => {
       const extra = await callProcedure(organizations.create, {
         name: "Temporary organization to delete",
         slug: "temp-org-del",
+        serial_number: "ORG-03",
       });
 
       const idsToDelete = [createdOrgId1, extra.id];

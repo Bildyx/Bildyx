@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Personality Test: Big 5 — Bildyx';
 $pageDescription = 'Big 5 personality test for Bildyx.';
-$pageScript = null;
+$pageScript = 'js/tests-preferences.ts';
 $bodyClass = 'big5-page';
 $showMainNav = false;
 

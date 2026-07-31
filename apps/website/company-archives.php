@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Pekamix Company Archives — Bildyx';
 $pageDescription = 'Historical company information for Pekamix.';
-$pageScript = 'js/company-archives.js';
+$pageScript = 'js/company-archives.ts';
 $bodyClass = 'company-archives-page';
 $showMainNav = false;
 

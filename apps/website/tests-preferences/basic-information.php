@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Basic Information — Bildyx';
 $pageDescription = 'Basic information test for Bildyx profile.';
-$pageScript = 'js/basic-information.js';
+$pageScript = 'js/basic-information.ts';
 $bodyClass = 'basic-information-page';
 $showMainNav = false;
 
