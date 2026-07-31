@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { getResetPasswordUrl } from "./auth.service";
 
 let transporter: any;
 if (process.env.SMTP_HOST) {
@@ -45,7 +46,7 @@ export async function sendResetEmail(
   email: string,
   token: string,
 ): Promise<void> {
-  const link = `${process.env.RESET_BASE_URL || process.env.FRONTEND_URL || "http://localhost:8000/reset-password.html"}?token=${token}&email=${encodeURIComponent(email)}`;
+  const link = getResetPasswordUrl(email, token);
   const subject = "Bildyx – Reset your password";
   const text =
     `We received a request to reset your Bildyx password.\n\n` +

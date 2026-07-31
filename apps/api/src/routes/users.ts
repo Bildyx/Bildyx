@@ -51,7 +51,7 @@ export const users = {
     }),
 
   // 2. Get a user by ID
-  getById: publicProcedure
+  getUserById: publicProcedure
     .route({
       method: "GET",
       summary: "Get a specific user",

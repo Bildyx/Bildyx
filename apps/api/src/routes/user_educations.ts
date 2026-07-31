@@ -17,7 +17,7 @@ import type { UserEducations } from "../db/types";
 
 export const user_educations = {
   // 1. Get all educations for a profile
-  getByProfile: publicProcedure
+  getEducationsByProfile: publicProcedure
     .route({
       method: "GET",
       summary: "List all educations for a user profile",
@@ -95,6 +95,7 @@ export const user_educations = {
         throw new ORPCError("NOT_FOUND", { message: "User profile not found" });
       }
 
+      console.log(input);
       const education = await database
         .insertInto("user_educations")
         .values({

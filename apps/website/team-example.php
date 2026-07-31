@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Pekamix Team Example — Bildyx';
 $pageDescription = 'Public company and team profile example on Bildyx.';
-$pageScript = 'js/team-example.js';
+$pageScript = 'js/team-example.ts';
 $bodyClass = 'team-example-page';
 $showMainNav = false;
 

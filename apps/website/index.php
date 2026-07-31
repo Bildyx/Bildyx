@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Bildyx — Home';
 $pageDescription = 'Bildyx — professional team profiles and MicroResumes.';
-$pageScript = 'js/home.js';
+$pageScript = 'js/home.ts';
 require __DIR__ . '/includes/header.php';
 ?>
 

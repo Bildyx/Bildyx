@@ -110,13 +110,13 @@ describe("Users API Endpoints", () => {
   describe("GET /users/{userId} (GetById)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
-        callProcedure(users.getById, { userId: randomUUID() }),
+        callProcedure(users.getUserById, { userId: randomUUID() }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
     test("should successfully return the user by its ID", async () => {
-      const res = await callProcedure(users.getById, {
+      const res = await callProcedure(users.getUserById, {
         userId: createdUserId1,
       });
       assert.strictEqual(res.id, createdUserId1);
@@ -160,7 +160,7 @@ describe("Users API Endpoints", () => {
       await callProcedure(users.delete, { userId: createdUserId1 });
 
       await assert.rejects(
-        callProcedure(users.getById, { userId: createdUserId1 }),
+        callProcedure(users.getUserById, { userId: createdUserId1 }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 
@@ -175,7 +175,7 @@ describe("Users API Endpoints", () => {
       });
 
       await assert.rejects(
-        callProcedure(users.getById, { userId: createdUserId2 }),
+        callProcedure(users.getUserById, { userId: createdUserId2 }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 

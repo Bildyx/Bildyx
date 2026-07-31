@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Mission — Bildyx';
 $pageDescription = 'Bildyx mission: eliminate friction from hiring for companies and candidates.';
-$pageScript = 'js/mission.js';
+$pageScript = 'js/mission.ts';
 $bodyClass = 'mission-page';
 $showMainNav = false;
 

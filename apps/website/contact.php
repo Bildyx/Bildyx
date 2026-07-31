@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Contact — Bildyx';
 $pageDescription = 'Contact Bildyx by email, phone, or message form.';
-$pageScript = 'js/contact.js';
+$pageScript = 'js/contact.ts';
 $bodyClass = 'contact-page';
 $showMainNav = false;
 

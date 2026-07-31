@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "5.0",
+    "paths": {
+      "@repo/api-client": ["./packages/api-client/src/index.ts"],
+      "@repo/models/*": ["./apps/api/src/models/*"]
+    }
+  }
+}

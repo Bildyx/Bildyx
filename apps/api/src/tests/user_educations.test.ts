@@ -105,7 +105,7 @@ describe("UserEducations API Endpoints", { concurrency: 1 }, () => {
   describe("GET /profiles/{userProfileId}/educations (GetByProfile)", () => {
     test("should throw NOT_FOUND when profile does not exist", async () => {
       await assert.rejects(
-        callProcedure(user_educations.getByProfile, {
+        callProcedure(user_educations.getEducationsByProfile, {
           userProfileId: randomUUID(),
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
@@ -113,7 +113,7 @@ describe("UserEducations API Endpoints", { concurrency: 1 }, () => {
     });
 
     test("should successfully return educations of the profile", async () => {
-      const res = await callProcedure(user_educations.getByProfile, {
+      const res = await callProcedure(user_educations.getEducationsByProfile, {
         userProfileId: testProfileId,
       });
 

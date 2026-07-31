@@ -12,6 +12,7 @@ import {
   HOST,
   PORT,
   RPC_PREFIX,
+  API_URL,
 } from "./configuration";
 import { router } from "./routes/router";
 import { database } from "./database";
@@ -61,7 +62,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.BASE_URL || "http://localhost:3000"}/api/auth/google/callback`,
+        callbackURL: `${API_URL}/api/auth/google/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

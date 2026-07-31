@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Tests & Preferences — Bildyx';
 $pageDescription = 'Manage Bildyx tests and preferences.';
-$pageScript = 'js/tests-preferences.js';
+$pageScript = 'js/tests-preferences.ts';
 $bodyClass = 'tests-preferences-page';
 $showMainNav = false;
 

@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'My Jobs — Bildyx';
 $pageDescription = 'Recommended teams and jobs based on your Bildyx MicroResume.';
-$pageScript = 'js/my-jobs.js';
+$pageScript = 'js/my-jobs.ts';
 $bodyClass = 'my-jobs-page';
 $showMainNav = false;
 

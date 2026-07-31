@@ -5,13 +5,13 @@ CREATE SCHEMA IF NOT EXISTS "public";
 CREATE TYPE "Currency" AS ENUM ('AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHF', 'CLP', 'CNY', 'COP', 'CRC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'UYU', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XCD', 'XOF', 'XPF', 'YER', 'ZAR', 'ZMW', 'ZWL');
 
 -- CreateEnum
-CREATE TYPE "CostOfLiving" AS ENUM ('LOW', 'LOW_MEDIUM', 'MEDIUM', 'MEDIUM_HIGH', 'HIGH', 'VERY_HIGH');
+CREATE TYPE "CostOfLiving" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'LOW_MEDIUM', 'MEDIUM_HIGH', 'VERY_HIGH');
 
 -- CreateEnum
-CREATE TYPE "QualityOfLife" AS ENUM ('LOW', 'LOW_MEDIUM', 'MEDIUM', 'MEDIUM_HIGH', 'HIGH', 'VERY_HIGH');
+CREATE TYPE "QualityOfLife" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'LOW_MEDIUM', 'MEDIUM_HIGH', 'VERY_HIGH');
 
 -- CreateEnum
-CREATE TYPE "Language" AS ENUM ('AFRIKAANS', 'ALBANIAN', 'AMBONESE_MALAY', 'AMHARIC', 'ARABIC', 'ARMENIAN', 'AYMARA', 'AZERBAIJANI', 'BAJAN_CREOLE', 'BASQUE', 'BELARUSIAN', 'BENGALI', 'BERBER', 'BOSNIAN', 'BULGARIAN', 'BURMESE', 'CATALAN', 'CEBUANO', 'CHAMORRO', 'CHINESE_CANTONESE', 'CHINESE_MANDARIN', 'CORSICAN', 'CROATIAN', 'CZECH', 'DANISH', 'DHIVEHI', 'DUTCH', 'ENGLISH', 'ESPERANTO', 'ESTONIAN', 'FILIPINO', 'FINNISH', 'FRENCH', 'FRISIAN', 'GALICIAN', 'GEORGIAN', 'GERMAN', 'GREEK', 'GUJARATI', 'GUYANESE_CREOLE', 'HAITIAN_CREOLE', 'HAUSA', 'HEBREW', 'HINDI', 'HMONG', 'HUNGARIAN', 'ICELANDIC', 'IGBO', 'INDONESIAN', 'IRISH', 'ITALIAN', 'JAPANESE', 'JAVANESE', 'KANNADA', 'KAPAMPANGAN', 'KAZAKH', 'KHMER', 'KIMBUNDU', 'KOREAN', 'KURDISH', 'KYRGYZ', 'LAO', 'LATIN', 'LATVIAN', 'LITHUANIAN', 'LUXEMBOURGISH', 'MACEDONIAN', 'MALAGASY', 'MALAY', 'MALAYALAM', 'MALTESE', 'MAORI', 'MARATHI', 'MONGOLIAN', 'MONTENEGRIN', 'NAVAJO', 'NEPALI', 'NORWEGIAN', 'PASHTO', 'PERSIAN', 'POLISH', 'PORTUGUESE', 'PUNJABI', 'QUECHUA', 'ROMANI', 'ROMANIAN', 'ROMANSH', 'RUSSIAN', 'SAMOAN', 'SCOTS', 'SCOTTISH_GAELIC', 'SERBIAN', 'SEYCHELLOIS_CREOLE', 'SHONA', 'SHUAR', 'SINDHI', 'SINHALA', 'SLOVAK', 'SLOVENIAN', 'SOMALI', 'SPANISH', 'SUNDANESE', 'SWAHILI', 'SWEDISH', 'TAGALOG', 'TAJIK', 'TAMIL', 'TATAR', 'TELUGU', 'THAI', 'TIBETAN', 'TURKISH', 'TURKMEN', 'UKRAINIAN', 'UMBUNDU', 'URDU', 'UZBEK', 'VALENCIAN', 'VIETNAMESE', 'WELSH', 'WOLOF', 'XHOSA', 'YIDDISH', 'YORUBA', 'ZULU');
+CREATE TYPE "Language" AS ENUM ('AFRIKAANS', 'ALBANIAN', 'AMHARIC', 'ARABIC', 'ARMENIAN', 'AZERBAIJANI', 'BASQUE', 'BELARUSIAN', 'BENGALI', 'BOSNIAN', 'BULGARIAN', 'BURMESE', 'CATALAN', 'CEBUANO', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'CROATIAN', 'CZECH', 'DANISH', 'DUTCH', 'ENGLISH', 'ESPERANTO', 'ESTONIAN', 'FILIPINO', 'FINNISH', 'FRENCH', 'GALICIAN', 'GEORGIAN', 'GERMAN', 'GREEK', 'GUJARATI', 'HAITIAN_CREOLE', 'HAUSA', 'HEBREW', 'HINDI', 'HUNGARIAN', 'ICELANDIC', 'IGBO', 'INDONESIAN', 'IRISH', 'ITALIAN', 'JAPANESE', 'JAVANESE', 'KANNADA', 'KAZAKH', 'KHMER', 'KOREAN', 'KURDISH', 'KYRGYZ', 'LAO', 'LATIN', 'LATVIAN', 'LITHUANIAN', 'LUXEMBOURGISH', 'MACEDONIAN', 'MALAGASY', 'MALAY', 'MALAYALAM', 'MALTESE', 'MAORI', 'MARATHI', 'MONGOLIAN', 'NEPALI', 'NORWEGIAN', 'PASHTO', 'PERSIAN', 'POLISH', 'PORTUGUESE', 'PUNJABI', 'ROMANIAN', 'RUSSIAN', 'SAMOAN', 'SERBIAN', 'SHONA', 'SINDHI', 'SINHALA', 'SLOVAK', 'SLOVENIAN', 'SOMALI', 'SPANISH', 'SUNDANESE', 'SWAHILI', 'SWEDISH', 'TAJIK', 'TAMIL', 'TATAR', 'TELUGU', 'THAI', 'TIBETAN', 'TURKISH', 'TURKMEN', 'UKRAINIAN', 'URDU', 'UZBEK', 'VIETNAMESE', 'WELSH', 'WOLOF', 'XHOSA', 'YIDDISH', 'YORUBA', 'ZULU', 'AMBONESE_MALAY', 'AYMARA', 'BAJAN_CREOLE', 'BERBER', 'CHAMORRO', 'CORSICAN', 'DHIVEHI', 'FRISIAN', 'GUYANESE_CREOLE', 'HMONG', 'KAPAMPANGAN', 'KIMBUNDU', 'MONTENEGRIN', 'NAVAJO', 'QUECHUA', 'ROMANI', 'ROMANSH', 'SCOTS', 'SCOTTISH_GAELIC', 'SEYCHELLOIS_CREOLE', 'SHUAR', 'TAGALOG', 'UMBUNDU', 'VALENCIAN');
 
 -- CreateEnum
 CREATE TYPE "JobCategory" AS ENUM ('PRIVATE_SECTOR', 'PUBLIC_SECTOR', 'GOVERNMENT', 'NGO', 'MILITARY', 'ACADEMIC', 'OTHER');
@@ -211,8 +211,8 @@ CREATE TABLE "organizations" (
     "subtype" "OrganizationSubType",
     "type1" TEXT,
     "type2" TEXT,
-    "student_count" INTEGER,
     "undergraduates" INTEGER,
+    "student_count" INTEGER,
     "postgraduates" INTEGER,
 
     CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
@@ -449,9 +449,9 @@ CREATE TABLE "user_profiles" (
     "current_job_started_at" TIMESTAMP(3),
     "current_organization_id" UUID,
     "metadata" JSONB,
-    "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "user_profiles_pkey" PRIMARY KEY ("id")
 );
@@ -471,11 +471,11 @@ CREATE TABLE "user_certifications" (
 CREATE TABLE "user_educations" (
     "id" UUID NOT NULL,
     "user_profile_id" UUID NOT NULL,
-    "organization_id" UUID,
     "degree_id" UUID,
     "start_year" INTEGER,
     "end_year" INTEGER,
     "graduated" BOOLEAN NOT NULL DEFAULT false,
+    "organization_id" UUID,
 
     CONSTRAINT "user_educations_pkey" PRIMARY KEY ("id")
 );
@@ -1009,10 +1009,10 @@ ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_study_
 ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_user_education_id_fkey" FOREIGN KEY ("user_education_id") REFERENCES "user_educations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1036,28 +1036,28 @@ ALTER TABLE "user_target_lists" ADD CONSTRAINT "user_target_lists_user_profile_i
 ALTER TABLE "personality_criteria" ADD CONSTRAINT "personality_criteria_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_criterion_id_fkey" FOREIGN KEY ("test_id", "criterion_id") REFERENCES "personality_criteria"("test_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "personality_test_results" ADD CONSTRAINT "personality_test_results_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "personality_test_results" ADD CONSTRAINT "personality_test_results_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "personality_answers" ADD CONSTRAINT "personality_answers_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "personality_test_results"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "personality_test_results" ADD CONSTRAINT "personality_test_results_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "personality_answers" ADD CONSTRAINT "personality_answers_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "personality_questions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "personality_criterion_scores" ADD CONSTRAINT "personality_criterion_scores_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "personality_test_results"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "personality_answers" ADD CONSTRAINT "personality_answers_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "personality_test_results"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "personality_criterion_scores" ADD CONSTRAINT "personality_criterion_scores_criterion_id_fkey" FOREIGN KEY ("criterion_id") REFERENCES "personality_criteria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_criterion_scores" ADD CONSTRAINT "personality_criterion_scores_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "personality_test_results"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

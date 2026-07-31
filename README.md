@@ -44,20 +44,32 @@ Useful options: --allow-partial to import valid rows and set aside those with er
 
 Translated with DeepL.com (free version)
 
-## 3. Start the API
+## 3. Configure the environment
+
+Copy the template `.env.example` to `apps/api/.env` and update the database and key configurations:
 
 ```bash
-cd apps/api
+cp .env.example apps/api/.env
+```
+
+## 4. Run the applications concurrently (via Turborepo)
+
+From the root of the project, you can now run both the backend API and the frontend website concurrently using Turborepo:
+
+### Development Mode
+```bash
 npm run dev
 ```
+- API will start on: http://localhost:3000
+- Website will start on: http://localhost:8000 (PHP server)
 
-L'API sera accessible via l'url : http://localhost:3000/
-
-## 4. Start the website
-
+### Production Mode
 ```bash
-cd apps/website
-npx http-server . -p 5500
+npm run start
 ```
 
-Le site sera accessible via l'url : http://localhost:5500/
+### Build Check
+```bash
+npm run build
+```
+

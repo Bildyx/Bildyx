@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Profile — Bildyx';
 $pageDescription = 'Build and edit your Bildyx MicroResume profile.';
-$pageScript = 'js/profile.js';
+$pageScript = 'js/profile.ts';
 $bodyClass = 'profile-page';
 $showMainNav = false;
 $activePage = 'profile';

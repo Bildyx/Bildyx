@@ -234,17 +234,6 @@ export async function mapCity(row: Record<string, any>) {
       if (companies.length > 0) {
         largestCompaniesStr = companies.map((c) => c.name).join(", ");
       }
-
-      // 3. Universities
-      const univs = await database
-        .selectFrom("universities")
-        .select("universities.name")
-        .where("city_id", "=", row.id)
-        .limit(4)
-        .execute();
-      if (univs.length > 0) {
-        topUniversitiesStr = univs.map((u) => u.name).join(", ");
-      }
     }
   } catch (err) {
     console.warn(
@@ -438,6 +427,7 @@ export async function mapOrganization(row: Record<string, any>) {
 
   return {
     organizationName: row.name,
+    name: row.name,
     serialNumber: row.serial_number,
     category: formatEnum(row.subtype),
     industry,
@@ -445,9 +435,12 @@ export async function mapOrganization(row: Record<string, any>) {
     companyType: formatEnum(row.subtype),
     type1: str(row.type1),
     type2: str(row.type2),
+    type: formatEnum(row.type1),
     numberOfEmployees: formatEnum(row.numberOfEmployees),
     founded: str(row.founded),
+    established: str(row.founded),
     headquartersLocation,
+    location: headquartersLocation,
     cityName,
     parent,
     offices: str(row.offices),
@@ -455,30 +448,17 @@ export async function mapOrganization(row: Record<string, any>) {
     knownFor: join(row.known_for),
     budget: str(row.budget),
     partners: join(row.partners),
-    programsActivities: join(row.programs_activities) || join(row.programsActivities),
+    programsActivities:
+      join(row.programs_activities) || join(row.programsActivities),
     personnel: formatPersonnel(row.personnel),
-    year: new Date().getFullYear(),
-  };
-}
-
-// ---------------------------------------------------------------------------
-// University
-// ---------------------------------------------------------------------------
-
-export function mapUniversity(row: Record<string, any>) {
-  return {
-    name: row.name,
-    serialNumber: row.serial_number,
-    established: str(row.established),
-    type: formatEnum(row.type),
-    location: str(row.location),
     totalStudents: fmt(row.student_count),
     undergraduates: fmt(row.undergraduates),
     postgraduates: fmt(row.postgraduates),
-    notes: str(row.notes),
+    notes: str(row.description),
     year: new Date().getFullYear(),
   };
 }
+
 
 // ---------------------------------------------------------------------------
 // Skill

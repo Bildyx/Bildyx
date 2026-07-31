@@ -17,7 +17,7 @@ import type { UserCertifications } from "../db/types";
 
 export const user_certifications = {
   // 1. Get all certifications d'un profil
-  getByProfile: publicProcedure
+  getCertificationByProfile: publicProcedure
     .route({
       method: "GET",
       summary: "List all certifications for a user profile",
