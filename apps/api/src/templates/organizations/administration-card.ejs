@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= name %> - Card</title>
+    <link rel="stylesheet" href="css/organization-card.css">
+</head>
+<body>
+    <div class="main-card">
+        <div class="header-row">
+            <div class="maygraph-logo">
+                <img src="<%= getIcon('logos', 'Logo-MayGraph_Big1.png') %>" alt="MayGraph" />
+            </div>
+            <div class="company-title"><%= name %></div>
+        </div>
+        <div class="info-table">
+            <% if (description) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'notes.png') %>" alt="" /></div>
+                <div class="info-label">Description</div>
+                <div class="info-value"><%= description %></div>
+            </div>
+            <% } %>
+            <% if (type1) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'Type.png') %>" alt="" /></div>
+                <div class="info-label">Type</div>
+                <div class="info-value" style="padding-top: 8px;"><%= type1 %></div>
+            </div>
+            <% } %>
+            <% if (founded) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'creation_date.png') %>" alt="" /></div>
+                <div class="info-label">Established</div>
+                <div class="info-value" style="padding-top: 8px;"><%= founded %></div>
+            </div>
+            <% } %>
+            <% if (headquartersLocation) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'hq.png') %>" alt="" /></div>
+                <div class="info-label">Headquarters</div>
+                <div class="info-value" style="padding-top: 8px;"><%= headquartersLocation %></div>
+            </div>
+            <% } %>
+            <% if (parent) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'parent_company.png') %>" alt="" /></div>
+                <div class="info-label">Parent</div>
+                <div class="info-value" style="padding-top: 8px;"><%= parent %></div>
+            </div>
+            <% } %>
+            <% if (numberOfEmployees) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'employees.png') %>" alt="" /></div>
+                <div class="info-label">Employees</div>
+                <div class="info-value" style="padding-top: 8px;"><%= numberOfEmployees %></div>
+            </div>
+            <% } %>
+            <% if (subsidiaries) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'government.png') %>" alt="" /></div>
+                <div class="info-label">Child Agencies</div>
+                <div class="info-value" style="padding-top: 8px;"><%= subsidiaries %></div>
+            </div>
+            <% } %>
+            <% if (budget) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'currency.png') %>" alt="" /></div>
+                <div class="info-label">Budget</div>
+                <div class="info-value" style="padding-top: 8px;"><%= budget %></div>
+            </div>
+            <% } %>
+            <% if (programs_activities) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'activity.png') %>" alt="" /></div>
+                <div class="info-label">Functions/Programs</div>
+                <div class="info-value" style="padding-top: 8px;"><%= programs_activities %></div>
+            </div>
+            <% } %>
+            <% if (jurisdiction) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'globe.png') %>" alt="" /></div>
+                <div class="info-label">Jurisdiction</div>
+                <div class="info-value" style="padding-top: 8px;"><%= jurisdiction %></div>
+            </div>
+            <% } %>
+            <% if (founders) { %>
+            <div class="info-row">
+                <div class="info-icon"><img src="<%= getIcon('icons', 'parent_company.png') %>" alt="" /></div>
+                <div class="info-label">Preceding Agency</div>
+                <div class="info-value" style="padding-top: 8px;"><%= founders %></div>
+            </div>
+            <% } %>
+        </div>
+        <div class="footer-row">
+            <span class="serial-number">#<%= serial_number %></span>
+            <span class="copyright">©<%= year %></span>
+        </div>
+    </div>
+</body>
+</html>

@@ -17,8 +17,6 @@ describe("UserProfiles API Endpoints", { concurrency: 1 }, () => {
       await pgliteClient.exec("BEGIN");
     }
 
-    
-
     testUserId1 = randomUUID();
     testUserId2 = randomUUID();
 
@@ -133,16 +131,16 @@ describe("UserProfiles API Endpoints", { concurrency: 1 }, () => {
     });
   });
 
-  describe("GET /users/{userId}/profile (GetByUser)", () => {
+  describe("GET /users/{userId}/full-profile (GetFullProfileByUser)", () => {
     test("should throw NOT_FOUND when profile does not exist", async () => {
       await assert.rejects(
-        callProcedure(user_profiles.getByUser, { userId: randomUUID() }),
+        callProcedure(user_profiles.getFullProfileByUser, { userId: randomUUID() }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
     test("should successfully return the profile by user ID", async () => {
-      const res = await callProcedure(user_profiles.getByUser, {
+      const res = await callProcedure(user_profiles.getFullProfileByUser, {
         userId: testUserId1,
       });
       assert.strictEqual(res.id, createdProfileId1);
