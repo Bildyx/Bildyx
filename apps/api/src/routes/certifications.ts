@@ -31,23 +31,20 @@ export const certifications = {
     .handler(async ({ input }) => {
       const { organizationId, name, category } = input;
 
-      if (organizationId) {
-        const organization = await database
-          .selectFrom("organizations")
-          .where("id", "=", organizationId)
-          .select("id")
-          .executeTakeFirst();
+      const organization = await database
+        .selectFrom("organizations")
+        .where("id", "=", organizationId)
+        .select("id")
+        .executeTakeFirst();
 
-        if (!organization) {
-          throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
-        }
+      if (!organization) {
+        throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
       }
 
-      let query = database.selectFrom("certifications").selectAll();
-
-      if (organizationId) {
-        query = query.where("issuing_organization_id", "=", organizationId);
-      }
+      let query = database
+        .selectFrom("certifications")
+        .selectAll()
+        .where("issuing_organization_id", "=", organizationId);
 
       if (name) {
         const p = `%${name.trim()}%`;
@@ -60,11 +57,7 @@ export const certifications = {
         query = query.where("category", "=", category);
       }
 
-      const certificationsData = await query
-        .orderBy("created_at", "desc")
-        .execute();
-
-      return certificationsData;
+      return await query.orderBy("created_at", "desc").execute();
     }),
 
   // 2. Get all certifications

@@ -11,6 +11,7 @@ export class OrganizationService {
   public async getAll(filters?: {
     name?: string;
     subtype?: "COMPANY" | "UNIVERSITY" | "NON_PROFIT" | "GOVERNMENT" | "OTHER";
+    city?: string;
   }): Promise<Organization[]> {
     return await this.rpcClient.organizations.getAll(filters || {});
   }
