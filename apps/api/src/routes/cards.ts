@@ -333,32 +333,8 @@ export const cards = {
             template = "organizations/state-government-card";
             break;
           }
-          case OrganizationSubtypeEnum.enum.COUNTY_GOVERNMENT: {
-            template = "organizations/county-government-card";
-            break;
-          }
           case OrganizationSubtypeEnum.enum.CITY_GOVERNMENT: {
             template = "organizations/city-government-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.GOVERNOR_OFFICE: {
-            template = "organizations/governor-office-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.PUBLIC_AUTHORITY: {
-            template = "organizations/public-authority-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.LOCAL_GOVERNMENT: {
-            template = "organizations/local-government-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.MAYOR_OFFICE: {
-            template = "organizations/mayor-office-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.CITY_DEPARTMENTS: {
-            template = "organizations/city-departments-card";
             break;
           }
           case OrganizationSubtypeEnum.enum.HOSPITAL: {
