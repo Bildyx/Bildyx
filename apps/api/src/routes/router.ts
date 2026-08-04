@@ -22,6 +22,14 @@ import { user_skills } from "./user_skills";
 import { user_experiences } from "./user_experiences";
 import { audit_logs } from "./audit_logs";
 import { cards } from "./cards";
+import { studyFields } from "./study_fields";
+import { personalityTests } from "./personality_tests";
+import { personalityCriteria } from "./personality_criteria";
+import { personalityQuestions } from "./personality_questions";
+import { personalityTestResults } from "./personality_test_results";
+import { personalityAnswers } from "./personality_answers";
+import { personalityCriterionScores } from "./personality_criterion_scores";
+import { user_target_lists } from "./user_target_lists";
 
 export const router = publicProcedure.router({
   auth,
@@ -47,5 +55,13 @@ export const router = publicProcedure.router({
   user_experiences,
   audit_logs,
   cards,
+  studyFields,
+  personalityTests,
+  personalityCriteria,
+  personalityQuestions,
+  personalityTestResults,
+  personalityAnswers,
+  personalityCriterionScores,
+  user_target_lists,
 });
 export type Router = typeof router;

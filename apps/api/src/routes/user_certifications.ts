@@ -137,7 +137,7 @@ export const user_certifications = {
     })
     .input(
       z
-        .object({ userCertificationId: z.string().uuid() })
+        .object({ userCertificationId: z.uuid() })
         .merge(PutUserCertificationSchema),
     )
     .output(UserCertificationSchema)

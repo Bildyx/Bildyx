@@ -146,7 +146,7 @@ export const cities = {
       path: "/cities/{cityId}",
       tags: ["City"],
     })
-    .input(z.object({ cityId: z.string().uuid() }).merge(PutCitySchema))
+    .input(z.object({ cityId: z.uuid() }).merge(PutCitySchema))
     .output(CitySchema)
     .handler(async ({ input }) => {
       const { cityId, metadata, ...data } = input;

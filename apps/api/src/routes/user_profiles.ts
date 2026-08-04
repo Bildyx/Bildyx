@@ -200,9 +200,7 @@ export const user_profiles = {
       path: "/profiles/{profileId}",
       tags: ["UserProfile"],
     })
-    .input(
-      z.object({ profileId: z.string().uuid() }).merge(PutUserProfileSchema),
-    )
+    .input(z.object({ profileId: z.uuid() }).merge(PutUserProfileSchema))
     .output(UserProfileSchema)
     .handler(async ({ input }) => {
       const { profileId, metadata, ...rest } = input;

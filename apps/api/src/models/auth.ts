@@ -26,7 +26,7 @@ export const LoginInputSchema = z.object({
 export const LoginOutputSchema = z.object({
   token: z.string(),
   user: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     email: z.email(),
     first_name: z.string().nullable().optional(),
     last_name: z.string().nullable().optional(),
@@ -44,7 +44,7 @@ export const VerifyEmailOutputSchema = z.object({
   token: z.string().optional(),
   user: z
     .object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       email: z.email(),
       role: UserRoleEnum,
     })

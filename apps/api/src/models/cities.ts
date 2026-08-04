@@ -1,9 +1,14 @@
 import { z } from "zod";
 import { CostOfLivingSchema, LanguageSchema } from "./utils/enums";
-import { zNullableInt, zNullableString, zNullableStringCoercive, zEnumArray } from "./utils/preprocessors";
+import {
+  zNullableInt,
+  zNullableString,
+  zNullableStringCoercive,
+  zEnumArray,
+} from "./utils/preprocessors";
 
 export const CitySchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   country_id: z.string().length(2),
@@ -42,7 +47,7 @@ export const GetCitiesSchema = z.object({
 });
 
 export const GetCitySchema = z.object({
-  cityId: z.string().uuid(),
+  cityId: z.uuid(),
 });
 
 // POST
@@ -58,11 +63,11 @@ export const PutCitySchema = PostCitySchema.partial();
 
 // DELETE
 export const DeleteCitySchema = z.object({
-  cityId: z.string().uuid(),
+  cityId: z.uuid(),
 });
 
 export const DeleteCitiesBulkSchema = z.object({
-  cityIds: z.array(z.string().uuid()),
+  cityIds: z.array(z.uuid()),
 });
 
 export type City = z.infer<typeof CitySchema>;

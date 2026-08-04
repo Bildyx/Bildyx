@@ -2,8 +2,8 @@ import { z } from "zod";
 import { zNullableUUID } from "./utils/preprocessors";
 
 export const UserProfileSchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(),
+  id: z.uuid(),
+  user_id: z.uuid(),
   biography: z.string().nullable().optional(),
   country_id: z.string().length(2).nullable().optional(),
   city_id: zNullableUUID(),
@@ -13,9 +13,9 @@ export const UserProfileSchema = z.object({
   locale: z.string().nullable().optional(),
   timezone: z.string().nullable().optional(),
   is_public: z.boolean(),
-  current_job_id: z.string().uuid().nullable().optional(),
+  current_job_id: z.uuid().nullable().optional(),
   current_job_started_at: z.date().nullable().optional(),
-  current_organization_id: z.string().uuid().nullable().optional(),
+  current_organization_id: z.uuid().nullable().optional(),
   metadata: z.any().nullable().optional(),
   created_at: z.date(),
   updated_at: z.date(),
@@ -23,22 +23,22 @@ export const UserProfileSchema = z.object({
 
 // GET
 export const GetUserProfilesSchema = z.object({
-  userId: z.string().uuid().optional(),
+  userId: zNullableUUID(),
   countryId: z.string().length(2).optional(),
-  cityId: z.string().uuid().optional(),
+  cityId: zNullableUUID(),
 });
 
 export const GetUserProfileSchema = z.object({
-  profileId: z.string().uuid(),
+  profileId: z.uuid(),
 });
 
 export const GetUserProfileByUserSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
 });
 
 // POST
 export const PostUserProfileSchema = z.object({
-  user_id: z.string().uuid(),
+  user_id: z.uuid(),
   biography: z.string().nullable().optional(),
   country_id: z.string().length(2).nullable().optional(),
   city_id: zNullableUUID(),
@@ -61,11 +61,11 @@ export const PutUserProfileSchema = PostUserProfileSchema.omit({
 
 // DELETE
 export const DeleteUserProfileSchema = z.object({
-  profileId: z.string().uuid(),
+  profileId: z.uuid(),
 });
 
 export const DeleteUserProfilesBulkSchema = z.object({
-  profileIds: z.array(z.string().uuid()),
+  profileIds: z.array(z.uuid()),
 });
 
 export type UserProfile = z.infer<typeof UserProfileSchema>;

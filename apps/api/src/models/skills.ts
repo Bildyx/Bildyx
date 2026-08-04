@@ -3,7 +3,7 @@ import { DifficultyLevelEnum } from "./utils/enums";
 import { zStringArray } from "./utils/preprocessors";
 
 export const SkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   type: z.string().nullable().optional(),
@@ -34,7 +34,7 @@ export const GetSkillsSchema = z.object({
 });
 
 export const GetSkillSchema = z.object({
-  skillId: z.string().uuid(),
+  skillId: z.uuid(),
 });
 
 // POST
@@ -50,11 +50,11 @@ export const PutSkillSchema = PostSkillSchema.partial();
 
 // DELETE
 export const DeleteSkillSchema = z.object({
-  skillId: z.string().uuid(),
+  skillId: z.uuid(),
 });
 
 export const DeleteSkillsBulkSchema = z.object({
-  skillIds: z.array(z.string().uuid()),
+  skillIds: z.array(z.uuid()),
 });
 
 export type Skill = z.infer<typeof SkillSchema>;

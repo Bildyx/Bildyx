@@ -2,7 +2,7 @@ import { z } from "zod";
 import { DegreeLevelEnum } from "./utils/enums";
 
 export const DegreeSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   level: DegreeLevelEnum.nullable().optional(),
@@ -23,7 +23,7 @@ export const GetDegreesSchema = z.object({
 });
 
 export const GetDegreeSchema = z.object({
-  degreeId: z.string().uuid(),
+  degreeId: z.uuid(),
 });
 
 // POST
@@ -39,11 +39,11 @@ export const PutDegreeSchema = PostDegreeSchema.partial();
 
 // DELETE
 export const DeleteDegreeSchema = z.object({
-  degreeId: z.string().uuid(),
+  degreeId: z.uuid(),
 });
 
 export const DeleteDegreesBulkSchema = z.object({
-  degreeIds: z.array(z.string().uuid()),
+  degreeIds: z.array(z.uuid()),
 });
 
 export type Degree = z.infer<typeof DegreeSchema>;

@@ -51,7 +51,7 @@ export const audit_logs = {
       path: "/users/{userId}/audit-logs",
       tags: ["AuditLog"],
     })
-    .input(z.object({ userId: z.string().uuid() }))
+    .input(z.object({ userId: z.uuid() }))
     .output(z.array(AuditLogSchema))
     .handler(async ({ input }) => {
       const user = await database

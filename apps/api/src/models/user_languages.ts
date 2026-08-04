@@ -2,24 +2,24 @@ import { z } from "zod";
 import { LanguageSchema, LanguageProficiencyEnum } from "./utils/enums";
 
 export const UserLanguageSchema = z.object({
-  id: z.string().uuid(),
-  user_profile_id: z.string().uuid(),
+  id: z.uuid(),
+  user_profile_id: z.uuid(),
   language: LanguageSchema,
   proficiency: LanguageProficiencyEnum.nullable().optional(),
 });
 
 // GET
 export const GetUserLanguagesSchema = z.object({
-  userProfileId: z.string().uuid(),
+  userProfileId: z.uuid(),
 });
 
 export const GetUserLanguageSchema = z.object({
-  userLanguageId: z.string().uuid(),
+  userLanguageId: z.uuid(),
 });
 
 // POST
 export const PostUserLanguageSchema = z.object({
-  user_profile_id: z.string().uuid(),
+  user_profile_id: z.uuid(),
   language: LanguageSchema,
   proficiency: LanguageProficiencyEnum.nullable().optional(),
 });
@@ -31,11 +31,11 @@ export const PutUserLanguageSchema = z.object({
 
 // DELETE
 export const DeleteUserLanguageSchema = z.object({
-  userLanguageId: z.string().uuid(),
+  userLanguageId: z.uuid(),
 });
 
 export const DeleteUserLanguagesBulkSchema = z.object({
-  userLanguageIds: z.array(z.string().uuid()),
+  userLanguageIds: z.array(z.uuid()),
 });
 
 export type UserLanguage = z.infer<typeof UserLanguageSchema>;

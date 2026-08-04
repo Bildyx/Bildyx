@@ -124,11 +124,7 @@ export const organizations = {
       path: "/organizations/{organizationId}",
       tags: ["Organization"],
     })
-    .input(
-      z
-        .object({ organizationId: z.string().uuid() })
-        .merge(PutOrganizationSchema),
-    )
+    .input(z.object({ organizationId: z.uuid() }).merge(PutOrganizationSchema))
     .output(OrganizationSchema)
     .handler(async ({ input }) => {
       const { organizationId, metadata, ...rest } = input;
@@ -146,7 +142,11 @@ export const organizations = {
 
       const organization = await database
         .updateTable("organizations")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any } as any)
+        .set({
+          ...rest,
+          updated_at: new Date(),
+          metadata: metadata as any,
+        } as any)
         .where("id", "=", organizationId)
         .returningAll()
         .executeTakeFirst();

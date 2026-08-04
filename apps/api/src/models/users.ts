@@ -2,7 +2,7 @@ import { z } from "zod";
 import { UserRoleEnum, UserStatusEnum } from "./utils/enums";
 
 export const UserSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   email: z.email(),
   email_verified: z.boolean(),
   password_hash: z.string(),
@@ -10,7 +10,7 @@ export const UserSchema = z.object({
   last_name: z.string().nullable().optional(),
   display_name: z.string().nullable().optional(),
   avatar_url: z.string().nullable().optional(),
-  organization_id: z.string().uuid().nullable().optional(),
+  organization_id: z.uuid().nullable().optional(),
   marketing_opt_in: z.boolean(),
   verification_code: z.string().nullable().optional(),
   verification_expires_at: z.date().nullable().optional(),
@@ -38,7 +38,7 @@ export const GetUsersSchema = z.object({
 });
 
 export const GetUserSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
 });
 
 // POST
@@ -49,7 +49,7 @@ export const PostUserSchema = z.object({
   last_name: z.string().nullable().optional(),
   display_name: z.string().nullable().optional(),
   avatar_url: z.string().nullable().optional(),
-  organization_id: z.string().uuid().nullable().optional(),
+  organization_id: z.uuid().nullable().optional(),
   marketing_opt_in: z.boolean().optional(),
   role: UserRoleEnum.optional(),
   status: UserStatusEnum.optional(),
@@ -61,11 +61,11 @@ export const PutUserSchema = PostUserSchema.partial();
 
 // DELETE
 export const DeleteUserSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
 });
 
 export const DeleteUsersBulkSchema = z.object({
-  userIds: z.array(z.string().uuid()),
+  userIds: z.array(z.uuid()),
 });
 
 export type User = z.infer<typeof UserSchema>;

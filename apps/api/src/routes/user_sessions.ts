@@ -120,11 +120,7 @@ export const user_sessions = {
       path: "/sessions/{sessionId}",
       tags: ["UserSession"],
     })
-    .input(
-      z
-        .object({ sessionId: z.string().uuid() })
-        .merge(PutUserSessionSchema),
-    )
+    .input(z.object({ sessionId: z.uuid() }).merge(PutUserSessionSchema))
     .output(UserSessionSchema)
     .handler(async ({ input }) => {
       const { sessionId, ...updates } = input;

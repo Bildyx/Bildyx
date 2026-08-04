@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EmployeeCountRangeEnum, OrganizationSubtypeEnum } from "./utils/enums";
 
 export const OrganizationSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   slug: z.string().trim().min(1),
@@ -29,8 +29,8 @@ export const OrganizationSchema = z.object({
   members: z.number().int().min(0).nullable().optional(),
   personnel: z.number().int().min(0).nullable().optional(),
   numberOfEmployees: EmployeeCountRangeEnum.nullable().optional(),
-  parent_organization_id: z.string().uuid().nullable().optional(),
-  city_id: z.string().uuid().nullable().optional(),
+  parent_organization_id: z.uuid().nullable().optional(),
+  city_id: z.uuid().nullable().optional(),
   research_areas: z.array(z.string()).nullable().optional(),
   products: z.array(z.string()).nullable().optional(),
   services: z.array(z.string()).nullable().optional(),
@@ -50,7 +50,7 @@ export const GetOrganizationsSchema = z.object({
 });
 
 export const GetOrganizationSchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.uuid(),
 });
 
 // POST
@@ -66,11 +66,11 @@ export const PutOrganizationSchema = PostOrganizationSchema.partial();
 
 // DELETE
 export const DeleteOrganizationSchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.uuid(),
 });
 
 export const DeleteOrganizationsBulkSchema = z.object({
-  organizationIds: z.array(z.string().uuid()),
+  organizationIds: z.array(z.uuid()),
 });
 
 export type Organization = z.infer<typeof OrganizationSchema>;

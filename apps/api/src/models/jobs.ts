@@ -5,7 +5,7 @@ import { zNullableUUID, zStringArray } from "./utils/preprocessors";
 const currentYear = () => new Date().getFullYear();
 
 export const JobSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   category: JobCategoryEnum.nullable().optional(),
@@ -27,11 +27,11 @@ export const GetJobsSchema = z.object({
   name: z.string().optional(),
   category: JobCategoryEnum.optional(),
   seniority_level: SeniorityLevelEnum.optional(),
-  industry_id: z.string().uuid().optional(),
+  industry_id: zNullableUUID(),
 });
 
 export const GetJobSchema = z.object({
-  jobId: z.string().uuid(),
+  jobId: z.uuid(),
 });
 
 // POST
@@ -47,11 +47,11 @@ export const PutJobSchema = PostJobSchema.partial();
 
 // DELETE
 export const DeleteJobSchema = z.object({
-  jobId: z.string().uuid(),
+  jobId: z.uuid(),
 });
 
 export const DeleteJobsBulkSchema = z.object({
-  jobIds: z.array(z.string().uuid()),
+  jobIds: z.array(z.uuid()),
 });
 
 export type Job = z.infer<typeof JobSchema>;

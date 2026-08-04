@@ -129,7 +129,7 @@ export const users = {
       path: "/users/{userId}",
       tags: ["User"],
     })
-    .input(z.object({ userId: z.string().uuid() }).merge(PutUserSchema))
+    .input(z.object({ userId: z.uuid() }).merge(PutUserSchema))
     .output(UserSchema)
     .handler(async ({ input }) => {
       const { userId, ...updates } = input;

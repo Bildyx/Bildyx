@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { zNullableUUID } from "./utils/preprocessors";
 
 export const UserExperienceSchema = z.object({
-  id: z.string().uuid(),
-  user_profile_id: z.string().uuid(),
-  organization_id: z.string().uuid().nullable().optional(),
-  job_id: z.string().uuid().nullable().optional(),
+  id: z.uuid(),
+  user_profile_id: z.uuid(),
+  organization_id: zNullableUUID(),
+  job_id: zNullableUUID(),
   title: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   start_year: z.number().nullable().optional(),
@@ -14,18 +15,18 @@ export const UserExperienceSchema = z.object({
 
 // GET
 export const GetUserExperiencesSchema = z.object({
-  userProfileId: z.string().uuid(),
+  userProfileId: z.uuid(),
 });
 
 export const GetUserExperienceSchema = z.object({
-  userExperienceId: z.string().uuid(),
+  userExperienceId: z.uuid(),
 });
 
 // POST
 export const PostUserExperienceSchema = z.object({
-  user_profile_id: z.string().uuid(),
-  organization_id: z.string().uuid().nullable().optional(),
-  job_id: z.string().uuid().nullable().optional(),
+  user_profile_id: z.uuid(),
+  organization_id: zNullableUUID(),
+  job_id: zNullableUUID(),
   title: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   start_year: z.number().nullable().optional(),
@@ -35,8 +36,8 @@ export const PostUserExperienceSchema = z.object({
 
 // PATCH
 export const PutUserExperienceSchema = z.object({
-  organization_id: z.string().uuid().nullable().optional(),
-  job_id: z.string().uuid().nullable().optional(),
+  organization_id: zNullableUUID(),
+  job_id: zNullableUUID(),
   title: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   start_year: z.number().nullable().optional(),
@@ -46,11 +47,11 @@ export const PutUserExperienceSchema = z.object({
 
 // DELETE
 export const DeleteUserExperienceSchema = z.object({
-  userExperienceId: z.string().uuid(),
+  userExperienceId: z.uuid(),
 });
 
 export const DeleteUserExperiencesBulkSchema = z.object({
-  userExperienceIds: z.array(z.string().uuid()),
+  userExperienceIds: z.array(z.uuid()),
 });
 
 export type UserExperience = z.infer<typeof UserExperienceSchema>;

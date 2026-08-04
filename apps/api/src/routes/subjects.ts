@@ -138,7 +138,7 @@ export const subjects = {
       path: "/subjects/{subjectId}",
       tags: ["Subject"],
     })
-    .input(z.object({ subjectId: z.string().uuid() }).merge(PutSubjectSchema))
+    .input(z.object({ subjectId: z.uuid() }).merge(PutSubjectSchema))
     .output(SubjectSchema)
     .handler(async ({ input }) => {
       const { subjectId, metadata, ...rest } = input;

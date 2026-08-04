@@ -164,19 +164,8 @@ model Organization {
   serial_number        String               @unique
   subsidiaries         String?
   subtype              OrganizationSubType?
-  // Free-form sub-category, dependent on subtype (e.g. for subtype=UNIVERSITY,
-  // suggested values "GRANDE_ECOLE" / "INSTITUTE" / "ACADEMY" / "ONLINE" /
-  // "OTHER" - former UniversityType enum, dropped from the schema along with
-  // the University model; not constrained on the DB side, to be
-  // validated/suggested on the front end if a dropdown is needed).
   type1                String?
   type2                String?
-  // Academic fields (relevant mostly for subtype=UNIVERSITY, but kept
-  // directly on Organization by choice - formerly carried by the University
-  // model, which was dropped). Retyped to Int (the former
-  // Organization.undergraduates/graduates was a String, which prevented
-  // sorting/aggregation).
-  studentCount         Int?                 @map("student_count")
   undergraduates       Int?
   studentCount         Int?                 @map("student_count")
   postgraduates        Int?
@@ -281,13 +270,6 @@ model Certification {
   @@index([category])
   @@map("certifications")
 }
-
-// model University dropped - universities are now Organization rows with
-// subtype=UNIVERSITY; their specific fields (studentCount, undergraduates,
-// postgraduates) are carried directly by Organization (see above). Migration
-// of the existing rows + UserEducations must be run before applying this
-// removal in production (see
-// prisma/migrate-universities-to-organizations.ts).
 
 model Degree {
   id              String           @id @default(uuid()) @db.Uuid
@@ -523,10 +505,6 @@ model UserCertifications {
 model UserEducations {
   id                    String                @id @default(uuid()) @db.Uuid
   user_profile_id       String                @db.Uuid
-  // Replaces university_id: now points to Organization (subtype filtered to
-  // UNIVERSITY on the application/import side, NOT at the DB constraint level
-  // - see the explicit validation in routes/user_educations.ts).
-  organization_id       String?               @db.Uuid
   degree_id             String?               @db.Uuid
   start_year            Int?
   end_year              Int?
