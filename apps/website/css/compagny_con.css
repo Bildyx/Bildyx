@@ -31,7 +31,7 @@ body.company-page {
 }
 
 .company-layout {
-    width: min(1480px, calc(100% - 64px));
+    width: min(1500px, calc(100% - 64px));
     margin: 0 auto;
     display: grid;
     grid-template-columns: 250px minmax(0, 1fr) 170px;
@@ -53,11 +53,21 @@ body.company-page {
 }
 
 .company-archive-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    border-radius: 8px;
+    background: transparent;
     color: #fff;
     text-decoration: none;
     text-align: center;
     font-weight: 800;
-    padding: 10px;
+    font-size: 14px;
+}
+
+.company-archive-link:hover {
+    background: rgba(255, 255, 255, .12);
 }
 
 .company-main-card {
@@ -148,7 +158,7 @@ body.company-page {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e3e8f5, #c9d3e8);
+    background: #d7deee;
     border: 2px solid #fff;
 }
 
@@ -187,7 +197,7 @@ body.company-page {
     width: 58px;
     height: 58px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ffd38a, #3159bd);
+    background: linear-gradient(135deg, #f4d18b, #7185b2);
     border: 2px solid transparent;
 }
 
@@ -262,46 +272,25 @@ body.company-page {
     color: var(--company-blue);
 }
 
+/* Empty boxes only. No +, no text. */
+
 .company-slot {
     min-height: 360px;
-    border: 2px dashed var(--company-border);
-    border-radius: 24px;
+    border: 2px solid #3b70bd;
+    border-radius: 30px;
     background: #fff;
-    color: var(--company-blue);
-    display: grid;
-    place-items: center;
-    align-content: center;
-    gap: 10px;
-    text-align: center;
-    padding: 28px;
+    color: transparent;
+    display: block;
+    box-shadow:
+        inset 0 0 0 14px #fff,
+        inset 0 0 0 18px #3b70bd;
 }
 
 .company-slot--side {
     min-height: 390px;
-    border: 2px solid #fff;
+    border-color: #fff;
+    border-radius: 24px;
     box-shadow: 0 0 0 3px var(--company-blue), 0 10px 28px rgba(0, 0, 0, .08);
-}
-
-.company-slot > span,
-.company-photo-slot > span {
-    width: 54px;
-    height: 54px;
-    border: 2px solid var(--company-border);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 26px;
-}
-
-.company-slot strong {
-    font-size: 18px;
-    font-weight: 900;
-}
-
-.company-slot p {
-    margin: 0;
-    color: var(--company-muted);
-    font-size: 13px;
 }
 
 .slot-row {
@@ -350,14 +339,9 @@ body.company-page {
 
 .company-photo-slot {
     height: 150px;
-    border: 2px dashed var(--company-border);
+    border: 2px solid var(--company-border);
     border-radius: 12px;
     background: #fff;
-    color: var(--company-blue);
-    display: grid;
-    place-items: center;
-    align-content: center;
-    gap: 8px;
 }
 
 .company-tip-card {
@@ -380,6 +364,59 @@ body.company-page {
     font-style: italic;
 }
 
+/* Company archive true page */
+
+.company-archive-shell {
+    padding: 18px 0 42px;
+}
+
+.company-archive-card {
+    width: min(1180px, calc(100% - 64px));
+    margin: 0 auto;
+    background: #fff;
+    border: 2px solid rgba(255, 255, 255, .65);
+    box-shadow: 0 0 0 3px var(--company-blue);
+    border-radius: 28px;
+    padding: 44px 42px;
+}
+
+.company-archive-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.company-archive-header a {
+    color: var(--company-blue);
+    text-decoration: none;
+    font-size: 32px;
+    line-height: 1;
+}
+
+.company-archive-header p {
+    margin: 0 0 6px;
+    color: var(--company-blue);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.company-archive-header h1 {
+    margin: 0;
+    color: var(--company-text);
+    font-size: 31px;
+}
+
+.company-archive-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.archive-empty-slot {
+    min-height: 330px;
+}
+
 @media (max-width: 1180px) {
     .company-layout {
         grid-template-columns: 1fr;
@@ -392,13 +429,15 @@ body.company-page {
 }
 
 @media (max-width: 900px) {
-    .company-layout {
+    .company-layout,
+    .company-archive-card {
         width: min(100% - 20px, 980px);
     }
 
     .team-box,
     .people-grid,
-    .photo-row {
+    .photo-row,
+    .company-archive-grid {
         grid-template-columns: 1fr;
     }
 
@@ -410,7 +449,8 @@ body.company-page {
         display: none;
     }
 
-    .company-main-card {
+    .company-main-card,
+    .company-archive-card {
         padding: 20px;
     }
 }

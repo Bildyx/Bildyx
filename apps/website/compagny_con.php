@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Company — Bildyx';
 $pageDescription = 'Company profile page for Bildyx.';
-$pageScript = 'js/compagny_con.js';
+$pageScript = null;
 $bodyClass = 'company-page';
 $showMainNav = false;
 
@@ -12,6 +12,7 @@ $sharedHeader = ob_get_clean();
 $companyStylesheet = '<link rel="stylesheet" href="css/compagny_con.css" />';
 echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 ?>
+
 
 <script>
 (function () {
@@ -36,24 +37,17 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 })();
 </script>
 
+
 <main class="company-page-shell">
     <div class="company-layout">
         <aside class="company-left-rail" aria-label="Company sidebar">
-            <section class="company-slot company-slot--side" data-card-slot="company-card">
-                <span>＋</span>
-                <strong>Company Card</strong>
-                <p>Empty backend slot</p>
-            </section>
+            <section class="company-slot company-slot--side" data-card-slot="company-card" aria-label="Company card empty slot"></section>
 
             <h2>Parent Company</h2>
 
-            <section class="company-slot company-slot--side" data-card-slot="parent-company-card">
-                <span>＋</span>
-                <strong>Parent Company Card</strong>
-                <p>Empty backend slot</p>
-            </section>
+            <section class="company-slot company-slot--side" data-card-slot="parent-company-card" aria-label="Parent company empty slot"></section>
 
-            <a class="company-archive-link" href="company-archives.php">▣ Company Archives</a>
+            <a class="company-archive-link" href="compagny_archive_true.php">▣ Company Archives</a>
         </aside>
 
         <section class="company-main-card" aria-labelledby="company-title">
@@ -135,8 +129,8 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
                 <h2>Our Product &amp; Service Portfolio</h2>
                 <div class="slot-row">
                     <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="product-card"><span>＋</span><strong>Product / Service Card</strong><p>Empty backend slot</p></article>
-                    <article class="company-slot" data-card-slot="product-card"><span>＋</span><strong>Product / Service Card</strong><p>Empty backend slot</p></article>
+                    <article class="company-slot" data-card-slot="product-card" aria-label="Product card empty slot"></article>
+                    <article class="company-slot" data-card-slot="product-card" aria-label="Product card empty slot"></article>
                     <button class="arrow" type="button">›</button>
                 </div>
                 <div class="dots"><i></i><i></i></div>
@@ -146,8 +140,8 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
                 <h2>Our Brands</h2>
                 <div class="slot-row">
                     <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="brand-card"><span>＋</span><strong>Brand Card</strong><p>Empty backend slot</p></article>
-                    <article class="company-slot" data-card-slot="brand-card"><span>＋</span><strong>Brand Card</strong><p>Empty backend slot</p></article>
+                    <article class="company-slot" data-card-slot="brand-card" aria-label="Brand card empty slot"></article>
+                    <article class="company-slot" data-card-slot="brand-card" aria-label="Brand card empty slot"></article>
                     <button class="arrow" type="button">›</button>
                 </div>
                 <div class="dots"><i></i><i></i></div>
@@ -156,8 +150,8 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
             <section class="company-section">
                 <h2>Photos</h2>
                 <div class="photo-row">
-                    <article class="company-photo-slot"><span>＋</span><strong>Office photo</strong></article>
-                    <article class="company-photo-slot"><span>＋</span><strong>Team photo</strong></article>
+                    <article class="company-photo-slot" aria-label="Office photo empty slot"></article>
+                    <article class="company-photo-slot" aria-label="Team photo empty slot"></article>
                 </div>
                 <div class="dots"><i></i><i></i></div>
             </section>
@@ -166,8 +160,8 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
                 <h2>Partners</h2>
                 <div class="slot-row">
                     <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="partner-card"><span>＋</span><strong>Partner Company Card</strong><p>Empty backend slot</p></article>
-                    <article class="company-slot" data-card-slot="partner-card"><span>＋</span><strong>Partner Company Card</strong><p>Empty backend slot</p></article>
+                    <article class="company-slot" data-card-slot="partner-card" aria-label="Partner card empty slot"></article>
+                    <article class="company-slot" data-card-slot="partner-card" aria-label="Partner card empty slot"></article>
                     <button class="arrow" type="button">›</button>
                 </div>
                 <div class="dots"><i></i><i></i></div>
@@ -177,8 +171,8 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
                 <h2>Customers</h2>
                 <div class="slot-row">
                     <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="customer-card"><span>＋</span><strong>Customer Company Card</strong><p>Empty backend slot</p></article>
-                    <article class="company-slot" data-card-slot="customer-card"><span>＋</span><strong>Customer Company Card</strong><p>Empty backend slot</p></article>
+                    <article class="company-slot" data-card-slot="customer-card" aria-label="Customer card empty slot"></article>
+                    <article class="company-slot" data-card-slot="customer-card" aria-label="Customer card empty slot"></article>
                     <button class="arrow" type="button">›</button>
                 </div>
                 <div class="dots"><i></i><i></i></div>
@@ -191,5 +185,7 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
         </aside>
     </div>
 </main>
+
+<script src="js/compagny_con.js"></script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>
