@@ -360,6 +360,7 @@ export async function mapOrganization(row: Record<string, any>) {
   let cityName = null;
   let parent = null;
   let industry = null;
+  let country = null;
 
   try {
     if (row.id) {
@@ -373,6 +374,7 @@ export async function mapOrganization(row: Record<string, any>) {
           .executeTakeFirst();
         if (city) {
           cityName = city.cityName;
+          country = city.countryName || null;
           headquartersLocation = city.countryName
             ? `${city.cityName}, ${city.countryName}`
             : city.cityName;
@@ -426,39 +428,45 @@ export async function mapOrganization(row: Record<string, any>) {
   };
 
   return {
-    organizationName: row.name,
+    id: row.id,
     name: row.name,
-    serialNumber: row.serial_number,
-    category: formatEnum(row.subtype),
+    slug: row.slug,
+    serial_number: row.serial_number,
+    subtype: row.subtype,
     industry,
-    products: join(row.products),
-    companyType: formatEnum(row.subtype),
+    parent,
+    headquartersLocation,
+    country,
+    description: str(row.description),
+    founded: str(row.founded),
     type1: str(row.type1),
     type2: str(row.type2),
-    type: formatEnum(row.type1),
-    numberOfEmployees: formatEnum(row.numberOfEmployees),
-    founded: str(row.founded),
-    established: str(row.founded),
-    headquartersLocation,
-    location: headquartersLocation,
-    cityName,
-    parent,
+    ownership: str(row.ownership),
+    collections: str(row.collections),
+    numberOfEmployees: row.numberOfEmployees ? formatEnum(row.numberOfEmployees) : null,
     offices: str(row.offices),
     subsidiaries: str(row.subsidiaries),
-    knownFor: join(row.known_for),
+    known_for: join(row.known_for),
     budget: str(row.budget),
     partners: join(row.partners),
-    programsActivities:
-      join(row.programs_activities) || join(row.programsActivities),
     personnel: formatPersonnel(row.personnel),
-    totalStudents: fmt(row.student_count),
+    authority: str(row.authority),
+    jurisdiction: str(row.jurisdiction),
+    student_count: fmt(row.student_count),
     undergraduates: fmt(row.undergraduates),
     postgraduates: fmt(row.postgraduates),
-    notes: str(row.description),
+    mission: str(row.mission),
+    research_areas: join(row.research_areas),
+    products: join(row.products),
+    facilities: join(row.facilities),
+    founders: join(row.founders),
+    project: str(row.project),
+    members: fmt(row.members),
+    programs_activities: join(row.programs_activities),
+    services: join(row.services),
     year: new Date().getFullYear(),
   };
 }
-
 
 // ---------------------------------------------------------------------------
 // Skill

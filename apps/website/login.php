@@ -1,6 +1,7 @@
 <?php
 $pageTitle = 'Bildyx — Login / Sign Up';
 $pageDescription = 'Log in or create a Bildyx account.';
+$pageScript = 'js/auth.ts';
 $bodyClass = 'auth-page';
 $showMainNav = false;
 
@@ -228,6 +229,5 @@ echo str_replace('</head>', "    {$authStylesheet}\n</head>", $sharedHeader);
 </main>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/dist/auth.js" defer></script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>

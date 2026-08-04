@@ -3,7 +3,12 @@ import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
 import util from "node:util";
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 import prettyMilliseconds from "pretty-ms";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { openAPIGenerator, openAPIHandler, rpcHandler } from "./application";
 import {
   NAME,
@@ -203,6 +208,7 @@ app.get("/spec.json", async (req, res) => {
 app.get("/enums/languages", (_req, res) => {
   res.json(LanguageSchema.options);
 });
+app.use("/css", express.static(path.resolve(__dirname, "templates/organizations")));
 
 
 app.use(async (req, res, next) => {

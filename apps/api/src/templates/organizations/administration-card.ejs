@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= name %> - Card</title>
+    <link rel="stylesheet" href="/css/organization-card.css">
+</head>
+<body>
+    <div class="main-card">
+        <%- renderHeader(name) %>
+        <div class="info-table">
+            <%- renderRow('Description', description) %>
+            <%- renderRow('Type', type1) %>
+            <%- renderRow('Established', founded) %>
+            <%- renderRow('Headquarters', headquartersLocation) %>
+            <%- renderRow('Parent', parent) %>
+            <%- renderRow('Employees', numberOfEmployees) %>
+            <%- renderRow('Child Agencies', subsidiaries) %>
+            <%- renderRow('Budget', budget) %>
+            <%- renderRow('Functions/Programs', programs_activities) %>
+            <%- renderRow('Jurisdiction', jurisdiction) %>
+            <%- renderRow('Preceding Agency', founders) %>
+        </div>
+        <%- renderFooter() %>
+    </div>
+</body>
+</html>

@@ -741,7 +741,7 @@ export async function fetchAndRenderCardSlot(
                           top: 0;
                           left: 0;
                           transform-origin: top left;
-                          width: 500px;
+                          width: var(--card-width, 500px);
                       }
                       .main-card {
                           height: 100% !important;
