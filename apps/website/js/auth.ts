@@ -66,6 +66,110 @@ function validProfessionalEmail(email: string) {
   return domain && !blockedDomains.includes(domain);
 }
 
+
+function normalizeAccountType(value: any) {
+  const raw = String(value || "")
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+
+  if (["company", "business", "employer", "organization", "organisation", "recruiter"].includes(raw)) {
+    return "company";
+  }
+
+  if (["seeker", "jobseeker", "jobseekers", "candidate", "student", "user"].includes(raw)) {
+    return "seeker";
+  }
+
+  return raw;
+}
+
+function getAuthUser(data: any) {
+  return data?.user || data?.data?.user || data?.data || data || {};
+}
+
+function readPendingAccountType(userId?: string) {
+  if (userId) {
+    return (
+      sessionStorage.getItem(`bildyx_pending_account_type_${userId}`) ||
+      localStorage.getItem(`bildyx_pending_account_type_${userId}`) ||
+      sessionStorage.getItem("bildyx_pending_account_type") ||
+      localStorage.getItem("bildyx_pending_account_type") ||
+      ""
+    );
+  }
+
+  return (
+    sessionStorage.getItem("bildyx_pending_account_type") ||
+    localStorage.getItem("bildyx_pending_account_type") ||
+    ""
+  );
+}
+
+function savePendingAccountType(accountType: string, userId?: string) {
+  if (!accountType) return;
+
+  sessionStorage.setItem("bildyx_pending_account_type", accountType);
+  localStorage.setItem("bildyx_pending_account_type", accountType);
+
+  if (userId) {
+    sessionStorage.setItem(`bildyx_pending_account_type_${userId}`, accountType);
+    localStorage.setItem(`bildyx_pending_account_type_${userId}`, accountType);
+  }
+}
+
+function clearPendingAccountType(userId?: string) {
+  sessionStorage.removeItem("bildyx_pending_account_type");
+  localStorage.removeItem("bildyx_pending_account_type");
+
+  if (userId) {
+    sessionStorage.removeItem(`bildyx_pending_account_type_${userId}`);
+    localStorage.removeItem(`bildyx_pending_account_type_${userId}`);
+  }
+}
+
+function getAccountType(user: any) {
+  const accountType = normalizeAccountType(
+    user?.accountType ||
+      user?.account_type ||
+      user?.userType ||
+      user?.user_type ||
+      user?.profileType ||
+      user?.profile_type ||
+      user?.role ||
+      user?.type,
+  );
+
+  if (accountType) return accountType;
+
+  return normalizeAccountType(readPendingAccountType());
+}
+
+function getRedirectUrl(user: any) {
+  return getAccountType(user) === "company" ? "compagny_con.php" : "profile.php";
+}
+
+function saveBildyxSession(user: any, fallbackEmail = "") {
+  const sessionInfo = {
+    userId: user?.id || user?.userId || user?._id || null,
+    email: user?.email || fallbackEmail || "",
+    role: user?.role || null,
+    accountType: getAccountType(user),
+    profileId: user?.profileId || user?.profile_id || null,
+    companyId:
+      user?.companyId ||
+      user?.company_id ||
+      user?.organizationId ||
+      user?.organization_id ||
+      null,
+  };
+
+  sessionStorage.setItem("bildyx_session", JSON.stringify(sessionInfo));
+  localStorage.setItem("bildyx_session", JSON.stringify(sessionInfo));
+  localStorage.setItem("bildyx_user", JSON.stringify(user || {}));
+
+  return sessionInfo;
+}
+
 function debug(payload: any) {
   const safe = JSON.parse(
     JSON.stringify(payload, (k, v) =>
@@ -224,6 +328,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const data = await authService.signup(body);
 
+        savePendingAccountType(accountType, data.userId);
+
         signupForm
           .querySelectorAll("input")
           .forEach((input) => setError(input as HTMLInputElement, ""));
@@ -297,12 +403,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (submitBtn) stopLoading = startButtonLoading(submitBtn);
 
         const data = await authService.login({ email, password });
-        const sessionInfo = {
-          userId: data.user.id,
-          profileId: null,
-        };
-        sessionStorage.setItem("bildyx_session", JSON.stringify(sessionInfo));
-        window.location.href = "profile.php";
+        const user = getAuthUser(data);
+
+        saveBildyxSession(user, email);
+
+        window.location.href = getRedirectUrl(user);
       } catch (err: any) {
         console.error(err);
         addAttempt(email);
@@ -356,7 +461,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.origin !== "http://localhost:3000") return;
 
     if (event.data?.type === "GOOGLE_LOGIN_SUCCESS") {
-      window.location.href = "profile.php";
+      const user = getAuthUser(event.data);
+      saveBildyxSession(user);
+      window.location.href = getRedirectUrl(user);
     }
   });
 });
@@ -385,6 +492,14 @@ function activateAuthTab(target: string) {
   try {
     const user = await userService.getById(userId);
     email = user.email;
+
+    const pendingAccountType =
+      normalizeAccountType(user?.accountType || user?.account_type || user?.role) ||
+      readPendingAccountType(userId);
+
+    if (pendingAccountType) {
+      savePendingAccountType(pendingAccountType, userId);
+    }
     const emailSpan = $("#verifyEmail");
     if (emailSpan) emailSpan.textContent = email;
   } catch (err) {
@@ -466,14 +581,18 @@ function activateAuthTab(target: string) {
         toast.success("Email verified! Redirecting to your profile...");
         email = ""; // Prevent beforeunload prompt
 
-        const sessionInfo = {
-          userId: data.user.id,
-          profileId: null,
-        };
-        sessionStorage.setItem("bildyx_session", JSON.stringify(sessionInfo));
+        const verifiedUser = getAuthUser(data);
+        const pendingAccountType = readPendingAccountType(userId);
+
+        if (pendingAccountType && !verifiedUser.accountType && !verifiedUser.account_type) {
+          verifiedUser.accountType = pendingAccountType;
+        }
+
+        saveBildyxSession(verifiedUser, email.trim());
+        clearPendingAccountType(userId);
 
         setTimeout(() => {
-          window.location.href = "profile.php";
+          window.location.href = getRedirectUrl(verifiedUser);
         }, 1500);
       } catch (err) {
         console.error(err);
