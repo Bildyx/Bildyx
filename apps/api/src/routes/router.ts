@@ -29,6 +29,7 @@ import { personalityQuestions } from "./personality_questions";
 import { personalityTestResults } from "./personality_test_results";
 import { personalityAnswers } from "./personality_answers";
 import { personalityCriterionScores } from "./personality_criterion_scores";
+import { user_target_lists } from "./user_target_lists";
 
 export const router = publicProcedure.router({
   auth,
@@ -61,5 +62,6 @@ export const router = publicProcedure.router({
   personalityTestResults,
   personalityAnswers,
   personalityCriterionScores,
+  user_target_lists,
 });
 export type Router = typeof router;

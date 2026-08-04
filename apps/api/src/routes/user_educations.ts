@@ -123,11 +123,7 @@ export const user_educations = {
       path: "/educations/{educationId}",
       tags: ["UserEducation"],
     })
-    .input(
-      z
-        .object({ educationId: z.string().uuid() })
-        .merge(PutUserEducationSchema),
-    )
+    .input(z.object({ educationId: z.uuid() }).merge(PutUserEducationSchema))
     .output(UserEducationSchema)
     .handler(async ({ input }) => {
       const { educationId, ...updates } = input;

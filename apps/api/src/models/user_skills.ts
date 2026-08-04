@@ -2,26 +2,26 @@ import { z } from "zod";
 import { DifficultyLevelEnum } from "./utils/enums";
 
 export const UserSkillSchema = z.object({
-  id: z.string().uuid(),
-  user_profile_id: z.string().uuid(),
-  skill_id: z.string().uuid(),
+  id: z.uuid(),
+  user_profile_id: z.uuid(),
+  skill_id: z.uuid(),
   level: DifficultyLevelEnum.nullable().optional(),
   name: z.string().optional(),
 });
 
 // GET
 export const GetUserSkillsSchema = z.object({
-  userProfileId: z.string().uuid(),
+  userProfileId: z.uuid(),
 });
 
 export const GetUserSkillSchema = z.object({
-  userSkillId: z.string().uuid(),
+  userSkillId: z.uuid(),
 });
 
 // POST
 export const PostUserSkillSchema = z.object({
-  user_profile_id: z.string().uuid(),
-  skill_id: z.string().uuid(),
+  user_profile_id: z.uuid(),
+  skill_id: z.uuid(),
   level: DifficultyLevelEnum.nullable().optional(),
 });
 
@@ -32,11 +32,11 @@ export const PutUserSkillSchema = z.object({
 
 // DELETE
 export const DeleteUserSkillSchema = z.object({
-  userSkillId: z.string().uuid(),
+  userSkillId: z.uuid(),
 });
 
 export const DeleteUserSkillsBulkSchema = z.object({
-  userSkillIds: z.array(z.string().uuid()),
+  userSkillIds: z.array(z.uuid()),
 });
 
 export type UserSkill = z.infer<typeof UserSkillSchema>;

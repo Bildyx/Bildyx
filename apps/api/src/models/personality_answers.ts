@@ -1,19 +1,20 @@
 import { z } from "zod";
+import { zNullableUUID } from "./utils/preprocessors";
 
 export const PersonalityAnswerSchema = z.object({
-  id: z.string().uuid(),
-  result_id: z.string().uuid(),
-  question_id: z.string().uuid(),
+  id: z.uuid(),
+  result_id: z.uuid(),
+  question_id: z.uuid(),
   raw_score: z.number().int().min(1).max(5),
 });
 
 // GET
 export const GetPersonalityAnswersSchema = z.object({
-  result_id: z.string().uuid().optional(),
+  result_id: zNullableUUID(),
 });
 
 export const GetPersonalityAnswerSchema = z.object({
-  answerId: z.string().uuid(),
+  answerId: z.uuid(),
 });
 
 // POST
@@ -26,11 +27,11 @@ export const PutPersonalityAnswerSchema = PostPersonalityAnswerSchema.partial();
 
 // DELETE
 export const DeletePersonalityAnswerSchema = z.object({
-  answerId: z.string().uuid(),
+  answerId: z.uuid(),
 });
 
 export const DeletePersonalityAnswersBulkSchema = z.object({
-  answerIds: z.array(z.string().uuid()),
+  answerIds: z.array(z.uuid()),
 });
 
 export type PersonalityAnswer = z.infer<typeof PersonalityAnswerSchema>;

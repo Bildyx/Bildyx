@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { zNullableUUID } from "./utils/preprocessors";
 
 export const PersonalityCriterionSchema = z.object({
-  id: z.string().uuid(),
-  test_id: z.string().uuid(),
+  id: z.uuid(),
+  test_id: z.uuid(),
   code: z.string().trim().min(1),
   name: z.string().trim().min(1),
   description: z.string().nullable().optional(),
@@ -11,12 +12,12 @@ export const PersonalityCriterionSchema = z.object({
 
 // GET
 export const GetPersonalityCriteriaSchema = z.object({
-  test_id: z.string().uuid().optional(),
+  test_id: zNullableUUID(),
   code: z.string().optional(),
 });
 
 export const GetPersonalityCriterionSchema = z.object({
-  criterionId: z.string().uuid(),
+  criterionId: z.uuid(),
 });
 
 // POST
@@ -25,17 +26,22 @@ export const PostPersonalityCriterionSchema = PersonalityCriterionSchema.omit({
 });
 
 // PATCH
-export const PutPersonalityCriterionSchema = PostPersonalityCriterionSchema.partial();
+export const PutPersonalityCriterionSchema =
+  PostPersonalityCriterionSchema.partial();
 
 // DELETE
 export const DeletePersonalityCriterionSchema = z.object({
-  criterionId: z.string().uuid(),
+  criterionId: z.uuid(),
 });
 
 export const DeletePersonalityCriteriaBulkSchema = z.object({
-  criterionIds: z.array(z.string().uuid()),
+  criterionIds: z.array(z.uuid()),
 });
 
 export type PersonalityCriterion = z.infer<typeof PersonalityCriterionSchema>;
-export type PostPersonalityCriterion = z.infer<typeof PostPersonalityCriterionSchema>;
-export type PutPersonalityCriterion = z.infer<typeof PutPersonalityCriterionSchema>;
+export type PostPersonalityCriterion = z.infer<
+  typeof PostPersonalityCriterionSchema
+>;
+export type PutPersonalityCriterion = z.infer<
+  typeof PutPersonalityCriterionSchema
+>;

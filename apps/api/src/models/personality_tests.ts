@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const PersonalityTestSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   code: z.string().trim().min(1),
   name: z.string().trim().min(1),
   description: z.string().nullable().optional(),
@@ -17,7 +17,7 @@ export const GetPersonalityTestsSchema = z.object({
 });
 
 export const GetPersonalityTestSchema = z.object({
-  testId: z.string().uuid(),
+  testId: z.uuid(),
 });
 
 // POST
@@ -32,11 +32,11 @@ export const PutPersonalityTestSchema = PostPersonalityTestSchema.partial();
 
 // DELETE
 export const DeletePersonalityTestSchema = z.object({
-  testId: z.string().uuid(),
+  testId: z.uuid(),
 });
 
 export const DeletePersonalityTestsBulkSchema = z.object({
-  testIds: z.array(z.string().uuid()),
+  testIds: z.array(z.uuid()),
 });
 
 export type PersonalityTest = z.infer<typeof PersonalityTestSchema>;

@@ -125,7 +125,7 @@ export const skills = {
       path: "/skills/{skillId}",
       tags: ["Skill"],
     })
-    .input(z.object({ skillId: z.string().uuid() }).merge(PutSkillSchema))
+    .input(z.object({ skillId: z.uuid() }).merge(PutSkillSchema))
     .output(SkillSchema)
     .handler(async ({ input }) => {
       const { skillId, metadata, ...rest } = input;

@@ -54,7 +54,9 @@ export const personalityAnswers = {
         .executeTakeFirst();
 
       if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality answer not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality answer not found",
+        });
       }
 
       return data;
@@ -97,7 +99,7 @@ export const personalityAnswers = {
       path: "/personality-answers/{answerId}",
       tags: ["PersonalityAnswer"],
     })
-    .input(z.object({ answerId: z.string().uuid() }).merge(PutPersonalityAnswerSchema))
+    .input(z.object({ answerId: z.uuid() }).merge(PutPersonalityAnswerSchema))
     .output(PersonalityAnswerSchema)
     .handler(async ({ input }) => {
       const { answerId, ...rest } = input;
@@ -109,7 +111,9 @@ export const personalityAnswers = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality answer not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality answer not found",
+        });
       }
 
       const answer = await database
@@ -146,7 +150,9 @@ export const personalityAnswers = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality answer not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality answer not found",
+        });
       }
 
       await database

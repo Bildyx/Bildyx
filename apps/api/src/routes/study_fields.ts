@@ -120,7 +120,7 @@ export const studyFields = {
       path: "/study-fields/{studyFieldId}",
       tags: ["StudyField"],
     })
-    .input(z.object({ studyFieldId: z.string().uuid() }).merge(PutStudyFieldSchema))
+    .input(z.object({ studyFieldId: z.uuid() }).merge(PutStudyFieldSchema))
     .output(StudyFieldSchema)
     .handler(async ({ input }) => {
       const { studyFieldId, metadata, ...rest } = input;

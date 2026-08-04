@@ -18,7 +18,8 @@ export const personalityCriteria = {
     .route({
       method: "GET",
       summary: "List all personality criteria",
-      description: "Get all personality criteria with optional test_id and code filters",
+      description:
+        "Get all personality criteria with optional test_id and code filters",
       path: "/personality-criteria",
       tags: ["PersonalityCriterion"],
     })
@@ -58,7 +59,9 @@ export const personalityCriteria = {
         .executeTakeFirst();
 
       if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality criterion not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality criterion not found",
+        });
       }
 
       return data;
@@ -114,7 +117,9 @@ export const personalityCriteria = {
       path: "/personality-criteria/{criterionId}",
       tags: ["PersonalityCriterion"],
     })
-    .input(z.object({ criterionId: z.string().uuid() }).merge(PutPersonalityCriterionSchema))
+    .input(
+      z.object({ criterionId: z.uuid() }).merge(PutPersonalityCriterionSchema),
+    )
     .output(PersonalityCriterionSchema)
     .handler(async ({ input }) => {
       const { criterionId, ...rest } = input;
@@ -126,7 +131,9 @@ export const personalityCriteria = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality criterion not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality criterion not found",
+        });
       }
 
       const criterion = await database
@@ -163,7 +170,9 @@ export const personalityCriteria = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality criterion not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality criterion not found",
+        });
       }
 
       await database

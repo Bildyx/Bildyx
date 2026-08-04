@@ -18,7 +18,8 @@ export const personalityTestResults = {
     .route({
       method: "GET",
       summary: "List all personality test results",
-      description: "Get all personality test results with optional user_profile_id and test_id filters",
+      description:
+        "Get all personality test results with optional user_profile_id and test_id filters",
       path: "/personality-test-results",
       tags: ["PersonalityTestResult"],
     })
@@ -58,7 +59,9 @@ export const personalityTestResults = {
         .executeTakeFirst();
 
       if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality test result not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality test result not found",
+        });
       }
 
       return data;
@@ -115,7 +118,9 @@ export const personalityTestResults = {
       path: "/personality-test-results/{resultId}",
       tags: ["PersonalityTestResult"],
     })
-    .input(z.object({ resultId: z.string().uuid() }).merge(PutPersonalityTestResultSchema))
+    .input(
+      z.object({ resultId: z.uuid() }).merge(PutPersonalityTestResultSchema),
+    )
     .output(PersonalityTestResultSchema)
     .handler(async ({ input }) => {
       const { resultId, ...rest } = input;
@@ -127,7 +132,9 @@ export const personalityTestResults = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality test result not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality test result not found",
+        });
       }
 
       const result = await database
@@ -164,7 +171,9 @@ export const personalityTestResults = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality test result not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality test result not found",
+        });
       }
 
       await database
@@ -177,7 +186,8 @@ export const personalityTestResults = {
     .route({
       method: "DELETE",
       summary: "Delete multiple personality test results",
-      description: "Delete multiple existing personality test results by their IDs",
+      description:
+        "Delete multiple existing personality test results by their IDs",
       path: "/personality-test-results",
       tags: ["PersonalityTestResult"],
     })

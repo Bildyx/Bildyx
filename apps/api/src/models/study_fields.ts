@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const StudyFieldSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   area: z.string().nullable().optional(),
@@ -20,7 +20,7 @@ export const GetStudyFieldsSchema = z.object({
 });
 
 export const GetStudyFieldSchema = z.object({
-  studyFieldId: z.string().uuid(),
+  studyFieldId: z.uuid(),
 });
 
 // POST
@@ -36,11 +36,11 @@ export const PutStudyFieldSchema = PostStudyFieldSchema.partial();
 
 // DELETE
 export const DeleteStudyFieldSchema = z.object({
-  studyFieldId: z.string().uuid(),
+  studyFieldId: z.uuid(),
 });
 
 export const DeleteStudyFieldsBulkSchema = z.object({
-  studyFieldIds: z.array(z.string().uuid()),
+  studyFieldIds: z.array(z.uuid()),
 });
 
 export type StudyField = z.infer<typeof StudyFieldSchema>;

@@ -18,7 +18,8 @@ export const personalityTests = {
     .route({
       method: "GET",
       summary: "List all personality tests",
-      description: "Get all personality tests with optional search and code filters",
+      description:
+        "Get all personality tests with optional search and code filters",
       path: "/personality-tests",
       tags: ["PersonalityTest"],
     })
@@ -58,7 +59,9 @@ export const personalityTests = {
         .executeTakeFirst();
 
       if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality test not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality test not found",
+        });
       }
 
       return data;
@@ -114,7 +117,7 @@ export const personalityTests = {
       path: "/personality-tests/{testId}",
       tags: ["PersonalityTest"],
     })
-    .input(z.object({ testId: z.string().uuid() }).merge(PutPersonalityTestSchema))
+    .input(z.object({ testId: z.uuid() }).merge(PutPersonalityTestSchema))
     .output(PersonalityTestSchema)
     .handler(async ({ input }) => {
       const { testId, ...rest } = input;
@@ -126,7 +129,9 @@ export const personalityTests = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality test not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality test not found",
+        });
       }
 
       const test = await database
@@ -163,7 +168,9 @@ export const personalityTests = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality test not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality test not found",
+        });
       }
 
       await database

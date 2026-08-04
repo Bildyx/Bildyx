@@ -1,4 +1,4 @@
-﻿import { ORPCError } from "@orpc/server";
+import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -31,20 +31,23 @@ export const certifications = {
     .handler(async ({ input }) => {
       const { organizationId, name, category } = input;
 
-      const organization = await database
-        .selectFrom("organizations")
-        .where("id", "=", organizationId)
-        .select("id")
-        .executeTakeFirst();
+      if (organizationId) {
+        const organization = await database
+          .selectFrom("organizations")
+          .where("id", "=", organizationId)
+          .select("id")
+          .executeTakeFirst();
 
-      if (!organization) {
-        throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
+        if (!organization) {
+          throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
+        }
       }
 
-      let query = database
-        .selectFrom("certifications")
-        .selectAll()
-        .where("issuing_organization_id", "=", organizationId);
+      let query = database.selectFrom("certifications").selectAll();
+
+      if (organizationId) {
+        query = query.where("issuing_organization_id", "=", organizationId);
+      }
 
       if (name) {
         const p = `%${name.trim()}%`;
@@ -154,9 +157,7 @@ export const certifications = {
       tags: ["Certification"],
     })
     .input(
-      z
-        .object({ certificationId: z.string().uuid() })
-        .merge(PutCertificationSchema),
+      z.object({ certificationId: z.uuid() }).merge(PutCertificationSchema),
     )
     .output(CertificationSchema)
     .handler(async ({ input }) => {

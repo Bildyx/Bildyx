@@ -18,7 +18,8 @@ export const personalityCriterionScores = {
     .route({
       method: "GET",
       summary: "List all personality criterion scores",
-      description: "Get all personality criterion scores with optional result_id filter",
+      description:
+        "Get all personality criterion scores with optional result_id filter",
       path: "/personality-criterion-scores",
       tags: ["PersonalityCriterionScore"],
     })
@@ -54,7 +55,9 @@ export const personalityCriterionScores = {
         .executeTakeFirst();
 
       if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality criterion score not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality criterion score not found",
+        });
       }
 
       return data;
@@ -97,7 +100,9 @@ export const personalityCriterionScores = {
       path: "/personality-criterion-scores/{scoreId}",
       tags: ["PersonalityCriterionScore"],
     })
-    .input(z.object({ scoreId: z.string().uuid() }).merge(PutPersonalityCriterionScoreSchema))
+    .input(
+      z.object({ scoreId: z.uuid() }).merge(PutPersonalityCriterionScoreSchema),
+    )
     .output(PersonalityCriterionScoreSchema)
     .handler(async ({ input }) => {
       const { scoreId, ...rest } = input;
@@ -109,7 +114,9 @@ export const personalityCriterionScores = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality criterion score not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality criterion score not found",
+        });
       }
 
       const score = await database
@@ -146,7 +153,9 @@ export const personalityCriterionScores = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality criterion score not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality criterion score not found",
+        });
       }
 
       await database
@@ -159,7 +168,8 @@ export const personalityCriterionScores = {
     .route({
       method: "DELETE",
       summary: "Delete multiple personality criterion scores",
-      description: "Delete multiple existing personality criterion scores by their IDs",
+      description:
+        "Delete multiple existing personality criterion scores by their IDs",
       path: "/personality-criterion-scores",
       tags: ["PersonalityCriterionScore"],
     })

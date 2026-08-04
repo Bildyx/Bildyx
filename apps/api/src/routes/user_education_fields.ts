@@ -21,7 +21,8 @@ export const user_education_fields = {
     .route({
       method: "GET",
       summary: "List all fields for a user education",
-      description: "Get all study fields linked to a specific user education entry",
+      description:
+        "Get all study fields linked to a specific user education entry",
       path: "/educations/{userEducationId}/fields",
       tags: ["UserEducationField"],
     })
@@ -138,11 +139,7 @@ export const user_education_fields = {
       path: "/education-fields/{fieldId}",
       tags: ["UserEducationField"],
     })
-    .input(
-      z
-        .object({ fieldId: z.string().uuid() })
-        .merge(PutUserEducationFieldSchema),
-    )
+    .input(z.object({ fieldId: z.uuid() }).merge(PutUserEducationFieldSchema))
     .output(UserEducationFieldSchema)
     .handler(async ({ input }) => {
       const { fieldId, ...updates } = input;

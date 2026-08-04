@@ -134,11 +134,7 @@ export const user_languages = {
       path: "/user-languages/{userLanguageId}",
       tags: ["UserLanguage"],
     })
-    .input(
-      z
-        .object({ userLanguageId: z.string().uuid() })
-        .merge(PutUserLanguageSchema),
-    )
+    .input(z.object({ userLanguageId: z.uuid() }).merge(PutUserLanguageSchema))
     .output(UserLanguageSchema)
     .handler(async ({ input }) => {
       const { userLanguageId, ...updates } = input;

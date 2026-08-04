@@ -115,7 +115,7 @@ export const industries = {
       path: "/industries/{industryId}",
       tags: ["Industry"],
     })
-    .input(z.object({ industryId: z.string().uuid() }).merge(PutIndustrySchema))
+    .input(z.object({ industryId: z.uuid() }).merge(PutIndustrySchema))
     .output(IndustrySchema)
     .handler(async ({ input }) => {
       const { industryId, metadata, ...rest } = input;

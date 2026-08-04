@@ -37,11 +37,11 @@ export const PutUserEducationSchema = PostUserEducationSchema.omit({
 
 // DELETE
 export const DeleteUserEducationSchema = z.object({
-  educationId: z.string().uuid(),
+  educationId: z.uuid(),
 });
 
 export const DeleteUserEducationsBulkSchema = z.object({
-  educationIds: z.array(z.string().uuid()),
+  educationIds: z.array(z.uuid()),
 });
 
 export type UserEducation = z.infer<typeof UserEducationSchema>;

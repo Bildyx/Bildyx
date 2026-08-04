@@ -124,9 +124,7 @@ export const user_experiences = {
       tags: ["UserExperience"],
     })
     .input(
-      z
-        .object({ userExperienceId: z.string().uuid() })
-        .merge(PutUserExperienceSchema),
+      z.object({ userExperienceId: z.uuid() }).merge(PutUserExperienceSchema),
     )
     .output(UserExperienceSchema)
     .handler(async ({ input }) => {

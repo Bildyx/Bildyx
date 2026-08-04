@@ -41,16 +41,13 @@ export const zNullableString = () =>
  * Preprocessor for an optional nullable string that coerces numbers/booleans and treats empty string as null.
  */
 export const zNullableStringCoercive = () =>
-  z.preprocess(
-    (val) => {
-      if (val === "" || val === null || val === undefined) return null;
-      if (typeof val === "number" || typeof val === "boolean") {
-        return String(val);
-      }
-      return val;
-    },
-    z.string().nullable().optional(),
-  );
+  z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return null;
+    if (typeof val === "number" || typeof val === "boolean") {
+      return String(val);
+    }
+    return val;
+  }, z.string().nullable().optional());
 
 /**
  * Preprocessor for optional nullable UUID.
@@ -58,7 +55,7 @@ export const zNullableStringCoercive = () =>
 export const zNullableUUID = () =>
   z.preprocess(
     (val) => (val === "" ? null : val),
-    z.string().uuid().nullable().optional(),
+    z.uuid().nullable().optional(),
   );
 
 /**

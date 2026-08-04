@@ -18,7 +18,8 @@ export const personalityQuestions = {
     .route({
       method: "GET",
       summary: "List all personality questions",
-      description: "Get all personality questions with optional test_id and criterion_id filters",
+      description:
+        "Get all personality questions with optional test_id and criterion_id filters",
       path: "/personality-questions",
       tags: ["PersonalityQuestion"],
     })
@@ -58,7 +59,9 @@ export const personalityQuestions = {
         .executeTakeFirst();
 
       if (!data) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality question not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality question not found",
+        });
       }
 
       return data;
@@ -101,7 +104,9 @@ export const personalityQuestions = {
       path: "/personality-questions/{questionId}",
       tags: ["PersonalityQuestion"],
     })
-    .input(z.object({ questionId: z.string().uuid() }).merge(PutPersonalityQuestionSchema))
+    .input(
+      z.object({ questionId: z.uuid() }).merge(PutPersonalityQuestionSchema),
+    )
     .output(PersonalityQuestionSchema)
     .handler(async ({ input }) => {
       const { questionId, ...rest } = input;
@@ -113,7 +118,9 @@ export const personalityQuestions = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality question not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality question not found",
+        });
       }
 
       const question = await database
@@ -150,7 +157,9 @@ export const personalityQuestions = {
         .executeTakeFirst();
 
       if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Personality question not found" });
+        throw new ORPCError("NOT_FOUND", {
+          message: "Personality question not found",
+        });
       }
 
       await database
@@ -163,7 +172,8 @@ export const personalityQuestions = {
     .route({
       method: "DELETE",
       summary: "Delete multiple personality questions",
-      description: "Delete multiple existing personality questions by their IDs",
+      description:
+        "Delete multiple existing personality questions by their IDs",
       path: "/personality-questions",
       tags: ["PersonalityQuestion"],
     })
