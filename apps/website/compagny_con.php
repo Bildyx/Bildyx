@@ -1,8 +1,8 @@
 <?php
-$pageTitle = 'Company — Bildyx';
-$pageDescription = 'Company profile page for Bildyx.';
-$pageScript = null;
-$bodyClass = 'company-page';
+$pageTitle = 'Pekamix Company — Bildyx';
+$pageDescription = 'Connected company profile page on Bildyx.';
+$pageScript = 'js/compagny_con.ts';
+$bodyClass = 'team-example-page company-page compagny-con-page';
 $showMainNav = false;
 
 ob_start();
@@ -12,7 +12,6 @@ $sharedHeader = ob_get_clean();
 $companyStylesheet = '<link rel="stylesheet" href="css/compagny_con.css" />';
 echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 ?>
-
 
 <script>
 (function () {
@@ -38,154 +37,127 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 </script>
 
 
-<main class="company-page-shell">
-    <div class="company-layout">
-        <aside class="company-left-rail" aria-label="Company sidebar">
-            <section class="company-slot company-slot--side" data-card-slot="company-card" aria-label="Company card empty slot"></section>
+<main class="te-page compagny-con-main">
+    <div class="te-company-bar" aria-label="Current company">PEKAMIX</div>
 
-            <h2>Parent Company</h2>
+    <div class="te-layout">
+        <aside class="te-company-rail" aria-label="Company information">
+            <div
+                id="company-profile-card"
+                class="te-backend-slot te-company-card-slot"
+                data-card-slot="company-profile"
+                aria-label="Company profile card reserved for backend content">
+            </div>
 
-            <section class="company-slot company-slot--side" data-card-slot="parent-company-card" aria-label="Parent company empty slot"></section>
+            <h1 class="te-company-rail__title">Parent Company</h1>
 
-            <a class="company-archive-link" href="compagny_archive_true.php">▣ Company Archives</a>
+            <div
+                id="parent-company-profile-card"
+                class="te-backend-slot te-company-card-slot te-parent-company-card-slot"
+                data-card-slot="parent-company-profile"
+                aria-label="Parent company profile card reserved for backend content">
+            </div>
+
+            <a class="te-archive-link" href="compagny_archive_true.php">
+                <span aria-hidden="true">▣</span>
+                Company Archives
+            </a>
         </aside>
 
-        <section class="company-main-card" aria-labelledby="company-title">
-            <header class="company-title-bar">
-                <h1 id="company-title">PEKAMIX</h1>
-            </header>
+        <div class="te-content">
+            <section class="te-team-panel" aria-labelledby="te-team-title">
+                <div class="te-team-main">
+                    <h2 id="te-team-title">Our Teams</h2>
 
-            <section class="company-section">
-                <h2>Our Teams</h2>
-
-                <div class="team-box">
-                    <div class="team-box-main">
-                        <div class="team-tabs">
-                            <button class="is-active" type="button">Team Alpha</button>
-                            <button type="button">Team Beta</button>
-                            <button type="button">Team Gamma</button>
-                            <button type="button">Team Delta</button>
-                        </div>
-
-                        <div class="people-grid">
-                            <article><span></span><strong>Michael</strong><small>VP Marketing</small></article>
-                            <article><span></span><strong>Amelia</strong><small>Product Manager</small></article>
-                            <article><span></span><strong>Carlos</strong><small>Lead Engineer</small></article>
-                            <article><span></span><strong>Hana</strong><small>UX Designer</small></article>
-                            <article><span></span><strong>Ethan</strong><small>Data Analyst</small></article>
-                            <article><span></span><strong>Naomi</strong><small>QA Lead</small></article>
-                            <article><span></span><strong>Clara</strong><small>Scrum Master</small></article>
-                            <article><span></span><strong>Omar</strong><small>DevOps Engineer</small></article>
-                        </div>
-
-                        <h3>Our Offices</h3>
-                        <div class="office-list">
-                            <button type="button"><span></span>Tokyo</button>
-                            <button type="button"><span></span>New York</button>
-                            <button type="button"><span></span>Istanbul</button>
-                            <button class="is-active" type="button"><span></span>Seattle</button>
-                            <button type="button"><span></span>Kuala Lumpur</button>
-                            <button type="button"><span></span>San Francisco</button>
-                        </div>
-
-                        <h3>Main Products / Services</h3>
-                        <div class="product-tabs">
-                            <button class="is-active" type="button">Marketing Software</button>
-                            <button type="button">ERP Systems</button>
-                            <button type="button">Sales Software</button>
-                            <button type="button">Cloud Infrastructure</button>
-                            <button type="button">Data Analytics</button>
-                        </div>
+                    <div class="te-team-tabs" role="tablist" aria-label="Choose a team">
+                        <button class="te-team-tab is-active" type="button" data-team="alpha" role="tab" aria-selected="true">Team Alpha</button>
+                        <button class="te-team-tab" type="button" data-team="beta" role="tab" aria-selected="false">Team Beta</button>
+                        <button class="te-team-tab" type="button" data-team="gamma" role="tab" aria-selected="false">Team Gamma</button>
+                        <button class="te-team-tab" type="button" data-team="delta" role="tab" aria-selected="false">Team Delta</button>
                     </div>
 
-                    <aside class="team-profile">
-                        <h3>Team Profile</h3>
-                        <span>Team Alpha</span>
+                    <div class="te-members" id="teMembers" aria-live="polite"></div>
 
-                        <h4>Who We Are</h4>
-                        <p>A mix of senior and emerging talent from startups and global tech.</p>
+                    <section class="te-subsection" aria-labelledby="te-offices-title">
+                        <h3 id="te-offices-title">Our Offices</h3>
+                        <div class="te-offices" id="teOffices"></div>
+                    </section>
 
-                        <h4>What We're Great At</h4>
-                        <p>Strong in system design, product thinking, and fast delivery.</p>
+                    <section class="te-subsection" aria-labelledby="te-products-title">
+                        <h3 id="te-products-title">Main Products / Services</h3>
+                        <div class="te-products" id="teProducts"></div>
+                    </section>
+                </div>
 
-                        <h4>Team Culture</h4>
-                        <p>Collaborative, low politics, friendly, and practical.</p>
+                <aside class="te-team-profile" aria-live="polite">
+                    <h2>Team Profile</h2>
+                    <span class="te-team-badge" id="teTeamBadge">Team Alpha</span>
+                    <div class="te-profile-points" id="teProfilePoints"></div>
+                    <div class="te-profile-actions" aria-label="Team profile mode">
+                        <button class="te-profile-button is-active" type="button" data-profile-mode="people" aria-pressed="true">People</button>
+                        <button class="te-profile-button" type="button" data-profile-mode="operate" aria-pressed="false">How We Operate</button>
+                    </div>
+                </aside>
+            </section>
 
-                        <h4>How We Work Together</h4>
-                        <p>Hybrid across three cities. Async-first, minimal meetings.</p>
-
-                        <h4 class="warning">This team is NOT for you if...</h4>
-                        <p>You prefer rigid routines or dislike shifting priorities mid-sprint.</p>
-
-                        <div>
-                            <button type="button">People</button>
-                            <button type="button">How We Operate</button>
-                        </div>
-                    </aside>
+            <section class="te-section" aria-labelledby="te-portfolio-title">
+                <h2 id="te-portfolio-title">Our Product &amp; Service Portfolio</h2>
+                <div class="te-carousel" data-carousel="portfolio">
+                    <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous product">←</button>
+                    <div class="te-carousel-track te-carousel-track--two" id="portfolio-track">
+                        <div id="portfolio-card-1" class="te-backend-slot te-product-card-slot" data-card-slot="portfolio-card"></div>
+                        <div id="portfolio-card-2" class="te-backend-slot te-product-card-slot" data-card-slot="portfolio-card"></div>
+                    </div>
+                    <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next product">→</button>
                 </div>
             </section>
 
-            <section class="company-section">
-                <h2>Our Product &amp; Service Portfolio</h2>
-                <div class="slot-row">
-                    <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="product-card" aria-label="Product card empty slot"></article>
-                    <article class="company-slot" data-card-slot="product-card" aria-label="Product card empty slot"></article>
-                    <button class="arrow" type="button">›</button>
+            <section class="te-section" aria-labelledby="te-brands-title">
+                <h2 id="te-brands-title">Our Brands</h2>
+                <div class="te-carousel" data-carousel="brands">
+                    <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous brand">←</button>
+                    <div class="te-carousel-track te-carousel-track--two" id="brands-track">
+                        <div id="brand-card-1" class="te-backend-slot te-brand-card-slot" data-card-slot="brand-card"></div>
+                        <div id="brand-card-2" class="te-backend-slot te-brand-card-slot" data-card-slot="brand-card"></div>
+                    </div>
+                    <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next brand">→</button>
                 </div>
-                <div class="dots"><i></i><i></i></div>
             </section>
 
-            <section class="company-section">
-                <h2>Our Brands</h2>
-                <div class="slot-row">
-                    <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="brand-card" aria-label="Brand card empty slot"></article>
-                    <article class="company-slot" data-card-slot="brand-card" aria-label="Brand card empty slot"></article>
-                    <button class="arrow" type="button">›</button>
+            <section class="te-section te-media-section" aria-labelledby="te-photos-title">
+                <span class="te-section-pill" id="te-photos-title">Photos</span>
+                <div class="te-carousel te-media-carousel" data-carousel="photos">
+                    <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous photo">←</button>
+                    <div id="photos-slot" class="te-backend-slot te-media-slot" data-card-slot="photos"></div>
+                    <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next photo">→</button>
                 </div>
-                <div class="dots"><i></i><i></i></div>
             </section>
 
-            <section class="company-section">
-                <h2>Photos</h2>
-                <div class="photo-row">
-                    <article class="company-photo-slot" aria-label="Office photo empty slot"></article>
-                    <article class="company-photo-slot" aria-label="Team photo empty slot"></article>
+            <section class="te-section te-media-section" aria-labelledby="te-partners-title">
+                <span class="te-section-pill" id="te-partners-title">Partners</span>
+                <div class="te-carousel te-media-carousel" data-carousel="partners">
+                    <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous partner">←</button>
+                    <div id="partners-slot" class="te-backend-slot te-media-slot te-media-slot--short" data-card-slot="partners"></div>
+                    <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next partner">→</button>
                 </div>
-                <div class="dots"><i></i><i></i></div>
             </section>
 
-            <section class="company-section">
-                <h2>Partners</h2>
-                <div class="slot-row">
-                    <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="partner-card" aria-label="Partner card empty slot"></article>
-                    <article class="company-slot" data-card-slot="partner-card" aria-label="Partner card empty slot"></article>
-                    <button class="arrow" type="button">›</button>
+            <section class="te-section te-media-section" aria-labelledby="te-customers-title">
+                <span class="te-section-pill" id="te-customers-title">Customers</span>
+                <div class="te-carousel te-media-carousel" data-carousel="customers">
+                    <button class="te-carousel-arrow te-carousel-arrow--left" type="button" aria-label="Previous customer">←</button>
+                    <div id="customers-slot" class="te-backend-slot te-media-slot te-media-slot--short" data-card-slot="customers"></div>
+                    <button class="te-carousel-arrow te-carousel-arrow--right" type="button" aria-label="Next customer">→</button>
                 </div>
-                <div class="dots"><i></i><i></i></div>
             </section>
+        </div>
 
-            <section class="company-section">
-                <h2>Customers</h2>
-                <div class="slot-row">
-                    <button class="arrow" type="button">‹</button>
-                    <article class="company-slot" data-card-slot="customer-card" aria-label="Customer card empty slot"></article>
-                    <article class="company-slot" data-card-slot="customer-card" aria-label="Customer card empty slot"></article>
-                    <button class="arrow" type="button">›</button>
-                </div>
-                <div class="dots"><i></i><i></i></div>
-            </section>
-        </section>
-
-        <aside class="company-tip-card">
-            <h2>✧ TIP</h2>
+        <aside class="te-tip-card" aria-label="Tip">
+            <strong><span aria-hidden="true">✣</span> TIP</strong>
             <p>Job seekers want to know the team before they apply. Create a free team profile on Bildyx Teams and show them yours today.</p>
         </aside>
     </div>
 </main>
 
-<script src="js/compagny_con.js"></script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>

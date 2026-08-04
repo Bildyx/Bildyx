@@ -1,8 +1,8 @@
 <?php
 $pageTitle = 'Company Archives — Bildyx';
-$pageDescription = 'Company archive page connected to company accounts.';
-$pageScript = null;
-$bodyClass = 'company-page company-archive-page';
+$pageDescription = 'Connected company archive page on Bildyx.';
+$pageScript = 'js/compagny_con.ts';
+$bodyClass = 'team-example-page company-page compagny-con-page compagny-archive-page';
 $showMainNav = false;
 
 ob_start();
@@ -12,7 +12,6 @@ $sharedHeader = ob_get_clean();
 $companyStylesheet = '<link rel="stylesheet" href="css/compagny_con.css" />';
 echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 ?>
-
 
 <script>
 (function () {
@@ -38,21 +37,23 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 </script>
 
 
-<main class="company-page-shell company-archive-shell">
-    <section class="company-archive-card" aria-labelledby="company-archive-title">
-        <header class="company-archive-header">
-            <a href="compagny_con.php">‹ Back</a>
+<main class="te-page compagny-con-main">
+    <div class="te-company-bar" aria-label="Current company">PEKAMIX</div>
+
+    <section class="compagny-archive-true-card" aria-labelledby="archive-title">
+        <header class="compagny-archive-true-header">
+            <a href="compagny_con.php" aria-label="Back to company page">←</a>
             <div>
-                <p>Connected Company Account</p>
-                <h1 id="company-archive-title">Company Archives</h1>
+                <p>Connected company account</p>
+                <h1 id="archive-title">Company Archives</h1>
             </div>
         </header>
 
-        <div class="company-archive-grid">
-            <article class="company-slot archive-empty-slot" data-card-slot="archive-company-1" aria-label="Company archive empty slot"></article>
-            <article class="company-slot archive-empty-slot" data-card-slot="archive-company-2" aria-label="Company archive empty slot"></article>
-            <article class="company-slot archive-empty-slot" data-card-slot="archive-company-3" aria-label="Company archive empty slot"></article>
-            <article class="company-slot archive-empty-slot" data-card-slot="archive-company-4" aria-label="Company archive empty slot"></article>
+        <div class="compagny-archive-true-grid">
+            <div class="te-backend-slot te-company-card-slot" data-card-slot="archive-company-1"></div>
+            <div class="te-backend-slot te-company-card-slot" data-card-slot="archive-company-2"></div>
+            <div class="te-backend-slot te-company-card-slot" data-card-slot="archive-company-3"></div>
+            <div class="te-backend-slot te-company-card-slot" data-card-slot="archive-company-4"></div>
         </div>
     </section>
 </main>

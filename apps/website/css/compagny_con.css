@@ -1,456 +1,580 @@
 :root {
-    --company-blue: #2447f4;
-    --company-blue-soft: #e7ebff;
-    --company-text: #061126;
-    --company-muted: #5d6679;
-    --company-border: #cbd5ff;
-    --company-white: #ffffff;
-    --company-bg: #f7f8fc;
+    --te-blue: #2244ec;
+    --te-blue-dark: #1939c8;
+    --te-blue-light: #4f6ff2;
+    --te-bg: #f5f6f8;
+    --te-card: #ffffff;
+    --te-border: #cfd7ff;
+    --te-text: #111827;
+    --te-muted: #667085;
 }
 
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
+body.team-example-page {
+    margin: 0;
+    background: var(--te-blue);
+    color: var(--te-text);
+    font-family: Arial, sans-serif;
 }
 
-body.company-page {
-    background: var(--company-blue);
+.te-page {
+    min-height: 100vh;
+    background: var(--te-blue);
 }
 
-.company-page .site-footer {
-    margin-top: 0;
+.te-company-bar {
+    color: #fff;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.18);
 }
 
-.company-page-shell {
-    min-height: calc(100vh - 72px);
-    background: var(--company-blue);
-    color: var(--company-text);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    padding: 18px 0 28px;
-}
-
-.company-layout {
-    width: min(1500px, calc(100% - 64px));
+.te-layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr) 190px;
+    gap: 20px;
+    max-width: 1680px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 250px minmax(0, 1fr) 170px;
-    gap: 22px;
-    align-items: start;
-}
-
-.company-left-rail {
-    display: grid;
-    gap: 22px;
-    color: #fff;
-}
-
-.company-left-rail h2 {
-    margin: 0;
-    text-align: center;
-    font-size: 19px;
-    color: #fff;
-}
-
-.company-archive-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 34px;
-    border-radius: 8px;
-    background: transparent;
-    color: #fff;
-    text-decoration: none;
-    text-align: center;
-    font-weight: 800;
-    font-size: 14px;
-}
-
-.company-archive-link:hover {
-    background: rgba(255, 255, 255, .12);
-}
-
-.company-main-card {
-    background: var(--company-bg);
-    min-height: 900px;
-    padding: 28px 28px 42px;
-}
-
-.company-title-bar {
-    text-align: center;
-    margin: -18px 0 26px;
-}
-
-.company-title-bar h1 {
-    margin: 0;
-    color: var(--company-blue);
-    font-size: 18px;
-    letter-spacing: .12em;
-}
-
-.company-section + .company-section {
-    margin-top: 34px;
-}
-
-.company-section > h2 {
-    margin: 0 0 16px;
-    font-size: 17px;
-}
-
-.team-box {
-    border: 1px solid var(--company-border);
-    border-radius: 12px;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 245px;
-    background: #fff;
-}
-
-.team-box-main {
     padding: 18px;
+}
+
+.te-company-rail,
+.te-content,
+.te-tip-card {
     min-width: 0;
 }
 
-.team-tabs,
-.product-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 9px;
-    margin-bottom: 18px;
+.te-company-rail {
+    color: #fff;
+    text-align: center;
 }
 
-.team-tabs button,
-.product-tabs button {
-    border: 1px solid #dce2ef;
-    background: #f2f4f8;
-    color: var(--company-muted);
+.te-company-card-slot {
+    min-height: 420px;
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,.45);
+}
+
+.te-company-rail__title {
+    margin: 26px 0 22px;
+    font-size: 1.25rem;
+}
+
+.te-archive-link {
+    color: #fff;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.te-content {
+    background: var(--te-bg);
+    padding: 20px;
+}
+
+.te-team-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    background: #fff;
+    border: 1px solid var(--te-border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.te-team-main {
+    padding: 22px;
+}
+
+.te-team-main h2,
+.te-team-main h3,
+.te-team-profile h2,
+.te-section h2 {
+    margin-top: 0;
+}
+
+.te-team-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0 18px;
+}
+
+.te-team-tab {
+    border: 0;
     border-radius: 999px;
-    padding: 7px 16px;
-    font-weight: 800;
+    background: #eef0f5;
+    color: #596174;
+    padding: 10px 18px;
     cursor: pointer;
 }
 
-.team-tabs button.is-active,
-.product-tabs button.is-active {
-    background: var(--company-blue);
-    border-color: var(--company-blue);
+.te-team-tab.is-active {
+    background: var(--te-blue);
     color: #fff;
 }
 
-.people-grid {
+.te-members {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
 }
 
-.people-grid article {
-    min-height: 86px;
+.te-member-card {
+    min-height: 92px;
     background: #f1f2f5;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    gap: 3px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
     text-align: center;
-    padding: 10px;
 }
 
-.people-grid article span {
-    width: 42px;
-    height: 42px;
+.te-member-avatar {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 7px;
     border-radius: 50%;
-    background: #d7deee;
-    border: 2px solid #fff;
+    overflow: hidden;
+    background: #dfe4ee;
+    flex-shrink: 0;
 }
 
-.people-grid strong {
-    font-size: 12px;
+.te-member-avatar img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center top;
 }
 
-.people-grid small {
-    color: var(--company-muted);
-    font-size: 10px;
+.te-member-name {
+    font-size: 0.9rem;
+    font-weight: 700;
 }
 
-.team-box-main h3 {
-    margin: 20px 0 10px;
-    font-size: 14px;
+.te-member-role {
+    margin-top: 3px;
+    color: var(--te-muted);
+    font-size: 0.78rem;
 }
 
-.office-list {
+.te-subsection {
+    margin-top: 22px;
+}
+
+.te-subsection h3 {
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.te-offices {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
 }
 
-.office-list button {
-    border: 0;
-    background: transparent;
-    color: var(--company-muted);
-    display: grid;
-    justify-items: center;
+.te-office {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 6px;
-    cursor: pointer;
-    font-size: 12px;
+    color: var(--te-muted);
+    font-size: 0.78rem;
 }
 
-.office-list span {
-    width: 58px;
-    height: 58px;
+.te-office-dot {
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #f4d18b, #7185b2);
+    overflow: hidden;
+    background: #e8ebf1;
     border: 2px solid transparent;
 }
 
-.office-list button.is-active {
-    color: var(--company-blue);
+.te-office-dot img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
 }
 
-.office-list button.is-active span {
-    border-color: var(--company-blue);
-}
-
-.team-profile {
-    background: var(--company-blue);
-    color: #fff;
-    padding: 18px;
-    display: grid;
-    align-content: start;
-    gap: 12px;
-}
-
-.team-profile h3,
-.team-profile h4,
-.team-profile p {
-    margin: 0;
-}
-
-.team-profile h3 {
-    font-size: 15px;
-}
-
-.team-profile > span {
-    width: fit-content;
+.te-office.is-active .te-office-dot {
+    border-color: var(--te-blue);
+    padding: 2px;
     background: #fff;
-    color: var(--company-blue);
-    border-radius: 999px;
-    padding: 6px 13px;
-    font-size: 12px;
-    font-weight: 800;
 }
 
-.team-profile h4 {
-    font-size: 12px;
+.te-office.is-active span {
+    color: var(--te-blue);
 }
 
-.team-profile p {
-    font-size: 11px;
-    line-height: 1.45;
-    color: rgba(255,255,255,.88);
-}
-
-.team-profile .warning {
-    color: #ffbbc2;
-}
-
-.team-profile div {
-    margin-top: 24px;
+.te-products {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-.team-profile div button {
-    border: 1px solid rgba(255,255,255,.45);
-    background: rgba(255,255,255,.12);
-    color: #fff;
+.te-product-chip {
+    border: 1px solid #d7dce8;
     border-radius: 999px;
-    padding: 8px 14px;
-    font-weight: 800;
-}
-
-.team-profile div button:first-child {
     background: #fff;
-    color: var(--company-blue);
-}
-
-/* Empty boxes only. No +, no text. */
-
-.company-slot {
-    min-height: 360px;
-    border: 2px solid #3b70bd;
-    border-radius: 30px;
-    background: #fff;
-    color: transparent;
-    display: block;
-    box-shadow:
-        inset 0 0 0 14px #fff,
-        inset 0 0 0 18px #3b70bd;
-}
-
-.company-slot--side {
-    min-height: 390px;
-    border-color: #fff;
-    border-radius: 24px;
-    box-shadow: 0 0 0 3px var(--company-blue), 0 10px 28px rgba(0, 0, 0, .08);
-}
-
-.slot-row {
-    position: relative;
-    display: grid;
-    grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr) 28px;
-    gap: 20px;
-    align-items: center;
-}
-
-.arrow {
-    width: 28px;
-    height: 28px;
-    border: 1px solid #e2e6f0;
-    background: #fff;
-    color: var(--company-muted);
-    border-radius: 50%;
+    color: #677085;
+    padding: 9px 16px;
     cursor: pointer;
 }
 
-.dots {
+.te-product-chip.is-active {
+    background: var(--te-blue);
+    color: #fff;
+    border-color: var(--te-blue);
+}
+
+.te-team-profile {
+    background: var(--te-blue);
+    color: #fff;
+    padding: 22px;
     display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 14px;
+    flex-direction: column;
 }
 
-.dots i {
-    width: 7px;
-    height: 7px;
+.te-team-badge {
+    display: inline-flex;
+    width: fit-content;
+    padding: 8px 14px;
+    background: rgba(255,255,255,.18);
     border-radius: 999px;
-    background: #c8ceda;
+    font-weight: 700;
+    margin: 8px 0 14px;
 }
 
-.dots i:first-child {
-    width: 22px;
-    background: var(--company-blue);
-}
-
-.photo-row {
+.te-profile-points {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
-    padding: 0 40px;
+    gap: 14px;
 }
 
-.company-photo-slot {
-    height: 150px;
-    border: 2px solid var(--company-border);
-    border-radius: 12px;
-    background: #fff;
+.te-profile-point h3 {
+    margin: 0 0 5px;
+    font-size: 0.95rem;
 }
 
-.company-tip-card {
-    background: #fff;
-    color: var(--company-blue);
-    border-radius: 10px;
-    padding: 20px 18px;
-    margin-top: 32px;
-}
-
-.company-tip-card h2 {
-    margin: 0 0 12px;
-    font-size: 13px;
-}
-
-.company-tip-card p {
+.te-profile-point p {
     margin: 0;
-    font-size: 13px;
-    line-height: 1.6;
-    font-style: italic;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: #eef2ff;
 }
 
-/* Company archive true page */
-
-.company-archive-shell {
-    padding: 18px 0 42px;
+.te-profile-point.is-warning h3 {
+    color: #ffdddd;
 }
 
-.company-archive-card {
-    width: min(1180px, calc(100% - 64px));
-    margin: 0 auto;
+.te-profile-actions {
+    margin-top: auto;
+    padding-top: 18px;
+    display: flex;
+    gap: 8px;
+}
+
+.te-profile-button {
+    border: 0;
+    border-radius: 999px;
+    padding: 9px 14px;
+    cursor: pointer;
+    background: rgba(255,255,255,.2);
+    color: #fff;
+}
+
+.te-profile-button.is-active {
     background: #fff;
-    border: 2px solid rgba(255, 255, 255, .65);
-    box-shadow: 0 0 0 3px var(--company-blue);
-    border-radius: 28px;
-    padding: 44px 42px;
+    color: var(--te-blue);
 }
 
-.company-archive-header {
+.te-section {
+    margin-top: 34px;
+}
+
+.te-carousel {
+    position: relative;
+    min-height: 390px;
+}
+
+.te-carousel-track {
+    display: grid;
+    grid-template-columns: minmax(260px, 430px);
+    gap: 18px;
+    align-items: start;
+}
+
+.te-carousel-track--two {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+}
+
+.te-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #e0e3ea;
+    background: #fff;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.te-carousel-arrow--left { left: -12px; }
+.te-carousel-arrow--right { right: -12px; }
+
+.te-backend-slot {
+    background: #fff;
+    border: 1px solid #dfe3eb;
+    border-radius: 18px;
+}
+
+.te-product-card-slot,
+.te-brand-card-slot {
+    min-height: 360px;
+}
+
+.te-media-section {
+    margin-top: 28px;
+}
+
+.te-section-pill {
+    display: inline-flex;
+    background: #eef0ff;
+    color: var(--te-blue);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-weight: 700;
+}
+
+.te-media-carousel {
+    margin-top: 12px;
+    min-height: 240px;
+}
+
+.te-media-slot {
+    min-height: 220px;
+}
+
+.te-media-slot--short {
+    min-height: 140px;
+}
+
+.te-tip-card {
+    align-self: start;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    color: var(--te-blue);
+    margin-top: 34px;
+}
+
+.te-tip-card p {
+    font-style: italic;
+    line-height: 1.55;
+}
+
+@media (max-width: 1200px) {
+    .te-layout {
+        grid-template-columns: 210px minmax(0, 1fr);
+    }
+
+    .te-tip-card {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 900px) {
+    .te-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .te-company-rail {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .te-company-card-slot {
+        min-height: 260px;
+    }
+
+    .te-team-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .te-team-profile {
+        min-height: 420px;
+    }
+}
+
+@media (max-width: 700px) {
+    .te-layout {
+        padding: 10px;
+    }
+
+    .te-content {
+        padding: 12px;
+    }
+
+    .te-company-rail {
+        display: block;
+    }
+
+    .te-company-card-slot {
+        min-height: 220px;
+    }
+
+    .te-members {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .te-carousel-track--two {
+        grid-template-columns: 1fr;
+    }
+
+    .te-member-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .te-office-dot {
+        width: 46px;
+        height: 46px;
+    }
+}
+
+
+/* =========================================================
+   compagny_con — based on team-example layout.
+   Keep the same te-* structure, but all backend card slots stay EMPTY.
+   No plus sign, no placeholder text.
+   ========================================================= */
+
+body.company-page,
+body.compagny-con-page {
+    margin: 0;
+    background: var(--te-blue);
+    color: var(--te-text);
+    font-family: Arial, sans-serif;
+}
+
+.company-page .site-footer,
+.compagny-con-page .site-footer {
+    margin-top: 0;
+}
+
+.compagny-con-main .te-company-card-slot,
+.compagny-con-main .te-product-card-slot,
+.compagny-con-main .te-brand-card-slot,
+.compagny-con-main .te-media-slot,
+.compagny-archive-page .te-company-card-slot {
+    background: #fff;
+    border: 1px solid #dfe3eb;
+    border-radius: 18px;
+    color: transparent;
+    overflow: hidden;
+}
+
+.compagny-con-main .te-backend-slot:empty::before,
+.compagny-con-main .te-backend-slot:empty::after,
+.compagny-archive-page .te-backend-slot:empty::before,
+.compagny-archive-page .te-backend-slot:empty::after {
+    content: none !important;
+}
+
+.te-parent-company-card-slot {
+    margin-top: 0;
+}
+
+.compagny-con-main .te-archive-link {
+    margin-top: 18px;
+}
+
+.compagny-con-main .te-carousel-track {
+    align-items: stretch;
+}
+
+.compagny-con-main .te-product-card-slot,
+.compagny-con-main .te-brand-card-slot {
+    min-height: 430px;
+}
+
+.compagny-con-main .te-company-card-slot {
+    min-height: 420px;
+}
+
+.compagny-con-main .te-media-slot {
+    min-height: 220px;
+}
+
+.compagny-con-main .te-media-slot--short {
+    min-height: 240px;
+}
+
+.compagny-archive-true-card {
+    width: min(1180px, calc(100% - 64px));
+    margin: 24px auto 48px;
+    background: var(--te-bg);
+    padding: 36px;
+    min-height: 720px;
+}
+
+.compagny-archive-true-header {
     display: flex;
     align-items: center;
     gap: 18px;
     margin-bottom: 28px;
 }
 
-.company-archive-header a {
-    color: var(--company-blue);
+.compagny-archive-true-header a {
+    color: var(--te-blue);
     text-decoration: none;
-    font-size: 32px;
+    font-size: 26px;
     line-height: 1;
-}
-
-.company-archive-header p {
-    margin: 0 0 6px;
-    color: var(--company-blue);
-    font-size: 13px;
     font-weight: 800;
 }
 
-.company-archive-header h1 {
-    margin: 0;
-    color: var(--company-text);
-    font-size: 31px;
+.compagny-archive-true-header p {
+    margin: 0 0 5px;
+    color: var(--te-muted);
+    font-size: .85rem;
 }
 
-.company-archive-grid {
+.compagny-archive-true-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    letter-spacing: -.04em;
+}
+
+.compagny-archive-true-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
     gap: 22px;
 }
 
-.archive-empty-slot {
-    min-height: 330px;
-}
-
-@media (max-width: 1180px) {
-    .company-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .company-left-rail,
-    .company-tip-card {
-        display: none;
-    }
+.compagny-archive-true-grid .te-company-card-slot {
+    min-height: 380px;
 }
 
 @media (max-width: 900px) {
-    .company-layout,
-    .company-archive-card {
+    .compagny-archive-true-card {
         width: min(100% - 20px, 980px);
-    }
-
-    .team-box,
-    .people-grid,
-    .photo-row,
-    .company-archive-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .slot-row {
-        grid-template-columns: 1fr;
-    }
-
-    .arrow {
-        display: none;
-    }
-
-    .company-main-card,
-    .company-archive-card {
         padding: 20px;
+    }
+
+    .compagny-archive-true-grid {
+        grid-template-columns: 1fr;
     }
 }
