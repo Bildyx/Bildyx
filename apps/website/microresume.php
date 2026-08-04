@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'MicroResume — Bildyx';
 $pageDescription = 'Turn your resume into a scannable signal system with Bildyx MicroResume.';
-$pageScript = 'js/microresume.js';
+$pageScript = 'js/microresume.ts';
 $bodyClass = 'microresume-page';
 
 /*

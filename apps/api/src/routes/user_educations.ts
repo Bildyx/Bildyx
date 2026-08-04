@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -16,8 +16,8 @@ import type { Insertable } from "kysely";
 import type { UserEducations } from "../db/types";
 
 export const user_educations = {
-  // 1. Récupérer toutes les formations d'un profil
-  getByProfile: publicProcedure
+  // 1. Get all educations for a profile
+  getEducationsByProfile: publicProcedure
     .route({
       method: "GET",
       summary: "List all educations for a user profile",
@@ -46,7 +46,7 @@ export const user_educations = {
         .execute();
     }),
 
-  // 2. Récupérer une formation par son ID
+  // 2. Get an education by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -73,7 +73,7 @@ export const user_educations = {
       return education;
     }),
 
-  // 3. Créer une nouvelle formation
+  // 3. Create a new education
   create: publicProcedure
     .route({
       method: "POST",
@@ -95,6 +95,7 @@ export const user_educations = {
         throw new ORPCError("NOT_FOUND", { message: "User profile not found" });
       }
 
+      console.log(input);
       const education = await database
         .insertInto("user_educations")
         .values({
@@ -113,7 +114,7 @@ export const user_educations = {
       return education;
     }),
 
-  // 4. Mettre à jour une formation
+  // 4. Update an education
   update: publicProcedure
     .route({
       method: "PATCH",
@@ -122,11 +123,7 @@ export const user_educations = {
       path: "/educations/{educationId}",
       tags: ["UserEducation"],
     })
-    .input(
-      z
-        .object({ educationId: z.string().uuid() })
-        .merge(PutUserEducationSchema),
-    )
+    .input(z.object({ educationId: z.uuid() }).merge(PutUserEducationSchema))
     .output(UserEducationSchema)
     .handler(async ({ input }) => {
       const { educationId, ...updates } = input;

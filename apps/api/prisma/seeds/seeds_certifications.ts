@@ -17,7 +17,7 @@ type CertificationCsv = {
   id: string;
   name: string;
   serial_number: string;
-  issuing_organization_id?: string;
+  issuing_organization_name?: string;
   description?: string;
   level?: string;
   category?: string;
@@ -36,8 +36,9 @@ type CertificationCsv = {
 export async function seedCertifications(prisma: PrismaClient) {
   const rows = readCsv<CertificationCsv>("certifications.csv");
 
-  // certifications.csv renseigne issuing_organization_id avec le nom de
-  // l'organisation (ex: "Adobe") plutot que son UUID -> resolution par nom.
+  // certifications.csv fills issuing_organization_name with the
+  // organization's name (e.g. "Adobe") rather than its UUID -> resolution by
+  // name.
   const organizations = await prisma.organization.findMany({
     select: { id: true, name: true },
   });
@@ -46,10 +47,10 @@ export async function seedCertifications(prisma: PrismaClient) {
 
   const data: Prisma.CertificationCreateManyInput[] = rows.map((r) => {
     const issuingOrganizationId = resolveOrganizationId(
-      r.issuing_organization_id,
+      r.issuing_organization_name,
     );
-    if (r.issuing_organization_id && !issuingOrganizationId) {
-      unmatchedOrganizations.add(r.issuing_organization_id);
+    if (r.issuing_organization_name && !issuingOrganizationId) {
+      unmatchedOrganizations.add(r.issuing_organization_name);
     }
 
     return {
@@ -88,12 +89,12 @@ export async function seedCertifications(prisma: PrismaClient) {
 
   if (unmatchedOrganizations.size > 0) {
     console.warn(
-      `Certifications: issuing_organization_id non resolus (mis a null): ${[...unmatchedOrganizations].join(", ")}`,
+      `Certifications: issuing_organization_name non resolus (mis a null): ${[...unmatchedOrganizations].join(", ")}`,
     );
   }
 
-  // NOTE: depend de organizations.ts (issuing_organization_id) -> a seeder
-  // avant.
+  // NOTE: depends on organizations.ts (issuing_organization_name) -> seed
+  // that first.
   const result = await prisma.certification.createMany({
     data,
     skipDuplicates: true,

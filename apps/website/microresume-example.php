@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'MicroResume Example — Bildyx';
 $pageDescription = 'Example of a structured Bildyx MicroResume profile.';
-$pageScript = 'js/microresume-example.js';
+$pageScript = 'js/microresume-example.ts';
 $bodyClass = 'microresume-example-page';
 
 /*

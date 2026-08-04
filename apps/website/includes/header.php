@@ -34,8 +34,8 @@ $bodyClass = $bodyClass ?? '';
             </a>
 
             <nav class="nav-buttons" aria-label="Authentication">
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=login" class="login">Log In</a>
-                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>generic.php?page=signup" class="signup">Sign Up</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>login.php" class="login">Log In</a>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>login.php?tab=signup" class="signup">Sign Up</a>
             </nav>
         </div>
     </header>

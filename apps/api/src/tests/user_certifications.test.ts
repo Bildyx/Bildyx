@@ -5,12 +5,7 @@ import { user_certifications } from "../routes/user_certifications";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { generateSerialNumber } from "../models/utils/enums.js";
 
 describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
   let testUserId: string;
@@ -22,11 +17,11 @@ describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
   let createdUserCertId2: string;
 
   before(async () => {
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
+
+    
 
     testUserId = randomUUID();
     await database
@@ -56,6 +51,7 @@ describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
         id: testOrgId,
         name: "Test Org for UserCerts",
         slug: `test-org-user-certs-${testOrgId}`,
+        serial_number: generateSerialNumber("COMPANY"),
         updated_at: new Date(),
       })
       .execute();
@@ -82,34 +78,8 @@ describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
   });
 
   after(async () => {
-    try {
-      const ids = [createdUserCertId1, createdUserCertId2].filter(Boolean);
-      if (ids.length > 0) {
-        await database
-          .deleteFrom("user_certifications")
-          .where("id", "in", ids)
-          .execute();
-      }
-      await database
-        .deleteFrom("certifications")
-        .where("id", "in", [testCertificationId1, testCertificationId2])
-        .execute();
-      await database
-        .deleteFrom("user_profiles")
-        .where("id", "=", testProfileId)
-        .execute();
-      await database.deleteFrom("users").where("id", "=", testUserId).execute();
-      await database
-        .deleteFrom("organizations")
-        .where("id", "=", testOrgId)
-        .execute();
-    } catch (err) {
-      console.error("Cleanup error in test teardown:", err);
-    } finally {
-      await database.destroy();
-      if (pgliteClient) {
-        await pgliteClient.close();
-      }
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -178,7 +148,7 @@ describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
   describe("GET /profiles/{userProfileId}/certifications (GetByProfile)", () => {
     test("should throw NOT_FOUND when profile does not exist", async () => {
       await assert.rejects(
-        callProcedure(user_certifications.getByProfile, {
+        callProcedure(user_certifications.getCertificationByProfile, {
           userProfileId: randomUUID(),
         }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
@@ -186,7 +156,7 @@ describe("UserCertifications API Endpoints", { concurrency: 1 }, () => {
     });
 
     test("should successfully return certifications of the profile", async () => {
-      const res = await callProcedure(user_certifications.getByProfile, {
+      const res = await callProcedure(user_certifications.getCertificationByProfile, {
         userProfileId: testProfileId,
       });
 

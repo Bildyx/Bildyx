@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= name %> - Card</title>
+    <link rel="stylesheet" href="/css/organization-card.css">
+    <style>
+        :root {
+            --card-width: 700px;
+            --theme-color: #3565ae;
+            --primary-type-color: #1b52a4;
+            --label-width: 170px;
+            --value-color: #1b52a4;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <%- renderHeader(name) %>
+        <div class="info-table">
+            <%- renderRow('Description', description) %>
+            <%- renderRow('Type', type1) %>
+            <%- renderRow('Established', founded) %>
+            <%- renderRow('Capital', headquartersLocation) %>
+            <%- renderRow('Employees', numberOfEmployees) %>
+            <%- renderRow('Child Agencies', subsidiaries) %>
+            <%- renderRow('Known for/Impact', known_for) %>
+            <%- renderRow('Budget', budget) %>
+            <%- renderRow('Functions/Programs', programs_activities) %>
+            <%- renderRow('Jurisdiction', jurisdiction) %>
+            <%- renderRow('Preceding Agency', founders) %>
+        </div>
+        <%- renderFooter() %>
+    </div>
+</body>
+</html>

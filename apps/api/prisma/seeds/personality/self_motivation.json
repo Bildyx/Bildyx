@@ -1,0 +1,106 @@
+{
+  "code": "SELF_MOTIVATION",
+  "name": "Self-Motivation",
+  "description": "Are you driven to achieve your goals?",
+  "is_active": true,
+  "criteria": [
+    {
+      "code": "SELF_MOTIVATION",
+      "name": "Self-Motivation",
+      "description": "Motivation intrinsèque : orientation vers les objectifs, planification, énergie et persévérance.",
+      "order": 1
+    }
+  ],
+  "questions": [
+    {
+      "order": 1,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I have both short term and long term goals that I am working towards",
+      "reverse_scored": false
+    },
+    {
+      "order": 2,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I like being responsible for the outcome of a project",
+      "reverse_scored": false
+    },
+    {
+      "order": 3,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I enjoy working with others",
+      "reverse_scored": false
+    },
+    {
+      "order": 4,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I have fun doing my work",
+      "reverse_scored": false
+    },
+    {
+      "order": 5,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I find my work boring",
+      "reverse_scored": true
+    },
+    {
+      "order": 6,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I am generally excited to start the day",
+      "reverse_scored": false
+    },
+    {
+      "order": 7,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "If I want something, I will find a way to get it",
+      "reverse_scored": false
+    },
+    {
+      "order": 8,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I do not work well with criticism",
+      "reverse_scored": true
+    },
+    {
+      "order": 9,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I will do almost anything if I think it could be fun",
+      "reverse_scored": false
+    },
+    {
+      "order": 10,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I am not good at long term planning",
+      "reverse_scored": true
+    },
+    {
+      "order": 11,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I get excited thinking about my future",
+      "reverse_scored": false
+    },
+    {
+      "order": 12,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I like to plan out how I will achieve my goals",
+      "reverse_scored": false
+    },
+    {
+      "order": 13,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I feel a need to succeed at whatever I am doing",
+      "reverse_scored": false
+    },
+    {
+      "order": 14,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I enjoy getting jobs done",
+      "reverse_scored": false
+    },
+    {
+      "order": 15,
+      "criterion_code": "SELF_MOTIVATION",
+      "text": "I have no hope for the future",
+      "reverse_scored": true
+    }
+  ]
+}

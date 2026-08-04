@@ -16,7 +16,7 @@ import type { Insertable } from "kysely";
 import type { Certifications } from "../db/types";
 
 export const certifications = {
-  // 1. Récupérer toutes les certifications d'une entreprise
+  // 1. Get all certifications for a company
   getByOrganization: publicProcedure
     .route({
       method: "GET",
@@ -57,14 +57,10 @@ export const certifications = {
         query = query.where("category", "=", category);
       }
 
-      const certificationsData = await query
-        .orderBy("created_at", "desc")
-        .execute();
-
-      return certificationsData;
+      return await query.orderBy("created_at", "desc").execute();
     }),
 
-  // 2. Récupérer toutes les certifications
+  // 2. Get all certifications
   getAll: publicProcedure
     .route({
       method: "GET",
@@ -84,7 +80,7 @@ export const certifications = {
       return certificationsData;
     }),
 
-  // 3. Récupérer une seule certification par son ID
+  // 3. Get a single certification by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -113,7 +109,7 @@ export const certifications = {
       return cert;
     }),
 
-  // 4. Créer une nouvelle certification
+  // 4. Create a new certification
   create: publicProcedure
     .route({
       method: "POST",
@@ -144,7 +140,7 @@ export const certifications = {
       return cert;
     }),
 
-  // 5. Mettre à jour une certification
+  // 5. Update a certification
   update: publicProcedure
     .route({
       method: "PATCH",
@@ -154,9 +150,7 @@ export const certifications = {
       tags: ["Certification"],
     })
     .input(
-      z
-        .object({ certificationId: z.string().uuid() })
-        .merge(PutCertificationSchema),
+      z.object({ certificationId: z.uuid() }).merge(PutCertificationSchema),
     )
     .output(CertificationSchema)
     .handler(async ({ input }) => {

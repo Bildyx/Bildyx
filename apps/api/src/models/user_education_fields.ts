@@ -3,25 +3,25 @@ import { z } from "zod";
 export const EducationFieldTypeEnum = z.enum(["MAJOR", "MINOR"]);
 
 export const UserEducationFieldSchema = z.object({
-  id: z.string().uuid(),
-  user_education_id: z.string().uuid(),
-  study_field_Id: z.string().uuid(),
+  id: z.uuid(),
+  user_education_id: z.uuid(),
+  study_field_Id: z.uuid(),
   type: EducationFieldTypeEnum,
 });
 
 // GET
 export const GetUserEducationFieldsSchema = z.object({
-  userEducationId: z.string().uuid(),
+  userEducationId: z.uuid(),
 });
 
 export const GetUserEducationFieldSchema = z.object({
-  fieldId: z.string().uuid(),
+  fieldId: z.uuid(),
 });
 
 // POST
 export const PostUserEducationFieldSchema = z.object({
-  user_education_id: z.string().uuid(),
-  study_field_Id: z.string().uuid(),
+  user_education_id: z.uuid(),
+  study_field_Id: z.uuid(),
   type: EducationFieldTypeEnum,
 });
 
@@ -32,13 +32,15 @@ export const PutUserEducationFieldSchema = z.object({
 
 // DELETE
 export const DeleteUserEducationFieldSchema = z.object({
-  fieldId: z.string().uuid(),
+  fieldId: z.uuid(),
 });
 
 export const DeleteUserEducationFieldsBulkSchema = z.object({
-  fieldIds: z.array(z.string().uuid()),
+  fieldIds: z.array(z.uuid()),
 });
 
 export type UserEducationField = z.infer<typeof UserEducationFieldSchema>;
-export type PostUserEducationField = z.infer<typeof PostUserEducationFieldSchema>;
+export type PostUserEducationField = z.infer<
+  typeof PostUserEducationFieldSchema
+>;
 export type PutUserEducationField = z.infer<typeof PutUserEducationFieldSchema>;

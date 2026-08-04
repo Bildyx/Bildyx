@@ -1,0 +1,1018 @@
+{
+  "Industry": {
+    "prismaModel": "industry",
+    "tableName": "industries",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "icon_url",
+        "fieldName": "iconUrl",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      },
+      {
+        "column": "related_industries",
+        "fieldName": "industries_A",
+        "kind": "m2m",
+        "targetNaturalKeyField": "name"
+      }
+    ]
+  },
+  "Country": {
+    "prismaModel": "country",
+    "tableName": "countries",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "iso_code",
+        "fieldName": "isoCode",
+        "kind": "scalar"
+      },
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "capital_name",
+        "fieldName": "capitalName",
+        "kind": "scalar"
+      },
+      {
+        "column": "flag_url",
+        "fieldName": "flagUrl",
+        "kind": "scalar"
+      },
+      {
+        "column": "population",
+        "fieldName": "population",
+        "kind": "scalar"
+      },
+      {
+        "column": "area_km2",
+        "fieldName": "areaKm2",
+        "kind": "scalar"
+      },
+      {
+        "column": "gdp_usd",
+        "fieldName": "gdpUsd",
+        "kind": "scalar"
+      },
+      {
+        "column": "gdp_per_capita_usd",
+        "fieldName": "gdpPerCapitaUsd",
+        "kind": "scalar"
+      },
+      {
+        "column": "hdi",
+        "fieldName": "hdi",
+        "kind": "scalar"
+      },
+      {
+        "column": "officialLanguages",
+        "fieldName": "officialLanguages",
+        "kind": "list"
+      },
+      {
+        "column": "calling_code",
+        "fieldName": "callingCode",
+        "kind": "scalar"
+      },
+      {
+        "column": "government_type",
+        "fieldName": "governmentType",
+        "kind": "scalar"
+      },
+      {
+        "column": "quality_of_life",
+        "fieldName": "qualityOfLife",
+        "kind": "scalar"
+      },
+      {
+        "column": "temperatures",
+        "fieldName": "temperatures",
+        "kind": "scalar"
+      },
+      {
+        "column": "climate",
+        "fieldName": "climate",
+        "kind": "scalar"
+      },
+      {
+        "column": "crime_rate",
+        "fieldName": "crimeRate",
+        "kind": "scalar"
+      },
+      {
+        "column": "income_inequality",
+        "fieldName": "incomeInequality",
+        "kind": "scalar"
+      },
+      {
+        "column": "work_life_balance",
+        "fieldName": "workLifeBalance",
+        "kind": "scalar"
+      },
+      {
+        "column": "main_industries",
+        "fieldName": "mainIndustries",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_multinational_hqs",
+        "fieldName": "numberOfMultinationalHqs",
+        "kind": "scalar"
+      },
+      {
+        "column": "currency",
+        "fieldName": "currency",
+        "kind": "scalar"
+      },
+      {
+        "column": "median_salary",
+        "fieldName": "medianSalary",
+        "kind": "scalar"
+      },
+      {
+        "column": "median_home_price",
+        "fieldName": "medianHomePrice",
+        "kind": "scalar"
+      },
+      {
+        "column": "average_rent",
+        "fieldName": "averageRent",
+        "kind": "scalar"
+      },
+      {
+        "column": "cost_of_living",
+        "fieldName": "costOfLiving",
+        "kind": "scalar"
+      },
+      {
+        "column": "interesting_fact",
+        "fieldName": "interestingFact",
+        "kind": "scalar"
+      },
+      {
+        "column": "citizenship_process",
+        "fieldName": "citizenshipProcess",
+        "kind": "scalar"
+      },
+      {
+        "column": "work_permit",
+        "fieldName": "workPermit",
+        "kind": "scalar"
+      },
+      {
+        "column": "global_competitiveness_index",
+        "fieldName": "globalCompetitivenessIndex",
+        "kind": "scalar"
+      },
+      {
+        "column": "level_of_globalisation",
+        "fieldName": "levelOfGlobalisation",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_international_students",
+        "fieldName": "numberOfInternationalStudents",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_foreign_organizations",
+        "fieldName": "numberOfForeignOrganizations",
+        "kind": "scalar"
+      },
+      {
+        "column": "personal_income_tax",
+        "fieldName": "personalIncomeTax",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_tourists",
+        "fieldName": "numberOfTourists",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_airports",
+        "fieldName": "numberOfAirports",
+        "kind": "scalar"
+      },
+      {
+        "column": "quality_of_education",
+        "fieldName": "qualityOfEducation",
+        "kind": "scalar"
+      },
+      {
+        "column": "degree_holders",
+        "fieldName": "degreeHolders",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_universities",
+        "fieldName": "numberOfUniversities",
+        "kind": "scalar"
+      },
+      {
+        "column": "top_universities",
+        "fieldName": "top_universities",
+        "kind": "scalar"
+      },
+      {
+        "column": "ethnic_groups",
+        "fieldName": "ethnicGroups",
+        "kind": "scalar"
+      },
+      {
+        "column": "religion",
+        "fieldName": "religion",
+        "kind": "scalar"
+      },
+      {
+        "column": "cultural_values",
+        "fieldName": "culturalValues",
+        "kind": "scalar"
+      },
+      {
+        "column": "people_description",
+        "fieldName": "peopleDescription",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      }
+    ]
+  },
+  "City": {
+    "prismaModel": "city",
+    "tableName": "cities",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "country_id",
+        "fieldName": "countryId",
+        "kind": "scalar"
+      },
+      {
+        "column": "is_capital",
+        "fieldName": "isCapital",
+        "kind": "scalar"
+      },
+      {
+        "column": "state_province",
+        "fieldName": "stateProvince",
+        "kind": "scalar"
+      },
+      {
+        "column": "population",
+        "fieldName": "population",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_multinational_hqs",
+        "fieldName": "numberOfMultinationalHqs",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_airports",
+        "fieldName": "numberOfAirports",
+        "kind": "scalar"
+      },
+      {
+        "column": "largest_organization",
+        "fieldName": "largest_organization",
+        "kind": "scalar"
+      },
+      {
+        "column": "currency",
+        "fieldName": "currency",
+        "kind": "scalar"
+      },
+      {
+        "column": "median_salary",
+        "fieldName": "medianSalary",
+        "kind": "scalar"
+      },
+      {
+        "column": "median_home_price",
+        "fieldName": "medianHomePrice",
+        "kind": "scalar"
+      },
+      {
+        "column": "average_rent",
+        "fieldName": "averageRent",
+        "kind": "scalar"
+      },
+      {
+        "column": "cost_of_living",
+        "fieldName": "costOfLiving",
+        "kind": "scalar"
+      },
+      {
+        "column": "temperatures",
+        "fieldName": "temperatures",
+        "kind": "scalar"
+      },
+      {
+        "column": "climate",
+        "fieldName": "climate",
+        "kind": "scalar"
+      },
+      {
+        "column": "interesting_fact",
+        "fieldName": "interestingFact",
+        "kind": "scalar"
+      },
+      {
+        "column": "degree_holders",
+        "fieldName": "degreeHolders",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_universities",
+        "fieldName": "numberOfUniversities",
+        "kind": "scalar"
+      },
+      {
+        "column": "top_universities",
+        "fieldName": "top_universities",
+        "kind": "scalar"
+      },
+      {
+        "column": "number_of_nationalities",
+        "fieldName": "numberOfNationalities",
+        "kind": "scalar"
+      },
+      {
+        "column": "language",
+        "fieldName": "language",
+        "kind": "list"
+      },
+      {
+        "column": "people_description",
+        "fieldName": "peopleDescription",
+        "kind": "scalar"
+      },
+      {
+        "column": "latitude",
+        "fieldName": "latitude",
+        "kind": "scalar"
+      },
+      {
+        "column": "longitude",
+        "fieldName": "longitude",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      },
+      {
+        "column": "main_industries",
+        "fieldName": "mainIndustries",
+        "kind": "m2m",
+        "targetNaturalKeyField": "name"
+      }
+    ]
+  },
+  "Job": {
+    "prismaModel": "job",
+    "tableName": "jobs",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "title",
+        "fieldName": "title",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "category",
+        "fieldName": "category",
+        "kind": "scalar"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "seniority_level",
+        "fieldName": "seniorityLevel",
+        "kind": "scalar"
+      },
+      {
+        "column": "industry_name",
+        "fieldName": "industry",
+        "kind": "fk",
+        "targetNaturalKeyField": "name"
+      },
+      {
+        "column": "products",
+        "fieldName": "products",
+        "kind": "list"
+      },
+      {
+        "column": "tools_and_tech",
+        "fieldName": "toolsAndTech",
+        "kind": "list"
+      },
+      {
+        "column": "tags",
+        "fieldName": "tags",
+        "kind": "list"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      }
+    ]
+  },
+  "Organization": {
+    "prismaModel": "organization",
+    "tableName": "organizations",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "slug",
+        "fieldName": "slug",
+        "kind": "scalar"
+      },
+      {
+        "column": "ownership",
+        "fieldName": "ownership",
+        "kind": "scalar"
+      },
+      {
+        "column": "mission",
+        "fieldName": "mission",
+        "kind": "scalar"
+      },
+      {
+        "column": "known_for",
+        "fieldName": "knownFor",
+        "kind": "scalar"
+      },
+      {
+        "column": "project",
+        "fieldName": "project",
+        "kind": "scalar"
+      },
+      {
+        "column": "research_areas",
+        "fieldName": "researchAreas",
+        "kind": "list"
+      },
+      {
+        "column": "products",
+        "fieldName": "products",
+        "kind": "list"
+      },
+      {
+        "column": "services",
+        "fieldName": "services",
+        "kind": "list"
+      },
+      {
+        "column": "budget",
+        "fieldName": "budget",
+        "kind": "scalar"
+      },
+      {
+        "column": "founded",
+        "fieldName": "founded",
+        "kind": "scalar"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      },
+      {
+        "column": "city_name",
+        "fieldName": "headquartersCity",
+        "kind": "fk",
+        "targetNaturalKeyField": "name"
+      },
+      {
+        "column": "numberOfEmployees",
+        "fieldName": "numberOfEmployees",
+        "kind": "scalar"
+      },
+      {
+        "column": "parent_organization_name",
+        "fieldName": "parentOrganization",
+        "kind": "fk",
+        "targetNaturalKeyField": "name"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      },
+      {
+        "column": "authority",
+        "fieldName": "authority",
+        "kind": "scalar"
+      },
+      {
+        "column": "collections",
+        "fieldName": "collections",
+        "kind": "scalar"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "facilities",
+        "fieldName": "facilities",
+        "kind": "list"
+      },
+      {
+        "column": "founders",
+        "fieldName": "founders",
+        "kind": "list"
+      },
+      {
+        "column": "jurisdiction",
+        "fieldName": "jurisdiction",
+        "kind": "scalar"
+      },
+      {
+        "column": "members",
+        "fieldName": "members",
+        "kind": "scalar"
+      },
+      {
+        "column": "offices",
+        "fieldName": "offices",
+        "kind": "scalar"
+      },
+      {
+        "column": "partners",
+        "fieldName": "partners",
+        "kind": "list"
+      },
+      {
+        "column": "personnel",
+        "fieldName": "personnel",
+        "kind": "scalar"
+      },
+      {
+        "column": "programs_activities",
+        "fieldName": "programsActivities",
+        "kind": "list"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "subsidiaries",
+        "fieldName": "subsidiaries",
+        "kind": "scalar"
+      },
+      {
+        "column": "subtype",
+        "fieldName": "subtype",
+        "kind": "scalar"
+      },
+      {
+        "column": "type1",
+        "fieldName": "type1",
+        "kind": "scalar"
+      },
+      {
+        "column": "type2",
+        "fieldName": "type2",
+        "kind": "scalar"
+      },
+      {
+        "column": "student_count",
+        "fieldName": "studentCount",
+        "kind": "scalar"
+      },
+      {
+        "column": "undergraduates",
+        "fieldName": "undergraduates",
+        "kind": "scalar"
+      },
+      {
+        "column": "postgraduates",
+        "fieldName": "postgraduates",
+        "kind": "scalar"
+      },
+      {
+        "column": "countries",
+        "fieldName": "countries",
+        "kind": "m2m",
+        "targetNaturalKeyField": "isoCode"
+      },
+      {
+        "column": "industries",
+        "fieldName": "industries",
+        "kind": "m2m",
+        "targetNaturalKeyField": "name"
+      },
+      {
+        "column": "working_area_cities",
+        "fieldName": "cities_working_area",
+        "kind": "m2m",
+        "targetNaturalKeyField": "name"
+      }
+    ]
+  },
+  "Skill": {
+    "prismaModel": "skill",
+    "tableName": "skills",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "type",
+        "fieldName": "type",
+        "kind": "scalar"
+      },
+      {
+        "column": "category",
+        "fieldName": "category",
+        "kind": "scalar"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "icon_url",
+        "fieldName": "iconUrl",
+        "kind": "scalar"
+      },
+      {
+        "column": "industry",
+        "fieldName": "industry",
+        "kind": "scalar"
+      },
+      {
+        "column": "difficulty",
+        "fieldName": "difficulty",
+        "kind": "scalar"
+      },
+      {
+        "column": "used_in",
+        "fieldName": "usedIn",
+        "kind": "list"
+      },
+      {
+        "column": "jobs",
+        "fieldName": "jobs",
+        "kind": "list"
+      },
+      {
+        "column": "product_categories",
+        "fieldName": "productCategories",
+        "kind": "list"
+      },
+      {
+        "column": "common_fields_of_study",
+        "fieldName": "commonFieldsOfStudy",
+        "kind": "list"
+      },
+      {
+        "column": "related_abilities",
+        "fieldName": "relatedAbilities",
+        "kind": "list"
+      },
+      {
+        "column": "time_to_master",
+        "fieldName": "timeToMaster",
+        "kind": "scalar"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      }
+    ]
+  },
+  "Certification": {
+    "prismaModel": "certification",
+    "tableName": "certifications",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "issuing_organization_name",
+        "fieldName": "issuingOrganization",
+        "kind": "fk",
+        "targetNaturalKeyField": "name"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "level",
+        "fieldName": "level",
+        "kind": "scalar"
+      },
+      {
+        "column": "category",
+        "fieldName": "category",
+        "kind": "scalar"
+      },
+      {
+        "column": "products",
+        "fieldName": "products",
+        "kind": "list"
+      },
+      {
+        "column": "jobs",
+        "fieldName": "jobs",
+        "kind": "list"
+      },
+      {
+        "column": "validity_duration_months",
+        "fieldName": "validityDurationMonths",
+        "kind": "scalar"
+      },
+      {
+        "column": "difficulty",
+        "fieldName": "difficulty",
+        "kind": "scalar"
+      },
+      {
+        "column": "website_url",
+        "fieldName": "websiteUrl",
+        "kind": "scalar"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      }
+    ]
+  },
+  "StudyFields": {
+    "prismaModel": "studyFields",
+    "tableName": "study_fields",
+    "deletedAtField": "deleted_at",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "area",
+        "fieldName": "area",
+        "kind": "scalar"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      }
+    ]
+  },
+  "Degree": {
+    "prismaModel": "degree",
+    "tableName": "degrees",
+    "deletedAtField": "deletedAt",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "level",
+        "fieldName": "level",
+        "kind": "scalar"
+      },
+      {
+        "column": "area",
+        "fieldName": "area",
+        "kind": "scalar"
+      },
+      {
+        "column": "duration_years",
+        "fieldName": "durationYears",
+        "kind": "scalar"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      }
+    ]
+  },
+  "Subject": {
+    "prismaModel": "subject",
+    "tableName": "subjects",
+    "deletedAtField": "deleted_at",
+    "fields": [
+      {
+        "column": "name",
+        "fieldName": "name",
+        "kind": "scalar"
+      },
+      {
+        "column": "serial_number",
+        "fieldName": "serial_number",
+        "kind": "scalar"
+      },
+      {
+        "column": "type",
+        "fieldName": "type",
+        "kind": "scalar"
+      },
+      {
+        "column": "description",
+        "fieldName": "description",
+        "kind": "scalar"
+      },
+      {
+        "column": "short_description",
+        "fieldName": "short_description",
+        "kind": "scalar"
+      },
+      {
+        "column": "category",
+        "fieldName": "category",
+        "kind": "scalar"
+      },
+      {
+        "column": "competitors",
+        "fieldName": "competitors",
+        "kind": "list"
+      },
+      {
+        "column": "vendors",
+        "fieldName": "vendors",
+        "kind": "list"
+      },
+      {
+        "column": "fun_fact",
+        "fieldName": "fun_fact",
+        "kind": "scalar"
+      },
+      {
+        "column": "organization_name",
+        "fieldName": "organization",
+        "kind": "fk",
+        "targetNaturalKeyField": "name"
+      },
+      {
+        "column": "website_url",
+        "fieldName": "website_url",
+        "kind": "scalar"
+      },
+      {
+        "column": "logo_url",
+        "fieldName": "logo_url",
+        "kind": "scalar"
+      },
+      {
+        "column": "tags",
+        "fieldName": "tags",
+        "kind": "list"
+      },
+      {
+        "column": "score",
+        "fieldName": "score",
+        "kind": "scalar"
+      },
+      {
+        "column": "metadata",
+        "fieldName": "metadata",
+        "kind": "scalar"
+      },
+      {
+        "column": "industries",
+        "fieldName": "industries",
+        "kind": "m2m",
+        "targetNaturalKeyField": "name"
+      }
+    ]
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "code": "ASSERTIVENESS",
+  "name": "Assertiveness",
+  "description": "Do you speak up for yourself in a way that is honest and respectful?",
+  "is_active": true,
+  "criteria": [
+    {
+      "code": "ASSERTIVENESS",
+      "name": "Assertiveness",
+      "description": "Capacité à exprimer son point de vue de façon honnête et respectueuse, y compris sous pression.",
+      "order": 1
+    }
+  ],
+  "questions": [
+    {
+      "order": 1,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I defend my point of view when my point of view is challenged",
+      "reverse_scored": false
+    },
+    {
+      "order": 2,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I am not afraid to speak my mind",
+      "reverse_scored": false
+    },
+    {
+      "order": 3,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I take charge in team settings",
+      "reverse_scored": false
+    },
+    {
+      "order": 4,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I make sure my opinions are known to those around me",
+      "reverse_scored": false
+    },
+    {
+      "order": 5,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I doubt myself when I am under stress",
+      "reverse_scored": true
+    },
+    {
+      "order": 6,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I am comfortable in expressing my opinions",
+      "reverse_scored": false
+    },
+    {
+      "order": 7,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I can make important decisions under stressful situations",
+      "reverse_scored": false
+    },
+    {
+      "order": 8,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I have many strong opinions on many topics",
+      "reverse_scored": false
+    },
+    {
+      "order": 9,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I find myself interrupting people, even if I do not mean to",
+      "reverse_scored": true
+    },
+    {
+      "order": 10,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I feel uncomfortable disagreeing with others",
+      "reverse_scored": true
+    },
+    {
+      "order": 11,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I am usually sure I will succeed at whatever I am doing",
+      "reverse_scored": false
+    },
+    {
+      "order": 12,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I am not good at expressing my opinions",
+      "reverse_scored": true
+    },
+    {
+      "order": 13,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "Speaking my mind makes me feel uncomfortable",
+      "reverse_scored": true
+    },
+    {
+      "order": 14,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I thrive under stress",
+      "reverse_scored": false
+    },
+    {
+      "order": 15,
+      "criterion_code": "ASSERTIVENESS",
+      "text": "I speak up for those around me",
+      "reverse_scored": false
+    }
+  ]
+}

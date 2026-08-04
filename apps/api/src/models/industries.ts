@@ -1,17 +1,16 @@
 import { z } from "zod";
 
 export const IndustrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   description: z.string().nullable().optional(),
   icon_url: z.string().nullable().optional(),
-  color: z.string().nullable().optional(),
   metadata: z.any().nullable().optional(),
+  score: z.number().int().min(0).nullable().optional(),
   deleted_at: z.date().nullable().optional().default(null),
   created_at: z.date(),
   updated_at: z.date(),
-  score: z.number().int().min(0).nullable().optional(),
 });
 
 // GET
@@ -20,7 +19,7 @@ export const GetIndustriesSchema = z.object({
 });
 
 export const GetIndustrySchema = z.object({
-  industryId: z.string().uuid(),
+  industryId: z.uuid(),
 });
 
 // POST
@@ -36,11 +35,11 @@ export const PutIndustrySchema = PostIndustrySchema.partial();
 
 // DELETE
 export const DeleteIndustrySchema = z.object({
-  industryId: z.string().uuid(),
+  industryId: z.uuid(),
 });
 
 export const DeleteIndustriesBulkSchema = z.object({
-  industryIds: z.array(z.string().uuid()),
+  industryIds: z.array(z.uuid()),
 });
 
 export type Industry = z.infer<typeof IndustrySchema>;

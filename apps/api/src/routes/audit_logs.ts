@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -15,7 +15,7 @@ import type { Insertable } from "kysely";
 import type { AuditLogs } from "../db/types";
 
 export const audit_logs = {
-  // 1. Récupérer tous les logs d'audit
+  // 1. Get all audit logs
   getAll: publicProcedure
     .route({
       method: "GET",
@@ -42,7 +42,7 @@ export const audit_logs = {
       return await query.orderBy("created_at", "desc").execute();
     }),
 
-  // 2. Récupérer tous les logs d'un utilisateur
+  // 2. Get all logs for a user
   getByUser: publicProcedure
     .route({
       method: "GET",
@@ -51,7 +51,7 @@ export const audit_logs = {
       path: "/users/{userId}/audit-logs",
       tags: ["AuditLog"],
     })
-    .input(z.object({ userId: z.string().uuid() }))
+    .input(z.object({ userId: z.uuid() }))
     .output(z.array(AuditLogSchema))
     .handler(async ({ input }) => {
       const user = await database
@@ -72,7 +72,7 @@ export const audit_logs = {
         .execute();
     }),
 
-  // 3. Récupérer un log d'audit par son ID
+  // 3. Get an audit log by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -97,7 +97,7 @@ export const audit_logs = {
       return log;
     }),
 
-  // 4. Créer un log d'audit
+  // 4. Create an audit log
   create: publicProcedure
     .route({
       method: "POST",

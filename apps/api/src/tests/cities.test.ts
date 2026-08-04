@@ -5,12 +5,6 @@ import { countries } from "../routes/countries";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Cities API Endpoints", () => {
   let testCountryId: string;
@@ -25,11 +19,8 @@ describe("Cities API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
     // Create a parent country for the cities
@@ -38,29 +29,12 @@ describe("Cities API Endpoints", () => {
       serial_number: "CPC-01",
       iso_code: "CP",
     });
-    testCountryId = country.id;
+    testCountryId = country.iso_code;
   });
 
   after(async () => {
-    // Clean up test cities and country
-    try {
-      const cityIds = [createdCityId1, createdCityId2].filter(Boolean);
-      if (cityIds.length > 0) {
-        await database
-          .deleteFrom("cities")
-          .where("id", "in", cityIds)
-          .execute();
-      }
-      if (testCountryId) {
-        await database
-          .deleteFrom("countries")
-          .where("id", "=", testCountryId)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -82,6 +56,7 @@ describe("Cities API Endpoints", () => {
           name: "New York",
           serial_number: "",
           country_id: testCountryId,
+          currency: "USD",
         }),
         (err: any) => err.name === "ZodError",
       );
@@ -92,6 +67,7 @@ describe("Cities API Endpoints", () => {
         name: "New York",
         serial_number: "NYC-01",
         country_id: testCountryId,
+        currency: "USD",
         is_capital: false,
         population: 8400000,
         average_rent: 3500,
@@ -110,6 +86,7 @@ describe("Cities API Endpoints", () => {
           name: "New York",
           serial_number: "NYC-02",
           country_id: testCountryId,
+          currency: "USD",
         }),
         (err: any) => err instanceof ORPCError && err.code === "CONFLICT",
       );
@@ -120,6 +97,7 @@ describe("Cities API Endpoints", () => {
         name: "Los Angeles",
         serial_number: "LAX-01",
         country_id: testCountryId,
+        currency: "USD",
         is_capital: false,
         population: 3900000,
       });
@@ -248,6 +226,7 @@ describe("Cities API Endpoints", () => {
         name: "Chicago",
         serial_number: "ORD-01",
         country_id: testCountryId,
+        currency: "USD",
       });
 
       const idsToDelete = [createdCityId1, extraCity.id];

@@ -43,7 +43,7 @@ export const skills = {
         query = query.where("difficulty", "=", difficulty);
       }
 
-      return await query.selectAll().orderBy("name", "asc").execute();
+      return (await query.selectAll().orderBy("name", "asc").execute()) as any;
     }),
 
   getById: publicProcedure
@@ -68,7 +68,7 @@ export const skills = {
         throw new ORPCError("NOT_FOUND", { message: "Skill not found" });
       }
 
-      return data;
+      return data as any;
     }),
 
   create: publicProcedure
@@ -114,7 +114,7 @@ export const skills = {
         });
       }
 
-      return skill;
+      return skill as any;
     }),
 
   update: publicProcedure
@@ -125,7 +125,7 @@ export const skills = {
       path: "/skills/{skillId}",
       tags: ["Skill"],
     })
-    .input(z.object({ skillId: z.string().uuid() }).merge(PutSkillSchema))
+    .input(z.object({ skillId: z.uuid() }).merge(PutSkillSchema))
     .output(SkillSchema)
     .handler(async ({ input }) => {
       const { skillId, metadata, ...rest } = input;
@@ -154,7 +154,7 @@ export const skills = {
         });
       }
 
-      return skill;
+      return skill as any;
     }),
 
   delete: publicProcedure

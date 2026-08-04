@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $pageTitle = 'Why Teams — Bildyx';
 $pageDescription = 'People do not join companies. They join teams.';
-$pageScript = 'js/why-teams.js';
+$pageScript = 'js/why-teams.ts';
 $bodyClass = 'why-teams-page';
 
 /*

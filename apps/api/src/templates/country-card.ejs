@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= countryName %> - Card</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+        
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; font-family: 'Work Sans', Arial, sans-serif; background-color: transparent; }
+        body {
+            width: 100%;
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .main-card {
+            width: 100%;
+            background: #ffffff;
+            border: 3px solid #3565ae;
+            border-radius: 35px;
+            padding: 22px 24px 14px 24px;
+            position: relative;
+        }
+
+        .main-card::after {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border-radius: 26px;
+            border: 3px solid #3565ae;
+            pointer-events: none;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 22px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .maygraph-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 85px;
+            height: 85px;
+            border: 3px solid #3565ae;
+            border-radius: 22px;
+            background: #ffffff;
+            padding: 6px;
+            flex-shrink: 0;
+        }
+        .maygraph-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+        .card-banner {
+            flex: 1;
+            max-width: 660px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+            border: 3px solid #3565ae;
+            border-radius: 40px;
+            background: #ffffff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .banner-flag {
+            width: 155px;
+            height: 100%;
+            overflow: hidden;
+            flex-shrink: 0;
+            clip-path: polygon(0 0, 100% 0, 75% 100%, 0 100%);
+            position: relative;
+        }
+        .banner-flag img { width: 100%; height: 100%; object-fit: cover; }
+
+        .banner-flag-separator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 155px;
+            height: 100%;
+            background: #3565ae;
+            z-index: 3;
+            clip-path: polygon(152px 0, 155px 0, 116.25px 100%, 113.25px 100%);
+            pointer-events: none;
+        }
+
+        .card-title {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 2.7rem;
+            color: #0b132b;
+            font-weight: 700;
+            margin: 0;
+            text-align: center;
+            flex: 1;
+            padding: 0 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .banner-photo {
+            width: 165px;
+            height: 100%;
+            overflow: hidden;
+            flex-shrink: 0;
+            clip-path: polygon(25% 0, 100% 0, 100% 100%, 0 100%);
+            position: relative;
+        }
+        .banner-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+        .banner-photo-separator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 165px;
+            height: 100%;
+            background: #3565ae;
+            z-index: 3;
+            clip-path: polygon(41.25px 0, 44.25px 0, 3px 100%, 0 100%);
+            pointer-events: none;
+        }
+
+        /* Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            position: relative;
+            z-index: 2;
+            align-items: stretch;
+        }
+
+        .grid-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-box:last-child {
+            flex-grow: 1;
+        }
+
+        @media (max-width: 1200px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            .header-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            .card-banner {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
+        /* Section Box */
+        .section-box {
+            border: 3px solid #3565ae;
+            border-radius: 22px;
+            background: #ffffff;
+            padding: 28px 14px 10px 14px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .box-badge {
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3565ae;
+            color: #ffffff;
+            border-bottom-left-radius: 14px;
+            border-bottom-right-radius: 14px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            padding: 4px 24px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            white-space: nowrap;
+        }
+
+        /* Row inside Box */
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .row-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .row-label {
+            width: 125px;
+            flex-shrink: 0;
+            color: #475569;
+            font-weight: 500;
+            font-size: 0.88rem;
+            line-height: 1.25;
+        }
+
+        .row-value {
+            flex: 1;
+            color: #034287;
+            font-weight: 500;
+            font-size: 0.88rem;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        /* Fact Pill */
+        .fact-pill {
+            background: #eef5fc;
+            border-radius: 16px;
+            padding: 14px 12px;
+            color: #034287;
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 500;
+            line-height: 1.35;
+        }
+
+        /* Sub topic */
+        .sub-topic {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-bottom: 4px;
+        }
+        .sub-topic-title {
+            color: #034287;
+            text-decoration: underline;
+            font-weight: 500;
+            font-size: 0.88rem;
+        }
+        .sub-topic-value {
+            color: #034287;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding-left: 2px;
+        }
+        .arrow {
+            color: #3565ae;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        /* Map silhouette */
+        .country-map-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2px 0;
+            margin: -4px 0;
+        }
+        .country-map-img {
+            height: 90px;
+            max-width: 130px;
+            object-fit: contain;
+            filter: invert(27%) sepia(85%) saturate(1250%) hue-rotate(200deg) brightness(85%) contrast(95%);
+        }
+
+        /* Quote */
+        .people-quote {
+            font-style: italic;
+            font-size: 0.82rem;
+            color: #475569;
+            text-align: center;
+            margin-top: 4px;
+            padding: 0 4px;
+            line-height: 1.3;
+        }
+
+        /* Footer */
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            position: relative;
+            z-index: 2;
+            font-family: 'Work Sans', sans-serif;
+        }
+        .serial-number {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #000000;
+        }
+        .copyright {
+            margin-left: auto;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #000000;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <div class="header-row">
+            <div class="maygraph-logo">
+                <img src="<%= getIcon('logos', 'Logo-MayGraph_Big1.png') %>" alt="MayGraph" />
+            </div>
+            <div class="card-banner">
+                <% if (flagUrl) { %>
+                <div class="banner-flag">
+                    <img src="<%= flagUrl %>" alt="<%= countryName %> Flag" />
+                </div>
+                <div class="banner-flag-separator"></div>
+                <% } %>
+                <div class="card-title"><%= countryName %></div>
+                <% if (photoUrl) { %>
+                <div class="banner-photo-separator"></div>
+                <div class="banner-photo">
+                    <img src="<%= photoUrl %>" alt="<%= countryName %> Landmark" />
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <!-- LEFT COLUMN -->
+            <div class="grid-column">
+                <!-- GENERAL BOX -->
+                <div class="section-box">
+                    <div class="box-badge">General</div>
+                    <% if (capital) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'capital.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Capital</div>
+                        <div class="row-value"><%= capital %></div>
+                    </div>
+                    <% } %>
+                    <% if (mainCities) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'main_city.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Main Cities</div>
+                        <div class="row-value"><%= mainCities %></div>
+                    </div>
+                    <% } %>
+                    <% if (population) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'population.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Population</div>
+                        <div class="row-value"><%= population %></div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- INTERESTING FACT BOX -->
+                <% if (interestingFact) { %>
+                <div class="section-box">
+                    <div class="box-badge">Interesting fact</div>
+                    <div class="fact-pill">
+                        <%= interestingFact %>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- WORK AND LIFE BOX -->
+                <div class="section-box">
+                    <div class="box-badge">Work and Life</div>
+                    <% if (qualityOfLife) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'life_quality.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Quality Of Life</div>
+                        <div class="row-value"><%= qualityOfLife %></div>
+                    </div>
+                    <% } %>
+                    <% if (temperatures) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'temperature.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Temperature</div>
+                        <div class="row-value"><%= temperatures %></div>
+                    </div>
+                    <% } %>
+                    <% if (climate) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'weather.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Climate</div>
+                        <div class="row-value"><%= climate %></div>
+                    </div>
+                    <% } %>
+                    <% if (crimeRate) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'crime_rate.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Crime Rate</div>
+                        <div class="row-value"><%= crimeRate %></div>
+                    </div>
+                    <% } %>
+                    <% if (incomeInequality) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'income_inequality.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Income Inequality</div>
+                        <div class="row-value"><%= incomeInequality %></div>
+                    </div>
+                    <% } %>
+                    <% if (workLifeBalance) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'work_life_balance.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Work Life Balance</div>
+                        <div class="row-value"><%= workLifeBalance %></div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- MIDDLE COLUMN -->
+            <div class="grid-column">
+                <!-- ECONOMY AND CAREER BOX -->
+                <div class="section-box">
+                    <div class="box-badge">Economy and career</div>
+                    <% if (currency) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'currency.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Currency</div>
+                        <div class="row-value"><%= currency %></div>
+                    </div>
+                    <% } %>
+                    <% if (mainIndustries) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'Industry.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Main Industries</div>
+                        <div class="row-value"><%= mainIndustries %></div>
+                    </div>
+                    <% } %>
+                    <% if (largestCompanies) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'company.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Largest Companies</div>
+                        <div class="row-value"><%= largestCompanies %></div>
+                    </div>
+                    <% } %>
+                    <% if (numberOfMultinationalHQs) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'hq.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">No of Multinational HQs</div>
+                        <div class="row-value"><%= numberOfMultinationalHQs %></div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- HOUSING & INCOME BOX -->
+                <div class="section-box">
+                    <div class="box-badge">Housing &amp; Income</div>
+                    <% if (medianSalary) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'salary_evolution.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Median Annual Salary</div>
+                        <div class="row-value"><%= medianSalary %></div>
+                    </div>
+                    <% } %>
+                    <% if (personalIncomeTax) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'tax.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Personal Income Tax</div>
+                        <div class="row-value"><%= personalIncomeTax %></div>
+                    </div>
+                    <% } %>
+                    <% if (costOfLiving) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'living_cost.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Cost of Living</div>
+                        <div class="row-value"><%= costOfLiving %></div>
+                    </div>
+                    <% } %>
+                    <% if (medianHomePrice) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'home_price.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Median Home Price</div>
+                        <div class="row-value"><%= medianHomePrice %></div>
+                    </div>
+                    <% } %>
+                    <% if (averageRent) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'rent.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Average Rent</div>
+                        <div class="row-value"><%= averageRent %></div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="grid-column">
+                <!-- SILHOUETTE MAP -->
+                <% if (mapUrl) { %>
+                <div class="country-map-center">
+                    <img src="<%= mapUrl %>" class="country-map-img" alt="<%= countryName %> Map" />
+                </div>
+                <% } %>
+
+                <!-- IMMIGRATION BOX -->
+                <div class="section-box">
+                    <div class="box-badge">Immigration</div>
+                    <% if (citizenshipProcess) { %>
+                    <div class="sub-topic">
+                        <div class="sub-topic-title">How easy it is to get citizenship?</div>
+                        <div class="sub-topic-value"><span class="arrow">&#10141;</span> <%= citizenshipProcess %></div>
+                    </div>
+                    <% } %>
+                    <% if (workPermit) { %>
+                    <div class="sub-topic">
+                        <div class="sub-topic-title">How easy it is to get work permit?</div>
+                        <div class="sub-topic-value"><span class="arrow">&#10141;</span> <%= workPermit %></div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- GLOBALIZATION BOX -->
+                <div class="section-box">
+                    <div class="box-badge">Globalization</div>
+                    <% if (globalCompetitivenessIndex) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'global_index.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Global Competitiveness Index</div>
+                        <div class="row-value"><%= globalCompetitivenessIndex %></div>
+                    </div>
+                    <% } %>
+                    <% if (levelOfGlobalization) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'globalization_level.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Level of Globalization</div>
+                        <div class="row-value"><%= levelOfGlobalization %></div>
+                    </div>
+                    <% } %>
+                    <% if (numberOfInternationalStudents) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'international_student.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">No. of International Students</div>
+                        <div class="row-value"><%= numberOfInternationalStudents %></div>
+                    </div>
+                    <% } %>
+                    <% if (numberOfForeignCompaniesThatHaveOffice) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'foreign_company.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">No. of Foreign Companies That Have Office</div>
+                        <div class="row-value"><%= numberOfForeignCompaniesThatHaveOffice %></div>
+                    </div>
+                    <% } %>
+                    <% if (numberOfTourists) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'tourist.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">No. of Tourists</div>
+                        <div class="row-value"><%= numberOfTourists %></div>
+                    </div>
+                    <% } %>
+                    <% if (numberOfAirports) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'airport.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">No. of Airports</div>
+                        <div class="row-value"><%= numberOfAirports %></div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="grid-column">
+                <!-- EDUCATION BOX -->
+                <div class="section-box">
+                    <div class="box-badge">Education</div>
+                    <% if (qualityOfPrimaryAndSecondaryEducation) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'open_book.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Quality of Primary and Secondary Education</div>
+                        <div class="row-value"><%= qualityOfPrimaryAndSecondaryEducation %></div>
+                    </div>
+                    <% } %>
+                    <% if (degreeHolders) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'mortarboard.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Degree Holders</div>
+                        <div class="row-value"><%= degreeHolders %></div>
+                    </div>
+                    <% } %>
+                    <% if (numberOfCollegesAndUniversities) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'university.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">No. of Colleges and Universities</div>
+                        <div class="row-value"><%= numberOfCollegesAndUniversities %></div>
+                    </div>
+                    <% } %>
+                    <% if (topUniversities) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'top_university.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Top Univ.</div>
+                        <div class="row-value"><%= topUniversities %></div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- PEOPLE BOX -->
+                <div class="section-box">
+                    <div class="box-badge">People</div>
+                    <% if (ethnicGroups) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'group.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Ethnic Groups</div>
+                        <div class="row-value"><%= ethnicGroups %></div>
+                    </div>
+                    <% } %>
+                    <% if (languages) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'language.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Languages</div>
+                        <div class="row-value"><%= languages %></div>
+                    </div>
+                    <% } %>
+                    <% if (religion) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'religion.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Religion</div>
+                        <div class="row-value"><%= religion %></div>
+                    </div>
+                    <% } %>
+                    <% if (culturalValues) { %>
+                    <div class="info-row">
+                        <img src="<%= getIcon('icons', 'values.png') %>" class="row-icon" alt="" />
+                        <div class="row-label">Cultural Values</div>
+                        <div class="row-value"><%= culturalValues %></div>
+                    </div>
+                    <% } %>
+                    <% if (peopleDescription) { %>
+                    <div class="people-quote">
+                        &ldquo;<%= peopleDescription %>&rdquo;
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-row">
+            <% if (serialNumber) { %>
+            <span class="serial-number">#<%= serialNumber %></span>
+            <% } %>
+            <span class="copyright">&copy;<%= year %></span>
+        </div>
+    </div>
+</body>
+</html>

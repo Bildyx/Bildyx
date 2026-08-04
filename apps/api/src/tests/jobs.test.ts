@@ -6,12 +6,6 @@ import { industries } from "../routes/industries";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Jobs API Endpoints", () => {
   let testCountryId: string;
@@ -27,11 +21,8 @@ describe("Jobs API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
     // Create a mock country
@@ -40,7 +31,7 @@ describe("Jobs API Endpoints", () => {
       serial_number: "JTC-01",
       iso_code: "JT",
     });
-    testCountryId = country.id;
+    testCountryId = country.iso_code;
 
     // Create a mock industry
     const industry = await callProcedure(industries.create, {
@@ -52,28 +43,8 @@ describe("Jobs API Endpoints", () => {
   });
 
   after(async () => {
-    // Clean up test jobs, industry, and country
-    try {
-      const jobIds = [createdJobId1, createdJobId2].filter(Boolean);
-      if (jobIds.length > 0) {
-        await database.deleteFrom("jobs").where("id", "in", jobIds).execute();
-      }
-      if (testIndustryId) {
-        await database
-          .deleteFrom("industries")
-          .where("id", "=", testIndustryId)
-          .execute();
-      }
-      if (testCountryId) {
-        await database
-          .deleteFrom("countries")
-          .where("id", "=", testCountryId)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 
@@ -105,11 +76,7 @@ describe("Jobs API Endpoints", () => {
         category: "PRIVATE_SECTOR",
         description: "Develop web applications",
         seniority_level: "SENIOR",
-        is_elected: false,
-        is_regulated: false,
-        start_year: 2026,
         industry_id: testIndustryId,
-        country_id: testCountryId,
         products: ["Vite", "React"],
         tools_and_tech: ["TypeScript", "Kysely"],
         tags: ["remote", "web"],
@@ -138,7 +105,6 @@ describe("Jobs API Endpoints", () => {
         title: "DevOps Engineer",
         serial_number: "JOB-03",
         industry_id: testIndustryId,
-        country_id: testCountryId,
         category: "PRIVATE_SECTOR",
         seniority_level: "MID",
       });
@@ -201,14 +167,6 @@ describe("Jobs API Endpoints", () => {
       assert.ok(results.length >= 2);
     });
 
-    test("should filter jobs by country_id", async () => {
-      const results = await callProcedure(jobs.getAll, {
-        country_id: testCountryId,
-      });
-
-      assert.ok(Array.isArray(results));
-      assert.ok(results.length >= 2);
-    });
   });
 
   describe("GET /jobs/{jobId} (GetById)", () => {
@@ -243,16 +201,13 @@ describe("Jobs API Endpoints", () => {
     });
 
     test("should successfully update job fields", async () => {
-      const currentYear = new Date().getFullYear();
       const result = await callProcedure(jobs.update, {
         jobId: createdJobId1,
         title: "Senior Fullstack Engineer",
-        start_year: currentYear,
       });
 
       assert.strictEqual(result.id, createdJobId1);
       assert.strictEqual(result.title, "Senior Fullstack Engineer");
-      assert.strictEqual(result.start_year, currentYear);
 
       // Verify in DB
       const dbJob = await database

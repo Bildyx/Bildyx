@@ -2,10 +2,10 @@ import { z } from "zod";
 import { zNullableUUID } from "./utils/preprocessors";
 
 export const UserEducationSchema = z.object({
-  id: z.string().uuid(),
-  user_profile_id: z.string().uuid(),
-  university_id: z.string().uuid().nullable().optional(),
-  degree_id: z.string().uuid().nullable().optional(),
+  id: z.uuid(),
+  user_profile_id: z.uuid(),
+  organization_id: zNullableUUID(),
+  degree_id: zNullableUUID(),
   start_year: z.number().int().nullable().optional(),
   end_year: z.number().int().nullable().optional(),
   graduated: z.boolean(),
@@ -13,17 +13,17 @@ export const UserEducationSchema = z.object({
 
 // GET
 export const GetUserEducationsSchema = z.object({
-  userProfileId: z.string().uuid(),
+  userProfileId: z.uuid(),
 });
 
 export const GetUserEducationSchema = z.object({
-  educationId: z.string().uuid(),
+  educationId: z.uuid(),
 });
 
 // POST
 export const PostUserEducationSchema = z.object({
-  user_profile_id: z.string().uuid(),
-  university_id: zNullableUUID(),
+  user_profile_id: z.uuid(),
+  organization_id: zNullableUUID(),
   degree_id: zNullableUUID(),
   start_year: z.number().int().nullable().optional(),
   end_year: z.number().int().nullable().optional(),
@@ -31,15 +31,17 @@ export const PostUserEducationSchema = z.object({
 });
 
 // PATCH
-export const PutUserEducationSchema = PostUserEducationSchema.omit({ user_profile_id: true }).partial();
+export const PutUserEducationSchema = PostUserEducationSchema.omit({
+  user_profile_id: true,
+}).partial();
 
 // DELETE
 export const DeleteUserEducationSchema = z.object({
-  educationId: z.string().uuid(),
+  educationId: z.uuid(),
 });
 
 export const DeleteUserEducationsBulkSchema = z.object({
-  educationIds: z.array(z.string().uuid()),
+  educationIds: z.array(z.uuid()),
 });
 
 export type UserEducation = z.infer<typeof UserEducationSchema>;

@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -16,12 +16,13 @@ import type { Insertable } from "kysely";
 import type { UserEducationFields } from "../db/types";
 
 export const user_education_fields = {
-  // 1. Récupérer tous les champs d'une formation
+  // 1. Get all fields for an education
   getByEducation: publicProcedure
     .route({
       method: "GET",
       summary: "List all fields for a user education",
-      description: "Get all study fields linked to a specific user education entry",
+      description:
+        "Get all study fields linked to a specific user education entry",
       path: "/educations/{userEducationId}/fields",
       tags: ["UserEducationField"],
     })
@@ -47,7 +48,7 @@ export const user_education_fields = {
         .execute();
     }),
 
-  // 2. Récupérer un champ par son ID
+  // 2. Get a field by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -74,7 +75,7 @@ export const user_education_fields = {
       return field;
     }),
 
-  // 3. Créer un nouveau champ de formation
+  // 3. Create a new education field
   create: publicProcedure
     .route({
       method: "POST",
@@ -129,7 +130,7 @@ export const user_education_fields = {
       return field;
     }),
 
-  // 4. Mettre à jour un champ de formation
+  // 4. Update an education field
   update: publicProcedure
     .route({
       method: "PATCH",
@@ -138,11 +139,7 @@ export const user_education_fields = {
       path: "/education-fields/{fieldId}",
       tags: ["UserEducationField"],
     })
-    .input(
-      z
-        .object({ fieldId: z.string().uuid() })
-        .merge(PutUserEducationFieldSchema),
-    )
+    .input(z.object({ fieldId: z.uuid() }).merge(PutUserEducationFieldSchema))
     .output(UserEducationFieldSchema)
     .handler(async ({ input }) => {
       const { fieldId, ...updates } = input;

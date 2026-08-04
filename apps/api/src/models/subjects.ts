@@ -3,7 +3,7 @@ import { SubjectCategoryEnum } from "./utils/enums";
 import { zNullableUUID, zStringArray } from "./utils/preprocessors";
 
 export const SubjectSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   type: z.string().nullable().optional(),
@@ -11,6 +11,7 @@ export const SubjectSchema = z.object({
   short_description: z.string().nullable().optional(),
   category: SubjectCategoryEnum.nullable().optional(),
   competitors: zStringArray(),
+  vendors: zStringArray(),
   fun_fact: z.string().nullable().optional(),
   organization_id: zNullableUUID(),
   website_url: z.string().nullable().optional(),
@@ -27,11 +28,11 @@ export const SubjectSchema = z.object({
 export const GetSubjectsSchema = z.object({
   name: z.string().optional(),
   category: SubjectCategoryEnum.optional(),
-  organization_id: z.string().uuid().optional(),
+  organization_id: zNullableUUID(),
 });
 
 export const GetSubjectSchema = z.object({
-  subjectId: z.string().uuid(),
+  subjectId: z.uuid(),
 });
 
 // POST
@@ -47,11 +48,11 @@ export const PutSubjectSchema = PostSubjectSchema.partial();
 
 // DELETE
 export const DeleteSubjectSchema = z.object({
-  subjectId: z.string().uuid(),
+  subjectId: z.uuid(),
 });
 
 export const DeleteSubjectsBulkSchema = z.object({
-  subjectIds: z.array(z.string().uuid()),
+  subjectIds: z.array(z.uuid()),
 });
 
 export type Subject = z.infer<typeof SubjectSchema>;

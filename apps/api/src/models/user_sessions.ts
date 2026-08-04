@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const UserSessionSchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(),
+  id: z.uuid(),
+  user_id: z.uuid(),
   token_hash: z.string(),
   expires_at: z.date(),
   revoked_at: z.date().nullable().optional(),
@@ -13,16 +13,16 @@ export const UserSessionSchema = z.object({
 
 // GET
 export const GetUserSessionsSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
 });
 
 export const GetUserSessionSchema = z.object({
-  sessionId: z.string().uuid(),
+  sessionId: z.uuid(),
 });
 
 // POST
 export const PostUserSessionSchema = z.object({
-  user_id: z.string().uuid(),
+  user_id: z.uuid(),
   token_hash: z.string().min(1),
   expires_at: z.date(),
   ip_address: z.string().nullable().optional(),
@@ -36,11 +36,11 @@ export const PutUserSessionSchema = z.object({
 
 // DELETE
 export const DeleteUserSessionSchema = z.object({
-  sessionId: z.string().uuid(),
+  sessionId: z.uuid(),
 });
 
 export const DeleteUserSessionsBulkSchema = z.object({
-  sessionIds: z.array(z.string().uuid()),
+  sessionIds: z.array(z.uuid()),
 });
 
 export type UserSession = z.infer<typeof UserSessionSchema>;

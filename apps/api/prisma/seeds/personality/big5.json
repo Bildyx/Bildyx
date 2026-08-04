@@ -1,0 +1,340 @@
+{
+  "code": "BIG5",
+  "name": "Big 5",
+  "description": "Most scientifically valid and reliable test.",
+  "is_active": true,
+  "criteria": [
+    {
+      "code": "E",
+      "name": "Extraversion",
+      "description": "Sociabilité, énergie tirée des interactions, aisance à occuper le devant de la scène.",
+      "order": 1
+    },
+    {
+      "code": "A",
+      "name": "Agreeableness",
+      "description": "Empathie, intérêt porté aux autres, coopération.",
+      "order": 2
+    },
+    {
+      "code": "C",
+      "name": "Conscientiousness",
+      "description": "Organisation, rigueur, fiabilité dans l'exécution.",
+      "order": 3
+    },
+    {
+      "code": "ES",
+      "name": "Emotional Stability",
+      "description": "Calme et résistance au stress. Un score élevé signifie stable (pôle inverse du névrosisme).",
+      "order": 4
+    },
+    {
+      "code": "O",
+      "name": "Openness",
+      "description": "Ouverture à l'expérience : imagination, curiosité intellectuelle, richesse conceptuelle.",
+      "order": 5
+    }
+  ],
+  "questions": [
+    {
+      "order": 1,
+      "criterion_code": "E",
+      "text": "I am the life of the party",
+      "reverse_scored": false
+    },
+    {
+      "order": 2,
+      "criterion_code": "A",
+      "text": "I feel little concern for others",
+      "reverse_scored": true
+    },
+    {
+      "order": 3,
+      "criterion_code": "C",
+      "text": "I am always prepared",
+      "reverse_scored": false
+    },
+    {
+      "order": 4,
+      "criterion_code": "ES",
+      "text": "I get stressed out easily",
+      "reverse_scored": true
+    },
+    {
+      "order": 5,
+      "criterion_code": "O",
+      "text": "I have a rich vocabulary",
+      "reverse_scored": false
+    },
+    {
+      "order": 6,
+      "criterion_code": "E",
+      "text": "I don't talk a lot",
+      "reverse_scored": true
+    },
+    {
+      "order": 7,
+      "criterion_code": "A",
+      "text": "I am interested in people",
+      "reverse_scored": false
+    },
+    {
+      "order": 8,
+      "criterion_code": "C",
+      "text": "I leave my belongings around",
+      "reverse_scored": true
+    },
+    {
+      "order": 9,
+      "criterion_code": "ES",
+      "text": "I am relaxed most of the time",
+      "reverse_scored": false
+    },
+    {
+      "order": 10,
+      "criterion_code": "O",
+      "text": "I have difficulty understanding abstract ideas",
+      "reverse_scored": true
+    },
+    {
+      "order": 11,
+      "criterion_code": "E",
+      "text": "I feel comfortable around people",
+      "reverse_scored": false
+    },
+    {
+      "order": 12,
+      "criterion_code": "A",
+      "text": "I insult people",
+      "reverse_scored": true
+    },
+    {
+      "order": 13,
+      "criterion_code": "C",
+      "text": "I pay attention to details",
+      "reverse_scored": false
+    },
+    {
+      "order": 14,
+      "criterion_code": "ES",
+      "text": "I worry about things",
+      "reverse_scored": true
+    },
+    {
+      "order": 15,
+      "criterion_code": "O",
+      "text": "I have a vivid imagination",
+      "reverse_scored": false
+    },
+    {
+      "order": 16,
+      "criterion_code": "E",
+      "text": "I keep in the background",
+      "reverse_scored": true
+    },
+    {
+      "order": 17,
+      "criterion_code": "A",
+      "text": "I sympathize with others' feelings",
+      "reverse_scored": false
+    },
+    {
+      "order": 18,
+      "criterion_code": "C",
+      "text": "I make a mess of things",
+      "reverse_scored": true
+    },
+    {
+      "order": 19,
+      "criterion_code": "ES",
+      "text": "I seldom feel blue",
+      "reverse_scored": false
+    },
+    {
+      "order": 20,
+      "criterion_code": "O",
+      "text": "I am not interested in abstract ideas",
+      "reverse_scored": true
+    },
+    {
+      "order": 21,
+      "criterion_code": "E",
+      "text": "I start conversations",
+      "reverse_scored": false
+    },
+    {
+      "order": 22,
+      "criterion_code": "A",
+      "text": "I am not interested in other people's problems",
+      "reverse_scored": true
+    },
+    {
+      "order": 23,
+      "criterion_code": "C",
+      "text": "I get chores done right away",
+      "reverse_scored": false
+    },
+    {
+      "order": 24,
+      "criterion_code": "ES",
+      "text": "I am easily disturbed",
+      "reverse_scored": true
+    },
+    {
+      "order": 25,
+      "criterion_code": "O",
+      "text": "I have excellent ideas",
+      "reverse_scored": false
+    },
+    {
+      "order": 26,
+      "criterion_code": "E",
+      "text": "I have little to say",
+      "reverse_scored": true
+    },
+    {
+      "order": 27,
+      "criterion_code": "A",
+      "text": "I have a soft heart",
+      "reverse_scored": false
+    },
+    {
+      "order": 28,
+      "criterion_code": "C",
+      "text": "I often forget to put things back in their proper place",
+      "reverse_scored": true
+    },
+    {
+      "order": 29,
+      "criterion_code": "ES",
+      "text": "I get upset easily",
+      "reverse_scored": true
+    },
+    {
+      "order": 30,
+      "criterion_code": "O",
+      "text": "I do not have a good imagination",
+      "reverse_scored": true
+    },
+    {
+      "order": 31,
+      "criterion_code": "E",
+      "text": "I talk to a lot of different people at parties",
+      "reverse_scored": false
+    },
+    {
+      "order": 32,
+      "criterion_code": "A",
+      "text": "I am not really interested in others",
+      "reverse_scored": true
+    },
+    {
+      "order": 33,
+      "criterion_code": "C",
+      "text": "I like order",
+      "reverse_scored": false
+    },
+    {
+      "order": 34,
+      "criterion_code": "ES",
+      "text": "I change my mood a lot",
+      "reverse_scored": true
+    },
+    {
+      "order": 35,
+      "criterion_code": "O",
+      "text": "I am quick to understand things",
+      "reverse_scored": false
+    },
+    {
+      "order": 36,
+      "criterion_code": "E",
+      "text": "I don't like to draw attention to myself",
+      "reverse_scored": true
+    },
+    {
+      "order": 37,
+      "criterion_code": "A",
+      "text": "I take time out for others",
+      "reverse_scored": false
+    },
+    {
+      "order": 38,
+      "criterion_code": "C",
+      "text": "I shirk my duties",
+      "reverse_scored": true
+    },
+    {
+      "order": 39,
+      "criterion_code": "ES",
+      "text": "I have frequent mood swings",
+      "reverse_scored": true
+    },
+    {
+      "order": 40,
+      "criterion_code": "O",
+      "text": "I use difficult words",
+      "reverse_scored": false
+    },
+    {
+      "order": 41,
+      "criterion_code": "E",
+      "text": "I don't mind being the center of attention",
+      "reverse_scored": false
+    },
+    {
+      "order": 42,
+      "criterion_code": "A",
+      "text": "I feel others' emotions",
+      "reverse_scored": false
+    },
+    {
+      "order": 43,
+      "criterion_code": "C",
+      "text": "I follow a schedule",
+      "reverse_scored": false
+    },
+    {
+      "order": 44,
+      "criterion_code": "ES",
+      "text": "I get irritated easily",
+      "reverse_scored": true
+    },
+    {
+      "order": 45,
+      "criterion_code": "O",
+      "text": "I spend time reflecting on things",
+      "reverse_scored": false
+    },
+    {
+      "order": 46,
+      "criterion_code": "E",
+      "text": "I am quiet around strangers",
+      "reverse_scored": true
+    },
+    {
+      "order": 47,
+      "criterion_code": "A",
+      "text": "I make people feel at ease",
+      "reverse_scored": false
+    },
+    {
+      "order": 48,
+      "criterion_code": "C",
+      "text": "I am exacting in my work",
+      "reverse_scored": false
+    },
+    {
+      "order": 49,
+      "criterion_code": "ES",
+      "text": "I often feel blue",
+      "reverse_scored": true
+    },
+    {
+      "order": 50,
+      "criterion_code": "O",
+      "text": "I am full of ideas",
+      "reverse_scored": false
+    }
+  ]
+}

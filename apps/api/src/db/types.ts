@@ -35,7 +35,7 @@ export type Certificationcategory = "LANGUAGE" | "OTHER" | "PROFESSIONAL" | "PRO
 
 export type Contracttype = "APPRENTICESHIP" | "FREELANCE" | "FULL_TIME" | "INTERNSHIP" | "OTHER" | "PART_TIME";
 
-export type Costofliving = "HIGH" | "LOW" | "MEDIUM";
+export type Costofliving = "HIGH" | "LOW" | "LOW_MEDIUM" | "MEDIUM" | "MEDIUM_HIGH" | "VERY_HIGH";
 
 export type Currency = "AED" | "AFN" | "ALL" | "AMD" | "ANG" | "AOA" | "ARS" | "AUD" | "AWG" | "AZN" | "BAM" | "BBD" | "BDT" | "BGN" | "BHD" | "BIF" | "BMD" | "BND" | "BOB" | "BRL" | "BSD" | "BTN" | "BWP" | "BYN" | "BZD" | "CAD" | "CDF" | "CHF" | "CLP" | "CNY" | "COP" | "CRC" | "CUP" | "CVE" | "CZK" | "DJF" | "DKK" | "DOP" | "DZD" | "EGP" | "ERN" | "ETB" | "EUR" | "FJD" | "FKP" | "GBP" | "GEL" | "GHS" | "GIP" | "GMD" | "GNF" | "GTQ" | "GYD" | "HKD" | "HNL" | "HTG" | "HUF" | "IDR" | "ILS" | "INR" | "IQD" | "IRR" | "ISK" | "JMD" | "JOD" | "JPY" | "KES" | "KGS" | "KHR" | "KMF" | "KPW" | "KRW" | "KWD" | "KYD" | "KZT" | "LAK" | "LBP" | "LKR" | "LRD" | "LSL" | "LYD" | "MAD" | "MDL" | "MGA" | "MKD" | "MMK" | "MNT" | "MOP" | "MRU" | "MUR" | "MVR" | "MWK" | "MXN" | "MYR" | "MZN" | "NAD" | "NGN" | "NIO" | "NOK" | "NPR" | "NZD" | "OMR" | "PAB" | "PEN" | "PGK" | "PHP" | "PKR" | "PLN" | "PYG" | "QAR" | "RON" | "RSD" | "RUB" | "RWF" | "SAR" | "SBD" | "SCR" | "SDG" | "SEK" | "SGD" | "SHP" | "SLE" | "SOS" | "SRD" | "SSP" | "STN" | "SYP" | "SZL" | "THB" | "TJS" | "TMT" | "TND" | "TOP" | "TRY" | "TTD" | "TWD" | "TZS" | "UAH" | "UGX" | "USD" | "UYU" | "UZS" | "VES" | "VND" | "VUV" | "WST" | "XAF" | "XCD" | "XOF" | "XPF" | "YER" | "ZAR" | "ZMW" | "ZWL";
 
@@ -47,7 +47,7 @@ export type Educationfieldtype = "MAJOR" | "MINOR";
 
 export type Educationlevel = "BACHELOR" | "HIGH_SCHOOL" | "MASTER" | "NONE" | "OTHER" | "PHD";
 
-export type Employeecountrange = "RANGE_1_10" | "RANGE_1001_5000" | "RANGE_11_50" | "RANGE_201_1000" | "RANGE_5000_PLUS" | "RANGE_51_200";
+export type Employeecountrange = "CLASSIFIED" | "RANGE_1_10" | "RANGE_1001_5000" | "RANGE_11_50" | "RANGE_201_1000" | "RANGE_5000_PLUS" | "RANGE_51_200";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -73,13 +73,15 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
-export type Language = "AFRIKAANS" | "ALBANIAN" | "AMHARIC" | "ARABIC" | "ARMENIAN" | "AZERBAIJANI" | "BASQUE" | "BELARUSIAN" | "BENGALI" | "BOSNIAN" | "BULGARIAN" | "BURMESE" | "CATALAN" | "CEBUANO" | "CHINESE_CANTONESE" | "CHINESE_MANDARIN" | "CROATIAN" | "CZECH" | "DANISH" | "DUTCH" | "ENGLISH" | "ESPERANTO" | "ESTONIAN" | "FILIPINO" | "FINNISH" | "FRENCH" | "GALICIAN" | "GEORGIAN" | "GERMAN" | "GREEK" | "GUJARATI" | "HAITIAN_CREOLE" | "HAUSA" | "HEBREW" | "HINDI" | "HUNGARIAN" | "ICELANDIC" | "IGBO" | "INDONESIAN" | "IRISH" | "ITALIAN" | "JAPANESE" | "JAVANESE" | "KANNADA" | "KAZAKH" | "KHMER" | "KOREAN" | "KURDISH" | "KYRGYZ" | "LAO" | "LATIN" | "LATVIAN" | "LITHUANIAN" | "LUXEMBOURGISH" | "MACEDONIAN" | "MALAGASY" | "MALAY" | "MALAYALAM" | "MALTESE" | "MAORI" | "MARATHI" | "MONGOLIAN" | "NEPALI" | "NORWEGIAN" | "PASHTO" | "PERSIAN" | "POLISH" | "PORTUGUESE" | "PUNJABI" | "ROMANIAN" | "RUSSIAN" | "SAMOAN" | "SERBIAN" | "SHONA" | "SINDHI" | "SINHALA" | "SLOVAK" | "SLOVENIAN" | "SOMALI" | "SPANISH" | "SUNDANESE" | "SWAHILI" | "SWEDISH" | "TAJIK" | "TAMIL" | "TATAR" | "TELUGU" | "THAI" | "TIBETAN" | "TURKISH" | "TURKMEN" | "UKRAINIAN" | "URDU" | "UZBEK" | "VIETNAMESE" | "WELSH" | "WOLOF" | "XHOSA" | "YIDDISH" | "YORUBA" | "ZULU";
+export type Language = "AFRIKAANS" | "ALBANIAN" | "AMBONESE_MALAY" | "AMHARIC" | "ARABIC" | "ARMENIAN" | "AYMARA" | "AZERBAIJANI" | "BAJAN_CREOLE" | "BASQUE" | "BELARUSIAN" | "BENGALI" | "BERBER" | "BOSNIAN" | "BULGARIAN" | "BURMESE" | "CATALAN" | "CEBUANO" | "CHAMORRO" | "CHINESE_CANTONESE" | "CHINESE_MANDARIN" | "CORSICAN" | "CROATIAN" | "CZECH" | "DANISH" | "DHIVEHI" | "DUTCH" | "ENGLISH" | "ESPERANTO" | "ESTONIAN" | "FILIPINO" | "FINNISH" | "FRENCH" | "FRISIAN" | "GALICIAN" | "GEORGIAN" | "GERMAN" | "GREEK" | "GUJARATI" | "GUYANESE_CREOLE" | "HAITIAN_CREOLE" | "HAUSA" | "HEBREW" | "HINDI" | "HMONG" | "HUNGARIAN" | "ICELANDIC" | "IGBO" | "INDONESIAN" | "IRISH" | "ITALIAN" | "JAPANESE" | "JAVANESE" | "KANNADA" | "KAPAMPANGAN" | "KAZAKH" | "KHMER" | "KIMBUNDU" | "KOREAN" | "KURDISH" | "KYRGYZ" | "LAO" | "LATIN" | "LATVIAN" | "LITHUANIAN" | "LUXEMBOURGISH" | "MACEDONIAN" | "MALAGASY" | "MALAY" | "MALAYALAM" | "MALTESE" | "MAORI" | "MARATHI" | "MONGOLIAN" | "MONTENEGRIN" | "NAVAJO" | "NEPALI" | "NORWEGIAN" | "PASHTO" | "PERSIAN" | "POLISH" | "PORTUGUESE" | "PUNJABI" | "QUECHUA" | "ROMANI" | "ROMANIAN" | "ROMANSH" | "RUSSIAN" | "SAMOAN" | "SCOTS" | "SCOTTISH_GAELIC" | "SERBIAN" | "SEYCHELLOIS_CREOLE" | "SHONA" | "SHUAR" | "SINDHI" | "SINHALA" | "SLOVAK" | "SLOVENIAN" | "SOMALI" | "SPANISH" | "SUNDANESE" | "SWAHILI" | "SWEDISH" | "TAGALOG" | "TAJIK" | "TAMIL" | "TATAR" | "TELUGU" | "THAI" | "TIBETAN" | "TURKISH" | "TURKMEN" | "UKRAINIAN" | "UMBUNDU" | "URDU" | "UZBEK" | "VALENCIAN" | "VIETNAMESE" | "WELSH" | "WOLOF" | "XHOSA" | "YIDDISH" | "YORUBA" | "ZULU";
+
+export type Languageproficiency = "BASIC" | "CONVERSATIONAL" | "FLUENT" | "NATIVE" | "PROFESSIONAL";
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type Organizationsubtype = "ARMY" | "CLUB" | "COMPANY" | "GOVERNMENT" | "INTERNATIONAL_ORGANIZATION" | "NGO" | "NON_PROFIT" | "OTHER" | "RESEARCH_INSTITUTE" | "SOCIETY" | "UNIVERSITY";
+export type Organizationsubtype = "ARMY" | "ASSOCIATION" | "CENTRAL_BANK" | "CHAMBER_OF_COMMERCE" | "CITY_GOVERNMENT" | "CLUB" | "COMPANY" | "COURT" | "EMBASSY" | "FOUNDATION" | "GOVERNMENT" | "HOSPITAL" | "INTERNATIONAL_ORGANIZATION" | "LIBRARY" | "MUSEUM" | "NATIONAL_AUDIT_OFFICE" | "NATIONAL_PARK" | "NGO" | "NON_PROFIT" | "OMBUDSMAN" | "OTHER" | "PRIMARY_SCHOOLS" | "PUBLIC_COMPANY" | "PUBLIC_PARKS" | "RESEARCH_INSTITUTE" | "SECONDARY_SCHOOLS" | "SOCIETY" | "SOE" | "STATE_GOVERNMENT" | "THINK_TANK" | "UNIVERSITY";
 
-export type Qualityoflife = "HIGH" | "LOW" | "MEDIUM";
+export type Qualityoflife = "HIGH" | "LOW" | "LOW_MEDIUM" | "MEDIUM" | "MEDIUM_HIGH" | "VERY_HIGH";
 
 export type Remotepolicy = "FULL_REMOTE" | "HYBRID" | "ON_SITE";
 
@@ -93,8 +95,6 @@ export type Subjectcategory = "API" | "HARDWARE" | "OTHER" | "PHYSICAL_PRODUCT" 
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export type Universitytype = "ACADEMY" | "GRANDE_ECOLE" | "INSTITUTE" | "ONLINE" | "OTHER" | "UNIVERSITY";
-
 export type Userrole = "ADMIN" | "CANDIDATE" | "ORGANIZATION";
 
 export type Userstatus = "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
@@ -104,7 +104,7 @@ export interface _CityMainIndustries {
   B: string;
 }
 
-export interface _CountryLargestOrganizations {
+export interface _OrganizationCountries {
   A: string;
   B: string;
 }
@@ -655,6 +655,15 @@ export interface ExtensionsPgStatStatementsInfo {
   stats_reset: Timestamp | null;
 }
 
+export interface ImportRowHashes {
+  id: string;
+  last_imported_at: Timestamp;
+  model_name: string;
+  natural_key: string;
+  row_hash: string;
+  source_file: string | null;
+}
+
 export interface Industries {
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
@@ -719,63 +728,96 @@ export interface Jobs {
   updated_at: Timestamp;
 }
 
-export interface MilitaryCapabilities {
-  id: string;
-  number_of_active_navy_personnel: number | null;
-  number_of_aircrafts: number | null;
-  number_of_communication_satellites: number | null;
-  number_of_destroyers: number | null;
-  number_of_drones: number | null;
-  number_of_fighter_jets: number | null;
-  number_of_helicopters: number | null;
-  number_of_maritime_patrol_aircraft: number | null;
-  number_of_missile_warning_satellites: number | null;
-  number_of_naval_shipyards: number | null;
-  number_of_navigation_satellites: number | null;
-  number_of_operational_spaceplanes: number | null;
-  number_of_satellite_jamming_systems: number | null;
-  number_of_space_launch_sites: number | null;
-  number_of_space_operations_squadrons: number | null;
-  number_of_space_personnel: number | null;
-  number_of_spy_satellites: number | null;
-  number_of_stealth_fleet: number | null;
-  number_of_submarines_diesel: number | null;
-  number_of_submarines_nuclear: number | null;
-  number_of_surveillance_radars: number | null;
-  number_of_surveillance_telescopes: number | null;
-  number_of_tanker_planes: number | null;
-  number_of_transport_planes: number | null;
-  organization_id: string;
-  updated_at: Timestamp;
-}
-
 export interface Organizations {
-  activities: string[] | null;
+  authority: string | null;
   budget: string | null;
   city_id: string | null;
+  collections: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  equipments: string | null;
+  description: string | null;
+  facilities: string[] | null;
   founded: string | null;
-  founder: string | null;
+  founders: string[] | null;
   id: string;
-  known_for: string[] | null;
-  legal_status: string | null;
+  jurisdiction: string | null;
+  known_for: string | null;
+  members: number | null;
   metadata: Json | null;
   mission: string | null;
   name: string;
   numberOfEmployees: Employeecountrange | null;
-  numberOfSubsidiaries: number | null;
+  offices: string | null;
   ownership: string | null;
   parent_organization_id: string | null;
-  partnerships: string[] | null;
+  partners: string[] | null;
+  personnel: number | null;
+  postgraduates: number | null;
   products: string[] | null;
+  programs_activities: string[] | null;
   project: string | null;
   research_areas: string[] | null;
   score: number | null;
+  serial_number: string;
   services: string[] | null;
   slug: string;
-  type: Organizationsubtype | null;
+  student_count: number | null;
+  subsidiaries: string | null;
+  subtype: Organizationsubtype | null;
+  type1: string | null;
+  type2: string | null;
+  undergraduates: number | null;
+  updated_at: Timestamp;
+}
+
+export interface PersonalityAnswers {
+  id: string;
+  question_id: string;
+  raw_score: number;
+  result_id: string;
+}
+
+export interface PersonalityCriteria {
+  code: string;
+  description: string | null;
+  id: string;
+  name: string;
+  order: number;
+  test_id: string;
+}
+
+export interface PersonalityCriterionScores {
+  criterion_id: string;
+  id: string;
+  result_id: string;
+  score: number;
+}
+
+export interface PersonalityQuestions {
+  criterion_id: string;
+  id: string;
+  order: number;
+  reverse_scored: Generated<boolean>;
+  test_id: string;
+  text: string;
+}
+
+export interface PersonalityTestResults {
+  completed_at: Timestamp;
+  created_at: Generated<Timestamp>;
+  id: string;
+  test_id: string;
+  updated_at: Timestamp;
+  user_profile_id: string;
+}
+
+export interface PersonalityTests {
+  code: string;
+  created_at: Generated<Timestamp>;
+  description: string | null;
+  id: string;
+  is_active: Generated<boolean>;
+  name: string;
   updated_at: Timestamp;
 }
 
@@ -963,30 +1005,6 @@ export interface Subjects {
   website_url: string | null;
 }
 
-export interface Universities {
-  city_id: string | null;
-  country_id: string | null;
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
-  description: string | null;
-  established: string | null;
-  id: string;
-  local_name: string | null;
-  logo_url: string | null;
-  metadata: Json | null;
-  name: string;
-  notes: string | null;
-  postgraduates: number | null;
-  score: number | null;
-  score_university: number | null;
-  serial_number: string;
-  student_count: number | null;
-  type: Universitytype | null;
-  undergraduates: number | null;
-  updated_at: Timestamp;
-  website_url: string | null;
-}
-
 export interface UserCertifications {
   certification_id: string;
   expires_at: Timestamp | null;
@@ -1007,8 +1025,29 @@ export interface UserEducations {
   end_year: number | null;
   graduated: Generated<boolean>;
   id: string;
+  organization_id: string | null;
   start_year: number | null;
-  university_id: string | null;
+  user_profile_id: string;
+}
+
+export interface UserExperiences {
+  created_at: Generated<Timestamp>;
+  current: Generated<boolean>;
+  description: string | null;
+  end_year: number | null;
+  id: string;
+  job_id: string | null;
+  organization_id: string | null;
+  start_year: number | null;
+  title: string | null;
+  updated_at: Timestamp;
+  user_profile_id: string;
+}
+
+export interface UserLanguages {
+  id: string;
+  language: Language;
+  proficiency: Languageproficiency | null;
   user_profile_id: string;
 }
 
@@ -1020,6 +1059,7 @@ export interface UserProfiles {
   current_job_id: string | null;
   current_job_started_at: Timestamp | null;
   current_organization_id: string | null;
+  deleted_at: Timestamp | null;
   github_url: string | null;
   id: string;
   is_public: Generated<boolean>;
@@ -1072,6 +1112,20 @@ export interface UserSessions {
   user_id: string;
 }
 
+export interface UserSkills {
+  id: string;
+  level: Difficultylevel | null;
+  skill_id: string;
+  user_profile_id: string;
+}
+
+export interface UserTargetLists {
+  created_at: Generated<Timestamp>;
+  id: string;
+  organization_id: string;
+  user_profile_id: string;
+}
+
 export interface VaultDecryptedSecrets {
   created_at: Timestamp | null;
   decrypted_secret: string | null;
@@ -1097,7 +1151,7 @@ export interface VaultSecrets {
 
 export interface DB {
   _CityMainIndustries: _CityMainIndustries;
-  _CountryLargestOrganizations: _CountryLargestOrganizations;
+  _OrganizationCountries: _OrganizationCountries;
   _OrganizationIndustries: _OrganizationIndustries;
   _prisma_migrations: _PrismaMigrations;
   _ProductIndustries: _ProductIndustries;
@@ -1133,12 +1187,18 @@ export interface DB {
   degrees: Degrees;
   "extensions.pg_stat_statements": ExtensionsPgStatStatements;
   "extensions.pg_stat_statements_info": ExtensionsPgStatStatementsInfo;
+  import_row_hashes: ImportRowHashes;
   industries: Industries;
   job_ad_skills: JobAdSkills;
   job_ads: JobAds;
   jobs: Jobs;
-  military_capabilities: MilitaryCapabilities;
   organizations: Organizations;
+  personality_answers: PersonalityAnswers;
+  personality_criteria: PersonalityCriteria;
+  personality_criterion_scores: PersonalityCriterionScores;
+  personality_questions: PersonalityQuestions;
+  personality_test_results: PersonalityTestResults;
+  personality_tests: PersonalityTests;
   "realtime.messages": RealtimeMessages;
   "realtime.schema_migrations": RealtimeSchemaMigrations;
   "realtime.subscription": RealtimeSubscription;
@@ -1153,12 +1213,15 @@ export interface DB {
   "storage.vector_indexes": StorageVectorIndexes;
   StudyFields: StudyFields;
   subjects: Subjects;
-  universities: Universities;
   user_certifications: UserCertifications;
   user_education_fields: UserEducationFields;
   user_educations: UserEducations;
+  user_experiences: UserExperiences;
+  user_languages: UserLanguages;
   user_profiles: UserProfiles;
   user_sessions: UserSessions;
+  user_skills: UserSkills;
+  user_target_lists: UserTargetLists;
   users: Users;
   "vault.decrypted_secrets": VaultDecryptedSecrets;
   "vault.secrets": VaultSecrets;

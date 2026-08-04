@@ -134,7 +134,7 @@ export const jobs = {
       path: "/jobs/{jobId}",
       tags: ["Job"],
     })
-    .input(z.object({ jobId: z.string().uuid() }).merge(PutJobSchema))
+    .input(z.object({ jobId: z.uuid() }).merge(PutJobSchema))
     .output(JobSchema)
     .handler(async ({ input }) => {
       const { jobId, metadata, ...rest } = input;

@@ -38,10 +38,48 @@ export const zNullableString = () =>
   );
 
 /**
+ * Preprocessor for an optional nullable string that coerces numbers/booleans and treats empty string as null.
+ */
+export const zNullableStringCoercive = () =>
+  z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return null;
+    if (typeof val === "number" || typeof val === "boolean") {
+      return String(val);
+    }
+    return val;
+  }, z.string().nullable().optional());
+
+/**
  * Preprocessor for optional nullable UUID.
  */
 export const zNullableUUID = () =>
   z.preprocess(
     (val) => (val === "" ? null : val),
-    z.string().uuid().nullable().optional(),
+    z.uuid().nullable().optional(),
   );
+
+/**
+ * Preprocessor for optional nullable integer number that parses strings.
+ */
+export const zNullableInt = () =>
+  z.preprocess((val) => {
+    if (typeof val === "string") {
+      if (val === "") return null;
+      const num = parseInt(val, 10);
+      return isNaN(num) ? val : num;
+    }
+    return val;
+  }, z.number().int().min(0).nullable().optional());
+
+/**
+ * Preprocessor for optional nullable float/decimal number that parses strings.
+ */
+export const zNullableFloat = () =>
+  z.preprocess((val) => {
+    if (typeof val === "string") {
+      if (val === "") return null;
+      const num = parseFloat(val);
+      return isNaN(num) ? val : num;
+    }
+    return val;
+  }, z.number().min(0).nullable().optional());

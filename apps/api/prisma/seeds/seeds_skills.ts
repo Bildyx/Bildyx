@@ -12,7 +12,7 @@ type SkillCsv = {
   name: string;
   serial_number: string;
   type?: string;
-  categories?: string;
+  category?: string;
   description?: string;
   icon_url?: string;
   industry?: string;
@@ -40,9 +40,9 @@ export async function seedSkills(prisma: PrismaClient) {
 
     type: r.type || null,
 
-    // "categories" est une colonne CSV multi-valeurs (comma-separated), mais
-    // Skill.category est un simple champ texte -> stockee telle quelle.
-    category: r.categories || null,
+    // "category" may hold several comma-separated values, but Skill.category
+    // is a plain text field -> stored as-is.
+    category: r.category || null,
 
     description: r.description || null,
     iconUrl: r.icon_url || null,

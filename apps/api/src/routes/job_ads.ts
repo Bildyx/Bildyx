@@ -138,7 +138,7 @@ export const job_ads = {
       path: "/job-ads/{jobAdId}",
       tags: ["JobAd"],
     })
-    .input(z.object({ jobAdId: z.string().uuid() }).merge(PutJobAdSchema))
+    .input(z.object({ jobAdId: z.uuid() }).merge(PutJobAdSchema))
     .output(JobAdSchema)
     .handler(async ({ input }) => {
       const { jobAdId, metadata, ...rest } = input;

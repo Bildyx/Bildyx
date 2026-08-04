@@ -5,13 +5,13 @@ CREATE SCHEMA IF NOT EXISTS "public";
 CREATE TYPE "Currency" AS ENUM ('AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHF', 'CLP', 'CNY', 'COP', 'CRC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'UYU', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XCD', 'XOF', 'XPF', 'YER', 'ZAR', 'ZMW', 'ZWL');
 
 -- CreateEnum
-CREATE TYPE "CostOfLiving" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+CREATE TYPE "CostOfLiving" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'LOW_MEDIUM', 'MEDIUM_HIGH', 'VERY_HIGH');
 
 -- CreateEnum
-CREATE TYPE "QualityOfLife" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+CREATE TYPE "QualityOfLife" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'LOW_MEDIUM', 'MEDIUM_HIGH', 'VERY_HIGH');
 
 -- CreateEnum
-CREATE TYPE "Language" AS ENUM ('AFRIKAANS', 'ALBANIAN', 'AMHARIC', 'ARABIC', 'ARMENIAN', 'AZERBAIJANI', 'BASQUE', 'BELARUSIAN', 'BENGALI', 'BOSNIAN', 'BULGARIAN', 'BURMESE', 'CATALAN', 'CEBUANO', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'CROATIAN', 'CZECH', 'DANISH', 'DUTCH', 'ENGLISH', 'ESPERANTO', 'ESTONIAN', 'FILIPINO', 'FINNISH', 'FRENCH', 'GALICIAN', 'GEORGIAN', 'GERMAN', 'GREEK', 'GUJARATI', 'HAITIAN_CREOLE', 'HAUSA', 'HEBREW', 'HINDI', 'HUNGARIAN', 'ICELANDIC', 'IGBO', 'INDONESIAN', 'IRISH', 'ITALIAN', 'JAPANESE', 'JAVANESE', 'KANNADA', 'KAZAKH', 'KHMER', 'KOREAN', 'KURDISH', 'KYRGYZ', 'LAO', 'LATIN', 'LATVIAN', 'LITHUANIAN', 'LUXEMBOURGISH', 'MACEDONIAN', 'MALAGASY', 'MALAY', 'MALAYALAM', 'MALTESE', 'MAORI', 'MARATHI', 'MONGOLIAN', 'NEPALI', 'NORWEGIAN', 'PASHTO', 'PERSIAN', 'POLISH', 'PORTUGUESE', 'PUNJABI', 'ROMANIAN', 'RUSSIAN', 'SAMOAN', 'SERBIAN', 'SHONA', 'SINDHI', 'SINHALA', 'SLOVAK', 'SLOVENIAN', 'SOMALI', 'SPANISH', 'SUNDANESE', 'SWAHILI', 'SWEDISH', 'TAJIK', 'TAMIL', 'TATAR', 'TELUGU', 'THAI', 'TIBETAN', 'TURKISH', 'TURKMEN', 'UKRAINIAN', 'URDU', 'UZBEK', 'VIETNAMESE', 'WELSH', 'WOLOF', 'XHOSA', 'YIDDISH', 'YORUBA', 'ZULU');
+CREATE TYPE "Language" AS ENUM ('AFRIKAANS', 'ALBANIAN', 'AMHARIC', 'ARABIC', 'ARMENIAN', 'AZERBAIJANI', 'BASQUE', 'BELARUSIAN', 'BENGALI', 'BOSNIAN', 'BULGARIAN', 'BURMESE', 'CATALAN', 'CEBUANO', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'CROATIAN', 'CZECH', 'DANISH', 'DUTCH', 'ENGLISH', 'ESPERANTO', 'ESTONIAN', 'FILIPINO', 'FINNISH', 'FRENCH', 'GALICIAN', 'GEORGIAN', 'GERMAN', 'GREEK', 'GUJARATI', 'HAITIAN_CREOLE', 'HAUSA', 'HEBREW', 'HINDI', 'HUNGARIAN', 'ICELANDIC', 'IGBO', 'INDONESIAN', 'IRISH', 'ITALIAN', 'JAPANESE', 'JAVANESE', 'KANNADA', 'KAZAKH', 'KHMER', 'KOREAN', 'KURDISH', 'KYRGYZ', 'LAO', 'LATIN', 'LATVIAN', 'LITHUANIAN', 'LUXEMBOURGISH', 'MACEDONIAN', 'MALAGASY', 'MALAY', 'MALAYALAM', 'MALTESE', 'MAORI', 'MARATHI', 'MONGOLIAN', 'NEPALI', 'NORWEGIAN', 'PASHTO', 'PERSIAN', 'POLISH', 'PORTUGUESE', 'PUNJABI', 'ROMANIAN', 'RUSSIAN', 'SAMOAN', 'SERBIAN', 'SHONA', 'SINDHI', 'SINHALA', 'SLOVAK', 'SLOVENIAN', 'SOMALI', 'SPANISH', 'SUNDANESE', 'SWAHILI', 'SWEDISH', 'TAJIK', 'TAMIL', 'TATAR', 'TELUGU', 'THAI', 'TIBETAN', 'TURKISH', 'TURKMEN', 'UKRAINIAN', 'URDU', 'UZBEK', 'VIETNAMESE', 'WELSH', 'WOLOF', 'XHOSA', 'YIDDISH', 'YORUBA', 'ZULU', 'AMBONESE_MALAY', 'AYMARA', 'BAJAN_CREOLE', 'BERBER', 'CHAMORRO', 'CORSICAN', 'DHIVEHI', 'FRISIAN', 'GUYANESE_CREOLE', 'HMONG', 'KAPAMPANGAN', 'KIMBUNDU', 'MONTENEGRIN', 'NAVAJO', 'QUECHUA', 'ROMANI', 'ROMANSH', 'SCOTS', 'SCOTTISH_GAELIC', 'SEYCHELLOIS_CREOLE', 'SHUAR', 'TAGALOG', 'UMBUNDU', 'VALENCIAN');
 
 -- CreateEnum
 CREATE TYPE "JobCategory" AS ENUM ('PRIVATE_SECTOR', 'PUBLIC_SECTOR', 'GOVERNMENT', 'NGO', 'MILITARY', 'ACADEMIC', 'OTHER');
@@ -35,13 +35,10 @@ CREATE TYPE "EducationLevel" AS ENUM ('NONE', 'HIGH_SCHOOL', 'BACHELOR', 'MASTER
 CREATE TYPE "SkillImportance" AS ENUM ('REQUIRED', 'PREFERRED', 'NICE_TO_HAVE');
 
 -- CreateEnum
-CREATE TYPE "OrganizationSubType" AS ENUM ('COMPANY', 'GOVERNMENT', 'RESEARCH_INSTITUTE', 'UNIVERSITY', 'INTERNATIONAL_ORGANIZATION', 'NGO', 'NON_PROFIT', 'SOCIETY', 'CLUB', 'ARMY', 'OTHER');
+CREATE TYPE "OrganizationSubType" AS ENUM ('COMPANY', 'GOVERNMENT', 'RESEARCH_INSTITUTE', 'UNIVERSITY', 'INTERNATIONAL_ORGANIZATION', 'NGO', 'NON_PROFIT', 'SOCIETY', 'CLUB', 'ARMY', 'OTHER', 'ASSOCIATION', 'CENTRAL_BANK', 'CHAMBER_OF_COMMERCE', 'CITY_GOVERNMENT', 'COURT', 'EMBASSY', 'FOUNDATION', 'HOSPITAL', 'LIBRARY', 'MUSEUM', 'NATIONAL_AUDIT_OFFICE', 'NATIONAL_PARK', 'OMBUDSMAN', 'PRIMARY_SCHOOLS', 'PUBLIC_COMPANY', 'PUBLIC_PARKS', 'SECONDARY_SCHOOLS', 'SOE', 'STATE_GOVERNMENT', 'THINK_TANK');
 
 -- CreateEnum
-CREATE TYPE "EmployeeCountRange" AS ENUM ('RANGE_1_10', 'RANGE_11_50', 'RANGE_51_200', 'RANGE_201_1000', 'RANGE_1001_5000', 'RANGE_5000_PLUS');
-
--- CreateEnum
-CREATE TYPE "UniversityType" AS ENUM ('UNIVERSITY', 'GRANDE_ECOLE', 'INSTITUTE', 'ACADEMY', 'ONLINE', 'OTHER');
+CREATE TYPE "EmployeeCountRange" AS ENUM ('RANGE_1_10', 'RANGE_11_50', 'RANGE_51_200', 'RANGE_201_1000', 'RANGE_1001_5000', 'RANGE_5000_PLUS', 'CLASSIFIED');
 
 -- CreateEnum
 CREATE TYPE "GovernmentType" AS ENUM ('REPUBLIC', 'CONSTITUTIONAL_MONARCHY', 'ABSOLUTE_MONARCHY', 'FEDERATION', 'PARLIAMENTARY', 'COMMUNIST', 'THEOCRACY', 'MILITARY_JUNTA', 'OTHER');
@@ -66,6 +63,9 @@ CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'SUSPENDED', 'DELETED', 'PENDING_VER
 
 -- CreateEnum
 CREATE TYPE "EducationFieldType" AS ENUM ('MAJOR', 'MINOR');
+
+-- CreateEnum
+CREATE TYPE "LanguageProficiency" AS ENUM ('BASIC', 'CONVERSATIONAL', 'PROFESSIONAL', 'FLUENT', 'NATIVE');
 
 -- CreateTable
 CREATE TABLE "industries" (
@@ -178,30 +178,42 @@ CREATE TABLE "organizations" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "type" "OrganizationSubType",
-    "legal_status" TEXT,
     "ownership" TEXT,
     "mission" TEXT,
-    "known_for" TEXT[],
-    "activities" TEXT[],
+    "known_for" TEXT,
     "project" TEXT,
     "research_areas" TEXT[],
     "products" TEXT[],
     "services" TEXT[],
-    "partnerships" TEXT[],
     "budget" TEXT,
     "founded" TEXT,
-    "founder" TEXT,
-    "equipments" TEXT,
     "score" INTEGER,
     "city_id" UUID,
     "numberOfEmployees" "EmployeeCountRange",
-    "numberOfSubsidiaries" INTEGER,
     "parent_organization_id" UUID,
     "metadata" JSONB,
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "authority" TEXT,
+    "collections" TEXT,
+    "description" TEXT,
+    "facilities" TEXT[],
+    "founders" TEXT[],
+    "jurisdiction" TEXT,
+    "members" INTEGER,
+    "offices" TEXT,
+    "partners" TEXT[],
+    "personnel" INTEGER,
+    "programs_activities" TEXT[],
+    "serial_number" TEXT NOT NULL,
+    "subsidiaries" TEXT,
+    "subtype" "OrganizationSubType",
+    "type1" TEXT,
+    "type2" TEXT,
+    "student_count" INTEGER,
+    "undergraduates" INTEGER,
+    "postgraduates" INTEGER,
 
     CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
 );
@@ -277,33 +289,6 @@ CREATE TABLE "certifications" (
 );
 
 -- CreateTable
-CREATE TABLE "universities" (
-    "id" UUID NOT NULL,
-    "name" TEXT NOT NULL,
-    "serial_number" TEXT NOT NULL,
-    "type" "UniversityType",
-    "description" TEXT,
-    "website_url" TEXT,
-    "logo_url" TEXT,
-    "country_id" CHAR(2),
-    "city_id" UUID,
-    "student_count" INTEGER,
-    "metadata" JSONB,
-    "score_university" DOUBLE PRECISION,
-    "local_name" TEXT,
-    "notes" TEXT,
-    "established" TEXT,
-    "score" INTEGER,
-    "undergraduates" INTEGER,
-    "postgraduates" INTEGER,
-    "deleted_at" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "universities_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "degrees" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
@@ -319,39 +304,6 @@ CREATE TABLE "degrees" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "degrees_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "military_capabilities" (
-    "id" UUID NOT NULL,
-    "organization_id" UUID NOT NULL,
-    "number_of_active_navy_personnel" INTEGER,
-    "number_of_destroyers" INTEGER,
-    "number_of_submarines_diesel" INTEGER,
-    "number_of_submarines_nuclear" INTEGER,
-    "number_of_naval_shipyards" INTEGER,
-    "number_of_maritime_patrol_aircraft" INTEGER,
-    "number_of_stealth_fleet" INTEGER,
-    "number_of_surveillance_radars" INTEGER,
-    "number_of_aircrafts" INTEGER,
-    "number_of_fighter_jets" INTEGER,
-    "number_of_helicopters" INTEGER,
-    "number_of_drones" INTEGER,
-    "number_of_tanker_planes" INTEGER,
-    "number_of_transport_planes" INTEGER,
-    "number_of_communication_satellites" INTEGER,
-    "number_of_missile_warning_satellites" INTEGER,
-    "number_of_navigation_satellites" INTEGER,
-    "number_of_spy_satellites" INTEGER,
-    "number_of_satellite_jamming_systems" INTEGER,
-    "number_of_surveillance_telescopes" INTEGER,
-    "number_of_operational_spaceplanes" INTEGER,
-    "number_of_space_launch_sites" INTEGER,
-    "number_of_space_operations_squadrons" INTEGER,
-    "number_of_space_personnel" INTEGER,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "military_capabilities_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -499,6 +451,7 @@ CREATE TABLE "user_profiles" (
     "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "user_profiles_pkey" PRIMARY KEY ("id")
 );
@@ -518,7 +471,7 @@ CREATE TABLE "user_certifications" (
 CREATE TABLE "user_educations" (
     "id" UUID NOT NULL,
     "user_profile_id" UUID NOT NULL,
-    "university_id" UUID,
+    "organization_id" UUID,
     "degree_id" UUID,
     "start_year" INTEGER,
     "end_year" INTEGER,
@@ -538,6 +491,122 @@ CREATE TABLE "user_education_fields" (
 );
 
 -- CreateTable
+CREATE TABLE "user_experiences" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "organization_id" UUID,
+    "job_id" UUID,
+    "title" TEXT,
+    "description" TEXT,
+    "start_year" INTEGER,
+    "end_year" INTEGER,
+    "current" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_experiences_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_languages" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "language" "Language" NOT NULL,
+    "proficiency" "LanguageProficiency",
+
+    CONSTRAINT "user_languages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_skills" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "skill_id" UUID NOT NULL,
+    "level" "DifficultyLevel",
+
+    CONSTRAINT "user_skills_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_target_lists" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "organization_id" UUID NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_target_lists_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "personality_tests" (
+    "id" UUID NOT NULL,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "personality_tests_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "personality_criteria" (
+    "id" UUID NOT NULL,
+    "test_id" UUID NOT NULL,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "order" INTEGER NOT NULL,
+
+    CONSTRAINT "personality_criteria_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "personality_questions" (
+    "id" UUID NOT NULL,
+    "test_id" UUID NOT NULL,
+    "criterion_id" UUID NOT NULL,
+    "order" INTEGER NOT NULL,
+    "text" TEXT NOT NULL,
+    "reverse_scored" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "personality_questions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "personality_test_results" (
+    "id" UUID NOT NULL,
+    "user_profile_id" UUID NOT NULL,
+    "test_id" UUID NOT NULL,
+    "completed_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "personality_test_results_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "personality_answers" (
+    "id" UUID NOT NULL,
+    "result_id" UUID NOT NULL,
+    "question_id" UUID NOT NULL,
+    "raw_score" INTEGER NOT NULL,
+
+    CONSTRAINT "personality_answers_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "personality_criterion_scores" (
+    "id" UUID NOT NULL,
+    "result_id" UUID NOT NULL,
+    "criterion_id" UUID NOT NULL,
+    "score" INTEGER NOT NULL,
+
+    CONSTRAINT "personality_criterion_scores_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "audit_logs" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
@@ -547,6 +616,18 @@ CREATE TABLE "audit_logs" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "audit_logs_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "import_row_hashes" (
+    "id" UUID NOT NULL,
+    "model_name" TEXT NOT NULL,
+    "natural_key" TEXT NOT NULL,
+    "row_hash" TEXT NOT NULL,
+    "last_imported_at" TIMESTAMP(3) NOT NULL,
+    "source_file" TEXT,
+
+    CONSTRAINT "import_row_hashes_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -574,11 +655,11 @@ CREATE TABLE "_RelatedIndustries" (
 );
 
 -- CreateTable
-CREATE TABLE "_CountryLargestOrganizations" (
+CREATE TABLE "_OrganizationCountries" (
     "A" CHAR(2) NOT NULL,
     "B" UUID NOT NULL,
 
-    CONSTRAINT "_CountryLargestOrganizations_AB_pkey" PRIMARY KEY ("A","B")
+    CONSTRAINT "_OrganizationCountries_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateTable
@@ -601,9 +682,6 @@ CREATE TABLE "_working_area" (
 CREATE UNIQUE INDEX "industries_serial_number_key" ON "industries"("serial_number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "countries_iso_code_key" ON "countries"("iso_code");
-
--- CreateIndex
 CREATE UNIQUE INDEX "countries_serial_number_key" ON "countries"("serial_number");
 
 -- CreateIndex
@@ -616,10 +694,16 @@ CREATE INDEX "cities_country_id_idx" ON "cities"("country_id");
 CREATE UNIQUE INDEX "organizations_slug_key" ON "organizations"("slug");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "organizations_serial_number_key" ON "organizations"("serial_number");
+
+-- CreateIndex
 CREATE INDEX "organizations_parent_organization_id_idx" ON "organizations"("parent_organization_id");
 
 -- CreateIndex
-CREATE INDEX "organizations_type_idx" ON "organizations"("type");
+CREATE INDEX "organizations_subtype_idx" ON "organizations"("subtype");
+
+-- CreateIndex
+CREATE INDEX "organizations_city_id_idx" ON "organizations"("city_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "jobs_serial_number_key" ON "jobs"("serial_number");
@@ -649,25 +733,10 @@ CREATE INDEX "certifications_issuing_organization_id_idx" ON "certifications"("i
 CREATE INDEX "certifications_category_idx" ON "certifications"("category");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "universities_serial_number_key" ON "universities"("serial_number");
-
--- CreateIndex
-CREATE INDEX "universities_country_id_idx" ON "universities"("country_id");
-
--- CreateIndex
-CREATE INDEX "universities_city_id_idx" ON "universities"("city_id");
-
--- CreateIndex
-CREATE INDEX "universities_type_idx" ON "universities"("type");
-
--- CreateIndex
 CREATE UNIQUE INDEX "degrees_serial_number_key" ON "degrees"("serial_number");
 
 -- CreateIndex
 CREATE INDEX "degrees_level_idx" ON "degrees"("level");
-
--- CreateIndex
-CREATE UNIQUE INDEX "military_capabilities_organization_id_key" ON "military_capabilities"("organization_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subjects_serial_number_key" ON "subjects"("serial_number");
@@ -757,7 +826,7 @@ CREATE INDEX "user_certifications_certification_id_idx" ON "user_certifications"
 CREATE UNIQUE INDEX "user_certifications_user_profile_id_certification_id_key" ON "user_certifications"("user_profile_id", "certification_id");
 
 -- CreateIndex
-CREATE INDEX "user_educations_university_id_idx" ON "user_educations"("university_id");
+CREATE INDEX "user_educations_organization_id_idx" ON "user_educations"("organization_id");
 
 -- CreateIndex
 CREATE INDEX "user_educations_user_profile_id_idx" ON "user_educations"("user_profile_id");
@@ -772,6 +841,66 @@ CREATE INDEX "user_education_fields_type_idx" ON "user_education_fields"("type")
 CREATE UNIQUE INDEX "user_education_fields_user_education_id_study_field_Id_key" ON "user_education_fields"("user_education_id", "study_field_Id");
 
 -- CreateIndex
+CREATE INDEX "user_experiences_user_profile_id_idx" ON "user_experiences"("user_profile_id");
+
+-- CreateIndex
+CREATE INDEX "user_experiences_organization_id_idx" ON "user_experiences"("organization_id");
+
+-- CreateIndex
+CREATE INDEX "user_experiences_job_id_idx" ON "user_experiences"("job_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_languages_user_profile_id_language_key" ON "user_languages"("user_profile_id", "language");
+
+-- CreateIndex
+CREATE INDEX "user_skills_skill_id_idx" ON "user_skills"("skill_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_skills_user_profile_id_skill_id_key" ON "user_skills"("user_profile_id", "skill_id");
+
+-- CreateIndex
+CREATE INDEX "user_target_lists_organization_id_idx" ON "user_target_lists"("organization_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_target_lists_user_profile_id_organization_id_key" ON "user_target_lists"("user_profile_id", "organization_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_tests_code_key" ON "personality_tests"("code");
+
+-- CreateIndex
+CREATE INDEX "personality_criteria_test_id_idx" ON "personality_criteria"("test_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_criteria_test_id_code_key" ON "personality_criteria"("test_id", "code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_criteria_test_id_id_key" ON "personality_criteria"("test_id", "id");
+
+-- CreateIndex
+CREATE INDEX "personality_questions_criterion_id_idx" ON "personality_questions"("criterion_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_questions_test_id_order_key" ON "personality_questions"("test_id", "order");
+
+-- CreateIndex
+CREATE INDEX "personality_test_results_test_id_idx" ON "personality_test_results"("test_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_test_results_user_profile_id_test_id_key" ON "personality_test_results"("user_profile_id", "test_id");
+
+-- CreateIndex
+CREATE INDEX "personality_answers_question_id_idx" ON "personality_answers"("question_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_answers_result_id_question_id_key" ON "personality_answers"("result_id", "question_id");
+
+-- CreateIndex
+CREATE INDEX "personality_criterion_scores_criterion_id_idx" ON "personality_criterion_scores"("criterion_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "personality_criterion_scores_result_id_criterion_id_key" ON "personality_criterion_scores"("result_id", "criterion_id");
+
+-- CreateIndex
 CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
 
 -- CreateIndex
@@ -779,6 +908,9 @@ CREATE INDEX "audit_logs_action_idx" ON "audit_logs"("action");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs"("created_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "import_row_hashes_model_name_natural_key_key" ON "import_row_hashes"("model_name", "natural_key");
 
 -- CreateIndex
 CREATE INDEX "_OrganizationIndustries_B_index" ON "_OrganizationIndustries"("B");
@@ -790,7 +922,7 @@ CREATE INDEX "_ProductIndustries_B_index" ON "_ProductIndustries"("B");
 CREATE INDEX "_RelatedIndustries_B_index" ON "_RelatedIndustries"("B");
 
 -- CreateIndex
-CREATE INDEX "_CountryLargestOrganizations_B_index" ON "_CountryLargestOrganizations"("B");
+CREATE INDEX "_OrganizationCountries_B_index" ON "_OrganizationCountries"("B");
 
 -- CreateIndex
 CREATE INDEX "_CityMainIndustries_B_index" ON "_CityMainIndustries"("B");
@@ -812,15 +944,6 @@ ALTER TABLE "jobs" ADD CONSTRAINT "jobs_industry_id_fkey" FOREIGN KEY ("industry
 
 -- AddForeignKey
 ALTER TABLE "certifications" ADD CONSTRAINT "certifications_issuing_organization_id_fkey" FOREIGN KEY ("issuing_organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "universities" ADD CONSTRAINT "universities_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "universities" ADD CONSTRAINT "universities_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("iso_code") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "military_capabilities" ADD CONSTRAINT "military_capabilities_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "subjects" ADD CONSTRAINT "subjects_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -874,7 +997,7 @@ ALTER TABLE "user_certifications" ADD CONSTRAINT "user_certifications_user_profi
 ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_degree_id_fkey" FOREIGN KEY ("degree_id") REFERENCES "degrees"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_university_id_fkey" FOREIGN KEY ("university_id") REFERENCES "universities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -884,6 +1007,57 @@ ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_study_
 
 -- AddForeignKey
 ALTER TABLE "user_education_fields" ADD CONSTRAINT "user_education_fields_user_education_id_fkey" FOREIGN KEY ("user_education_id") REFERENCES "user_educations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_experiences" ADD CONSTRAINT "user_experiences_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skills"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_skills" ADD CONSTRAINT "user_skills_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_target_lists" ADD CONSTRAINT "user_target_lists_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_target_lists" ADD CONSTRAINT "user_target_lists_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_criteria" ADD CONSTRAINT "personality_criteria_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_criterion_id_fkey" FOREIGN KEY ("test_id", "criterion_id") REFERENCES "personality_criteria"("test_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_questions" ADD CONSTRAINT "personality_questions_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_test_results" ADD CONSTRAINT "personality_test_results_test_id_fkey" FOREIGN KEY ("test_id") REFERENCES "personality_tests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_test_results" ADD CONSTRAINT "personality_test_results_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_answers" ADD CONSTRAINT "personality_answers_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "personality_questions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_answers" ADD CONSTRAINT "personality_answers_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "personality_test_results"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_criterion_scores" ADD CONSTRAINT "personality_criterion_scores_criterion_id_fkey" FOREIGN KEY ("criterion_id") REFERENCES "personality_criteria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personality_criterion_scores" ADD CONSTRAINT "personality_criterion_scores_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "personality_test_results"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -907,10 +1081,10 @@ ALTER TABLE "_RelatedIndustries" ADD CONSTRAINT "_RelatedIndustries_A_fkey" FORE
 ALTER TABLE "_RelatedIndustries" ADD CONSTRAINT "_RelatedIndustries_B_fkey" FOREIGN KEY ("B") REFERENCES "industries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CountryLargestOrganizations" ADD CONSTRAINT "_CountryLargestOrganizations_A_fkey" FOREIGN KEY ("A") REFERENCES "countries"("iso_code") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_OrganizationCountries" ADD CONSTRAINT "_OrganizationCountries_A_fkey" FOREIGN KEY ("A") REFERENCES "countries"("iso_code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CountryLargestOrganizations" ADD CONSTRAINT "_CountryLargestOrganizations_B_fkey" FOREIGN KEY ("B") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_OrganizationCountries" ADD CONSTRAINT "_OrganizationCountries_B_fkey" FOREIGN KEY ("B") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CityMainIndustries" ADD CONSTRAINT "_CityMainIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;

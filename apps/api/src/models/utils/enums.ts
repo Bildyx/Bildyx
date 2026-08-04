@@ -1,28 +1,50 @@
 import { z } from "zod";
 
-export const CostOfLivingSchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
-export const QualityOfLifeSchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
+export const CostOfLivingSchema = z.enum([
+  "LOW",
+  "LOW_MEDIUM",
+  "MEDIUM",
+  "MEDIUM_HIGH",
+  "HIGH",
+  "VERY_HIGH",
+]);
+
+export const QualityOfLifeSchema = z.enum([
+  "LOW",
+  "LOW_MEDIUM",
+  "MEDIUM",
+  "MEDIUM_HIGH",
+  "HIGH",
+  "VERY_HIGH",
+]);
 
 export const LanguageSchema = z.enum([
   "AFRIKAANS",
   "ALBANIAN",
+  "AMBONESE_MALAY",
   "AMHARIC",
   "ARABIC",
   "ARMENIAN",
+  "AYMARA",
   "AZERBAIJANI",
+  "BAJAN_CREOLE",
   "BASQUE",
   "BELARUSIAN",
   "BENGALI",
+  "BERBER",
   "BOSNIAN",
   "BULGARIAN",
   "BURMESE",
   "CATALAN",
   "CEBUANO",
+  "CHAMORRO",
   "CHINESE_CANTONESE",
   "CHINESE_MANDARIN",
+  "CORSICAN",
   "CROATIAN",
   "CZECH",
   "DANISH",
+  "DHIVEHI",
   "DUTCH",
   "ENGLISH",
   "ESPERANTO",
@@ -30,15 +52,18 @@ export const LanguageSchema = z.enum([
   "FILIPINO",
   "FINNISH",
   "FRENCH",
+  "FRISIAN",
   "GALICIAN",
   "GEORGIAN",
   "GERMAN",
   "GREEK",
   "GUJARATI",
+  "GUYANESE_CREOLE",
   "HAITIAN_CREOLE",
   "HAUSA",
   "HEBREW",
   "HINDI",
+  "HMONG",
   "HUNGARIAN",
   "ICELANDIC",
   "IGBO",
@@ -48,8 +73,10 @@ export const LanguageSchema = z.enum([
   "JAPANESE",
   "JAVANESE",
   "KANNADA",
+  "KAPAMPANGAN",
   "KAZAKH",
   "KHMER",
+  "KIMBUNDU",
   "KOREAN",
   "KURDISH",
   "KYRGYZ",
@@ -66,6 +93,8 @@ export const LanguageSchema = z.enum([
   "MAORI",
   "MARATHI",
   "MONGOLIAN",
+  "MONTENEGRIN",
+  "NAVAJO",
   "NEPALI",
   "NORWEGIAN",
   "PASHTO",
@@ -73,11 +102,18 @@ export const LanguageSchema = z.enum([
   "POLISH",
   "PORTUGUESE",
   "PUNJABI",
+  "QUECHUA",
+  "ROMANI",
   "ROMANIAN",
+  "ROMANSH",
   "RUSSIAN",
   "SAMOAN",
+  "SCOTS",
+  "SCOTTISH_GAELIC",
   "SERBIAN",
+  "SEYCHELLOIS_CREOLE",
   "SHONA",
+  "SHUAR",
   "SINDHI",
   "SINHALA",
   "SLOVAK",
@@ -87,6 +123,7 @@ export const LanguageSchema = z.enum([
   "SUNDANESE",
   "SWAHILI",
   "SWEDISH",
+  "TAGALOG",
   "TAJIK",
   "TAMIL",
   "TATAR",
@@ -96,8 +133,10 @@ export const LanguageSchema = z.enum([
   "TURKISH",
   "TURKMEN",
   "UKRAINIAN",
+  "UMBUNDU",
   "URDU",
   "UZBEK",
+  "VALENCIAN",
   "VIETNAMESE",
   "WELSH",
   "WOLOF",
@@ -226,18 +265,38 @@ export const SeniorityLevelEnum = z.enum([
 // Organizations
 // ---------------------------------------------------------------------------
 
-export const OrganizationTypeEnum = z.enum([
+export const OrganizationSubtypeEnum = z.enum([
+  "ARMY",
+  "ASSOCIATION",
+  "CENTRAL_BANK",
+  "CHAMBER_OF_COMMERCE",
+  "CITY_GOVERNMENT",
+  "CLUB",
   "COMPANY",
+  "COURT",
+  "EMBASSY",
+  "FOUNDATION",
   "GOVERNMENT",
-  "RESEARCH_INSTITUTE",
-  "UNIVERSITY",
+  "HOSPITAL",
   "INTERNATIONAL_ORGANIZATION",
+  "LIBRARY",
+  "MUSEUM",
+  "NATIONAL_AUDIT_OFFICE",
+  "NATIONAL_PARK",
   "NGO",
   "NON_PROFIT",
-  "SOCIETY",
-  "CLUB",
-  "ARMY",
+  "OMBUDSMAN",
   "OTHER",
+  "PRIMARY_SCHOOLS",
+  "PUBLIC_COMPANY",
+  "PUBLIC_PARKS",
+  "RESEARCH_INSTITUTE",
+  "SECONDARY_SCHOOLS",
+  "SOCIETY",
+  "SOE",
+  "STATE_GOVERNMENT",
+  "THINK_TANK",
+  "UNIVERSITY",
 ]);
 
 export const EmployeeCountRangeEnum = z.enum([
@@ -247,7 +306,10 @@ export const EmployeeCountRangeEnum = z.enum([
   "RANGE_201_1000",
   "RANGE_1001_5000",
   "RANGE_5000_PLUS",
+  "CLASSIFIED",
 ]);
+
+export const EducationFieldTypeEnum = z.enum(["MAJOR", "MINOR"]);
 
 // ---------------------------------------------------------------------------
 // Products
@@ -277,18 +339,6 @@ export const SkillCategoryEnum = z.enum([
   "TOOL",
 ]);
 
-// ---------------------------------------------------------------------------
-// Universities
-// ---------------------------------------------------------------------------
-
-export const UniversityTypeEnum = z.enum([
-  "ACADEMY",
-  "GRANDE_ECOLE",
-  "INSTITUTE",
-  "ONLINE",
-  "OTHER",
-  "UNIVERSITY",
-]);
 
 // ---------------------------------------------------------------------------
 // Users
@@ -302,3 +352,52 @@ export const UserStatusEnum = z.enum([
   "PENDING_VERIFICATION",
   "SUSPENDED",
 ]);
+
+export const LanguageProficiencyEnum = z.enum([
+  "BASIC",
+  "CONVERSATIONAL",
+  "FLUENT",
+  "NATIVE",
+  "PROFESSIONAL",
+]);
+
+const SUBTYPE_PREFIX_MAP: Record<string, string> = {
+  COMPANY: "COM",
+  GOVERNMENT: "GOV",
+  RESEARCH_INSTITUTE: "RES",
+  UNIVERSITY: "UNI",
+  INTERNATIONAL_ORGANIZATION: "INT",
+  NGO: "NGO",
+  NON_PROFIT: "NPO",
+  SOCIETY: "SOC",
+  CLUB: "CLU",
+  ARMY: "ARM",
+  ASSOCIATION: "ASS",
+  CENTRAL_BANK: "CEN",
+  CHAMBER_OF_COMMERCE: "CHA",
+  CITY_GOVERNMENT: "CIT",
+  COURT: "COU",
+  EMBASSY: "EMB",
+  FOUNDATION: "FOU",
+  HOSPITAL: "HOS",
+  LIBRARY: "LIB",
+  MUSEUM: "MUS",
+  NATIONAL_AUDIT_OFFICE: "AUD",
+  NATIONAL_PARK: "PAR",
+  OMBUDSMAN: "OMB",
+  PRIMARY_SCHOOLS: "SCH",
+  PUBLIC_COMPANY: "PUB",
+  PUBLIC_PARKS: "PKY",
+  SECONDARY_SCHOOLS: "SEC",
+  SOE: "SOE",
+  STATE_GOVERNMENT: "STA",
+  THINK_TANK: "THI",
+  OTHER: "OTH"
+};
+
+export function generateSerialNumber(subtype?: string | null): string {
+  const cleanSubtype = subtype ? subtype.trim().toUpperCase() : "";
+  const prefix = SUBTYPE_PREFIX_MAP[cleanSubtype] || "COM";
+  const num = Math.floor(1 + Math.random() * 999999);
+  return `${prefix}-${String(num).padStart(6, "0")}`;
+}

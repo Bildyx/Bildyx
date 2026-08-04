@@ -1,7 +1,14 @@
 const beforeTimeMs = performance.now();
+import "dotenv/config";
 import express from "express";
+import cookieParser from "cookie-parser";
 import util from "node:util";
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 import prettyMilliseconds from "pretty-ms";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { openAPIGenerator, openAPIHandler, rpcHandler } from "./application";
 import {
   NAME,
@@ -10,23 +17,171 @@ import {
   HOST,
   PORT,
   RPC_PREFIX,
+  API_URL,
 } from "./configuration";
 import { router } from "./routes/router";
 import { database } from "./database";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { randomUUID, randomBytes } from "node:crypto";
+import { hashPassword } from "./services/auth.service";
+import cors from "cors";
+import { LanguageSchema } from "./models/utils/enums";
 
 const app = express();
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:8000",
+  "http://localhost:3000",
+  "http://localhost:5500",
+  "http://localhost:8080",
+  "http://localhost:3001",
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:5500",
+  "http://127.0.0.1:8000",
+  "http://127.0.0.1:8080",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin '${origin}' not allowed`));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
 app.use(express.json());
+app.use(cookieParser());
+app.use(passport.initialize());
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: `${API_URL}/api/auth/google/callback`,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value?.toLowerCase();
+          if (!email) {
+            return done(new Error("Google account has no email"));
+          }
+
+          const existingUser = await database
+            .selectFrom("users")
+            .select(["id", "email", "role", "email_verified"])
+            .where("email", "=", email)
+            .where("deleted_at", "is", null)
+            .executeTakeFirst();
+
+          if (existingUser) {
+            if (!existingUser.email_verified) {
+              await database
+                .updateTable("users")
+                .set({
+                  email_verified: true,
+                  verification_code: null,
+                  verification_expires_at: null,
+                  last_verification_sent_at: null,
+                  status: "ACTIVE",
+                  updated_at: new Date(),
+                })
+                .where("id", "=", existingUser.id)
+                .execute();
+
+              const verifiedUser = {
+                ...existingUser,
+                email_verified: true,
+              };
+              return done(null, verifiedUser);
+            }
+
+            return done(null, existingUser);
+          }
+
+          const randomPasswordHash = hashPassword(
+            randomBytes(32).toString("hex"),
+          );
+          const userId = randomUUID();
+
+          await database.transaction().execute(async (trx) => {
+            await trx
+              .insertInto("users")
+              .values({
+                id: userId,
+                email,
+                first_name: profile.name?.givenName || "",
+                last_name: profile.name?.familyName || "",
+                display_name: profile.displayName || "",
+                avatar_url: profile.photos?.[0]?.value || null,
+                role: "CANDIDATE",
+                marketing_opt_in: false,
+                email_verified: true,
+                password_hash: randomPasswordHash,
+                verification_code: null,
+                verification_expires_at: null,
+                last_verification_sent_at: null,
+                status: "ACTIVE",
+                updated_at: new Date(),
+              })
+              .execute();
+
+            await trx
+              .insertInto("user_profiles")
+              .values({
+                id: randomUUID(),
+                user_id: userId,
+                is_public: true,
+                updated_at: new Date(),
+              })
+              .execute();
+          });
+
+          const newUser = {
+            id: userId,
+            email,
+            role: "CANDIDATE",
+            email_verified: true,
+          };
+
+          return done(null, newUser);
+        } catch (err) {
+          return done(err);
+        }
+      },
+    ),
+  );
+} else {
+  console.warn(
+    "Google OAuth credentials missing. Google login strategy not loaded.",
+  );
+}
 
 app.use(async (req, res, next) => {
-  const result = await rpcHandler.handle(req, res, {
-    context: { headers: req.headers },
-    prefix: RPC_PREFIX,
-  });
-  if (result.matched) {
-    return;
+  try {
+    const result = await rpcHandler.handle(req, res, {
+      context: { headers: req.headers, req, res },
+      prefix: RPC_PREFIX,
+    });
+    if (result.matched) {
+      return;
+    }
+    next();
+  } catch (err) {
+    if (res.headersSent) {
+      return;
+    }
+    next(err);
   }
-  next();
 });
 
 app.get("/spec.json", async (req, res) => {
@@ -50,15 +205,28 @@ app.get("/spec.json", async (req, res) => {
   res.json(spec);
 });
 
+app.get("/enums/languages", (_req, res) => {
+  res.json(LanguageSchema.options);
+});
+app.use("/css", express.static(path.resolve(__dirname, "templates/organizations")));
+
+
 app.use(async (req, res, next) => {
-  const result = await openAPIHandler.handle(req, res, {
-    context: { headers: req.headers },
-    prefix: OPENAPI_PREFIX,
-  });
-  if (result.matched) {
-    return;
+  try {
+    const result = await openAPIHandler.handle(req, res, {
+      context: { headers: req.headers, req, res },
+      prefix: OPENAPI_PREFIX,
+    });
+    if (result.matched) {
+      return;
+    }
+    next();
+  } catch (err) {
+    if (res.headersSent) {
+      return;
+    }
+    next(err);
   }
-  next();
 });
 
 app.use((req, res) => {
@@ -80,10 +248,11 @@ app.use((req, res) => {
             url: '/spec.json',
             orderSchemaPropertiesBy: 'preserve',
             operationsSorter: (a, b) => {
-              const methods = ['get', 'post', 'patch', 'patch', 'delete'];
+              const methods = ['get', 'post', 'put', 'patch', 'delete'];
               const diff = methods.indexOf(a.method.toLowerCase()) - methods.indexOf(b.method.toLowerCase());
               if (diff !== 0) return diff;
-              return a.path.localeCompare(b.path);
+
+              return a.idx - b.idx;
             },
             authentication: {
               securitySchemes: {

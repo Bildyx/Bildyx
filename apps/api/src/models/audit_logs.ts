@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { zNullableUUID } from "./utils/preprocessors";
 
 export const AuditLogSchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(),
+  id: z.uuid(),
+  user_id: z.uuid(),
   action: z.string(),
   ip_address: z.string().nullable().optional(),
   metadata: z.any().nullable().optional(),
@@ -11,17 +12,17 @@ export const AuditLogSchema = z.object({
 
 // GET
 export const GetAuditLogsSchema = z.object({
-  userId: z.string().uuid().optional(),
+  userId: zNullableUUID(),
   action: z.string().optional(),
 });
 
 export const GetAuditLogSchema = z.object({
-  auditLogId: z.string().uuid(),
+  auditLogId: z.uuid(),
 });
 
 // POST
 export const PostAuditLogSchema = z.object({
-  user_id: z.string().uuid(),
+  user_id: z.uuid(),
   action: z.string().min(1),
   ip_address: z.string().nullable().optional(),
   metadata: z.any().nullable().optional(),
@@ -29,11 +30,11 @@ export const PostAuditLogSchema = z.object({
 
 // DELETE
 export const DeleteAuditLogSchema = z.object({
-  auditLogId: z.string().uuid(),
+  auditLogId: z.uuid(),
 });
 
 export const DeleteAuditLogsBulkSchema = z.object({
-  auditLogIds: z.array(z.string().uuid()),
+  auditLogIds: z.array(z.uuid()),
 });
 
 export type AuditLog = z.infer<typeof AuditLogSchema>;

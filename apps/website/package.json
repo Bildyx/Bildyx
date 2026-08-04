@@ -1,0 +1,17 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run build && php -S localhost:8000",
+    "watch": "node esbuild.config.mjs --watch",
+    "start": "npm run build:ts && php -S localhost:8000",
+    "build": "node esbuild.config.mjs",
+    "build:ts": "node esbuild.config.mjs",
+    "test": "echo \"No tests for website\""
+  },
+  "dependencies": {
+    "concurrently": "^10.0.4",
+    "esbuild": "^0.28.1"
+  }
+}

@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -16,7 +16,7 @@ import type { Insertable } from "kysely";
 import type { Users } from "../db/types";
 
 export const users = {
-  // 1. Récupérer tous les utilisateurs
+  // 1. Get all users
   getAll: publicProcedure
     .route({
       method: "GET",
@@ -40,7 +40,7 @@ export const users = {
       }
 
       if (role) {
-        query = query.where("role", "=", role);
+        query = query.where("role", "=", role as any);
       }
 
       if (status) {
@@ -50,8 +50,8 @@ export const users = {
       return await query.orderBy("created_at", "desc").execute();
     }),
 
-  // 2. Récupérer un utilisateur par son ID
-  getById: publicProcedure
+  // 2. Get a user by ID
+  getUserById: publicProcedure
     .route({
       method: "GET",
       summary: "Get a specific user",
@@ -76,7 +76,7 @@ export const users = {
       return user;
     }),
 
-  // 3. Créer un nouvel utilisateur
+  // 3. Create a new user
   create: publicProcedure
     .route({
       method: "POST",
@@ -120,7 +120,7 @@ export const users = {
       return user;
     }),
 
-  // 4. Mettre à jour un utilisateur
+  // 4. Update a user
   update: publicProcedure
     .route({
       method: "PATCH",
@@ -129,7 +129,7 @@ export const users = {
       path: "/users/{userId}",
       tags: ["User"],
     })
-    .input(z.object({ userId: z.string().uuid() }).merge(PutUserSchema))
+    .input(z.object({ userId: z.uuid() }).merge(PutUserSchema))
     .output(UserSchema)
     .handler(async ({ input }) => {
       const { userId, ...updates } = input;
@@ -164,22 +164,23 @@ export const users = {
       return user;
     }),
 
-  // 5. Supprimer un utilisateur (soft delete)
+  // 5. Supprimer un utilisateur
   delete: publicProcedure
     .route({
       method: "DELETE",
       summary: "Delete a user",
-      description: "Soft delete an existing user by its ID",
+      description: "Delete an existing user by its ID",
       path: "/users/{userId}",
       tags: ["User"],
     })
     .input(DeleteUserSchema)
     .output(z.void())
     .handler(async ({ input }) => {
+      const { userId } = input;
+
       const existing = await database
         .selectFrom("users")
-        .where("id", "=", input.userId)
-        .where("deleted_at", "is", null)
+        .where("id", "=", userId)
         .select("id")
         .executeTakeFirst();
 
@@ -187,11 +188,7 @@ export const users = {
         throw new ORPCError("NOT_FOUND", { message: "User not found" });
       }
 
-      await database
-        .updateTable("users")
-        .set({ deleted_at: new Date() })
-        .where("id", "=", input.userId)
-        .execute();
+      await database.deleteFrom("users").where("id", "=", userId).execute();
     }),
 
   // 6. Supprimer plusieurs utilisateurs (Bulk)

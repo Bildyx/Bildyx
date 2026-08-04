@@ -5,24 +5,10 @@ import { users } from "../routes/users";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-describe("Users API Endpoints", { concurrency: 1 }, () => {
+describe("Users API Endpoints", () => {
   let createdUserId1: string;
   let createdUserId2: string;
-
-  before(async () => {
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
-    }
-  });
 
   after(async () => {
     try {
@@ -30,13 +16,8 @@ describe("Users API Endpoints", { concurrency: 1 }, () => {
       if (ids.length > 0) {
         await database.deleteFrom("users").where("id", "in", ids).execute();
       }
-    } catch (err) {
-      console.error("Cleanup error in test teardown:", err);
-    } finally {
-      await database.destroy();
-      if (pgliteClient) {
-        await pgliteClient.close();
-      }
+    } catch (e) {
+      console.warn("Cleanup error in test teardown:", e);
     }
   });
 
@@ -129,13 +110,13 @@ describe("Users API Endpoints", { concurrency: 1 }, () => {
   describe("GET /users/{userId} (GetById)", () => {
     test("should throw NOT_FOUND for a non-existent ID", async () => {
       await assert.rejects(
-        callProcedure(users.getById, { userId: randomUUID() }),
+        callProcedure(users.getUserById, { userId: randomUUID() }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
     });
 
     test("should successfully return the user by its ID", async () => {
-      const res = await callProcedure(users.getById, {
+      const res = await callProcedure(users.getUserById, {
         userId: createdUserId1,
       });
       assert.strictEqual(res.id, createdUserId1);
@@ -179,7 +160,7 @@ describe("Users API Endpoints", { concurrency: 1 }, () => {
       await callProcedure(users.delete, { userId: createdUserId1 });
 
       await assert.rejects(
-        callProcedure(users.getById, { userId: createdUserId1 }),
+        callProcedure(users.getUserById, { userId: createdUserId1 }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 
@@ -194,7 +175,7 @@ describe("Users API Endpoints", { concurrency: 1 }, () => {
       });
 
       await assert.rejects(
-        callProcedure(users.getById, { userId: createdUserId2 }),
+        callProcedure(users.getUserById, { userId: createdUserId2 }),
         (err: any) => err instanceof ORPCError && err.code === "NOT_FOUND",
       );
 

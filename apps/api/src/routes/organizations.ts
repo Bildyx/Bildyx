@@ -25,24 +25,31 @@ export const organizations = {
     .input(GetOrganizationsSchema)
     .output(z.array(OrganizationSchema))
     .handler(async ({ input }) => {
-      const { name, type } = input;
+      const { name, subtype, city } = input;
 
       let query = database
         .selectFrom("organizations")
-        .where("deleted_at", "is", null);
+        .where("organizations.deleted_at", "is", null);
 
       if (name) {
         const p = `%${name.trim()}%`;
         query = query.where((eb) =>
-          eb("name", "ilike", p).or("mission", "ilike", p),
+          eb("organizations.name", "ilike", p).or("organizations.mission", "ilike", p),
         );
       }
 
-      if (type) {
-        query = query.where("type", "=", type);
+      if (subtype) {
+        query = query.where("organizations.subtype", "=", subtype);
       }
 
-      return await query.selectAll().orderBy("name", "asc").execute();
+      if (city) {
+        const cp = `%${city.trim()}%`;
+        query = query
+          .innerJoin("cities", "cities.id", "organizations.city_id")
+          .where("cities.name", "ilike", cp);
+      }
+
+      return await query.selectAll("organizations").orderBy("organizations.name", "asc").execute();
     }),
 
   getById: publicProcedure
@@ -124,11 +131,7 @@ export const organizations = {
       path: "/organizations/{organizationId}",
       tags: ["Organization"],
     })
-    .input(
-      z
-        .object({ organizationId: z.string().uuid() })
-        .merge(PutOrganizationSchema),
-    )
+    .input(z.object({ organizationId: z.uuid() }).merge(PutOrganizationSchema))
     .output(OrganizationSchema)
     .handler(async ({ input }) => {
       const { organizationId, metadata, ...rest } = input;
@@ -146,7 +149,11 @@ export const organizations = {
 
       const organization = await database
         .updateTable("organizations")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set({
+          ...rest,
+          updated_at: new Date(),
+          metadata: metadata as any,
+        } as any)
         .where("id", "=", organizationId)
         .returningAll()
         .executeTakeFirst();

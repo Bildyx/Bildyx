@@ -50,7 +50,7 @@ export const job_ads_skills = {
       path: "/job-ads/{jobAdId}/skills",
       tags: ["JobAdSkill"],
     })
-    .input(z.object({ jobAdId: z.string().uuid() }))
+    .input(z.object({ jobAdId: z.uuid() }))
     .output(z.array(JobAdSkillSchema))
     .handler(async ({ input }) => {
       const jobAd = await database
@@ -117,9 +117,7 @@ export const job_ads_skills = {
       path: "/job-ad-skills/{jobAdSkillId}",
       tags: ["JobAdSkill"],
     })
-    .input(
-      z.object({ jobAdSkillId: z.string().uuid() }).merge(PutJobAdSkillSchema),
-    )
+    .input(z.object({ jobAdSkillId: z.uuid() }).merge(PutJobAdSkillSchema))
     .output(JobAdSkillSchema)
     .handler(async ({ input }) => {
       const { jobAdSkillId, ...rest } = input;

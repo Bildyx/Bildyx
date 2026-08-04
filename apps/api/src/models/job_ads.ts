@@ -8,16 +8,16 @@ import {
 import { zNullableUUID, zStringArray } from "./utils/preprocessors";
 
 export const JobAdSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
-  organization_id: z.string().uuid(),
+  organization_id: z.uuid(),
   job_id: zNullableUUID(),
   description: z.string().nullable().optional(),
   status: JobAdStatusEnum.optional().default("DRAFT"),
   contract_type: ContractTypeEnum.nullable().optional(),
   remote: RemotePolicyEnum.nullable().optional(),
-  country_id: zNullableUUID(),
+  country_id: z.string().length(2).nullable().optional(),
   city_id: zNullableUUID(),
   salary_range: z.string().nullable().optional(),
   required_years_experience: z.number().int().min(0).nullable().optional(),
@@ -36,17 +36,17 @@ export const JobAdSchema = z.object({
 // GET
 export const GetJobAdsSchema = z.object({
   name: z.string().optional(),
-  organization_id: z.string().uuid().optional(),
-  job_id: z.string().uuid().optional(),
+  organization_id: zNullableUUID(),
+  job_id: zNullableUUID(),
   contract_type: ContractTypeEnum.optional(),
   remote: RemotePolicyEnum.optional(),
   status: JobAdStatusEnum.optional(),
-  country_id: z.string().uuid().optional(),
-  city_id: z.string().uuid().optional(),
+  country_id: z.string().length(2).optional(),
+  city_id: zNullableUUID(),
 });
 
 export const GetJobAdSchema = z.object({
-  jobAdId: z.string().uuid(),
+  jobAdId: z.uuid(),
 });
 
 // POST
@@ -62,11 +62,11 @@ export const PutJobAdSchema = PostJobAdSchema.partial();
 
 // DELETE
 export const DeleteJobAdSchema = z.object({
-  jobAdId: z.string().uuid(),
+  jobAdId: z.uuid(),
 });
 
 export const DeleteJobAdsBulkSchema = z.object({
-  jobAdIds: z.array(z.string().uuid()),
+  jobAdIds: z.array(z.uuid()),
 });
 
 export type JobAd = z.infer<typeof JobAdSchema>;

@@ -4,6 +4,8 @@
 /generated/prisma
 .vscode/
 
+#Claude
+/claude
 CLAUDE.MD
 Database.rtf
 Database_prompt.rtf
@@ -21,3 +23,13 @@ node_modules/
 # Build
 dist/
 build/
+
+# Test cache
+.schema.hash
+
+# Claude Code system files
+.claude/
+
+# Turborepo
+.turbo/
+*.log

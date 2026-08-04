@@ -4,12 +4,7 @@ import { job_ads } from "../routes/job_ads";
 import { database, pgliteClient } from "../database";
 import { ORPCError } from "@orpc/server";
 import { randomUUID } from "node:crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { generateSerialNumber } from "../models/utils/enums.js";
 
 describe("Job Ads API Endpoints", () => {
   let testOrgId: string;
@@ -25,11 +20,8 @@ describe("Job Ads API Endpoints", () => {
   };
 
   before(async () => {
-    // If running in test environment, initialize the database schema in memory
-    if (process.env.NODE_ENV === "test" && pgliteClient) {
-      const schemaPath = path.join(__dirname, "schema.sql");
-      const schemaSql = fs.readFileSync(schemaPath, "utf8");
-      await pgliteClient.exec(schemaSql);
+    if (pgliteClient) {
+      await pgliteClient.exec("BEGIN");
     }
 
     testOrgId = randomUUID();
@@ -42,6 +34,7 @@ describe("Job Ads API Endpoints", () => {
         id: testOrgId,
         name: "Test Org for Job Ads",
         slug: "test-org-job-ads-slug",
+        serial_number: generateSerialNumber("COMPANY"),
         updated_at: new Date(),
       })
       .execute();
@@ -59,23 +52,8 @@ describe("Job Ads API Endpoints", () => {
   });
 
   after(async () => {
-    // Clean up test items
-    try {
-      // Hard delete any remaining job ads created in tests first
-      await database.deleteFrom("job_ads").execute();
-      if (testJobId) {
-        await database.deleteFrom("jobs").where("id", "=", testJobId).execute();
-      }
-      if (testOrgId) {
-        await database
-          .deleteFrom("organizations")
-          .where("id", "=", testOrgId)
-          .execute();
-      }
-    } catch (e) {
-      console.warn("Cleanup error in test teardown:", e);
-    } finally {
-      await database.destroy();
+    if (pgliteClient) {
+      await pgliteClient.exec("ROLLBACK");
     }
   });
 

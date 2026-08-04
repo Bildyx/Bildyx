@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/server";
+﻿import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -16,7 +16,7 @@ import type { Insertable } from "kysely";
 import type { UserSessions } from "../db/types";
 
 export const user_sessions = {
-  // 1. Récupérer toutes les sessions d'un utilisateur
+  // 1. Get all sessions for a user
   getByUser: publicProcedure
     .route({
       method: "GET",
@@ -46,7 +46,7 @@ export const user_sessions = {
         .execute();
     }),
 
-  // 2. Récupérer une session par son ID
+  // 2. Get a session by ID
   getById: publicProcedure
     .route({
       method: "GET",
@@ -71,7 +71,7 @@ export const user_sessions = {
       return session;
     }),
 
-  // 3. Créer une nouvelle session
+  // 3. Create a new session
   create: publicProcedure
     .route({
       method: "POST",
@@ -111,7 +111,7 @@ export const user_sessions = {
       return session;
     }),
 
-  // 4. Révoquer une session (mettre à jour revoked_at)
+  // 4. Revoke a session (update revoked_at)
   revoke: publicProcedure
     .route({
       method: "PATCH",
@@ -120,11 +120,7 @@ export const user_sessions = {
       path: "/sessions/{sessionId}",
       tags: ["UserSession"],
     })
-    .input(
-      z
-        .object({ sessionId: z.string().uuid() })
-        .merge(PutUserSessionSchema),
-    )
+    .input(z.object({ sessionId: z.uuid() }).merge(PutUserSessionSchema))
     .output(UserSessionSchema)
     .handler(async ({ input }) => {
       const { sessionId, ...updates } = input;
