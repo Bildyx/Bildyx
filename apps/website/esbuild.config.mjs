@@ -1,9 +1,10 @@
 import * as esbuild from "esbuild";
 import { readdirSync } from "fs";
 import { join } from "path";
+import { fileURLToPath } from "url";
 
-const jsDir = new URL("./js", import.meta.url).pathname.replace(/^\/([A-Z]:)/, "$1");
-const outDir = new URL("./js/dist", import.meta.url).pathname.replace(/^\/([A-Z]:)/, "$1");
+const jsDir = fileURLToPath(new URL("./js", import.meta.url));
+const outDir = fileURLToPath(new URL("./js/dist", import.meta.url));
 
 // Collect all .ts entry points in js/ (not in subdirs)
 const entryPoints = readdirSync(jsDir)
