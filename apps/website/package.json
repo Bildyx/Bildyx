@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "php -S localhost:8000",
+    "dev": "npm run build && php -S localhost:8000",
     "watch": "node esbuild.config.mjs --watch",
     "start": "npm run build:ts && php -S localhost:8000",
     "build": "node esbuild.config.mjs",

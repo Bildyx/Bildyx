@@ -41,7 +41,7 @@ export function alignCardsHeight(grid: HTMLElement | null) {
         mainCard.style.setProperty("height", "auto", "important");
       }
 
-      const cardWidth = 500;
+      const cardWidth = wrap.offsetWidth || 500;
       const cardHeight = wrap.scrollHeight || 400;
       const containerWidth = slot.clientWidth || iframe.clientWidth || 250;
 

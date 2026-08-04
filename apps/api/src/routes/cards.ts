@@ -329,6 +329,87 @@ export const cards = {
             template = "organizations/association-card";
             break;
           }
+          case OrganizationSubtypeEnum.enum.STATE_GOVERNMENT: {
+            template = "organizations/state-government-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.COUNTY_GOVERNMENT: {
+            template = "organizations/county-government-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.CITY_GOVERNMENT: {
+            template = "organizations/city-government-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.GOVERNOR_OFFICE: {
+            template = "organizations/governor-office-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.PUBLIC_AUTHORITY: {
+            template = "organizations/public-authority-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.LOCAL_GOVERNMENT: {
+            template = "organizations/local-government-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.MAYOR_OFFICE: {
+            template = "organizations/mayor-office-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.CITY_DEPARTMENTS: {
+            template = "organizations/city-departments-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.HOSPITAL: {
+            template = "organizations/hospital-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.NATIONAL_PARK: {
+            template = "organizations/national-park-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.OMBUDSMAN: {
+            template = "organizations/ombudsman-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.NATIONAL_AUDIT_OFFICE: {
+            template = "organizations/national-audit-office-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.EMBASSY: {
+            template = "organizations/embassy-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.CHAMBER_OF_COMMERCE: {
+            template = "organizations/chamber-of-commerce-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.PUBLIC_PARKS: {
+            template = "organizations/public-parks-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.PRIMARY_SCHOOLS:
+          case OrganizationSubtypeEnum.enum.SECONDARY_SCHOOLS: {
+            template = "organizations/school-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.ARMY: {
+            template = "organizations/army-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.NON_PROFIT: {
+            template = "organizations/non-profit-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.FOUNDATION: {
+            template = "organizations/foundation-card";
+            break;
+          }
+          case OrganizationSubtypeEnum.enum.INTERNATIONAL_ORGANIZATION: {
+            template = "organizations/international-organization-card";
+            break;
+          }
         }
         return await sendHtmlResponse(
           ctx,

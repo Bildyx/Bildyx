@@ -211,8 +211,8 @@ CREATE TABLE "organizations" (
     "subtype" "OrganizationSubType",
     "type1" TEXT,
     "type2" TEXT,
-    "undergraduates" INTEGER,
     "student_count" INTEGER,
+    "undergraduates" INTEGER,
     "postgraduates" INTEGER,
 
     CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
@@ -471,11 +471,11 @@ CREATE TABLE "user_certifications" (
 CREATE TABLE "user_educations" (
     "id" UUID NOT NULL,
     "user_profile_id" UUID NOT NULL,
+    "organization_id" UUID,
     "degree_id" UUID,
     "start_year" INTEGER,
     "end_year" INTEGER,
     "graduated" BOOLEAN NOT NULL DEFAULT false,
-    "organization_id" UUID,
 
     CONSTRAINT "user_educations_pkey" PRIMARY KEY ("id")
 );

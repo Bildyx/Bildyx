@@ -1,7 +1,7 @@
-﻿<?php
+<?php
 $pageTitle = 'Personality Test: Big 5 — Bildyx';
 $pageDescription = 'Big 5 personality test for Bildyx.';
-$pageScript = 'js/tests-preferences.ts';
+$pageScript = 'js/big-5.ts';
 $bodyClass = 'big5-page';
 $showMainNav = false;
 
@@ -167,8 +167,6 @@ $icons = ['✦', '♞', '▣', '⌁', '▫', '○', '♙'];
         </aside>
     </div>
 </main>
-
-<script src="../js/big-5.js"></script>
 
 <?php
 ob_start();

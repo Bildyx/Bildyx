@@ -10,11 +10,16 @@
         <%- renderHeader(name) %>
         <div class="info-table">
             <%- renderRow('Description', description) %>
-            <%- renderRow('Type', type1) %>
+            <%- renderRow('Type 1', type1) %>
             <%- renderRow('Established', founded) %>
-            <%- renderRow('Administering Agency', parent) %>
+            <%- renderRow('City', headquartersLocation) %>
+            <%- renderRow('State/Province/Prefecture', parent) %>
+            <%- renderRow('Staff', numberOfEmployees) %>
+            <%- renderRow('Departments', subsidiaries) %>
+            <%- renderRow('Known For/Impact', known_for) %>
             <%- renderRow('Budget', budget) %>
-            <%- renderRow('Target Population', members) %>
+            <%- renderRow('Partners', partners) %>
+            <%- renderRow('Functions/Programs', programs_activities) %>
         </div>
         <%- renderFooter() %>
     </div>

@@ -463,6 +463,7 @@ export async function mapOrganization(row: Record<string, any>) {
     project: str(row.project),
     members: fmt(row.members),
     programs_activities: join(row.programs_activities),
+    services: join(row.services),
     year: new Date().getFullYear(),
   };
 }

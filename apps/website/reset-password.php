@@ -1,6 +1,7 @@
 <?php
 $pageTitle = 'Bildyx — Reset Password';
 $pageDescription = 'Choose a new Bildyx password.';
+$pageScript = 'js/reset-password.ts';
 $bodyClass = 'auth-page';
 $showMainNav = false;
 
@@ -92,6 +93,5 @@ echo str_replace('</head>', "    {$authStylesheet}\n</head>", $sharedHeader);
 </main>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/dist/reset-password.js" defer></script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>

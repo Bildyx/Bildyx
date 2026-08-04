@@ -1,7 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
 
+:root {
+    --card-width: 550px;
+    --label-width: 175px;
+}
+
 html, body {
-    width: var(--card-width, 500px);
+    width: var(--card-width, 550px);
     margin: 0;
     padding: 0;
     font-family: 'Work Sans', Arial, sans-serif;
@@ -108,11 +113,13 @@ html, body {
 }
 
 .info-label {
-    flex: 0 0 var(--label-width, 130px);
+    flex: 0 0 var(--label-width, 175px);
+    min-width: 0;
     font-size: 1.10rem;
     color: #555555;
     font-weight: 500;
     padding-top: 8px;
+    overflow-wrap: break-word;
 }
 
 .info-value {

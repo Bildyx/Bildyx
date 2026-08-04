@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Personality Test: ' . $testTitle . ' — Bildyx';
 $pageDescription = $testSubtitle;
-$pageScript = null;
+$pageScript = 'js/personality-test-pages.ts';
 $bodyClass = 'personality-test-page';
 $showMainNav = false;
 
@@ -118,8 +118,6 @@ echo str_replace('</head>', "    {$stylesheet}\n</head>", $sharedHeader);
         </aside>
     </div>
 </main>
-
-<script src="../js/personality-test-pages.js"></script>
 
 <?php
 ob_start();

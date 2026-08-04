@@ -1,23 +1,23 @@
 /*
- * Generic JS for personality test pages.
+ * Generic TS for personality test pages.
  */
 
 (function () {
-    const form = document.getElementById('personalityTestForm');
+    const form = document.getElementById('personalityTestForm') as HTMLFormElement | null;
     if (!form) return;
 
     const testKey = form.dataset.testKey || 'personality_test';
     const storageKey = `bildyx_${testKey}_answers`;
     const scoresKey = `bildyx_${testKey}_scores`;
-    const API = window.BildyxAPI || null;
+    const API = (window as any).BildyxAPI || null;
 
-    const buttons = Array.from(document.querySelectorAll('.pt-answer-button'));
+    const buttons = Array.from(document.querySelectorAll('.pt-answer-button')) as HTMLButtonElement[];
     const progress = document.getElementById('ptProgress');
-    const navLinks = Array.from(document.querySelectorAll('.pt-question-list a'));
+    const navLinks = Array.from(document.querySelectorAll('.pt-question-list a')) as HTMLAnchorElement[];
     const discardBtn = document.getElementById('ptDiscard');
     const total = navLinks.length || document.querySelectorAll('.pt-question').length;
 
-    function getAnswers() {
+    function getAnswers(): Record<string, any> {
         try {
             return JSON.parse(localStorage.getItem(storageKey) || '{}');
         } catch (_) {
@@ -25,11 +25,11 @@
         }
     }
 
-    function setAnswers(answers) {
+    function setAnswers(answers: Record<string, any>): void {
         localStorage.setItem(storageKey, JSON.stringify(answers));
     }
 
-    function refreshProgress() {
+    function refreshProgress(): void {
         const answers = getAnswers();
         const answered = Object.keys(answers).filter(key => answers[key]).length;
 
@@ -38,23 +38,23 @@
         }
 
         navLinks.forEach(link => {
-            const id = link.getAttribute('href')?.replace('#question-', '');
+            const id = link.getAttribute('href')?.replace('#question-', '') || '';
             link.classList.toggle('is-answered', Boolean(answers[id]));
         });
     }
 
-    function restoreAnswers() {
+    function restoreAnswers(): void {
         const answers = getAnswers();
 
         buttons.forEach(button => {
-            const question = button.dataset.question;
-            const value = button.dataset.value;
+            const question = button.dataset.question || '';
+            const value = button.dataset.value || '';
             const selected = String(answers[question] || '') === String(value);
 
             button.classList.toggle('is-selected', selected);
             button.setAttribute('aria-pressed', selected ? 'true' : 'false');
 
-            const input = form.querySelector(`input[name="q${question}"]`);
+            const input = form?.querySelector(`input[name="q${question}"]`) as HTMLInputElement | null;
             if (input && selected) input.value = value;
         });
 
@@ -63,8 +63,8 @@
 
     buttons.forEach(button => {
         button.addEventListener('click', () => {
-            const question = button.dataset.question;
-            const value = button.dataset.value;
+            const question = button.dataset.question || '';
+            const value = button.dataset.value || '';
             const answers = getAnswers();
 
             answers[question] = value;
@@ -78,7 +78,7 @@
                     item.setAttribute('aria-pressed', selected ? 'true' : 'false');
                 });
 
-            const input = form.querySelector(`input[name="q${question}"]`);
+            const input = form?.querySelector(`input[name="q${question}"]`) as HTMLInputElement | null;
             if (input) input.value = value;
 
             refreshProgress();
@@ -87,7 +87,8 @@
 
     navLinks.forEach(link => {
         link.addEventListener('click', event => {
-            const target = document.querySelector(link.getAttribute('href'));
+            const href = link.getAttribute('href');
+            const target = href ? document.querySelector(href) : null;
             if (!target) return;
 
             event.preventDefault();
@@ -122,7 +123,7 @@
                             metadata: existingMetadata,
                         });
                     }
-                } catch (err) {
+                } catch (err: any) {
                     console.warn(`[${testKey}] Could not clear API answers:`, err.message);
                 }
             }
@@ -148,7 +149,7 @@
                 const session = await API.requireSession();
 
                 if (session?.profileId) {
-                    let existingMetadata = {};
+                    let existingMetadata: Record<string, any> = {};
                     try {
                         const profile = await API.apiFetch('GET', `/profiles/${session.profileId}`);
                         existingMetadata = profile?.metadata ?? {};
@@ -173,7 +174,7 @@
         alert(`Test updated locally.\n${answered}/${total} questions answered.`);
     });
 
-    async function loadFromProfile() {
+    async function loadFromProfile(): Promise<void> {
         if (!API) {
             restoreAnswers();
             return;
@@ -195,7 +196,7 @@
             }
 
             restoreAnswers();
-        } catch (err) {
+        } catch (err: any) {
             console.warn(`[${testKey}] Could not load profile answers:`, err.message);
             restoreAnswers();
         }
