@@ -36,19 +36,6 @@ echo str_replace('</head>', "    {$testsStylesheet}\n</head>", $sharedHeader);
                     <span role="cell"></span>
                 </a>
 
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">▥</span> Company</span>
-                    <span role="cell">Preference</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
-                </a>
-
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">▣</span> Job</span>
-                    <span role="cell">Preference</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
-                </a>
 
                 <a class="tp-test-row" role="row" href="tests-preferences/big-5.php">
                     <span class="tp-test-name" role="cell"><span class="tp-icon">♙</span> Big 5</span>
@@ -90,48 +77,6 @@ echo str_replace('</head>', "    {$testsStylesheet}\n</head>", $sharedHeader);
                     <span role="cell">Personality Test</span>
                     <span class="tp-status" role="cell">Completed</span>
                     <span role="cell"><span class="tp-result-button">View Result</span></span>
-                </a>
-
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">ⓘ</span> About Me</span>
-                    <span role="cell">Test</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
-                </a>
-
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">♡</span> Lifestyle</span>
-                    <span role="cell">Test</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
-                </a>
-
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">⌁</span> Working Time</span>
-                    <span role="cell">Test</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
-                </a>
-
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">☻</span> Wellbeing</span>
-                    <span role="cell">Test</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
-                </a>
-
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">ϟ</span> Values</span>
-                    <span role="cell">Preference</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
-                </a>
-
-                <a class="tp-test-row" role="row" href="#">
-                    <span class="tp-test-name" role="cell"><span class="tp-icon">⚙</span> Preferences</span>
-                    <span role="cell">Preference</span>
-                    <span class="tp-status" role="cell">Completed</span>
-                    <span role="cell"></span>
                 </a>
             </div>
         </section>
