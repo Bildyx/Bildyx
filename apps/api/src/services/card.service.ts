@@ -183,7 +183,7 @@ export async function renderCardHtml(
     ? fs.readFileSync(cssPath, "utf-8")
     : "";
 
-  return ejs.renderFile(
+  const html = await ejs.renderFile(
     templatePath,
     {
       ...data,
@@ -195,4 +195,13 @@ export async function renderCardHtml(
     },
     { async: true },
   );
+
+  if (organizationCss) {
+    return html.replace(
+      /<link rel="stylesheet" href="\/css\/organization-card\.css">/g,
+      `<style>${organizationCss}</style>`
+    );
+  }
+
+  return html;
 }

@@ -1,100 +1,350 @@
+import { getSession } from "./helpers";
+import { OrganizationService } from "../services/organization.service";
 import { CardService } from "../services/card.service";
+import { CityService } from "../services/city.service";
 
+const organizationService = new OrganizationService();
 const cardService = new CardService();
+const cityService = new CityService();
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // ─── Filtre de recherche ──────────────────────────────────
-    const input = document.querySelector('#targetCity') as HTMLInputElement | null;
-    const cards = Array.from(document.querySelectorAll('.tl-info-card')) as HTMLElement[];
-    const rows = Array.from(document.querySelectorAll('.tl-card-row')) as HTMLElement[];
+function alignCardHeight(slot: HTMLElement) {
+  const iframe = slot.querySelector("iframe");
+  if (!iframe) return;
+  try {
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    const wrap = doc?.getElementById("scaleWrap");
+    if (!wrap) return;
 
-    if (input) {
-        const filterCards = () => {
-            const query = input.value.trim().toLowerCase();
-
-            cards.forEach((card) => {
-                const searchable = `${card.dataset.city || ''} ${card.dataset.name || ''} ${card.textContent}`.toLowerCase();
-                card.hidden = query.length > 0 && !searchable.includes(query);
-            });
-
-            rows.forEach((row) => {
-                const visibleCards = Array.from(row.querySelectorAll('.tl-info-card')).filter((card) => !(card as HTMLElement).hidden);
-                row.classList.toggle('is-empty', visibleCards.length === 0);
-            });
-        };
-
-        input.addEventListener('input', filterCards);
+    wrap.style.height = "auto";
+    const mainCard = wrap.querySelector(".main-card") as HTMLElement | null;
+    if (mainCard) {
+      mainCard.style.setProperty("height", "auto", "important");
     }
 
-    // ─── Chargement des cartes API ────────────────────────────
-    /**
-     * Charge le HTML d'une carte depuis l'API et l'insère dans le slot.
-     */
-    async function loadCard(slot: HTMLElement, type: string, id: string, extended = false) {
-        slot.textContent = '...';
-        try {
-            const extParam = extended ? 'true' : 'false';
-            let html = '';
+    const cardWidth = wrap.offsetWidth || 500;
+    const cardHeight = wrap.scrollHeight || 400;
+    const containerWidth = slot.clientWidth || iframe.clientWidth || 250;
 
-            switch (type) {
-                case 'country':
-                    html = await cardService.getCountry(id, extParam);
-                    break;
-                case 'city':
-                    html = await cardService.getCity(id, extParam);
-                    break;
-                case 'job':
-                    html = await cardService.getJob(id, extParam);
-                    break;
-                case 'organization':
-                    html = await cardService.getOrganization(id, extParam);
-                    break;
-                case 'university':
-                    html = await cardService.getOrganization(id, extParam);
-                    break;
-                case 'skill':
-                    html = await cardService.getSkill(id, extParam);
-                    break;
-                case 'industry':
-                    html = await cardService.getIndustry(id, extParam);
-                    break;
-                case 'certification':
-                    html = await cardService.getCertification(id, extParam);
-                    break;
-                case 'subject':
-                    html = await cardService.getSubject(id, extParam);
-                    break;
-                case 'degree':
-                    html = await cardService.getDegree(id, extParam);
-                    break;
-                default:
-                    throw new Error(`Unsupported card type: ${type}`);
-            }
+    const scale = Math.min(containerWidth / cardWidth, 1);
+    const scaledHeight = cardHeight * scale;
 
-            // Créer un wrapper et insérer le HTML de la carte
-            const wrapper = document.createElement('div');
-            wrapper.className = 'api-card-wrapper';
-            wrapper.innerHTML = html;
-            slot.replaceWith(wrapper);
-        } catch (err: any) {
-            console.warn(`[target-list.ts] Could not load card ${type}/${id}:`, err.message);
-            slot.textContent = `⚠ ${type}/${id}`;
-            slot.classList.add('is-error');
-        }
+    slot.style.minHeight = "auto";
+    slot.style.height = `${scaledHeight}px`;
+    iframe.style.height = `${scaledHeight}px`;
+
+    const heightNeeded = scaledHeight / scale;
+    wrap.style.height = `${heightNeeded}px`;
+
+    wrap.style.transform = `scale(${scale})`;
+    wrap.style.top = `0px`;
+    wrap.style.left = `${(containerWidth - cardWidth * scale) / 2}px`;
+
+    if (mainCard) {
+      mainCard.style.setProperty("height", "100%", "important");
+    }
+  } catch (err) {
+    console.error("[target-list] Error aligning card height:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const companiesRow = document.querySelector(
+    '[data-target-list="companies"]',
+  ) as HTMLElement | null;
+  const governmentRow = document.querySelector(
+    '[data-target-list="government"]',
+  ) as HTMLElement | null;
+  const input = document.querySelector(
+    "#targetCity",
+  ) as HTMLInputElement | null;
+
+  const session = getSession();
+  if (!session?.userId) {
+    window.location.href = "login.php";
+    return;
+  }
+
+  const PAGE_SIZE = 4;
+  const cityMap = new Map<string, string>();
+  let companiesList: any[] = [];
+  let governmentList: any[] = [];
+  let filteredCompanies: any[] = [];
+  let filteredGovernment: any[] = [];
+  let currentCompaniesPage = 1;
+  let currentGovernmentPage = 1;
+
+  // ─── Load Card Function ──────────────────────────────────
+  async function loadCard(slot: HTMLElement, id: string) {
+    try {
+      const html = await cardService.getOrganization(id);
+
+      slot.classList.remove("is-loading");
+      slot.classList.add("is-filled");
+
+      const iframe = document.createElement("iframe");
+      iframe.className = "org-card-frame";
+      iframe.srcdoc = `
+                <html>
+                <head>
+                    <style>
+                        html, body {
+                            margin: 0;
+                            padding: 0;
+                            overflow: hidden;
+                            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+                        }
+                        .scale-wrap {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            transform-origin: top left;
+                            width: 500px;
+                        }
+                        .main-card {
+                            height: 100% !important;
+                            box-sizing: border-box;
+                        }
+                        .footer-row {
+                            margin-top: auto !important;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="scale-wrap" id="scaleWrap">${html}</div>
+                </body>
+                </html>
+            `;
+
+      iframe.addEventListener("load", () => {
+        alignCardHeight(slot);
+      });
+
+      slot.innerHTML = "";
+      slot.appendChild(iframe);
+    } catch (err: any) {
+      console.warn(
+        `[target-list.ts] Could not load card organization/${id}:`,
+        err.message,
+      );
+      slot.classList.remove("is-loading");
+      slot.textContent = `⚠ Failed to load card`;
+      slot.classList.add("is-error");
+    }
+  }
+
+  // ─── Render Page Function ────────────────────────────────
+  function renderPage(type: "companies" | "government", list: any[]) {
+    const row = type === "companies" ? companiesRow : governmentRow;
+    const pagination = document.querySelector(
+      `[data-pagination-for="${type}"]`,
+    ) as HTMLElement | null;
+    if (!row) return;
+
+    row.innerHTML = "";
+    row.classList.remove("is-empty");
+
+    const totalItems = list.length;
+    const totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
+    const currentPage =
+      type === "companies" ? currentCompaniesPage : currentGovernmentPage;
+
+    const pageToRender = Math.min(currentPage, totalPages);
+    if (type === "companies") currentCompaniesPage = pageToRender;
+    else currentGovernmentPage = pageToRender;
+
+    if (totalItems === 0) {
+      row.classList.add("is-empty");
+      if (pagination) pagination.style.display = "none";
+      return;
     }
 
-    // Chercher tous les slots avec des attributs data-card-type et data-card-id
-    const cardSlots = document.querySelectorAll('.backend-slot[data-card-type][data-card-id]');
+    if (pagination) {
+      pagination.style.display = totalPages > 1 ? "flex" : "none";
+      const prevBtn = pagination.querySelector(
+        ".is-prev",
+      ) as HTMLButtonElement | null;
+      const nextBtn = pagination.querySelector(
+        ".is-next",
+      ) as HTMLButtonElement | null;
+      const info = pagination.querySelector(
+        ".tl-page-info",
+      ) as HTMLElement | null;
 
-    const loadPromises = Array.from(cardSlots).map(element => {
-        const slot = element as HTMLElement;
-        const type = slot.dataset.cardType || '';
-        const id = slot.dataset.cardId || '';
-        const extended = slot.dataset.extended === 'true';
-        return loadCard(slot, type, id, extended);
+      if (prevBtn) prevBtn.disabled = pageToRender <= 1;
+      if (nextBtn) nextBtn.disabled = pageToRender >= totalPages;
+      if (info) info.textContent = `Page ${pageToRender} of ${totalPages}`;
+    }
+
+    const startIndex = (pageToRender - 1) * PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
+    const pageItems = list.slice(startIndex, endIndex);
+
+    pageItems.forEach((org) => {
+      if (!org.id) return;
+      const cityName = org.city_id ? cityMap.get(org.city_id) || "" : "";
+      const slot = document.createElement("div");
+      slot.className = "backend-slot is-loading";
+      slot.dataset.city = cityName.toLowerCase();
+      slot.dataset.name = (org.name || "").toLowerCase();
+      slot.innerHTML = '<div class="skeleton-loader skeleton-card"></div>';
+      row.appendChild(slot);
+
+      loadCard(slot, org.id);
+    });
+  }
+
+  // ─── Filter and Render ──────────────────────────────────
+  const filterAndRender = () => {
+    const query = input ? input.value.trim().toLowerCase() : "";
+
+    filteredCompanies = companiesList.filter((org) => {
+      const cityName = org.city_id ? cityMap.get(org.city_id) || "" : "";
+      const searchable = `${org.name || ""} ${cityName}`.toLowerCase();
+      return searchable.includes(query);
     });
 
-    if (loadPromises.length > 0) {
-        await Promise.allSettled(loadPromises);
+    filteredGovernment = governmentList.filter((org) => {
+      const cityName = org.city_id ? cityMap.get(org.city_id) || "" : "";
+      const searchable = `${org.name || ""} ${cityName}`.toLowerCase();
+      return searchable.includes(query);
+    });
+
+    currentCompaniesPage = 1;
+    currentGovernmentPage = 1;
+
+    renderPage("companies", filteredCompanies);
+    renderPage("government", filteredGovernment);
+  };
+
+  // ─── Setup Pagination Listeners ──────────────────────────
+  const setupPaginationListeners = (type: "companies" | "government") => {
+    const pagination = document.querySelector(
+      `[data-pagination-for="${type}"]`,
+    );
+    if (!pagination) return;
+
+    const prevBtn = pagination.querySelector(".is-prev");
+    const nextBtn = pagination.querySelector(".is-next");
+
+    prevBtn?.addEventListener("click", () => {
+      if (type === "companies") {
+        if (currentCompaniesPage > 1) {
+          currentCompaniesPage--;
+          renderPage("companies", filteredCompanies);
+        }
+      } else {
+        if (currentGovernmentPage > 1) {
+          currentGovernmentPage--;
+          renderPage("government", filteredGovernment);
+        }
+      }
+    });
+
+    nextBtn?.addEventListener("click", () => {
+      const list =
+        type === "companies" ? filteredCompanies : filteredGovernment;
+      const currentPage =
+        type === "companies" ? currentCompaniesPage : currentGovernmentPage;
+      const totalPages = Math.ceil(list.length / PAGE_SIZE);
+
+      if (currentPage < totalPages) {
+        if (type === "companies") {
+          currentCompaniesPage++;
+          renderPage("companies", filteredCompanies);
+        } else {
+          currentGovernmentPage++;
+          renderPage("government", filteredGovernment);
+        }
+      }
+    });
+  };
+
+  const performSearch = async (query: string) => {
+    if (companiesRow) {
+      companiesRow.innerHTML = `
+        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
+        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
+      `;
+      companiesRow.classList.remove("is-empty");
     }
+    if (governmentRow) {
+      governmentRow.innerHTML = `
+        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
+        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
+      `;
+      governmentRow.classList.remove("is-empty");
+    }
+
+    try {
+      const orgs = await organizationService.getAll({
+        city: query || undefined,
+      });
+
+      companiesList = orgs.filter(
+        (org) =>
+          ![
+            "GOVERNMENT",
+            "STATE_GOVERNMENT",
+            "CITY_GOVERNMENT",
+            "CENTRAL_BANK",
+            "COURT",
+            "EMBASSY",
+          ].includes(org.subtype || ""),
+      );
+      governmentList = orgs.filter((org) =>
+        [
+          "GOVERNMENT",
+          "STATE_GOVERNMENT",
+          "CITY_GOVERNMENT",
+          "CENTRAL_BANK",
+          "COURT",
+          "EMBASSY",
+        ].includes(org.subtype || ""),
+      );
+
+      filteredCompanies = [...companiesList];
+      filteredGovernment = [...governmentList];
+
+      currentCompaniesPage = 1;
+      currentGovernmentPage = 1;
+
+      renderPage("companies", filteredCompanies);
+      renderPage("government", filteredGovernment);
+    } catch (err) {
+      console.error("Failed to load target list data:", err);
+    }
+  };
+
+  setupPaginationListeners("companies");
+  setupPaginationListeners("government");
+
+  try {
+    const cities = await cityService.getAll();
+    cities.forEach((city) => {
+      if (city.id && city.name) {
+        cityMap.set(city.id, city.name);
+      }
+    });
+
+    await performSearch("");
+  } catch (err) {
+    console.error("Failed to fetch initial data:", err);
+  }
+
+  if (input) {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        performSearch(input.value.trim());
+      }
+    });
+  }
+
+  // ─── Window Resize Alignment ─────────────────────────────
+  window.addEventListener("resize", () => {
+    const slots = Array.from(
+      document.querySelectorAll(".backend-slot.is-filled"),
+    ) as HTMLElement[];
+    slots.forEach(alignCardHeight);
+  });
 });

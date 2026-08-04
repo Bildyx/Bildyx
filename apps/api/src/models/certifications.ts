@@ -22,9 +22,8 @@ export const CertificationSchema = z.object({
   updated_at: z.date(),
 });
 
-// GET
 export const GetCertificationsSchema = z.object({
-  organizationId: z.uuid().optional(),
+  organizationId: z.uuid(),
   name: z.string().optional(),
   category: CertificationCategoryEnum.optional(),
 });

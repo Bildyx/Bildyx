@@ -47,6 +47,7 @@ export const OrganizationSchema = z.object({
 export const GetOrganizationsSchema = z.object({
   name: z.string().optional(),
   subtype: OrganizationSubtypeEnum.optional(),
+  city: z.string().optional(),
 });
 
 export const GetOrganizationSchema = z.object({
