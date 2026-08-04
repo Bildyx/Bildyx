@@ -1,0 +1,416 @@
+:root {
+    --company-blue: #2447f4;
+    --company-blue-soft: #e7ebff;
+    --company-text: #061126;
+    --company-muted: #5d6679;
+    --company-border: #cbd5ff;
+    --company-white: #ffffff;
+    --company-bg: #f7f8fc;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body.company-page {
+    background: var(--company-blue);
+}
+
+.company-page .site-footer {
+    margin-top: 0;
+}
+
+.company-page-shell {
+    min-height: calc(100vh - 72px);
+    background: var(--company-blue);
+    color: var(--company-text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 18px 0 28px;
+}
+
+.company-layout {
+    width: min(1480px, calc(100% - 64px));
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr) 170px;
+    gap: 22px;
+    align-items: start;
+}
+
+.company-left-rail {
+    display: grid;
+    gap: 22px;
+    color: #fff;
+}
+
+.company-left-rail h2 {
+    margin: 0;
+    text-align: center;
+    font-size: 19px;
+    color: #fff;
+}
+
+.company-archive-link {
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 800;
+    padding: 10px;
+}
+
+.company-main-card {
+    background: var(--company-bg);
+    min-height: 900px;
+    padding: 28px 28px 42px;
+}
+
+.company-title-bar {
+    text-align: center;
+    margin: -18px 0 26px;
+}
+
+.company-title-bar h1 {
+    margin: 0;
+    color: var(--company-blue);
+    font-size: 18px;
+    letter-spacing: .12em;
+}
+
+.company-section + .company-section {
+    margin-top: 34px;
+}
+
+.company-section > h2 {
+    margin: 0 0 16px;
+    font-size: 17px;
+}
+
+.team-box {
+    border: 1px solid var(--company-border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 245px;
+    background: #fff;
+}
+
+.team-box-main {
+    padding: 18px;
+    min-width: 0;
+}
+
+.team-tabs,
+.product-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 18px;
+}
+
+.team-tabs button,
+.product-tabs button {
+    border: 1px solid #dce2ef;
+    background: #f2f4f8;
+    color: var(--company-muted);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.team-tabs button.is-active,
+.product-tabs button.is-active {
+    background: var(--company-blue);
+    border-color: var(--company-blue);
+    color: #fff;
+}
+
+.people-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.people-grid article {
+    min-height: 86px;
+    background: #f1f2f5;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    gap: 3px;
+    text-align: center;
+    padding: 10px;
+}
+
+.people-grid article span {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e3e8f5, #c9d3e8);
+    border: 2px solid #fff;
+}
+
+.people-grid strong {
+    font-size: 12px;
+}
+
+.people-grid small {
+    color: var(--company-muted);
+    font-size: 10px;
+}
+
+.team-box-main h3 {
+    margin: 20px 0 10px;
+    font-size: 14px;
+}
+
+.office-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.office-list button {
+    border: 0;
+    background: transparent;
+    color: var(--company-muted);
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.office-list span {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd38a, #3159bd);
+    border: 2px solid transparent;
+}
+
+.office-list button.is-active {
+    color: var(--company-blue);
+}
+
+.office-list button.is-active span {
+    border-color: var(--company-blue);
+}
+
+.team-profile {
+    background: var(--company-blue);
+    color: #fff;
+    padding: 18px;
+    display: grid;
+    align-content: start;
+    gap: 12px;
+}
+
+.team-profile h3,
+.team-profile h4,
+.team-profile p {
+    margin: 0;
+}
+
+.team-profile h3 {
+    font-size: 15px;
+}
+
+.team-profile > span {
+    width: fit-content;
+    background: #fff;
+    color: var(--company-blue);
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.team-profile h4 {
+    font-size: 12px;
+}
+
+.team-profile p {
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgba(255,255,255,.88);
+}
+
+.team-profile .warning {
+    color: #ffbbc2;
+}
+
+.team-profile div {
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+}
+
+.team-profile div button {
+    border: 1px solid rgba(255,255,255,.45);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-weight: 800;
+}
+
+.team-profile div button:first-child {
+    background: #fff;
+    color: var(--company-blue);
+}
+
+.company-slot {
+    min-height: 360px;
+    border: 2px dashed var(--company-border);
+    border-radius: 24px;
+    background: #fff;
+    color: var(--company-blue);
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 10px;
+    text-align: center;
+    padding: 28px;
+}
+
+.company-slot--side {
+    min-height: 390px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 3px var(--company-blue), 0 10px 28px rgba(0, 0, 0, .08);
+}
+
+.company-slot > span,
+.company-photo-slot > span {
+    width: 54px;
+    height: 54px;
+    border: 2px solid var(--company-border);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+}
+
+.company-slot strong {
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.company-slot p {
+    margin: 0;
+    color: var(--company-muted);
+    font-size: 13px;
+}
+
+.slot-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr) 28px;
+    gap: 20px;
+    align-items: center;
+}
+
+.arrow {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #e2e6f0;
+    background: #fff;
+    color: var(--company-muted);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+.dots i {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #c8ceda;
+}
+
+.dots i:first-child {
+    width: 22px;
+    background: var(--company-blue);
+}
+
+.photo-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    padding: 0 40px;
+}
+
+.company-photo-slot {
+    height: 150px;
+    border: 2px dashed var(--company-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--company-blue);
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 8px;
+}
+
+.company-tip-card {
+    background: #fff;
+    color: var(--company-blue);
+    border-radius: 10px;
+    padding: 20px 18px;
+    margin-top: 32px;
+}
+
+.company-tip-card h2 {
+    margin: 0 0 12px;
+    font-size: 13px;
+}
+
+.company-tip-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    font-style: italic;
+}
+
+@media (max-width: 1180px) {
+    .company-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .company-left-rail,
+    .company-tip-card {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .company-layout {
+        width: min(100% - 20px, 980px);
+    }
+
+    .team-box,
+    .people-grid,
+    .photo-row {
+        grid-template-columns: 1fr;
+    }
+
+    .slot-row {
+        grid-template-columns: 1fr;
+    }
+
+    .arrow {
+        display: none;
+    }
+
+    .company-main-card {
+        padding: 20px;
+    }
+}
