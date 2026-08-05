@@ -6,387 +6,62 @@ import { UserProfileService } from "../services/user-profile.service";
 const organizationService = new OrganizationService();
 const cardService = new CardService();
 const profileService = new UserProfileService();
+const GOVERNMENT_SUBTYPES = ["GOVERNMENT","STATE_GOVERNMENT","CITY_GOVERNMENT","CENTRAL_BANK","COURT","EMBASSY"];
+const PAGE_SIZE = 4;
+type TargetType = "companies" | "government";
+type MatchedOrg = { org:any; score:number; keywords:string[]; matchCount:number };
 
 function alignCardHeight(slot: HTMLElement) {
-  const iframe = slot.querySelector("iframe");
-  if (!iframe) return;
+  const iframe = slot.querySelector("iframe"); if (!iframe) return;
   try {
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    const wrap = doc?.getElementById("scaleWrap");
-    if (!wrap) return;
-
+    const wrap = doc?.getElementById("scaleWrap"); if (!wrap) return;
     wrap.style.height = "auto";
     const mainCard = wrap.querySelector(".main-card") as HTMLElement | null;
-    if (mainCard) {
-      mainCard.style.setProperty("height", "auto", "important");
-    }
-
+    if (mainCard) mainCard.style.setProperty("height", "auto", "important");
     const cardWidth = wrap.offsetWidth || 500;
     const cardHeight = wrap.scrollHeight || 400;
     const containerWidth = slot.clientWidth || iframe.clientWidth || 250;
-
     const scale = Math.min(containerWidth / cardWidth, 1);
     const scaledHeight = cardHeight * scale;
-
-    slot.style.minHeight = "auto";
-    slot.style.height = `${scaledHeight}px`;
-    iframe.style.height = `${scaledHeight}px`;
-
-    const heightNeeded = scaledHeight / scale;
-    wrap.style.height = `${heightNeeded}px`;
-
-    wrap.style.transform = `scale(${scale})`;
-    wrap.style.top = `0px`;
-    wrap.style.left = `${(containerWidth - cardWidth * scale) / 2}px`;
-
-    if (mainCard) {
-      mainCard.style.setProperty("height", "100%", "important");
-    }
-  } catch (err) {
-    console.error("[target-list] Error aligning card height:", err);
-  }
+    slot.style.minHeight = "auto"; slot.style.height = `${scaledHeight}px`; iframe.style.height = `${scaledHeight}px`;
+    wrap.style.height = `${scaledHeight / scale}px`;
+    wrap.style.transform = `scale(${scale})`; wrap.style.top = "0px"; wrap.style.left = `${(containerWidth - cardWidth * scale) / 2}px`;
+    if (mainCard) mainCard.style.setProperty("height", "100%", "important");
+  } catch (err) { console.error("[target-list] Error aligning card height:", err); }
 }
+function normalizeText(value: unknown) { return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); }
+function toTextList(value: unknown) { if (Array.isArray(value)) return value.map(normalizeText).filter(Boolean); if (typeof value === "string") return value.split(/[;,|]/).map(normalizeText).filter(Boolean); return []; }
+function getOrgKeywords(org:any){ return Array.from(new Set([...toTextList(org.research_areas),...toTextList(org.services),...toTextList(org.products),...toTextList(org.product_services),...toTextList(org.industries),...toTextList(org.industry),...toTextList(org.tags)].filter(Boolean))); }
+function getOrgText(org:any){ return normalizeText([org.name,org.display_name,org.title,org.city,org.country,org.location,org.type,org.subtype,org.category,org.industry,org.description,org.summary,...getOrgKeywords(org)].join(" ")); }
+function getEmployeeCount(org:any){ const raw = org.employee_count ?? org.employees_count ?? org.number_of_employees ?? org.no_of_employees ?? org.employees ?? org.size ?? org.organization_size ?? ""; if(typeof raw==="number") return raw; const m=String(raw).replace(/,/g,"").match(/\d+/); return m ? Number(m[0]) : null; }
+function getOrgSizeGroup(org:any){ const s=normalizeText(org.organization_size || org.size || org.company_size || ""); if(s.includes("micro")) return "micro"; if(s.includes("small")) return "small"; if(s.includes("medium")) return "medium"; if(s.includes("mid")) return "mid-market"; if(s.includes("large")||s.includes("enterprise")) return "large-established"; const e=getEmployeeCount(org); if(!e) return ""; if(e<=10) return "micro"; if(e<=50) return "small"; if(e<=250) return "medium"; if(e<=1000) return "mid-market"; if(e<=10000) return "big"; return "large-established"; }
+function getWorkForGroup(org:any){ const text=getOrgText(org), subtype=normalizeText(org.subtype); if(GOVERNMENT_SUBTYPES.includes(String(org.subtype || "")) || subtype.includes("government") || text.includes("government") || text.includes("public service") || text.includes("public sector") || text.includes("embassy") || text.includes("court")) return "government"; if(text.includes("hospital")||text.includes("healthcare")||text.includes("health care")||text.includes("medical")||text.includes("clinic")) return "healthcare"; if(text.includes("education")||text.includes("research")||text.includes("university")||text.includes("school")||text.includes("laboratory")) return "education"; if(text.includes("non-profit")||text.includes("nonprofit")||text.includes("ngo")||text.includes("community")||text.includes("advocacy")) return "nonprofit"; if(text.includes("international")||text.includes("diplomatic")||text.includes("united nations")||text.includes("embassy")) return "international"; if(text.includes("culture")||text.includes("museum")||text.includes("heritage")||text.includes("park")) return "culture"; return "companies"; }
+function isGovernmentOrg(org:any){ return GOVERNMENT_SUBTYPES.includes(String(org.subtype || "")); }
+function getCheckedValues(name:string){ return Array.from(document.querySelectorAll<HTMLInputElement>(`[data-filter="${name}"]:checked`)).map(i=>i.value); }
+function debounce(callback:()=>void, delay=350){ let timeoutId:number|undefined; return () => { window.clearTimeout(timeoutId); timeoutId = window.setTimeout(callback, delay); }; }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const companiesRow = document.querySelector(
-    '[data-target-list="companies"]',
-  ) as HTMLElement | null;
-  const governmentRow = document.querySelector(
-    '[data-target-list="government"]',
-  ) as HTMLElement | null;
-  const input = document.querySelector(
-    "#targetCity",
-  ) as HTMLInputElement | null;
+  const companiesRow = document.querySelector('[data-target-list="companies"]') as HTMLElement | null;
+  const governmentRow = document.querySelector('[data-target-list="government"]') as HTMLElement | null;
+  const cityInput = document.querySelector("#targetCity") as HTMLInputElement | null;
+  const countryInput = document.querySelector("#targetCountry") as HTMLInputElement | null;
+  const keywordInput = document.querySelector("#targetKeyword") as HTMLInputElement | null;
+  const resetFiltersButton = document.querySelector("#resetTargetFilters") as HTMLButtonElement | null;
+  const session = getSession(); if(!session?.userId){ window.location.href="login.php"; return; }
+  let allMatchedOrgs:MatchedOrg[]=[]; let filteredCompanies:MatchedOrg[]=[]; let filteredGovernment:MatchedOrg[]=[]; let currentCompaniesPage=1; let currentGovernmentPage=1; let userWorkOrgIds:string[]=[]; const userExperienceKeywords=new Set<string>();
 
-  const session = getSession();
-  if (!session?.userId) {
-    window.location.href = "login.php";
-    return;
-  }
-
-  const PAGE_SIZE = 4;
-  let companiesList: any[] = [];
-  let governmentList: any[] = [];
-  let filteredCompanies: any[] = [];
-  let filteredGovernment: any[] = [];
-  let currentCompaniesPage = 1;
-  let currentGovernmentPage = 1;
-
-  // ─── Load Card Function ──────────────────────────────────
-  async function loadCard(slot: HTMLElement, id: string, score: number) {
-    try {
-      const html = await cardService.getOrganization(id);
-
-      slot.classList.remove("is-loading");
-      slot.classList.add("is-filled");
-
-      const iframe = document.createElement("iframe");
-      iframe.className = "org-card-frame";
-      iframe.srcdoc = `
-                <html>
-                <head>
-                    <style>
-                        html, body {
-                            margin: 0;
-                            padding: 0;
-                            overflow: hidden;
-                            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-                        }
-                        .scale-wrap {
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            transform-origin: top left;
-                            width: 500px;
-                        }
-                        .main-card {
-                            height: 100% !important;
-                            box-sizing: border-box;
-                        }
-                        .footer-row {
-                            margin-top: auto !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="scale-wrap" id="scaleWrap">${html}</div>
-                </body>
-                </html>
-            `;
-
-      iframe.addEventListener("load", () => {
-        alignCardHeight(slot);
-      });
-
-      slot.innerHTML = "";
-      slot.appendChild(iframe);
-
-      const badge = document.createElement("span");
-      badge.className = "tl-match-badge";
-      badge.textContent = `${score}% Match`;
-      slot.appendChild(badge);
-    } catch (err: any) {
-      console.warn(
-        `[target-list.ts] Could not load card organization/${id}:`,
-        err.message,
-      );
-      slot.classList.remove("is-loading");
-      slot.textContent = `⚠ Failed to load card`;
-      slot.classList.add("is-error");
-    }
-  }
-
-  // ─── Render Page Function ────────────────────────────────
-  function renderPage(type: "companies" | "government", list: any[]) {
-    const row = type === "companies" ? companiesRow : governmentRow;
-    const pagination = document.querySelector(
-      `[data-pagination-for="${type}"]`,
-    ) as HTMLElement | null;
-    if (!row) return;
-
-    row.innerHTML = "";
-    row.classList.remove("is-empty");
-
-    const totalItems = list.length;
-    const totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
-    const currentPage =
-      type === "companies" ? currentCompaniesPage : currentGovernmentPage;
-
-    const pageToRender = Math.min(currentPage, totalPages);
-    if (type === "companies") currentCompaniesPage = pageToRender;
-    else currentGovernmentPage = pageToRender;
-
-    if (totalItems === 0) {
-      row.classList.add("is-empty");
-      if (pagination) pagination.style.display = "none";
-      return;
-    }
-
-    if (pagination) {
-      pagination.style.display = totalPages > 1 ? "flex" : "none";
-      const prevBtn = pagination.querySelector(
-        ".is-prev",
-      ) as HTMLButtonElement | null;
-      const nextBtn = pagination.querySelector(
-        ".is-next",
-      ) as HTMLButtonElement | null;
-      const info = pagination.querySelector(
-        ".tl-page-info",
-      ) as HTMLElement | null;
-
-      if (prevBtn) prevBtn.disabled = pageToRender <= 1;
-      if (nextBtn) nextBtn.disabled = pageToRender >= totalPages;
-      if (info) info.textContent = `Page ${pageToRender} of ${totalPages}`;
-    }
-
-    const startIndex = (pageToRender - 1) * PAGE_SIZE;
-    const endIndex = startIndex + PAGE_SIZE;
-    const pageItems = list.slice(startIndex, endIndex);
-
-    pageItems.forEach(({ org, score }) => {
-      if (!org.id) return;
-      const slot = document.createElement("div");
-      slot.className = "backend-slot is-loading";
-      slot.innerHTML = '<div class="skeleton-loader skeleton-card"></div>';
-      row.appendChild(slot);
-
-      loadCard(slot, org.id, score);
-    });
-  }
-
-  // ─── Setup Pagination Listeners ──────────────────────────
-  const setupPaginationListeners = (type: "companies" | "government") => {
-    const pagination = document.querySelector(
-      `[data-pagination-for="${type}"]`,
-    );
-    if (!pagination) return;
-
-    const prevBtn = pagination.querySelector(".is-prev");
-    const nextBtn = pagination.querySelector(".is-next");
-
-    prevBtn?.addEventListener("click", () => {
-      if (type === "companies") {
-        if (currentCompaniesPage > 1) {
-          currentCompaniesPage--;
-          renderPage("companies", filteredCompanies);
-        }
-      } else {
-        if (currentGovernmentPage > 1) {
-          currentGovernmentPage--;
-          renderPage("government", filteredGovernment);
-        }
-      }
-    });
-
-    nextBtn?.addEventListener("click", () => {
-      const list =
-        type === "companies" ? filteredCompanies : filteredGovernment;
-      const currentPage =
-        type === "companies" ? currentCompaniesPage : currentGovernmentPage;
-      const totalPages = Math.ceil(list.length / PAGE_SIZE);
-
-      if (currentPage < totalPages) {
-        if (type === "companies") {
-          currentCompaniesPage++;
-          renderPage("companies", filteredCompanies);
-        } else {
-          currentGovernmentPage++;
-          renderPage("government", filteredGovernment);
-        }
-      }
-    });
-  };
-
-  const userExperienceKeywords = new Set<string>();
-  let userWorkOrgIds: string[] = [];
-
-  const performSearch = async (query: string) => {
-    if (companiesRow) {
-      companiesRow.innerHTML = `
-        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
-        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
-      `;
-      companiesRow.classList.remove("is-empty");
-    }
-    if (governmentRow) {
-      governmentRow.innerHTML = `
-        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
-        <div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>
-      `;
-      governmentRow.classList.remove("is-empty");
-    }
-
-    try {
-      const orgs = await organizationService.getAll({
-        city: query || undefined,
-      });
-
-      // Map to compute compatibility score and filter/sort
-      const matchedOrgs = orgs
-        .map((org) => {
-          if (!org.id) return null;
-          if (userWorkOrgIds.includes(org.id)) return null;
-
-          const orgAreas = Array.isArray(org.research_areas)
-            ? org.research_areas
-            : [];
-          const orgServices = Array.isArray(org.services) ? org.services : [];
-          const keywords = [...orgAreas, ...orgServices]
-            .map((k) => k.toLowerCase().trim())
-            .filter(Boolean);
-
-          const matchingKeywords = keywords.filter((kw) =>
-            userExperienceKeywords.has(kw),
-          );
-          const matchCount = matchingKeywords.length;
-          if (matchCount === 0) return null;
-
-          // Score is the percentage of matching keywords relative to organization keywords
-          const score =
-            keywords.length > 0
-              ? Math.round((matchCount / keywords.length) * 100)
-              : 0;
-          return { org, score };
-        })
-        .filter((item): item is { org: any; score: number } => item !== null);
-
-      // Sort by score descending (highest score first)
-      matchedOrgs.sort((a, b) => b.score - a.score);
-
-      companiesList = matchedOrgs.filter(
-        ({ org }) =>
-          ![
-            "GOVERNMENT",
-            "STATE_GOVERNMENT",
-            "CITY_GOVERNMENT",
-            "CENTRAL_BANK",
-            "COURT",
-            "EMBASSY",
-          ].includes(org.subtype || ""),
-      );
-      governmentList = matchedOrgs.filter(({ org }) =>
-        [
-          "GOVERNMENT",
-          "STATE_GOVERNMENT",
-          "CITY_GOVERNMENT",
-          "CENTRAL_BANK",
-          "COURT",
-          "EMBASSY",
-        ].includes(org.subtype || ""),
-      );
-
-      filteredCompanies = [...companiesList];
-      filteredGovernment = [...governmentList];
-
-      currentCompaniesPage = 1;
-      currentGovernmentPage = 1;
-
-      renderPage("companies", filteredCompanies);
-      renderPage("government", filteredGovernment);
-    } catch (err) {
-      console.error("Failed to load target list data:", err);
-    }
-  };
-
-  setupPaginationListeners("companies");
-  setupPaginationListeners("government");
-
-  try {
-    const fullProfile = await profileService.getFullProfileByUserId(
-      session.userId,
-    );
-    if (fullProfile) {
-      // Extract unique organization IDs from user's experiences
-      userWorkOrgIds = Array.from(
-        new Set(
-          (fullProfile.experiences || [])
-            .map((exp: any) => exp.organization_id)
-            .filter(Boolean),
-        ),
-      ) as string[];
-
-      // Fetch details of those organizations
-      const userWorkOrgs = await Promise.all(
-        userWorkOrgIds.map((id) =>
-          organizationService.getById(id).catch(() => null),
-        ),
-      );
-
-      // Collect all research areas & services
-      userWorkOrgs.forEach((org) => {
-        if (!org) return;
-        if (Array.isArray(org.research_areas)) {
-          org.research_areas.forEach((ra) => {
-            if (ra) userExperienceKeywords.add(ra.toLowerCase().trim());
-          });
-        }
-        if (Array.isArray(org.services)) {
-          org.services.forEach((s) => {
-            if (s) userExperienceKeywords.add(s.toLowerCase().trim());
-          });
-        }
-      });
-    }
-
-    await performSearch("");
-  } catch (err) {
-    console.error("Failed to fetch initial data:", err);
-  }
-
-  if (input) {
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        performSearch(input.value.trim());
-      }
-    });
-  }
-
-  // ─── Window Resize Alignment ─────────────────────────────
-  window.addEventListener("resize", () => {
-    const slots = Array.from(
-      document.querySelectorAll(".backend-slot.is-filled"),
-    ) as HTMLElement[];
-    slots.forEach(alignCardHeight);
-  });
+  function setLoadingState(){ const html='<div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div><div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div>'; if(companiesRow){companiesRow.innerHTML=html; companiesRow.classList.remove("is-empty");} if(governmentRow){governmentRow.innerHTML=html; governmentRow.classList.remove("is-empty");} }
+  async function loadCard(slot:HTMLElement,id:string,score:number){ try{ const html=await cardService.getOrganization(id); slot.classList.remove("is-loading"); slot.classList.add("is-filled"); const iframe=document.createElement("iframe"); iframe.className="org-card-frame"; iframe.srcdoc=`<html><head><style>html,body{margin:0;padding:0;overflow:hidden;font-family:"Plus Jakarta Sans",system-ui,sans-serif}.scale-wrap{position:absolute;top:0;left:0;transform-origin:top left;width:500px}.main-card{height:100%!important;box-sizing:border-box}.footer-row{margin-top:auto!important}</style></head><body><div class="scale-wrap" id="scaleWrap">${html}</div></body></html>`; iframe.addEventListener("load",()=>alignCardHeight(slot)); slot.innerHTML=""; slot.appendChild(iframe); const badge=document.createElement("span"); badge.className="tl-match-badge"; badge.textContent=`${score}% Match`; slot.appendChild(badge);} catch(err:any){ console.warn(`[target-list.ts] Could not load card organization/${id}:`,err.message); slot.classList.remove("is-loading"); slot.classList.add("is-error"); slot.textContent="Failed to load card"; } }
+  function renderPage(type:TargetType,list:MatchedOrg[]){ const row=type==="companies"?companiesRow:governmentRow; const pagination=document.querySelector(`[data-pagination-for="${type}"]`) as HTMLElement|null; if(!row) return; row.innerHTML=""; row.classList.remove("is-empty"); const total=list.length; const totalPages=Math.ceil(total/PAGE_SIZE)||1; const page=Math.min(type==="companies"?currentCompaniesPage:currentGovernmentPage,totalPages); if(type==="companies") currentCompaniesPage=page; else currentGovernmentPage=page; if(total===0){ row.classList.add("is-empty"); if(pagination) pagination.style.display="none"; return; } if(pagination){ pagination.style.display=totalPages>1?"flex":"none"; const prev=pagination.querySelector(".is-prev") as HTMLButtonElement|null; const next=pagination.querySelector(".is-next") as HTMLButtonElement|null; const info=pagination.querySelector(".tl-page-info") as HTMLElement|null; if(prev) prev.disabled=page<=1; if(next) next.disabled=page>=totalPages; if(info) info.textContent=`Page ${page} of ${totalPages}`; } list.slice((page-1)*PAGE_SIZE,(page-1)*PAGE_SIZE+PAGE_SIZE).forEach(({org,score})=>{ if(!org.id) return; const slot=document.createElement("div"); slot.className="backend-slot is-loading"; slot.innerHTML='<div class="skeleton-loader skeleton-card"></div>'; row.appendChild(slot); loadCard(slot,org.id,score); }); }
+  function updateFilterCounts(){ ["size","products","workFor"].forEach(name=>{ const counter=document.querySelector(`[data-filter-count="${name}"]`) as HTMLElement|null; if(counter){ const count=getCheckedValues(name).length; counter.textContent=count?`(${count})`:""; } }); }
+  function getFilterState(){ return { city:normalizeText(cityInput?.value||""), country:normalizeText(countryInput?.value||""), keyword:normalizeText(keywordInput?.value||""), size:getCheckedValues("size"), products:getCheckedValues("products"), workFor:getCheckedValues("workFor") }; }
+  function matchesProductFilter(item:MatchedOrg, selected:string[]){ if(selected.length===0) return item.matchCount>0 || userExperienceKeywords.size===0; const exact=item.matchCount>0; const partial=item.keywords.some(k=>Array.from(userExperienceKeywords).some(u=>k.includes(u)||u.includes(k)||k.split(" ").some(p=>p.length>3&&u.includes(p)))); return selected.some(f=>f==="same"?exact:f==="similar"?(exact||partial):f==="different"?!exact:true); }
+  function applyFilters(){ const f=getFilterState(); updateFilterCounts(); let list=allMatchedOrgs.filter(item=>{ const org=item.org; const text=getOrgText(org); if(f.city && !normalizeText(org.city || org.location).includes(f.city)) return false; if(f.country && !normalizeText(org.country || org.location).includes(f.country)) return false; if(f.keyword && !text.includes(f.keyword)) return false; if(f.size.length && !f.size.includes(getOrgSizeGroup(org))) return false; if(f.workFor.length && !f.workFor.includes(getWorkForGroup(org))) return false; if(!matchesProductFilter(item,f.products)) return false; return true; }).sort((a,b)=>b.score-a.score); filteredCompanies=list.filter(({org})=>!isGovernmentOrg(org)); filteredGovernment=list.filter(({org})=>isGovernmentOrg(org)); currentCompaniesPage=1; currentGovernmentPage=1; renderPage("companies",filteredCompanies); renderPage("government",filteredGovernment); }
+  async function performSearch(){ setLoadingState(); try{ const f=getFilterState(); const orgs=await organizationService.getAll({city:f.city||undefined} as any); allMatchedOrgs=orgs.map((org:any)=>{ if(!org.id || userWorkOrgIds.includes(org.id)) return null; const keywords=getOrgKeywords(org); const matchCount=keywords.filter(k=>userExperienceKeywords.has(k)).length; const score=keywords.length>0?Math.round((matchCount/keywords.length)*100):0; return {org,score,keywords,matchCount}; }).filter((x:any):x is MatchedOrg=>x!==null); applyFilters(); } catch(err){ console.error("Failed to load target list data:",err); allMatchedOrgs=[]; applyFilters(); } }
+  function setupDropdowns(){ document.querySelectorAll<HTMLElement>("[data-filter-dropdown]").forEach(dropdown=>{ const toggle=dropdown.querySelector<HTMLButtonElement>("[data-filter-toggle]"); const panel=dropdown.querySelector<HTMLElement>("[data-filter-panel]"); if(!toggle||!panel) return; toggle.addEventListener("click",e=>{ e.stopPropagation(); document.querySelectorAll<HTMLElement>("[data-filter-panel].is-open").forEach(p=>{ if(p!==panel)p.classList.remove("is-open"); }); document.querySelectorAll<HTMLButtonElement>("[data-filter-toggle].is-open").forEach(t=>{ if(t!==toggle){t.classList.remove("is-open");t.setAttribute("aria-expanded","false");} }); const open=panel.classList.toggle("is-open"); toggle.classList.toggle("is-open",open); toggle.setAttribute("aria-expanded",String(open)); }); panel.addEventListener("click",e=>e.stopPropagation()); }); document.addEventListener("click",()=>{ document.querySelectorAll<HTMLElement>("[data-filter-panel].is-open").forEach(p=>p.classList.remove("is-open")); document.querySelectorAll<HTMLButtonElement>("[data-filter-toggle].is-open").forEach(t=>{t.classList.remove("is-open");t.setAttribute("aria-expanded","false");}); }); document.addEventListener("keydown",e=>{ if(e.key!=="Escape") return; document.querySelectorAll<HTMLElement>("[data-filter-panel].is-open").forEach(p=>p.classList.remove("is-open")); }); }
+  function setupPaginationListeners(type:TargetType){ const pagination=document.querySelector(`[data-pagination-for="${type}"]`); if(!pagination) return; pagination.querySelector(".is-prev")?.addEventListener("click",()=>{ if(type==="companies"&&currentCompaniesPage>1){currentCompaniesPage--;renderPage("companies",filteredCompanies)} if(type==="government"&&currentGovernmentPage>1){currentGovernmentPage--;renderPage("government",filteredGovernment)} }); pagination.querySelector(".is-next")?.addEventListener("click",()=>{ const list=type==="companies"?filteredCompanies:filteredGovernment; const page=type==="companies"?currentCompaniesPage:currentGovernmentPage; if(page<Math.ceil(list.length/PAGE_SIZE)){ if(type==="companies"){currentCompaniesPage++;renderPage("companies",filteredCompanies)} else {currentGovernmentPage++;renderPage("government",filteredGovernment)} } }); }
+  setupDropdowns(); setupPaginationListeners("companies"); setupPaginationListeners("government"); const debouncedSearch=debounce(performSearch,350); const debouncedFilter=debounce(applyFilters,250); document.querySelectorAll<HTMLInputElement>("[data-filter]").forEach(i=>i.addEventListener("change",applyFilters)); cityInput?.addEventListener("input",debouncedSearch); countryInput?.addEventListener("input",debouncedSearch); keywordInput?.addEventListener("input",debouncedFilter); [cityInput,countryInput,keywordInput].forEach(input=>input?.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); input===keywordInput?applyFilters():performSearch(); } })); resetFiltersButton?.addEventListener("click",()=>{ if(cityInput) cityInput.value=""; if(countryInput) countryInput.value=""; if(keywordInput) keywordInput.value=""; document.querySelectorAll<HTMLInputElement>("[data-filter]").forEach(i=>i.checked=false); performSearch(); });
+  try{ const fullProfile=await profileService.getFullProfileByUserId(session.userId); if(fullProfile){ userWorkOrgIds=Array.from(new Set((fullProfile.experiences||[]).map((exp:any)=>exp.organization_id).filter(Boolean))) as string[]; const userWorkOrgs=await Promise.all(userWorkOrgIds.map(id=>organizationService.getById(id).catch(()=>null))); userWorkOrgs.forEach(org=>{ if(org) getOrgKeywords(org).forEach(k=>userExperienceKeywords.add(k)); }); } await performSearch(); } catch(err){ console.error("Failed to fetch initial data:",err); await performSearch(); }
+  window.addEventListener("resize", () => { Array.from( document.querySelectorAll<HTMLElement>(".backend-slot.is-filled"), ).forEach(alignCardHeight); });
 });
