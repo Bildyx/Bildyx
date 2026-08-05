@@ -20,27 +20,27 @@ const teams = {
     ],
     overviewPoints: [
       [
-        "♙",
+        "",
         "Who We Are",
         "A cross-functional squad of engineers, designers, and PMs shipping user-facing products.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Great At",
         "Rapid prototyping, data-driven decisions, and shipping high-quality features fast.",
       ],
       [
-        "â™¡",
+        "",
         "Team Culture",
         "Open feedback, async-first communication, weekly demos, and blameless retros.",
       ],
       [
-        "â—‡",
+        "",
         "How We Work Together",
         "Two-week sprints with daily standups. We pair-program and run design critiques weekly.",
       ],
       [
-        "â¬¡",
+        "",
         "This Team is NOT For You If...",
         "You prefer rigid routines or dislike shifting priorities mid-sprint.",
         true,
@@ -48,27 +48,27 @@ const teams = {
     ],
     operatePoints: [
       [
-        "â™¢",
+        "",
         "How We're Led",
         "Hands-on when needed, high trust by default. Clear goals, strong ownership. Manager as coach, not micromanager.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Solving Now",
         "Scaling infrastructure, reducing tech debt, improving retention, and migrating from monolith to microservices.",
       ],
       [
-        "♙",
+        "",
         "A Typical Day",
         "Deep work mornings, collaboration afternoons. 15-minute standup. Protected focus time. Most log off by 5-6 PM.",
       ],
       [
-        "â™¡",
+        "",
         "What We Value",
         "Direct communication, low ego, high ownership. It's safe to disagree. We care about impact more than hours worked.",
       ],
       [
-        "â†—",
+        "",
         "Growth Here",
         "Learning budget for everyone. Clear promotion paths. Prefer internal growth. Mentorship is both formal and informal.",
       ],
@@ -90,27 +90,27 @@ const teams = {
     ],
     overviewPoints: [
       [
-        "♙",
+        "",
         "Who We Are",
         "Backend-heavy engineers with ML expertise. Distributed across 2 time zones with 5+ years average experience.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Great At",
         "Building reliable data pipelines and ML models at scale. Fast iteration on experiments.",
       ],
       [
-        "â™¡",
+        "",
         "Team Culture",
         "Data-driven decisions. We celebrate failed experiments as learning. Weekly knowledge-sharing sessions.",
       ],
       [
-        "â—‡",
+        "",
         "How We Work Together",
         "Mostly remote. Daily async updates. Weekly sync calls. Heavy use of Jupyter notebooks and shared docs.",
       ],
       [
-        "â¬¡",
+        "",
         "This Team is NOT For You If...",
         "You need constant guidance or struggle with ambiguity in problem-solving.",
         true,
@@ -118,27 +118,27 @@ const teams = {
     ],
     operatePoints: [
       [
-        "â™¢",
+        "",
         "How We're Led",
         "Flat hierarchy. The tech lead sets direction, but everyone contributes to architecture decisions. Quarterly OKRs.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Solving Now",
         "Real-time recommendation engine, reducing model latency by 40%, and building a feature store for cross-team use.",
       ],
       [
-        "♙",
+        "",
         "A Typical Day",
         "Morning: model training reviews. Afternoon: pair programming or experimentation. Fridays: research time.",
       ],
       [
-        "â™¡",
+        "",
         "What We Value",
         "Intellectual curiosity, reproducibility, and shipping over perfection. We document everything.",
       ],
       [
-        "â†—",
+        "",
         "Growth Here",
         "Conference budget, paper reading groups, and internal tech talks. Clear IC and management tracks.",
       ],
@@ -160,27 +160,27 @@ const teams = {
     ],
     overviewPoints: [
       [
-        "♙",
+        "",
         "Who We Are",
         "A product-focused team building clear, useful experiences for fast-moving sales organizations.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Great At",
         "Customer discovery, rapid prototyping, accessible interfaces, and measurable product outcomes.",
       ],
       [
-        "â™¡",
+        "",
         "Team Culture",
         "Curious, practical, and candid. We share early work and improve it together.",
       ],
       [
-        "â—‡",
+        "",
         "How We Work Together",
         "Small project squads, written decisions, and frequent user feedback.",
       ],
       [
-        "â¬¡",
+        "",
         "This Team is NOT For You If...",
         "You prefer perfect plans over fast learning and direct customer feedback.",
         true,
@@ -188,27 +188,27 @@ const teams = {
     ],
     operatePoints: [
       [
-        "â™¢",
+        "",
         "How We're Led",
         "Product and engineering share ownership. Leads set context, then teams choose the best path to the outcome.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Solving Now",
         "Simplifying onboarding, improving conversion, and creating clearer workflows for international customers.",
       ],
       [
-        "♙",
+        "",
         "A Typical Day",
         "Customer interviews, focused build time, design reviews, and short written updates instead of long meetings.",
       ],
       [
-        "â™¡",
+        "",
         "What We Value",
         "Clarity, empathy, experimentation, and evidence over assumptions.",
       ],
       [
-        "â†—",
+        "",
         "Growth Here",
         "Cross-functional mentoring, product workshops, and regular opportunities to lead small initiatives.",
       ],
@@ -230,27 +230,27 @@ const teams = {
     ],
     overviewPoints: [
       [
-        "♙",
+        "",
         "Who We Are",
         "Infrastructure specialists delivering dependable services for global product teams.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Great At",
         "Cloud architecture, observability, incident response, and performance optimization.",
       ],
       [
-        "â™¡",
+        "",
         "Team Culture",
         "Calm under pressure, documentation-first, and generous with knowledge.",
       ],
       [
-        "â—‡",
+        "",
         "How We Work Together",
         "Rotating ownership, blameless reviews, and strong automation.",
       ],
       [
-        "â¬¡",
+        "",
         "This Team is NOT For You If...",
         "You dislike operational responsibility or documenting your decisions.",
         true,
@@ -258,27 +258,27 @@ const teams = {
     ],
     operatePoints: [
       [
-        "â™¢",
+        "",
         "How We're Led",
         "Clear service ownership with rotating technical leadership. Decisions are documented and reviewed openly.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Solving Now",
         "Improving reliability, reducing deployment time, and standardizing observability across services.",
       ],
       [
-        "♙",
+        "",
         "A Typical Day",
         "Focused platform work, short operational reviews, pairing on incidents, and scheduled improvement time.",
       ],
       [
-        "â™¡",
+        "",
         "What We Value",
         "Reliability, calm communication, automation, and learning from every incident.",
       ],
       [
-        "â†—",
+        "",
         "Growth Here",
         "Cloud certifications, architecture reviews, incident leadership, and mentorship across product teams.",
       ],
@@ -299,27 +299,27 @@ const teams = {
     ],
     overviewPoints: [
       [
-        "♙",
+        "",
         "Who We Are",
         "Quality and reliability champions. Diverse backgrounds from gaming, fintech, and healthcare.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Great At",
         "End-to-end test automation, accessibility audits, and building quality into the development process.",
       ],
       [
-        "â™¡",
+        "",
         "Team Culture",
         "Supportive and patient. We mentor junior members actively. Monthly hackathons and innovation days.",
       ],
       [
-        "â—‡",
+        "",
         "How We Work Together",
         "Fully remote across 5 time zones. Overlap hours 10 AM-2 PM ET. Strong async documentation culture.",
       ],
       [
-        "â¬¡",
+        "",
         "This Team is NOT For You If...",
         "You cut corners on quality or see testing as someone else's job.",
         true,
@@ -327,27 +327,27 @@ const teams = {
     ],
     operatePoints: [
       [
-        "â™¢",
+        "",
         "How We're Led",
         "Shared leadership between quality, product, and engineering. Ownership follows the problem, not the title.",
       ],
       [
-        "â˜†",
+        "",
         "What We're Solving Now",
         "Expanding automated coverage, improving accessibility, and making quality signals visible earlier.",
       ],
       [
-        "♙",
+        "",
         "A Typical Day",
         "Async check-ins, focused test and development work, paired reviews, and a short overlap window for decisions.",
       ],
       [
-        "â™¡",
+        "",
         "What We Value",
         "Patience, precision, accessibility, and helping every teammate build quality into their work.",
       ],
       [
-        "â†—",
+        "",
         "Growth Here",
         "Quality engineering mentorship, accessibility training, and opportunities to lead cross-team improvements.",
       ],

@@ -52,46 +52,46 @@
       ],
       people: [
         {
-          title: "â™Ÿ Who We Are",
+          title: "Who We Are",
           text: "A mix of senior and emerging talent from startups and global tech. Some with traditional degrees, others self-taught.",
         },
         {
-          title: "â˜† What We're Great At",
+          title: "What We're Great At",
           text: "Strong in system design and fast shipping. We value clean code and clear UX.",
         },
         {
-          title: "â™¡ Team Culture",
+          title: "Team Culture",
           text: "Collaborative, low politics. Friendly, not forced. Occasional dinners, strong boundaries.",
         },
         {
-          title: "â—‡ How We Work Together",
+          title: "How We Work Together",
           text: "Hybrid across three cities. Async-first, minimal meetings. Slack and Notion for most communication.",
         },
         {
-          title: "â–³ This team is NOT for you if...",
+          title: "This team is NOT for you if...",
           text: "You prefer rigid routines or dislike shifting priorities mid-sprint.",
           warning: true,
         },
       ],
       operate: [
         {
-          title: "â—‡ How We're Led",
+          title: "How We're Led",
           text: "Clear ownership, high trust, and direct feedback.",
         },
         {
-          title: "â˜† What We Are Solving Now",
+          title: "What We Are Solving Now",
           text: "Scaling the platform while keeping the user experience simple.",
         },
         {
-          title: "▣ A Typical Day",
+          title: "A Typical Day",
           text: "Deep work blocks, short syncs, and protected time for collaboration.",
         },
         {
-          title: "â™¡ What We Value",
+          title: "What We Value",
           text: "Curiosity, accountability, and kindness under pressure.",
         },
         {
-          title: "â†— Growth Here",
+          title: "Growth Here",
           text: "Mentorship, internal mobility, and visible impact.",
         },
       ],
@@ -112,46 +112,46 @@
       products: ["Search Engine Software", "Data Analytics", "AI Software"],
       people: [
         {
-          title: "â™Ÿ Who We Are",
+          title: "Who We Are",
           text: "Backend-heavy engineers with ML expertise, distributed across two time zones.",
         },
         {
-          title: "â˜† What We're Great At",
+          title: "What We're Great At",
           text: "Reliable data pipelines, model delivery, and fast experiments.",
         },
         {
-          title: "â™¡ Team Culture",
+          title: "Team Culture",
           text: "Data-driven, candid, and generous with knowledge.",
         },
         {
-          title: "â—‡ How We Work Together",
+          title: "How We Work Together",
           text: "Mostly remote with written decisions and focused weekly syncs.",
         },
         {
-          title: "â–³ This team is NOT for you if...",
+          title: "This team is NOT for you if...",
           text: "You need constant guidance or avoid ambiguity.",
           warning: true,
         },
       ],
       operate: [
         {
-          title: "â—‡ How We're Led",
+          title: "How We're Led",
           text: "Flat hierarchy with strong technical direction.",
         },
         {
-          title: "â˜† What We Are Solving Now",
+          title: "What We Are Solving Now",
           text: "Recommendation quality, model latency, and reusable data tooling.",
         },
         {
-          title: "▣ A Typical Day",
+          title: "A Typical Day",
           text: "Training reviews, pairing, and independent research blocks.",
         },
         {
-          title: "â™¡ What We Value",
+          title: "What We Value",
           text: "Reproducibility, intellectual honesty, and useful documentation.",
         },
         {
-          title: "â†— Growth Here",
+          title: "Growth Here",
           text: "Conference support, paper reading groups, and clear IC tracks.",
         },
       ],
