@@ -350,3 +350,18 @@
     font-weight: 700;
     color: var(--bildyx-muted);
 }
+
+.tl-match-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(40, 71, 240, 0.12);
+    color: var(--bildyx-blue);
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 800;
+    z-index: 5;
+    pointer-events: none;
+    border: 1px solid rgba(40, 71, 240, 0.2);
+}

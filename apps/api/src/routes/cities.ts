@@ -9,6 +9,7 @@ import {
   GetCitySchema,
   DeleteCitySchema,
   DeleteCitiesBulkSchema,
+  CityListItemSchema,
 } from "../models/cities";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -23,7 +24,7 @@ export const cities = {
       tags: ["City"],
     })
     .input(GetCitiesSchema)
-    .output(z.array(CitySchema))
+    .output(z.array(CityListItemSchema))
     .handler(async ({ input }) => {
       const { name, country_id } = input;
 
