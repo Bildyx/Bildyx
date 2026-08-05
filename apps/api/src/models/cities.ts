@@ -50,6 +50,11 @@ export const GetCitySchema = z.object({
   cityId: z.uuid(),
 });
 
+export const CityListItemSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+});
+
 // POST
 export const PostCitySchema = CitySchema.omit({
   id: true,

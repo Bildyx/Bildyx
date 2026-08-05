@@ -1,11 +1,11 @@
 import { getSession } from "./helpers";
 import { OrganizationService } from "../services/organization.service";
 import { CardService } from "../services/card.service";
-import { CityService } from "../services/city.service";
+import { UserProfileService } from "../services/user-profile.service";
 
 const organizationService = new OrganizationService();
 const cardService = new CardService();
-const cityService = new CityService();
+const profileService = new UserProfileService();
 
 function alignCardHeight(slot: HTMLElement) {
   const iframe = slot.querySelector("iframe");
@@ -65,7 +65,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const PAGE_SIZE = 4;
-  const cityMap = new Map<string, string>();
   let companiesList: any[] = [];
   let governmentList: any[] = [];
   let filteredCompanies: any[] = [];
@@ -74,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentGovernmentPage = 1;
 
   // ─── Load Card Function ──────────────────────────────────
-  async function loadCard(slot: HTMLElement, id: string) {
+  async function loadCard(slot: HTMLElement, id: string, score: number) {
     try {
       const html = await cardService.getOrganization(id);
 
@@ -121,6 +120,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       slot.innerHTML = "";
       slot.appendChild(iframe);
+
+      const badge = document.createElement("span");
+      badge.className = "tl-match-badge";
+      badge.textContent = `${score}% Match`;
+      slot.appendChild(badge);
     } catch (err: any) {
       console.warn(
         `[target-list.ts] Could not load card organization/${id}:`,
@@ -179,42 +183,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const endIndex = startIndex + PAGE_SIZE;
     const pageItems = list.slice(startIndex, endIndex);
 
-    pageItems.forEach((org) => {
+    pageItems.forEach(({ org, score }) => {
       if (!org.id) return;
-      const cityName = org.city_id ? cityMap.get(org.city_id) || "" : "";
       const slot = document.createElement("div");
       slot.className = "backend-slot is-loading";
-      slot.dataset.city = cityName.toLowerCase();
-      slot.dataset.name = (org.name || "").toLowerCase();
       slot.innerHTML = '<div class="skeleton-loader skeleton-card"></div>';
       row.appendChild(slot);
 
-      loadCard(slot, org.id);
+      loadCard(slot, org.id, score);
     });
   }
-
-  // ─── Filter and Render ──────────────────────────────────
-  const filterAndRender = () => {
-    const query = input ? input.value.trim().toLowerCase() : "";
-
-    filteredCompanies = companiesList.filter((org) => {
-      const cityName = org.city_id ? cityMap.get(org.city_id) || "" : "";
-      const searchable = `${org.name || ""} ${cityName}`.toLowerCase();
-      return searchable.includes(query);
-    });
-
-    filteredGovernment = governmentList.filter((org) => {
-      const cityName = org.city_id ? cityMap.get(org.city_id) || "" : "";
-      const searchable = `${org.name || ""} ${cityName}`.toLowerCase();
-      return searchable.includes(query);
-    });
-
-    currentCompaniesPage = 1;
-    currentGovernmentPage = 1;
-
-    renderPage("companies", filteredCompanies);
-    renderPage("government", filteredGovernment);
-  };
 
   // ─── Setup Pagination Listeners ──────────────────────────
   const setupPaginationListeners = (type: "companies" | "government") => {
@@ -259,6 +237,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   };
 
+  const userExperienceKeywords = new Set<string>();
+  let userWorkOrgIds: string[] = [];
+
   const performSearch = async (query: string) => {
     if (companiesRow) {
       companiesRow.innerHTML = `
@@ -280,8 +261,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         city: query || undefined,
       });
 
-      companiesList = orgs.filter(
-        (org) =>
+      // Map to compute compatibility score and filter/sort
+      const matchedOrgs = orgs
+        .map((org) => {
+          if (!org.id) return null;
+          if (userWorkOrgIds.includes(org.id)) return null;
+
+          const orgAreas = Array.isArray(org.research_areas)
+            ? org.research_areas
+            : [];
+          const orgServices = Array.isArray(org.services) ? org.services : [];
+          const keywords = [...orgAreas, ...orgServices]
+            .map((k) => k.toLowerCase().trim())
+            .filter(Boolean);
+
+          const matchingKeywords = keywords.filter((kw) =>
+            userExperienceKeywords.has(kw),
+          );
+          const matchCount = matchingKeywords.length;
+          if (matchCount === 0) return null;
+
+          // Score is the percentage of matching keywords relative to organization keywords
+          const score =
+            keywords.length > 0
+              ? Math.round((matchCount / keywords.length) * 100)
+              : 0;
+          return { org, score };
+        })
+        .filter((item): item is { org: any; score: number } => item !== null);
+
+      // Sort by score descending (highest score first)
+      matchedOrgs.sort((a, b) => b.score - a.score);
+
+      companiesList = matchedOrgs.filter(
+        ({ org }) =>
           ![
             "GOVERNMENT",
             "STATE_GOVERNMENT",
@@ -291,7 +304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             "EMBASSY",
           ].includes(org.subtype || ""),
       );
-      governmentList = orgs.filter((org) =>
+      governmentList = matchedOrgs.filter(({ org }) =>
         [
           "GOVERNMENT",
           "STATE_GOVERNMENT",
@@ -319,12 +332,41 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupPaginationListeners("government");
 
   try {
-    const cities = await cityService.getAll();
-    cities.forEach((city) => {
-      if (city.id && city.name) {
-        cityMap.set(city.id, city.name);
-      }
-    });
+    const fullProfile = await profileService.getFullProfileByUserId(
+      session.userId,
+    );
+    if (fullProfile) {
+      // Extract unique organization IDs from user's experiences
+      userWorkOrgIds = Array.from(
+        new Set(
+          (fullProfile.experiences || [])
+            .map((exp: any) => exp.organization_id)
+            .filter(Boolean),
+        ),
+      ) as string[];
+
+      // Fetch details of those organizations
+      const userWorkOrgs = await Promise.all(
+        userWorkOrgIds.map((id) =>
+          organizationService.getById(id).catch(() => null),
+        ),
+      );
+
+      // Collect all research areas & services
+      userWorkOrgs.forEach((org) => {
+        if (!org) return;
+        if (Array.isArray(org.research_areas)) {
+          org.research_areas.forEach((ra) => {
+            if (ra) userExperienceKeywords.add(ra.toLowerCase().trim());
+          });
+        }
+        if (Array.isArray(org.services)) {
+          org.services.forEach((s) => {
+            if (s) userExperienceKeywords.add(s.toLowerCase().trim());
+          });
+        }
+      });
+    }
 
     await performSearch("");
   } catch (err) {
