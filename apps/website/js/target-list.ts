@@ -183,6 +183,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const endIndex = startIndex + PAGE_SIZE;
     const pageItems = list.slice(startIndex, endIndex);
 
+    const cardPromises: Promise<void>[] = [];
+
     pageItems.forEach(({ org, score }) => {
       if (!org.id) return;
       const slot = document.createElement("div");
@@ -190,7 +192,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       slot.innerHTML = '<div class="skeleton-loader skeleton-card"></div>';
       row.appendChild(slot);
 
-      loadCard(slot, org.id, score);
+      cardPromises.push(loadCard(slot, org.id, score));
+    });
+
+    // Batch all card requests in parallel with proper error handling
+    Promise.allSettled(cardPromises).then((results) => {
+      const failed = results.filter((r) => r.status === "rejected");
+      if (failed.length > 0) {
+        console.warn(`[target-list] ${failed.length}/${results.length} card(s) failed to load`);
+      }
     });
   }
 
@@ -267,11 +277,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (!org.id) return null;
           if (userWorkOrgIds.includes(org.id)) return null;
 
-          const orgAreas = Array.isArray(org.research_areas)
-            ? org.research_areas
-            : [];
           const orgServices = Array.isArray(org.services) ? org.services : [];
-          const keywords = [...orgAreas, ...orgServices]
+          const keywords = orgServices
             .map((k) => k.toLowerCase().trim())
             .filter(Boolean);
 
@@ -352,14 +359,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         ),
       );
 
-      // Collect all research areas & services
+      // Collect only services (exclude research areas)
       userWorkOrgs.forEach((org) => {
         if (!org) return;
-        if (Array.isArray(org.research_areas)) {
-          org.research_areas.forEach((ra) => {
-            if (ra) userExperienceKeywords.add(ra.toLowerCase().trim());
-          });
-        }
         if (Array.isArray(org.services)) {
           org.services.forEach((s) => {
             if (s) userExperienceKeywords.add(s.toLowerCase().trim());
