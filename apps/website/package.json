@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "concurrently": "^10.0.4",
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "lucide": "^1.28.0"
   }
 }

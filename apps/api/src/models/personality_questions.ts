@@ -25,6 +25,10 @@ export const PostPersonalityQuestionSchema = PersonalityQuestionSchema.omit({
   id: true,
 });
 
+export const PostPersonalityQuestionBulkSchema = z.array(
+  PostPersonalityQuestionSchema,
+);
+
 // PATCH
 export const PutPersonalityQuestionSchema =
   PostPersonalityQuestionSchema.partial();

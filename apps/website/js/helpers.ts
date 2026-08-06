@@ -159,6 +159,8 @@ export function checkCaptcha(name: string) {
 }
 
 export function getSession() {
-  const raw = sessionStorage.getItem("bildyx_session");
+  const raw = sessionStorage.getItem("bildyx_session") || 
+              localStorage.getItem("bildyx_session") || 
+              localStorage.getItem("bildyx_user");
   return raw ? JSON.parse(raw) : null;
 }

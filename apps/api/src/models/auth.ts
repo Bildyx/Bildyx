@@ -31,6 +31,8 @@ export const LoginOutputSchema = z.object({
     first_name: z.string().nullable().optional(),
     last_name: z.string().nullable().optional(),
     role: UserRoleEnum,
+    profile_id: z.uuid().nullable().optional(),
+    organization_id: z.uuid().nullable().optional(),
   }),
 });
 
@@ -47,6 +49,8 @@ export const VerifyEmailOutputSchema = z.object({
       id: z.uuid(),
       email: z.email(),
       role: UserRoleEnum,
+      profile_id: z.uuid().nullable().optional(),
+      organization_id: z.uuid().nullable().optional(),
     })
     .optional(),
 });
