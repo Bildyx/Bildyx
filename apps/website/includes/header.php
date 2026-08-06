@@ -12,6 +12,12 @@ $pageTitle = $pageTitle ?? 'Bildyx';
 $pageDescription = $pageDescription ?? 'Bildyx — professional team profiles and MicroResumes.';
 $basePath = $basePath ?? '';
 $bodyClass = $bodyClass ?? '';
+$headerMode = $headerMode ?? 'default';
+$headerCenterLabel = $headerCenterLabel ?? '';
+$headerBackHref = $headerBackHref ?? '';
+$headerBackLabel = $headerBackLabel ?? '';
+$headerStatusLabel = $headerStatusLabel ?? 'Unpublished';
+$isCompanyAdminHeader = $headerMode === 'company-admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,13 +33,41 @@ $bodyClass = $bodyClass ?? '';
     <link rel="stylesheet" href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>css/style.css" />
 </head>
 <body<?= $bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
-    <header class="site-header">
-        <div class="header-content">
-            <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>index.php" class="logo" aria-label="Bildyx home">
-                <img src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>images/Logo.png" alt="Bildyx" />
-            </a>
+    <header class="site-header<?= $isCompanyAdminHeader ? ' site-header--company-admin' : '' ?>">
+        <div class="header-content<?= $isCompanyAdminHeader ? ' header-content--company-admin' : '' ?>">
+            <?php if ($isCompanyAdminHeader): ?>
+                <div class="company-admin-header-left">
+                    <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>index.php" class="logo" aria-label="Bildyx home">
+                        <img src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>images/Logo.png" alt="Bildyx" />
+                    </a>
 
-            <nav class="nav-buttons" aria-label="Authentication and account" data-auth-nav>
+                    <?php if ($headerBackHref !== ''): ?>
+                        <a class="company-admin-preview-link" href="<?= htmlspecialchars($basePath . $headerBackHref, ENT_QUOTES, 'UTF-8') ?>">
+                            <?= htmlspecialchars($headerBackLabel ?: '‹ Preview company page', ENT_QUOTES, 'UTF-8') ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
+
+                <div class="company-admin-header-title">
+                    <?= htmlspecialchars($headerCenterLabel ?: 'F-CAREER', ENT_QUOTES, 'UTF-8') ?>
+                </div>
+            <?php else: ?>
+                <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>index.php" class="logo" aria-label="Bildyx home">
+                    <img src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>images/Logo.png" alt="Bildyx" />
+                </a>
+            <?php endif; ?>
+
+            <nav class="nav-buttons<?= $isCompanyAdminHeader ? ' nav-buttons--company-admin is-authenticated' : '' ?>" aria-label="Authentication and account" data-auth-nav>
+                <?php if ($isCompanyAdminHeader): ?>
+                    <button class="company-admin-status-pill" type="button" data-toggle-published>
+                        <span aria-hidden="true">◎</span>
+                        <span data-published-label><?= htmlspecialchars($headerStatusLabel, ENT_QUOTES, 'UTF-8') ?></span>
+                    </button>
+
+                    <button class="company-admin-header-icon" type="button" aria-label="Notifications">♧</button>
+                    <button class="company-admin-header-icon" type="button" aria-label="Settings">⚙</button>
+                <?php endif; ?>
+
                 <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>login.php" class="login" data-login-link>Log In</a>
                 <a href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>login.php?tab=signup" class="signup" data-signup-link>Sign Up</a>
 
@@ -171,7 +205,11 @@ $bodyClass = $bodyClass ?? '';
             const session = readSession();
             const isLoggedIn = hasActiveSession(session);
 
-            nav.classList.toggle('is-authenticated', isLoggedIn);
+            if (!nav.classList.contains('nav-buttons--company-admin')) {
+                nav.classList.toggle('is-authenticated', isLoggedIn);
+            } else {
+                nav.classList.add('is-authenticated');
+            }
 
             if (!isLoggedIn && menu) {
                 menu.classList.remove('is-open');

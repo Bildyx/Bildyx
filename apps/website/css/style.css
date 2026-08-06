@@ -1162,3 +1162,118 @@ a {
     color: var(--primary);
     line-height: 1;
 }
+
+
+/* Company admin header mode */
+
+.site-header--company-admin {
+    min-height: 54px;
+}
+
+.header-content--company-admin {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.company-admin-header-left {
+    grid-column: 1;
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    min-width: 0;
+}
+
+.company-admin-preview-link {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+    opacity: 0.95;
+}
+
+.company-admin-preview-link:hover {
+    opacity: 0.75;
+    transform: translateY(-1px);
+}
+
+.company-admin-header-title {
+    grid-column: 2;
+    justify-self: center;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+}
+
+.nav-buttons--company-admin {
+    gap: 10px;
+}
+
+.company-admin-status-pill {
+    min-height: 28px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 14px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.company-admin-status-pill:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.company-admin-header-icon {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.88);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.company-admin-header-icon:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.nav-buttons--company-admin .account-menu {
+    display: block;
+}
+
+.nav-buttons--company-admin .login,
+.nav-buttons--company-admin .signup {
+    display: none !important;
+}
+
+@media (max-width: 760px) {
+    .header-content--company-admin {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+    }
+
+    .company-admin-header-left {
+        gap: 12px;
+    }
+
+    .company-admin-preview-link {
+        display: none;
+    }
+
+    .company-admin-header-title {
+        display: none;
+    }
+
+    .company-admin-status-pill {
+        padding: 0 10px;
+    }
+}
