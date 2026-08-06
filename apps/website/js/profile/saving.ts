@@ -388,7 +388,11 @@ export async function saveProfile() {
             companySlot?.dataset.orgId ||
             companySlot?.dataset.universityId ||
             null;
-          let jobId = roleSlot?.dataset.jobId || null;
+
+          let jobId = roleSlot?.dataset.roleId || null;
+
+          console.log("ROLE SLOT");
+          console.log(jobId);
 
           const expData = {
             organization_id: orgId,
@@ -399,6 +403,8 @@ export async function saveProfile() {
             end_year: endYear,
             current: currentChecked,
           };
+
+          console.log(roleSlot, expData);
 
           const id = card.dataset.id;
           if (id && card.dataset.unsaved !== "true") {
@@ -500,8 +506,10 @@ export async function saveProfile() {
           );
           let certId = slot?.dataset.certificationId || null;
 
-          const obtainedVal = card.querySelector<HTMLInputElement>(".cert-obtained-at")?.value;
-          const expiresVal = card.querySelector<HTMLInputElement>(".cert-expires-at")?.value;
+          const obtainedVal =
+            card.querySelector<HTMLInputElement>(".cert-obtained-at")?.value;
+          const expiresVal =
+            card.querySelector<HTMLInputElement>(".cert-expires-at")?.value;
 
           const obtainedAt = obtainedVal ? new Date(obtainedVal) : null;
           const expiresAt = expiresVal ? new Date(expiresVal) : null;
@@ -540,6 +548,8 @@ export async function saveProfile() {
     }
 
     await Promise.all(promises);
+    sessionStorage.removeItem("user_experience_keywords");
+    sessionStorage.removeItem("user_work_org_ids");
     showToast("Profile saved");
   } catch (err) {
     console.error("[profile.ts] Save profile error:", err);

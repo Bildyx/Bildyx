@@ -4,14 +4,20 @@ import type {
   PostOrganization,
   PutOrganization,
 } from "@repo/models/organizations";
+import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
 
 export class OrganizationService {
   private readonly rpcClient = getRPCClient("http://localhost:3000");
 
   public async getAll(filters?: {
     name?: string;
-    subtype?: "COMPANY" | "UNIVERSITY" | "NON_PROFIT" | "GOVERNMENT" | "OTHER";
+    subtypes?: OrganizationSubType[];
     city?: string;
+    country?: string;
+    sizes?: EmployeeCountRange[];
+    keyword?: string;
+    productFilter?: "same" | "similar" | "different";
+    userExperienceKeywords?: string[];
   }): Promise<Organization[]> {
     return await this.rpcClient.organizations.getAll(filters || {});
   }
@@ -24,8 +30,14 @@ export class OrganizationService {
     return await this.rpcClient.organizations.create(input);
   }
 
-  public async update(organizationId: string, input: PutOrganization): Promise<Organization> {
-    return await this.rpcClient.organizations.update({ organizationId, ...input });
+  public async update(
+    organizationId: string,
+    input: PutOrganization,
+  ): Promise<Organization> {
+    return await this.rpcClient.organizations.update({
+      organizationId,
+      ...input,
+    });
   }
 
   public async delete(organizationId: string): Promise<void> {

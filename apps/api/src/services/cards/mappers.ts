@@ -364,48 +364,57 @@ export async function mapOrganization(row: Record<string, any>) {
 
   try {
     if (row.id) {
-      // 1. Headquarters Location (City, Country)
-      if (row.city_id) {
-        const city = await database
-          .selectFrom("cities")
-          .leftJoin("countries", "countries.iso_code", "cities.country_id")
-          .select(["cities.name as cityName", "countries.name as countryName"])
-          .where("cities.id", "=", row.city_id)
-          .executeTakeFirst();
-        if (city) {
-          cityName = city.cityName;
-          country = city.countryName || null;
-          headquartersLocation = city.countryName
-            ? `${city.cityName}, ${city.countryName}`
-            : city.cityName;
-        }
+      // Run all 3 DB queries in parallel instead of sequentially
+      const [cityResult, parentResult, industryResult] = await Promise.all([
+        // 1. Headquarters Location (City + Country)
+        row.city_id
+          ? database
+              .selectFrom("cities")
+              .leftJoin("countries", "countries.iso_code", "cities.country_id")
+              .select(["cities.name as cityName", "countries.name as countryName"])
+              .where("cities.id", "=", row.city_id)
+              .executeTakeFirst()
+          : Promise.resolve(null),
+
+        // 2. Parent Organization
+        row.parent_organization_id
+          ? database
+              .selectFrom("organizations")
+              .select("name")
+              .where("id", "=", row.parent_organization_id)
+              .executeTakeFirst()
+          : Promise.resolve(null),
+
+        // 3. Industries
+        database
+          .selectFrom("industries")
+          .innerJoin(
+            "_OrganizationIndustries",
+            "_OrganizationIndustries.A",
+            "industries.id",
+          )
+          .select("industries.name")
+          .where("_OrganizationIndustries.B", "=", row.id)
+          .execute(),
+      ]);
+
+      // Process city result
+      if (cityResult) {
+        cityName = cityResult.cityName;
+        country = cityResult.countryName || null;
+        headquartersLocation = cityResult.countryName
+          ? `${cityResult.cityName}, ${cityResult.countryName}`
+          : cityResult.cityName;
       }
 
-      // 2. Parent Organization
-      if (row.parent_organization_id) {
-        const p = await database
-          .selectFrom("organizations")
-          .select("name")
-          .where("id", "=", row.parent_organization_id)
-          .executeTakeFirst();
-        if (p) {
-          parent = p.name;
-        }
+      // Process parent result
+      if (parentResult) {
+        parent = parentResult.name;
       }
 
-      // 3. Industries
-      const inds = await database
-        .selectFrom("industries")
-        .innerJoin(
-          "_OrganizationIndustries",
-          "_OrganizationIndustries.A",
-          "industries.id",
-        )
-        .select("industries.name")
-        .where("_OrganizationIndustries.B", "=", row.id)
-        .execute();
-      if (inds.length > 0) {
-        industry = inds.map((i) => i.name).join(", ");
+      // Process industries result
+      if (industryResult.length > 0) {
+        industry = industryResult.map((i) => i.name).join(", ");
       }
     }
   } catch (err) {

@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === "test") {
 
   const pool = new Pool({
     connectionString,
-    max: 10,
+    max: 25,
     ssl: connectionString.includes("localhost")
       ? false
       : {

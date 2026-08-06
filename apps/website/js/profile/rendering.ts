@@ -202,8 +202,13 @@ export async function renderExperiences(experiences: any[]) {
   if (!list) return;
   list.innerHTML = "";
 
+  const userExperienceKeywords = new Set<string>();
+  const userWorkOrgIds: string[] = [];
+
   if (experiences.length === 0) {
     list.innerHTML = '<p class="empty-message">No experiences added yet.</p>';
+    sessionStorage.setItem("user_experience_keywords", JSON.stringify([]));
+    sessionStorage.setItem("user_work_org_ids", JSON.stringify([]));
     return;
   }
 
@@ -212,9 +217,17 @@ export async function renderExperiences(experiences: any[]) {
     experiences.map(async (exp) => {
       let companyName = "";
       if (exp.organization_id) {
+        userWorkOrgIds.push(exp.organization_id);
         try {
           const org = await organizationService.getById(exp.organization_id);
-          if (org) companyName = org.name;
+          if (org) {
+            companyName = org.name;
+            if (Array.isArray(org.services)) {
+              org.services.forEach((s: any) => {
+                if (s) userExperienceKeywords.add(s.toLowerCase().trim());
+              });
+            }
+          }
         } catch (_) {}
       }
 
@@ -232,6 +245,9 @@ export async function renderExperiences(experiences: any[]) {
       };
     }),
   );
+
+  sessionStorage.setItem("user_experience_keywords", JSON.stringify(Array.from(userExperienceKeywords)));
+  sessionStorage.setItem("user_work_org_ids", JSON.stringify(userWorkOrgIds));
 
   uiExperiences.forEach((exp, i) => {
     const article = document.createElement("article");

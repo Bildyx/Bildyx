@@ -46,8 +46,23 @@ export const OrganizationSchema = z.object({
 // GET
 export const GetOrganizationsSchema = z.object({
   name: z.string().optional(),
-  subtype: OrganizationSubtypeEnum.optional(),
+  subtypes: z
+    .preprocess((val) => {
+      if (typeof val === "string") return [val];
+      return val;
+    }, z.array(OrganizationSubtypeEnum))
+    .optional(),
   city: z.string().optional(),
+  country: z.string().optional(),
+  sizes: z
+    .preprocess((val) => {
+      if (typeof val === "string") return [val];
+      return val;
+    }, z.array(EmployeeCountRangeEnum))
+    .optional(),
+  keyword: z.string().optional(),
+  productFilter: z.enum(["same", "similar", "different"]).optional(),
+  userExperienceKeywords: z.array(z.string()).optional(),
 });
 
 export const GetOrganizationSchema = z.object({

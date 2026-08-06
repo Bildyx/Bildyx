@@ -117,7 +117,7 @@ export async function searchEntities(
   } else if (endpoint === "/universities") {
     return await organizationService.getAll({
       name: query,
-      subtype: "UNIVERSITY",
+      subtypes: ["UNIVERSITY"],
     });
   } else if (endpoint === "/subjects") {
     return await subjectService.getAll({ name: query });

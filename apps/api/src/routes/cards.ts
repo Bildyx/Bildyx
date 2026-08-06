@@ -15,8 +15,90 @@ import {
 } from "../services/cards/mappers.js";
 import { CardInputSchema } from "../models/card.js";
 import type { Request, Response } from "express";
-import { OrganizationSubtypeEnum } from "../models/utils/enums.js";
-import { z } from "zod";
+
+// ---------------------------------------------------------------------------
+// O(1) template resolution for organization subtypes
+// ---------------------------------------------------------------------------
+
+const SUBTYPE_TEMPLATE_MAP: Record<string, string> = {
+  COMPANY: "organizations/company-card",
+  CENTRAL_BANK: "organizations/central-bank-card",
+  COURT: "organizations/court-card",
+  SOE: "organizations/soe-card",
+  LIBRARY: "organizations/library-card",
+  MUSEUM: "organizations/museum-card",
+  UNIVERSITY: "organizations/university-card",
+  RESEARCH_INSTITUTE: "organizations/research-institute-card",
+  THINK_TANK: "organizations/think-tank-card",
+  NGO: "organizations/ngo-card",
+  CLUB: "organizations/club-card",
+  SOCIETY: "organizations/society-card",
+  ASSOCIATION: "organizations/association-card",
+  STATE_GOVERNMENT: "organizations/state-government-card",
+  CITY_GOVERNMENT: "organizations/city-government-card",
+  HOSPITAL: "organizations/hospital-card",
+  NATIONAL_PARK: "organizations/national-park-card",
+  OMBUDSMAN: "organizations/ombudsman-card",
+  NATIONAL_AUDIT_OFFICE: "organizations/national-audit-office-card",
+  EMBASSY: "organizations/embassy-card",
+  CHAMBER_OF_COMMERCE: "organizations/chamber-of-commerce-card",
+  PUBLIC_PARKS: "organizations/public-parks-card",
+  PRIMARY_SCHOOLS: "organizations/school-card",
+  SECONDARY_SCHOOLS: "organizations/school-card",
+  ARMY: "organizations/army-card",
+  NON_PROFIT: "organizations/non-profit-card",
+  FOUNDATION: "organizations/foundation-card",
+  INTERNATIONAL_ORGANIZATION: "organizations/international-organization-card",
+  PUBLIC_COMPANY: "organizations/company-card",
+  OTHER: "organizations/company-card",
+};
+
+/** Ordered rules for GOVERNMENT sub-dispatch (type1 / name matching). */
+const GOVERNMENT_RULES: Array<{
+  keywords: string[];
+  template: string;
+}> = [
+  { keywords: ["upper house", "lower house", "house of", "senate"], template: "organizations/house-card" },
+  { keywords: ["president administration", "vice president administration"], template: "organizations/president-administration-card" },
+  { keywords: ["agency"], template: "organizations/agency-card" },
+  { keywords: ["bureau"], template: "organizations/bureau-card" },
+  { keywords: ["administration"], template: "organizations/administration-card" },
+  { keywords: ["services", "service"], template: "organizations/services-card" },
+  { keywords: ["institute"], template: "organizations/institute-card" },
+  { keywords: ["office"], template: "organizations/office-card" },
+  { keywords: ["laboratory", "laboratories"], template: "organizations/laboratories-card" },
+  { keywords: ["directorate", "directorates"], template: "organizations/directorates-card" },
+  { keywords: ["division", "divisions"], template: "organizations/divisions-card" },
+  { keywords: ["program", "programs"], template: "organizations/programs-card" },
+  { keywords: ["task force"], template: "organizations/task-force-card" },
+  { keywords: ["board"], template: "organizations/board-card" },
+  { keywords: ["commission"], template: "organizations/commissions-card" },
+  { keywords: ["council"], template: "organizations/council-card" },
+  { keywords: ["committee"], template: "organizations/committee-card" },
+];
+
+function resolveOrganizationTemplate(row: Record<string, any>): string {
+  const subtype = (row.subtype || "").toUpperCase().trim();
+
+  // Fast path: direct O(1) lookup for non-GOVERNMENT subtypes
+  if (subtype !== "GOVERNMENT") {
+    return SUBTYPE_TEMPLATE_MAP[subtype] || "organizations/company-card";
+  }
+
+  // GOVERNMENT sub-dispatch: check type1 and name against ordered rules
+  const t1 = (row.type1 || "").toLowerCase().trim();
+  const nm = (row.name || "").toLowerCase().trim();
+
+  for (const rule of GOVERNMENT_RULES) {
+    for (const kw of rule.keywords) {
+      if (t1 === kw || t1.includes(kw) || nm.includes(kw)) {
+        return rule.template;
+      }
+    }
+  }
+
+  return "organizations/government-card";
+}
 
 interface CardsContext {
   req?: Request;
@@ -181,216 +263,70 @@ export const cards = {
       }
       const { id } = input;
       try {
+        const t0 = performance.now();
         const isUuid = /^[0-9a-f-]{36}$/.test(id);
         const row = await database
           .selectFrom("organizations")
-          .selectAll()
+          .select([
+            "id",
+            "name",
+            "slug",
+            "serial_number",
+            "subtype",
+            "type1",
+            "type2",
+            "description",
+            "mission",
+            "authority",
+            "ownership",
+            "jurisdiction",
+            "known_for",
+            "project",
+            "budget",
+            "founded",
+            "founders",
+            "collections",
+            "student_count",
+            "undergraduates",
+            "postgraduates",
+            "subsidiaries",
+            "offices",
+            "members",
+            "personnel",
+            "numberOfEmployees",
+            "parent_organization_id",
+            "city_id",
+            "research_areas",
+            "products",
+            "services",
+            "facilities",
+            "partners",
+            "programs_activities",
+          ])
           .where(isUuid ? "id" : "slug", "=", id)
           .executeTakeFirst();
+        const t1 = performance.now();
         if (!row) {
           throw new ORPCError("NOT_FOUND", {
             message: "Organization not found",
           });
         }
 
-        let template = "organizations/company-card";
+        const template = resolveOrganizationTemplate(row);
 
-        switch (row.subtype as z.infer<typeof OrganizationSubtypeEnum>) {
-          case OrganizationSubtypeEnum.enum.COMPANY: {
-            template = "organizations/company-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.GOVERNMENT: {
-            const t1 = (row.type1 || "").toLowerCase().trim();
-            const nm = (row.name || "").toLowerCase().trim();
+        // Set cache headers
+        ctx.res.setHeader("Cache-Control", "public, max-age=300");
 
-            if (
-              t1 === "upper house" ||
-              t1 === "lower house" ||
-              nm.includes("house of") ||
-              nm.includes("senate")
-            ) {
-              template = "organizations/house-card";
-            } else if (
-              t1 === "the president administration" ||
-              t1 === "vice president administration" ||
-              nm.includes("president administration") ||
-              nm.includes("vice president administration")
-            ) {
-              template = "organizations/president-administration-card";
-            } else if (t1 === "agency" || nm.includes("agency")) {
-              template = "organizations/agency-card";
-            } else if (t1 === "bureau" || nm.includes("bureau")) {
-              template = "organizations/bureau-card";
-            } else if (
-              t1 === "administration" ||
-              nm.includes("administration")
-            ) {
-              template = "organizations/administration-card";
-            } else if (
-              t1 === "services" ||
-              t1 === "service" ||
-              nm.includes("services") ||
-              nm.includes("service")
-            ) {
-              template = "organizations/services-card";
-            } else if (t1 === "institute" || nm.includes("institute")) {
-              template = "organizations/institute-card";
-            } else if (t1 === "office" || nm.includes("office")) {
-              template = "organizations/office-card";
-            } else if (
-              t1 === "laboratory" ||
-              t1 === "laboratories" ||
-              nm.includes("laboratory") ||
-              nm.includes("laboratories")
-            ) {
-              template = "organizations/laboratories-card";
-            } else if (
-              t1 === "directorate" ||
-              t1 === "directorates" ||
-              nm.includes("directorate") ||
-              nm.includes("directorates")
-            ) {
-              template = "organizations/directorates-card";
-            } else if (
-              t1 === "division" ||
-              t1 === "divisions" ||
-              nm.includes("division") ||
-              nm.includes("divisions")
-            ) {
-              template = "organizations/divisions-card";
-            } else if (
-              t1 === "program" ||
-              t1 === "programs" ||
-              nm.includes("program") ||
-              nm.includes("programs")
-            ) {
-              template = "organizations/programs-card";
-            } else if (t1 === "task force" || nm.includes("task force")) {
-              template = "organizations/task-force-card";
-            } else if (t1 === "board" || nm.includes("board")) {
-              template = "organizations/board-card";
-            } else if (t1 === "commission" || nm.includes("commission")) {
-              template = "organizations/commissions-card";
-            } else if (t1 === "council" || nm.includes("council")) {
-              template = "organizations/council-card";
-            } else if (t1 === "committee" || nm.includes("committee")) {
-              template = "organizations/committee-card";
-            } else {
-              template = "organizations/government-card";
-            }
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.CENTRAL_BANK: {
-            template = "organizations/central-bank-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.COURT: {
-            template = "organizations/court-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.SOE: {
-            template = "organizations/soe-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.LIBRARY: {
-            template = "organizations/library-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.MUSEUM: {
-            template = "organizations/museum-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.UNIVERSITY: {
-            template = "organizations/university-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.RESEARCH_INSTITUTE: {
-            template = "organizations/research-institute-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.THINK_TANK: {
-            template = "organizations/think-tank-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.NGO: {
-            template = "organizations/ngo-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.CLUB: {
-            template = "organizations/club-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.SOCIETY: {
-            template = "organizations/society-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.ASSOCIATION: {
-            template = "organizations/association-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.STATE_GOVERNMENT: {
-            template = "organizations/state-government-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.CITY_GOVERNMENT: {
-            template = "organizations/city-government-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.HOSPITAL: {
-            template = "organizations/hospital-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.NATIONAL_PARK: {
-            template = "organizations/national-park-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.OMBUDSMAN: {
-            template = "organizations/ombudsman-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.NATIONAL_AUDIT_OFFICE: {
-            template = "organizations/national-audit-office-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.EMBASSY: {
-            template = "organizations/embassy-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.CHAMBER_OF_COMMERCE: {
-            template = "organizations/chamber-of-commerce-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.PUBLIC_PARKS: {
-            template = "organizations/public-parks-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.PRIMARY_SCHOOLS:
-          case OrganizationSubtypeEnum.enum.SECONDARY_SCHOOLS: {
-            template = "organizations/school-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.ARMY: {
-            template = "organizations/army-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.NON_PROFIT: {
-            template = "organizations/non-profit-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.FOUNDATION: {
-            template = "organizations/foundation-card";
-            break;
-          }
-          case OrganizationSubtypeEnum.enum.INTERNATIONAL_ORGANIZATION: {
-            template = "organizations/international-organization-card";
-            break;
-          }
-        }
-        return await sendHtmlResponse(
-          ctx,
-          await renderCardHtml(template, await mapOrganization(row)),
+        const mapped = await mapOrganization(row);
+        const t2 = performance.now();
+        const html = await renderCardHtml(template, mapped);
+        const t3 = performance.now();
+
+        console.log(
+          `[cards/organization] id=${id} | DB: ${(t1 - t0).toFixed(0)}ms | map: ${(t2 - t1).toFixed(0)}ms | render: ${(t3 - t2).toFixed(0)}ms | total: ${(t3 - t0).toFixed(0)}ms`,
         );
+
+        return await sendHtmlResponse(ctx, html);
       } catch (err) {
         const error = err as Error;
         console.error(

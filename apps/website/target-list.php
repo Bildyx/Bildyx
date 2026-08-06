@@ -28,15 +28,15 @@ echo str_replace('</head>', "    {$targetStylesheet}\n</head>", $sharedHeader);
 
             <div class="tl-filter-dropdown" data-filter-dropdown>
               <button class="tl-filter-chip" type="button" data-filter-toggle aria-expanded="false">
-                <span aria-hidden="true">♙</span> Organization Size <strong data-filter-count="size"></strong> <span aria-hidden="true">⌄</span>
+                <span aria-hidden="true">♙</span> Organization Size <strong data-filter-count="sizes"></strong> <span aria-hidden="true">⌄</span>
               </button>
               <div class="tl-filter-panel" data-filter-panel>
-                <label class="tl-filter-option"><input type="checkbox" value="micro" data-filter="size" /><span></span><strong>Micro</strong><small>1–10 employees</small></label>
-                <label class="tl-filter-option"><input type="checkbox" value="small" data-filter="size" /><span></span><strong>Small</strong><small>11–50 employees</small></label>
-                <label class="tl-filter-option"><input type="checkbox" value="medium" data-filter="size" /><span></span><strong>Medium-sized</strong><small>51–250 employees</small></label>
-                <label class="tl-filter-option"><input type="checkbox" value="mid-market" data-filter="size" /><span></span><strong>Mid-Market</strong><small>251–1,000 employees</small></label>
-                <label class="tl-filter-option"><input type="checkbox" value="big" data-filter="size" /><span></span><strong>Big</strong><small>1,001–10,000 employees</small></label>
-                <label class="tl-filter-option"><input type="checkbox" value="large-established" data-filter="size" /><span></span><strong>Large, established</strong><small>10,000+ employees</small></label>
+                <label class="tl-filter-option"><input type="checkbox" value="RANGE_1_10" data-filter="sizes" /><span></span><strong>Micro</strong><small>1–10 employees</small></label>
+                <label class="tl-filter-option"><input type="checkbox" value="RANGE_11_50" data-filter="sizes" /><span></span><strong>Small</strong><small>11–50 employees</small></label>
+                <label class="tl-filter-option"><input type="checkbox" value="RANGE_51_200" data-filter="sizes" /><span></span><strong>Medium-sized</strong><small>51–200 employees</small></label>
+                <label class="tl-filter-option"><input type="checkbox" value="RANGE_201_1000" data-filter="sizes" /><span></span><strong>Mid-Market</strong><small>201–1,000 employees</small></label>
+                <label class="tl-filter-option"><input type="checkbox" value="RANGE_1001_5000" data-filter="sizes" /><span></span><strong>Big</strong><small>1,001–5,000 employees</small></label>
+                <label class="tl-filter-option"><input type="checkbox" value="RANGE_5000_PLUS" data-filter="sizes" /><span></span><strong>Large, established</strong><small>5,000+ employees</small></label>
               </div>
             </div>
           </div>
@@ -84,12 +84,6 @@ echo str_replace('</head>', "    {$targetStylesheet}\n</head>", $sharedHeader);
         <h2 id="tl-company-title" class="tl-section-icon" aria-label="Companies">▥</h2>
         <div class="tl-card-row" data-target-list="companies"><div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div><div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div></div>
         <div class="tl-pagination" data-pagination-for="companies"><button class="tl-page-btn is-prev" type="button">‹ Prev</button><span class="tl-page-info">Page 1 of 1</span><button class="tl-page-btn is-next" type="button">Next ›</button></div>
-      </section>
-
-      <section class="tl-target-section" aria-labelledby="tl-government-title">
-        <h2 id="tl-government-title" class="tl-section-icon" aria-label="Public sector">▥</h2>
-        <div class="tl-card-row" data-target-list="government"><div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div><div class="backend-slot is-loading"><div class="skeleton-loader skeleton-card"></div></div></div>
-        <div class="tl-pagination" data-pagination-for="government"><button class="tl-page-btn is-prev" type="button">‹ Prev</button><span class="tl-page-info">Page 1 of 1</span><button class="tl-page-btn is-next" type="button">Next ›</button></div>
       </section>
     </section>
 
