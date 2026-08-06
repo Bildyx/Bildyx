@@ -1072,3 +1072,93 @@ a {
     flex: 1;
     min-height: 0;
 }
+
+
+/* Authenticated header state */
+
+.nav-buttons {
+    position: relative;
+}
+
+.account-menu {
+    position: relative;
+    display: none;
+}
+
+.nav-buttons.is-authenticated .login,
+.nav-buttons.is-authenticated .signup {
+    display: none;
+}
+
+.nav-buttons.is-authenticated .account-menu {
+    display: block;
+}
+
+.account-trigger {
+    width: 27px;
+    height: 27px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.account-trigger:hover,
+.account-menu.is-open .account-trigger {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+.account-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 100;
+    min-width: 128px;
+    padding: 6px;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(15, 23, 41, 0.18);
+    display: none;
+    color: var(--text);
+}
+
+.account-menu.is-open .account-dropdown {
+    display: grid;
+    gap: 2px;
+}
+
+.account-dropdown a,
+.account-dropdown button {
+    width: 100%;
+    min-height: 35px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+}
+
+.account-dropdown a:hover,
+.account-dropdown button:hover {
+    background: #f0f2ff;
+}
+
+.account-dropdown span {
+    width: 16px;
+    color: var(--primary);
+    line-height: 1;
+}
