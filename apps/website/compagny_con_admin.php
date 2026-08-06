@@ -28,13 +28,19 @@ echo str_replace('</head>', "    {$adminStylesheet}\n</head>", $sharedHeader);
     </aside>
     <section class="ca-main">
       <header class="ca-builder"><span></span><b>Profile Builder</b><p>— Start building your company profile by adding teams, products, and more</p></header>
-      <section><div class="ca-section-head"><h2>Our Teams</h2><div><button class="ca-save" type="button" data-save-public>✓ Save</button><button class="ca-cancel-top" type="button" data-reset-draft>× Cancel</button></div></div>
+      <section><div class="ca-section-head">
+          <h2>Our Teams</h2>
+          <button class="ca-edit-pencil-button" type="button" data-toggle-edit-mode aria-pressed="false">
+            <span aria-hidden="true">✎</span>
+            Edit
+          </button>
+        </div>
         <div class="ca-team-panel"><div class="ca-team-main">
           <div class="ca-actions"><button data-open-modal="team">+ Add New Team</button><button data-open-modal="member">♙ Add Team Members</button></div>
           <div class="ca-tabs" id="caTeamTabs"></div><div class="ca-members" id="caMembers"><div class="ca-empty">No team members added yet. Use “Add Team Members” to build this team.</div></div>
           <div class="ca-sub"><h3>Our Offices</h3><button data-open-modal="city">+ Add City</button></div><div class="ca-chips" id="caOffices"></div>
           <div class="ca-sub"><h3>Main Products / Services</h3><div><button data-open-modal="product">+ Add Product/Service</button><button data-open-modal="brand">+ Add Brand</button></div></div><div class="ca-chips" id="caProducts"></div>
-        </div><aside class="ca-profile-side"><div><h3>Team Profile</h3><button data-open-modal="profile">+ Add</button></div><i></i><div id="caTeamProfile"><p>No team profile added yet.</p></div><footer><button class="is-active" data-mode="people">People</button><button data-mode="operate">How We Operate</button></footer></aside></div>
+        </div><aside class="ca-profile-side"><div><h3>Team Profile</h3><button data-open-modal="profile" data-profile-edit-button>+ Add</button></div><i></i><div id="caTeamProfile"><p>No team profile added yet.</p></div><footer><button class="is-active" data-mode="people">People</button><button data-mode="operate">How We Operate</button></footer></aside></div>
       </section>
       <section class="ca-block"><header><span>Our Product &amp; Service Portfolio</span><button data-open-modal="product">+ Add Product/Service</button></header><div id="caPortfolio">No products or services added yet.</div></section>
       <section class="ca-block"><header><span>Photos</span><small id="caPhotosCount">0/10</small><button data-open-modal="photos">+ Add Photos</button></header><div id="caPhotos">No photos added yet.</div></section>
@@ -60,4 +66,87 @@ echo str_replace('</head>', "    {$adminStylesheet}\n</head>", $sharedHeader);
 <template id="modal-photos"><h2>Add Photos</h2><p>Upload photos of your workspace, team, or culture.</p><button class="upload" type="button">⇧<b>Click to upload photos</b><small>JPG, PNG up to 5MB</small></button><footer><button data-close-modal>Cancel</button><button class="primary" data-add-photo>Add Photos</button></footer></template>
 <template id="modal-logo"><h2>Upload Logo</h2><p>Upload your company logo.</p><button class="upload" type="button">⇧<b>Click to upload logo</b><small>JPG, PNG up to 5MB</small></button><footer><button data-close-modal>Cancel</button><button class="primary" data-close-modal>Save Logo</button></footer></template>
 <template id="modal-parent"><h2>Add Parent Company</h2><p>Search and connect the parent company if applicable.</p><input data-field="name" placeholder="Search parent company..."><footer><button data-close-modal>Cancel</button><button class="primary" data-add-parent>Add Parent Company</button></footer></template>
+
+<template id="modal-edit-team">
+    <h2 id="companyAdminModalTitle">Edit Team</h2>
+    <p class="ca-modal-lead">Update or remove this team.</p>
+
+    <input type="hidden" data-field="teamId" />
+
+    <label>Name of Team</label>
+    <input data-field="teamName" maxlength="35" placeholder="e.g. Team Alpha" />
+
+    <footer>
+        <button class="ca-danger-button" type="button" data-delete-team>Delete</button>
+        <button class="ca-cancel" type="button" data-close-modal>Cancel</button>
+        <button class="ca-primary" type="button" data-update-team>Update Team</button>
+    </footer>
+</template>
+
+<template id="modal-edit-member">
+    <h2 id="companyAdminModalTitle">Edit Team Member</h2>
+    <p class="ca-modal-lead">Update job title or profile image for this team member.</p>
+
+    <input type="hidden" data-field="memberId" />
+
+    <label>Name</label>
+    <input data-field="memberName" placeholder="Member name" />
+
+    <label>Job Title</label>
+    <input data-field="jobTitle" placeholder="Job title" />
+
+    <label>Profile Image</label>
+    <button class="ca-upload-area" type="button">
+        <span>⇧</span>
+        <strong>Change image</strong>
+        <small>JPG, PNG up to 5MB</small>
+    </button>
+
+    <footer>
+        <button class="ca-danger-button" type="button" data-delete-member>Delete</button>
+        <button class="ca-cancel" type="button" data-close-modal>Cancel</button>
+        <button class="ca-primary" type="button" data-update-member>Save Changes</button>
+    </footer>
+</template>
+
+<template id="modal-edit-office">
+    <h2 id="companyAdminModalTitle">Edit City</h2>
+    <p class="ca-modal-lead">Update or remove this office location.</p>
+
+    <input type="hidden" data-field="officeId" />
+
+    <label>City</label>
+    <input data-field="cityName" placeholder="City name" />
+
+    <footer>
+        <button class="ca-danger-button" type="button" data-delete-office>Delete</button>
+        <button class="ca-cancel" type="button" data-close-modal>Cancel</button>
+        <button class="ca-primary" type="button" data-update-office>Update City</button>
+    </footer>
+</template>
+
+<template id="modal-edit-product">
+    <h2 id="companyAdminModalTitle">Edit Product/Service</h2>
+    <p class="ca-modal-lead">Update or remove this product/service.</p>
+
+    <input type="hidden" data-field="productId" />
+
+    <label>Product/Service Name</label>
+    <input data-field="productName" placeholder="Product/service name" />
+
+    <label>Product/Service Status</label>
+    <select data-field="productStatus">
+        <option>Main Focus (Our #1 Priority)</option>
+        <option>High Priority (Core Products/Services)</option>
+        <option>Runner Ups (New or Smaller Projects)</option>
+    </select>
+
+    <footer>
+        <button class="ca-danger-button" type="button" data-delete-product>Delete</button>
+        <button class="ca-cancel" type="button" data-close-modal>Cancel</button>
+        <button class="ca-primary" type="button" data-update-product>Update Product</button>
+    </footer>
+</template>
+
+
 <?php require __DIR__ . '/includes/footer.php'; ?>

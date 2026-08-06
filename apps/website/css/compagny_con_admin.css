@@ -91,3 +91,261 @@ button.ca-modal-close,
 .ca-modal-overlay.is-open {
     z-index: 200 !important;
 }
+
+
+/* Pencil edit mode instead of Save / Cancel */
+
+.ca-edit-pencil-button {
+    min-height: 31px;
+    padding: 0 14px;
+    border: 1px solid #aebcff;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ca-blue);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.ca-edit-pencil-button:hover,
+.ca-edit-pencil-button.is-active {
+    background: #e7ebff;
+    border-color: var(--ca-blue);
+}
+
+.ca-save-link,
+.ca-cancel-link,
+.ca-edit-actions {
+    display: none !important;
+}
+
+.ca-team-panel.is-editing .ca-member-card,
+.ca-team-panel.is-editing .ca-team-tab,
+.ca-team-panel.is-editing .ca-office-chip,
+.ca-team-panel.is-editing .ca-product-chip {
+    outline: 1px solid #aebcff;
+    outline-offset: 2px;
+}
+
+.ca-card-actions,
+.ca-chip-actions,
+.ca-tab-actions {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    display: none;
+    gap: 6px;
+    z-index: 3;
+}
+
+.ca-team-panel.is-editing .ca-card-actions,
+.ca-team-panel.is-editing .ca-chip-actions,
+.ca-team-panel.is-editing .ca-tab-actions {
+    display: flex;
+}
+
+.ca-card-action,
+.ca-chip-action,
+.ca-tab-action {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #d7dce8;
+    border-radius: 7px;
+    background: #fff;
+    color: var(--ca-blue);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.ca-card-action:hover,
+.ca-chip-action:hover,
+.ca-tab-action:hover {
+    background: #eef1ff;
+}
+
+.ca-card-action.is-danger,
+.ca-chip-action.is-danger,
+.ca-tab-action.is-danger {
+    color: var(--ca-danger);
+}
+
+.ca-member-card,
+.ca-team-tab,
+.ca-office-chip,
+.ca-product-chip {
+    position: relative;
+}
+
+.ca-team-tab {
+    padding-right: 17px;
+}
+
+.ca-team-panel.is-editing .ca-team-tab {
+    padding-right: 45px;
+}
+
+.ca-danger-button {
+    min-height: 38px;
+    border-radius: 6px;
+    padding: 0 16px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 1px solid #fecaca;
+    background: #fff;
+    color: var(--ca-danger);
+    margin-right: auto;
+}
+
+.ca-danger-button:hover {
+    background: #fff1f2;
+}
+
+.ca-office-chip,
+.ca-product-chip {
+    min-width: 68px;
+}
+
+
+/* FINAL FIX: replace Save / Cancel by one pencil Edit button */
+
+.ca-save,
+.ca-cancel-top,
+.ca-save-link,
+.ca-cancel-link,
+.ca-edit-actions {
+    display: none !important;
+}
+
+.ca-edit-pencil-button {
+    min-height: 31px;
+    padding: 0 14px;
+    border: 1px solid #aebcff;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ca-blue);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.ca-edit-pencil-button:hover,
+.ca-edit-pencil-button.is-active {
+    background: #e7ebff;
+    border-color: var(--ca-blue);
+}
+
+.ca-team-panel.is-editing .ca-member,
+.ca-team-panel.is-editing .ca-chip,
+.ca-team-panel.is-editing .ca-tabs button {
+    outline: 1px solid #aebcff;
+    outline-offset: 2px;
+}
+
+.ca-member,
+.ca-chip,
+.ca-tabs button {
+    position: relative;
+}
+
+.ca-item-actions {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    z-index: 4;
+    display: none;
+    gap: 6px;
+}
+
+.ca-team-panel.is-editing .ca-item-actions {
+    display: flex;
+}
+
+.ca-item-action {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #d7dce8;
+    border-radius: 7px;
+    background: #fff;
+    color: var(--ca-blue);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.ca-item-action:hover {
+    background: #eef1ff;
+}
+
+.ca-item-action.danger {
+    color: var(--ca-danger);
+}
+
+.ca-modal footer button.danger,
+.ca-modal footer .danger {
+    border-color: #fecaca !important;
+    background: #fff !important;
+    color: var(--ca-danger) !important;
+    margin-right: auto;
+}
+
+/* make both close button styles clickable */
+.ca-x,
+.ca-modal-close,
+button.ca-modal-close,
+[data-close-modal].ca-modal-close {
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+    cursor: pointer !important;
+}
+
+.ca-x::before {
+    content: "×";
+}
+
+
+/* Edit blue Team Profile panel */
+
+.ca-team-panel.is-editing .ca-profile-side {
+    outline: 1px solid #aebcff;
+    outline-offset: -4px;
+}
+
+.ca-profile-side [data-profile-edit-button],
+.ca-profile-side [data-open-modal="profile"] {
+    min-width: 58px;
+}
+
+.ca-team-panel.is-editing .ca-profile-side [data-profile-edit-button],
+.ca-team-panel.is-editing .ca-profile-side [data-open-modal="profile"] {
+    border-color: rgba(255,255,255,.8);
+    background: rgba(255,255,255,.18);
+}
+
+.ca-profile-side .ca-point {
+    position: relative;
+}
+
+.ca-team-panel.is-editing .ca-profile-side .ca-point {
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 7px;
+    padding: 8px;
+    margin-left: -8px;
+    margin-right: -8px;
+}
+
+.ca-profile-edit-hint {
+    margin-top: 10px !important;
+    color: rgba(255,255,255,.72) !important;
+    font-size: 10px !important;
+}
