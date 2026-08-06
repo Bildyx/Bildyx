@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Profile — Bildyx';
 $pageDescription = 'Build and edit your Bildyx MicroResume profile.';
 $pageScript = 'js/profile.ts';
@@ -56,7 +56,7 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
                             <span class="skeleton-loader skeleton-chip"></span>
                         </div>
 
-                        <p class="level-legend" style="display: none;">
+                        <p class="level-legend">
                             <span></span> Native
                             <span></span> Fluent
                             <span></span> Intermediate

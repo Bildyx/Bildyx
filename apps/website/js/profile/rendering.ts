@@ -162,7 +162,7 @@ export function renderLanguages(userLangs: any[]) {
     else if (prof === "CONVERSATIONAL" || prof === "PROFESSIONAL")
       levelClass = "is-intermediate";
 
-    const text = `${formatLanguageLabel(ul.language)} (${formatProficiency(prof)})`;
+    const text = formatLanguageLabel(ul.language);
 
     const chip = document.createElement("span");
     chip.className = `chip is-filled ${levelClass}`.trim();

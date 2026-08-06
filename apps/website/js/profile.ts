@@ -139,19 +139,15 @@ export function addChip(containerId: string) {
 
   if (containerId === "languageChips") {
     openLanguageModal((lang: string, level: string) => {
-      let levelClass = "",
-        suffix = "";
+      let levelClass = "";
       if (level === "Native") {
         levelClass = "is-native";
-        suffix = " (Native)";
       } else if (level === "Fluent") {
         levelClass = "is-fluent";
-        suffix = " (Fluent)";
       } else {
         levelClass = "is-intermediate";
-        suffix = " (Intermediate)";
       }
-      const label = lang + suffix;
+      const label = lang;
 
       // Prevent duplicate chips
       const exists = Array.from(container.querySelectorAll(".chip")).some(

@@ -361,16 +361,21 @@ body.profile-page {
 
 .level-legend {
     margin: 8px 0 18px;
-    display: none;
+    display: block;
+    font-size: 0.8rem;
+    color: var(--profile-muted);
 }
 
 .level-legend span {
     display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin: 0 4px 0 10px;
+    width: 8px;
+    height: 8px;
+    margin: 0 4px 0 12px;
     border-radius: 50%;
-    background: var(--profile-blue);
+}
+
+.level-legend span:first-of-type {
+    margin-left: 0;
 }
 
 .profile-meta-list {
@@ -1187,35 +1192,35 @@ input.is-overflow:focus {
 
 /* --- Organisation & Couleurs des Langages --- */
 .level-legend span:nth-of-type(1) {
-    background: var(--profile-blue) !important;
+    background: #071f58 !important;
 }
 
 .level-legend span:nth-of-type(2) {
-    background: #5c7cfa !important;
+    background: #2445ee !important;
 }
 
 .level-legend span:nth-of-type(3) {
-    background: #ced4da !important;
+    background: #0084ff !important;
 }
 
 /* Chips de langues par niveau */
 .chip.is-filled.is-native {
-    background: var(--profile-blue) !important;
+    background: #000080FF !important;
     color: #ffffff !important;
-    border-color: var(--profile-blue) !important;
+    border-color: #000080FF !important;
 }
 
 .chip.is-filled.is-fluent {
-    background: #e8ecff !important;
-    color: var(--profile-blue) !important;
-    border-color: #5c7cfa !important;
+    background: #2445ee !important;
+    color: #ffffff !important;
+    border-color: #2445ee !important;
 }
 
 .chip.is-filled.is-intermediate {
-    background: #f1f3f5 !important;
-    color: #495057 !important;
-    border-color: #ced4da !important;
-    border-style: dashed !important;
+    background: #0084ff !important;
+    color: #ffffff !important;
+    border-color: #0084ff !important;
+    border-style: solid !important;
 }
 
 /* Icones SVG pour la section métadonnées */
@@ -1404,4 +1409,4 @@ input.is-overflow:focus {
 .autosave-badge.is-visible {
     opacity: 1;
     transform: translateY(0);
-}
+}

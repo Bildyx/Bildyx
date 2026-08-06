@@ -279,19 +279,13 @@ export async function saveProfile() {
           const text = chip.childNodes[0]?.textContent?.trim() || "";
           if (!text) return;
 
-          const match = text.match(
-            /^(.*?)(?:\s*\((Native|Fluent|Intermediate|Basic|Professional)\))?$/i,
-          );
-          const langName = match ? match[1].trim() : text;
-          const level = match && match[2] ? match[2] : "Fluent";
+          const langName = text;
           const langEnum = parseLanguageLabel(langName);
 
           let levelEnum = "FLUENT";
-          if (level === "Native") levelEnum = "NATIVE";
-          else if (level === "Fluent") levelEnum = "FLUENT";
-          else if (level === "Intermediate") levelEnum = "CONVERSATIONAL";
-          else if (level === "Basic") levelEnum = "BASIC";
-          else if (level === "Professional") levelEnum = "PROFESSIONAL";
+          if (chip.classList.contains("is-native")) levelEnum = "NATIVE";
+          else if (chip.classList.contains("is-fluent")) levelEnum = "FLUENT";
+          else if (chip.classList.contains("is-intermediate")) levelEnum = "CONVERSATIONAL";
 
           const langData = {
             language: langEnum as any,
