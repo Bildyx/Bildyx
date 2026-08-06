@@ -364,7 +364,7 @@ if (preg_match('/<head\b[^>]*>/i', $sharedHeader)) {
             <a class="side-nav-button" href="profile.php"><span aria-hidden="true">☻</span> Profile</a>
             <a class="side-nav-button" href="target-list.php"><span aria-hidden="true">◎</span> My Target List</a>
             <a class="side-nav-button is-active" href="tests-preferences.php"><span aria-hidden="true">▣</span> Tests &amp;<br> Preferences</a>
-            <a class="side-nav-button" href="my-jobs.php"><span aria-hidden="true">▥</span> My Jobs</a>
+  <!--          <a class="side-nav-button" href="my-jobs.php"><span aria-hidden="true">▥</span> My Jobs</a> -->
             <a class="side-nav-button" href="settings.php"><span aria-hidden="true">⚙</span> Settings</a>
         </aside>
     </div>
