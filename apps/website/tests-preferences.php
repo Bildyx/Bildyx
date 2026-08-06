@@ -55,7 +55,7 @@ echo str_replace('</head>', "    {$testsStylesheet}\n    {$fontawesomeScript}\n<
             <a href="profile.php"><span>☻</span> Profile</a>
             <a href="target-list.php"><span>◎</span> My Target List</a>
             <a class="is-active" href="tests-preferences.php"><span>▣</span> Tests &amp;<br> Preferences</a>
-            <a href="my-jobs.php"><span>▥</span> My Jobs</a>
+         <!--            <a href="my-jobs.php"><span>▥</span> My Jobs</a> -->
             <a href="settings.php"><span>⚙</span> Settings</a>
         </aside>
     </div>

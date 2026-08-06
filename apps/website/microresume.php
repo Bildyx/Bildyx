@@ -30,7 +30,7 @@ echo str_replace('</head>', "    {$microresumeStylesheet}\n</head>", $sharedHead
                 </ul>
 
                 <div class="mr-actions">
-                    <a class="mr-button mr-button--primary" href="generic.php?page=login">Log in</a>
+                    <a class="mr-button mr-button--primary mr-smart-login" href="login.php" data-auth-redirect="profile.php">Log in</a>
                     <a class="mr-button mr-button--primary" href="microresume-example.php">
                         See MicroResume example
                     </a>
@@ -158,7 +158,7 @@ echo str_replace('</head>', "    {$microresumeStylesheet}\n</head>", $sharedHead
         <div class="mr-shell mr-final__inner">
             <h2 id="mr-final-title">Build your first Bildyx MicroResume.</h2>
             <p>If you're tired of being overlooked because your story doesn't fit<br class="mr-desktop-only"> into a 6-second skim, MicroResume is for you. Turn your<br class="mr-desktop-only"> experience into a clear, scannable signal system.</p>
-            <a class="mr-button mr-button--primary" href="generic.php?page=login">Log in</a>
+            <a class="mr-button mr-button--primary mr-smart-login" href="login.php" data-auth-redirect="profile.php">Log in</a>
             <p class="mr-note">No spam. Just occasional progress updates and an invite when we're ready.</p>
         </div>
     </section>

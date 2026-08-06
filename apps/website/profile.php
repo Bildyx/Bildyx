@@ -175,10 +175,10 @@ echo str_replace('</head>', "    {$profileStylesheet}\n</head>", $sharedHeader);
                 Tests &amp;<br> Preferences
             </a>
 
-            <a class="side-nav-button" href="my-jobs.php">
+<!--            <a class="side-nav-button" href="my-jobs.php">
                 <span aria-hidden="true">▥</span>
                 My Jobs
-            </a>
+            </a>   -->
 
             <a class="side-nav-button" href="settings.php">
                 <span aria-hidden="true">⚙</span>

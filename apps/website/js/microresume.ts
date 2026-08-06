@@ -38,5 +38,81 @@
             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
+    function parseJSON(value) {
+        try {
+            return value ? JSON.parse(value) : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function normalizeAccountType(value) {
+        return String(value || '')
+            .toLowerCase()
+            .replace(/[\s_-]/g, '');
+    }
+
+    function readBildyxSession() {
+        return (
+            parseJSON(sessionStorage.getItem('bildyx_session')) ||
+            parseJSON(localStorage.getItem('bildyx_session')) ||
+            parseJSON(localStorage.getItem('bildyx_user'))
+        );
+    }
+
+    function isLoggedIn(session) {
+        return Boolean(
+            session &&
+            (
+                session.userId ||
+                session.id ||
+                session._id ||
+                session.email ||
+                session.accountType ||
+                session.account_type ||
+                session.role
+            )
+        );
+    }
+
+    function getConnectedRedirect(session) {
+        const accountType = normalizeAccountType(
+            session?.accountType ||
+            session?.account_type ||
+            session?.userType ||
+            session?.user_type ||
+            session?.role ||
+            session?.type
+        );
+
+        if (
+            [
+                'company',
+                'business',
+                'employer',
+                'organization',
+                'organisation',
+                'recruiter',
+            ].includes(accountType)
+        ) {
+            return 'compagny_con.php';
+        }
+
+        return 'profile.php';
+    }
+
+    document.querySelectorAll('.mr-smart-login').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            const session = readBildyxSession();
+
+            if (!isLoggedIn(session)) {
+                return;
+            }
+
+            event.preventDefault();
+            window.location.href = getConnectedRedirect(session);
+        });
+    });
+
 })();
 

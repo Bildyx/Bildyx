@@ -1072,3 +1072,208 @@ a {
     flex: 1;
     min-height: 0;
 }
+
+
+/* Authenticated header state */
+
+.nav-buttons {
+    position: relative;
+}
+
+.account-menu {
+    position: relative;
+    display: none;
+}
+
+.nav-buttons.is-authenticated .login,
+.nav-buttons.is-authenticated .signup {
+    display: none;
+}
+
+.nav-buttons.is-authenticated .account-menu {
+    display: block;
+}
+
+.account-trigger {
+    width: 27px;
+    height: 27px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.account-trigger:hover,
+.account-menu.is-open .account-trigger {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+.account-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 100;
+    min-width: 128px;
+    padding: 6px;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(15, 23, 41, 0.18);
+    display: none;
+    color: var(--text);
+}
+
+.account-menu.is-open .account-dropdown {
+    display: grid;
+    gap: 2px;
+}
+
+.account-dropdown a,
+.account-dropdown button {
+    width: 100%;
+    min-height: 35px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+}
+
+.account-dropdown a:hover,
+.account-dropdown button:hover {
+    background: #f0f2ff;
+}
+
+.account-dropdown span {
+    width: 16px;
+    color: var(--primary);
+    line-height: 1;
+}
+
+
+/* Company admin header mode */
+
+.site-header--company-admin {
+    min-height: 54px;
+}
+
+.header-content--company-admin {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.company-admin-header-left {
+    grid-column: 1;
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    min-width: 0;
+}
+
+.company-admin-preview-link {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+    opacity: 0.95;
+}
+
+.company-admin-preview-link:hover {
+    opacity: 0.75;
+    transform: translateY(-1px);
+}
+
+.company-admin-header-title {
+    grid-column: 2;
+    justify-self: center;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+}
+
+.nav-buttons--company-admin {
+    gap: 10px;
+}
+
+.company-admin-status-pill {
+    min-height: 28px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 14px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.company-admin-status-pill:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.company-admin-header-icon {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.88);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.company-admin-header-icon:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.nav-buttons--company-admin .account-menu {
+    display: block;
+}
+
+.nav-buttons--company-admin .login,
+.nav-buttons--company-admin .signup {
+    display: none !important;
+}
+
+@media (max-width: 760px) {
+    .header-content--company-admin {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+    }
+
+    .company-admin-header-left {
+        gap: 12px;
+    }
+
+    .company-admin-preview-link {
+        display: none;
+    }
+
+    .company-admin-header-title {
+        display: none;
+    }
+
+    .company-admin-status-pill {
+        padding: 0 10px;
+    }
+}
