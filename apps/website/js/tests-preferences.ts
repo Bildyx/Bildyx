@@ -88,6 +88,15 @@ const personalityService = new PersonalityService();
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Loading...';
       }
     });
+
+    window.addEventListener("pageshow", () => {
+      const buttons = document.querySelectorAll(".tp-result-button") as NodeListOf<HTMLAnchorElement>;
+      buttons.forEach((btn) => {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+        btn.innerHTML = "View Result";
+      });
+    });
   } catch (err: any) {
     console.error("[tests-preferences.ts] Error updating statuses:", err);
   }

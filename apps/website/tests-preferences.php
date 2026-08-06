@@ -32,21 +32,39 @@ echo str_replace('</head>', "    {$testsStylesheet}\n    {$fontawesomeScript}\n<
                 <!-- Skeleton Loading Placeholders -->
                 <div class="tp-skeleton-row" role="row">
                     <span role="cell"><span class="tp-skeleton-bar" style="width: 40%;"></span></span>
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 60%;"></span></span>
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 30%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 40%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 40%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 40%;"></span></span>
                 </div>
                 <div class="tp-skeleton-row" role="row">
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 55%;"></span></span>
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 60%;"></span></span>
                     <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 0%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
                 </div>
                 <div class="tp-skeleton-row" role="row">
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 35%;"></span></span>
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 60%;"></span></span>
                     <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
-                    <span role="cell"><span class="tp-skeleton-bar" style="width: 0%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                </div>
+                <div class="tp-skeleton-row" role="row">
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                </div>
+                <div class="tp-skeleton-row" role="row">
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                </div>
+                <div class="tp-skeleton-row" role="row">
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
+                    <span role="cell"><span class="tp-skeleton-bar" style="width: 50%;"></span></span>
                 </div>
             </div>
         </section>

@@ -343,6 +343,21 @@ const personalityService = new PersonalityService();
         }
       }
     });
+
+    window.addEventListener("pageshow", () => {
+      const submitBtn = form.querySelector(
+        'button[type="submit"]',
+      ) as HTMLButtonElement | null;
+      const loader = document.getElementById("ptLoader");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+        submitBtn.textContent = "Calculate Results";
+      }
+      if (loader) {
+        loader.style.display = "none";
+      }
+    });
   } catch (err) {
     console.error("[test-form.ts] Initialization error:", err);
   }
