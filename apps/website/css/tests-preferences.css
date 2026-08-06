@@ -99,9 +99,18 @@
 .tp-test-name {
     color: var(--tp-blue);
     font-weight: 800;
+}
+
+.tp-test-name a {
+    color: var(--tp-blue);
+    text-decoration: none;
     display: flex;
     align-items: center;
     gap: 14px;
+}
+
+.tp-test-name a:hover {
+    text-decoration: underline;
 }
 
 .tp-icon {
@@ -450,5 +459,36 @@
     .tp-outline-button,
     .tp-primary-button {
         width: 100%;
+    }
+}
+
+.tp-skeleton-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.45fr) minmax(140px, 1fr) 120px 170px;
+    align-items: center;
+    min-height: 50px;
+    padding: 0 14px;
+    border-radius: 0;
+}
+
+.tp-skeleton-row:nth-child(even) {
+    background: var(--tp-soft);
+}
+
+.tp-skeleton-bar {
+    height: 18px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #cbd5e1 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.4s ease-in-out infinite;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 150% 50%;
+    }
+    100% {
+        background-position: -50% 50%;
     }
 }

@@ -303,6 +303,12 @@ export const auth = {
         });
       }
 
+      const userProfile = await database
+        .selectFrom("user_profiles")
+        .select("id")
+        .where("user_id", "=", user.id)
+        .executeTakeFirst();
+
       return {
         token,
         user: {
@@ -311,6 +317,8 @@ export const auth = {
           first_name: user.first_name,
           last_name: user.last_name,
           role: user.role,
+          profile_id: userProfile?.id || null,
+          organization_id: user.organization_id || null,
         },
       };
     }),
@@ -408,6 +416,12 @@ export const auth = {
         });
       }
 
+      const userProfile = await database
+        .selectFrom("user_profiles")
+        .select("id")
+        .where("user_id", "=", user.id)
+        .executeTakeFirst();
+
       return {
         message: "Email successfully verified. You are now logged in.",
         token,
@@ -415,6 +429,8 @@ export const auth = {
           id: user.id,
           email: user.email,
           role: user.role,
+          profile_id: userProfile?.id || null,
+          organization_id: user.organization_id || null,
         },
       };
     }),
@@ -893,6 +909,12 @@ export const auth = {
         });
       }
 
+      const userProfile = await database
+        .selectFrom("user_profiles")
+        .select("id")
+        .where("user_id", "=", user.id)
+        .executeTakeFirst();
+
       return {
         user: {
           id: user.id,
@@ -903,6 +925,7 @@ export const auth = {
           role: user.role,
           avatar_url: user.avatar_url,
           organization_id: user.organization_id,
+          profile_id: userProfile?.id || null,
         },
       };
     }),

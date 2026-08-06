@@ -9,6 +9,7 @@ import {
   GetPersonalityQuestionSchema,
   DeletePersonalityQuestionSchema,
   DeletePersonalityQuestionsBulkSchema,
+  PostPersonalityQuestionBulkSchema,
 } from "../models/personality_questions";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
@@ -94,6 +95,31 @@ export const personalityQuestions = {
       }
 
       return question;
+    }),
+
+  createBulk: publicProcedure
+    .route({
+      method: "POST",
+      summary: "Create multiple personality questions",
+      description: "Create multiple personality questions",
+      path: "/personality-questions/bulk",
+      tags: ["PersonalityQuestion"],
+    })
+    .input(PostPersonalityQuestionBulkSchema)
+    .output(z.array(PersonalityQuestionSchema))
+    .handler(async ({ input }) => {
+      const questions = await database
+        .insertInto("personality_questions")
+        .values(
+          input.map((q) => ({
+            ...q,
+            id: randomUUID(),
+          })),
+        )
+        .returningAll()
+        .execute();
+
+      return questions;
     }),
 
   update: publicProcedure
