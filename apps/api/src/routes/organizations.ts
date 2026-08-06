@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
+import { sql } from "kysely";
 import {
   OrganizationSchema,
   PostOrganizationSchema,
@@ -25,31 +26,90 @@ export const organizations = {
     .input(GetOrganizationsSchema)
     .output(z.array(OrganizationSchema))
     .handler(async ({ input }) => {
-      const { name, subtype, city } = input;
+      const {
+        name,
+        subtypes,
+        city,
+        country,
+        sizes,
+        keyword,
+        productFilter,
+        userExperienceKeywords,
+      } = input;
 
       let query = database
         .selectFrom("organizations")
+        .leftJoin("cities", "cities.id", "organizations.city_id")
+        .leftJoin("countries", "countries.iso_code", "cities.country_id")
+        .selectAll("organizations")
         .where("organizations.deleted_at", "is", null);
 
       if (name) {
-        const p = `%${name.trim()}%`;
-        query = query.where((eb) =>
-          eb("organizations.name", "ilike", p).or("organizations.mission", "ilike", p),
-        );
+        query = query.where("organizations.name", "ilike", `%${name.trim()}%`);
       }
 
-      if (subtype) {
-        query = query.where("organizations.subtype", "=", subtype);
+      if (subtypes && subtypes.length > 0) {
+        query = query.where((eb) => {
+          const conditions = [eb("organizations.subtype", "in", subtypes)];
+          if (subtypes.includes("COMPANY")) {
+            conditions.push(eb("organizations.subtype", "is", null));
+          }
+          return eb.or(conditions);
+        });
       }
 
       if (city) {
-        const cp = `%${city.trim()}%`;
-        query = query
-          .innerJoin("cities", "cities.id", "organizations.city_id")
-          .where("cities.name", "ilike", cp);
+        query = query.where("cities.name", "ilike", `%${city.trim()}%`);
       }
 
-      return await query.selectAll("organizations").orderBy("organizations.name", "asc").execute();
+      if (country) {
+        query = query.where("countries.name", "ilike", `%${country.trim()}%`);
+      }
+
+      if (sizes && sizes.length > 0) {
+        query = query.where("organizations.numberOfEmployees", "in", sizes);
+      }
+      if (keyword) {
+        const kp = `%${keyword.trim()}%`;
+        query = query.where((eb) =>
+          eb("organizations.name", "ilike", kp)
+            .or("organizations.description", "ilike", kp)
+            .or("organizations.mission", "ilike", kp)
+            .or(
+              sql`array_to_string(coalesce(organizations.products, array[]::text[]), ' ')`,
+              "ilike",
+              kp,
+            )
+            .or(
+              sql`array_to_string(coalesce(organizations.services, array[]::text[]), ' ')`,
+              "ilike",
+              kp,
+            ),
+        );
+      }
+
+      // ✅ Correction 'productFilter' : Binding sécurisé avec sql.val
+      if (
+        productFilter &&
+        userExperienceKeywords &&
+        userExperienceKeywords.length > 0
+      ) {
+        const conditions = userExperienceKeywords.map((k) => {
+          const kp = `%${k.trim()}%`;
+          return sql<boolean>`(
+        array_to_string(coalesce(organizations.products, array[]::text[]), ' ') ilike ${sql.val(kp)} 
+        or array_to_string(coalesce(organizations.services, array[]::text[]), ' ') ilike ${sql.val(kp)}
+      )`;
+        });
+
+        if (productFilter === "same" || productFilter === "similar") {
+          query = query.where((eb) => eb.or(conditions));
+        } else if (productFilter === "different") {
+          query = query.where((eb) => eb.not(eb.or(conditions)));
+        }
+      }
+
+      return await query.orderBy("organizations.name", "asc").execute();
     }),
 
   getById: publicProcedure

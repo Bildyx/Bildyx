@@ -548,6 +548,8 @@ export async function saveProfile() {
     }
 
     await Promise.all(promises);
+    sessionStorage.removeItem("user_experience_keywords");
+    sessionStorage.removeItem("user_work_org_ids");
     showToast("Profile saved");
   } catch (err) {
     console.error("[profile.ts] Save profile error:", err);
