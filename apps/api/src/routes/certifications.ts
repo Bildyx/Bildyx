@@ -57,7 +57,7 @@ export const certifications = {
         query = query.where("category", "=", category);
       }
 
-      return await query.orderBy("created_at", "desc").execute();
+      return await query.orderBy("name", "asc").execute();
     }),
 
   // 2. Get all certifications
@@ -74,7 +74,7 @@ export const certifications = {
       let query = database.selectFrom("certifications").selectAll();
 
       const certificationsData = await query
-        .orderBy("created_at", "desc")
+        .orderBy("name", "asc")
         .execute();
 
       return certificationsData;
@@ -158,10 +158,7 @@ export const certifications = {
 
       const cert = await database
         .updateTable("certifications")
-        .set({
-          ...updates,
-          updated_at: new Date(),
-        } as Insertable<Certifications>)
+        .set(updates as any)
         .where("id", "=", certificationId)
         .returningAll()
         .executeTakeFirst();

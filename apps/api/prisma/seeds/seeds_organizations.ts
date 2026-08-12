@@ -44,32 +44,11 @@ function parseEmployeeRange(v?: string): EmployeeCountRange | null {
 
 // Columns actually present in organizations.csv (the file contains no
 // id/created_at/updated_at/deleted_at).
-type OrganizationCsv = {
-  name: string;
-  serial_number?: string;
-  slug: string;
-  subtype?: string;
-  type1?: string;
-  type2?: string;
-  ownership?: string;
-  mission?: string;
-  known_for?: string;
-  programs_activities?: string;
-  project?: string;
-  research_areas?: string;
-  products?: string;
-  services?: string;
-  partners?: string;
-  budget?: string;
-  founded?: string;
-  founders?: string;
-  facilities?: string;
-  score?: string;
+import { Organization } from "../../src/models/organizations";
+
+type OrganizationCsv = Partial<Record<keyof Organization, string>> & {
   city_name?: string;
-  numberOfEmployees?: string;
-  subsidiaries?: string;
   parent_organization_name?: string;
-  metadata?: string;
 };
 
 export async function seedOrganizations(prisma: PrismaClient) {
@@ -82,12 +61,14 @@ export async function seedOrganizations(prisma: PrismaClient) {
   // with uuids we generate ourselves up front for parent_organization_name
   // so it can be resolved in a single pass whatever the row order in the
   // CSV.
-  const cities = await prisma.city.findMany({ select: { id: true, name: true } });
+  const cities = await prisma.city.findMany({
+    select: { id: true, name: true },
+  });
   const resolveCityId = buildNameLookup(cities);
   const unmatchedCities = new Set<string>();
 
   const idByOrgName = new Map(
-    rows.map((r) => [r.name.trim().toLowerCase(), randomUUID()]),
+    rows.map((r) => [r.name!.trim().toLowerCase(), randomUUID()]),
   );
   const resolveParentId = (rawName?: string): string | null => {
     if (!rawName || rawName.trim() === "") return null;
@@ -100,11 +81,12 @@ export async function seedOrganizations(prisma: PrismaClient) {
     if (r.city_name && !city_id) unmatchedCities.add(r.city_name);
 
     return {
-      id: idByOrgName.get(r.name.trim().toLowerCase())!,
-      name: r.name,
-      slug: r.slug,
+      id: idByOrgName.get(r.name!.trim().toLowerCase())!,
+      name: r.name!,
+      slug: r.slug!,
       serial_number:
-        r.serial_number || generateSerialNumber(parseEnum(r.subtype, OrganizationSubType)),
+        r.serial_number ||
+        generateSerialNumber(parseEnum(r.subtype, OrganizationSubType)),
 
       subtype: parseEnum(r.subtype, OrganizationSubType),
       type1: r.type1 || null,
@@ -116,12 +98,9 @@ export async function seedOrganizations(prisma: PrismaClient) {
       knownFor: r.known_for || null,
       programsActivities: toStringArray(r.programs_activities),
 
-      project: r.project || null,
-
       researchAreas: toStringArray(r.research_areas),
       products: toStringArray(r.products),
       services: toStringArray(r.services),
-      partners: toStringArray(r.partners),
 
       budget: r.budget || null,
       founded: r.founded || null,
@@ -139,19 +118,12 @@ export async function seedOrganizations(prisma: PrismaClient) {
       city_id,
 
       numberOfEmployees: parseEmployeeRange(r.numberOfEmployees),
-      subsidiaries: r.subsidiaries || null,
 
       // parentOrganizationId is a self-reference: filled in the 2nd pass
       // below, once every row is in the database, so the foreign key
       // constraint is never violated if a child appears in the CSV before
       // its parent.
       parentOrganizationId: null,
-
-      metadata: toJson(r.metadata),
-
-      deletedAt: toDate(undefined, false),
-      createdAt: toDate(undefined, true) as Date,
-      updatedAt: toDate(undefined, true) as Date,
     };
   });
 
@@ -170,7 +142,7 @@ export async function seedOrganizations(prisma: PrismaClient) {
     if (!parentOrganizationId) continue;
 
     await prisma.organization.update({
-      where: { id: idByOrgName.get(r.name.trim().toLowerCase())! },
+      where: { id: idByOrgName.get(r.name!.trim().toLowerCase())! },
       data: { parentOrganizationId },
     });
   }

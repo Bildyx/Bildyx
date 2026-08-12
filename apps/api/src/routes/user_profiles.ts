@@ -30,23 +30,32 @@ export const user_profiles = {
     .input(GetUserProfilesSchema)
     .output(z.array(UserProfileSchema))
     .handler(async ({ input }) => {
-      const { userId, countryId, cityId } = input;
+      const { userId, countryId, cityId, excludeOrganizations } = input;
 
-      let query = database.selectFrom("user_profiles").selectAll();
+      let query = database.selectFrom("user_profiles") as any;
+
+      if (excludeOrganizations) {
+        query = query
+          .innerJoin("users", "users.id", "user_profiles.user_id")
+          .where("users.role", "!=", "ORGANIZATION")
+          .selectAll("user_profiles");
+      } else {
+        query = query.selectAll();
+      }
 
       if (userId) {
-        query = query.where("user_id", "=", userId);
+        query = query.where("user_profiles.user_id", "=", userId);
       }
 
       if (countryId) {
-        query = query.where("country_id", "=", countryId);
+        query = query.where("user_profiles.country_id", "=", countryId);
       }
 
       if (cityId) {
-        query = query.where("city_id", "=", cityId);
+        query = query.where("user_profiles.city_id", "=", cityId);
       }
 
-      return await query.orderBy("created_at", "desc").execute();
+      return await query.execute();
     }),
 
   // 2. Get a profile by ID
@@ -169,15 +178,13 @@ export const user_profiles = {
         });
       }
 
-      const { metadata, ...rest } = input;
+      const { ...rest } = input;
 
       const profile = await database
         .insertInto("user_profiles")
         .values({
           ...rest,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         } as Insertable<UserProfiles>)
         .returningAll()
         .executeTakeFirst();
@@ -203,7 +210,7 @@ export const user_profiles = {
     .input(z.object({ profileId: z.uuid() }).merge(PutUserProfileSchema))
     .output(UserProfileSchema)
     .handler(async ({ input }) => {
-      const { profileId, metadata, ...rest } = input;
+      const { profileId, ...rest } = input;
 
       const existing = await database
         .selectFrom("user_profiles")
@@ -219,9 +226,7 @@ export const user_profiles = {
         .updateTable("user_profiles")
         .set({
           ...rest,
-          updated_at: new Date(),
-          metadata: metadata as any,
-        } as Insertable<UserProfiles>)
+        })
         .where("id", "=", profileId)
         .returningAll()
         .executeTakeFirst();

@@ -87,51 +87,40 @@ export async function loadUserData() {
     setCurrentProfile(fullProfile);
 
     const displayName =
-      user.display_name ||
-      [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+      fullProfile.display_name ||
+      [fullProfile.first_name, fullProfile.last_name]
+        .filter(Boolean)
+        .join(" ") ||
       user.email;
 
     setField("name", displayName);
 
     const avatarEl = document.getElementById("profileAvatar");
     if (avatarEl) {
-      if (user.avatar_url) {
-        avatarEl.style.backgroundImage = `url('${user.avatar_url}')`;
+      if (fullProfile.avatar_url) {
+        avatarEl.style.backgroundImage = `url('${fullProfile.avatar_url}')`;
         avatarEl.style.backgroundSize = "cover";
         avatarEl.style.backgroundPosition = "center";
         avatarEl.textContent = "";
       } else {
         avatarEl.style.backgroundImage = "";
         avatarEl.textContent =
-          [user.first_name?.[0], user.last_name?.[0]]
+          [fullProfile.first_name?.[0], fullProfile.last_name?.[0]]
             .filter(Boolean)
             .join("")
             .toUpperCase() || "?";
       }
     }
 
-    let meta: Record<string, any> = {};
-    if (fullProfile.metadata) {
-      try {
-        meta =
-          typeof fullProfile.metadata === "string"
-            ? JSON.parse(fullProfile.metadata)
-            : fullProfile.metadata;
-      } catch (e) {
-        console.error("Failed to parse metadata:", e);
-        meta = {};
-      }
-    }
-
     setField("summary", fullProfile.biography || "");
-    setField("role", meta.role || "");
+    setField("role", fullProfile.role || "");
 
-    const locationEl = document.querySelector(".location-line");
-    if (locationEl) {
-      locationEl.textContent = meta.location
-        ? `⌾ ${meta.location}`
-        : "⌾ Add location...";
-    }
+    // const locationEl = document.querySelector(".location-line");
+    // if (locationEl) {
+    //   locationEl.textContent = meta.location
+    //     ? `⌾ ${meta.location}`
+    //     : "⌾ Add location...";
+    // }
 
     // 2. Rendu ultra-rapide en utilisant les données déjà présentes dans fullProfile
     renderLanguages(fullProfile.languages || []);
@@ -246,7 +235,10 @@ export async function renderExperiences(experiences: any[]) {
     }),
   );
 
-  sessionStorage.setItem("user_experience_keywords", JSON.stringify(Array.from(userExperienceKeywords)));
+  sessionStorage.setItem(
+    "user_experience_keywords",
+    JSON.stringify(Array.from(userExperienceKeywords)),
+  );
   sessionStorage.setItem("user_work_org_ids", JSON.stringify(userWorkOrgIds));
 
   uiExperiences.forEach((exp, i) => {
@@ -310,7 +302,8 @@ export async function renderExperiences(experiences: any[]) {
       txt.addEventListener("input", () => updateWordCounter(txt));
     }
 
-    const currentCheckbox = article.querySelector<HTMLInputElement>(".exp-current");
+    const currentCheckbox =
+      article.querySelector<HTMLInputElement>(".exp-current");
     const endYearInput = article.querySelector<HTMLInputElement>(".end-year");
     if (currentCheckbox && endYearInput) {
       currentCheckbox.addEventListener("change", () => {
@@ -478,7 +471,7 @@ export async function renderCertifications(userCerts: any[]) {
                     <div class="cert-date-row" style="display: flex; gap: 12px; margin-bottom: 12px;">
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 0.85em; opacity: 0.8;">Obtained at</label>
-                            <input type="date" class="cert-obtained-at" value="${uc.obtained_at ? new Date(uc.obtained_at).toISOString().split('T')[0] : ''}" style="width: 100%;" />
+                            <input type="date" class="cert-obtained-at" value="${uc.obtained_at ? new Date(uc.obtained_at).toISOString().split("T")[0] : ""}" style="width: 100%;" />
                         </div>
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -487,7 +480,7 @@ export async function renderCertifications(userCerts: any[]) {
                                     <input type="checkbox" class="cert-never-expire" ${!uc.expires_at ? "checked" : ""} /> Never
                                 </label>
                             </div>
-                            <input type="date" class="cert-expires-at" value="${uc.expires_at ? new Date(uc.expires_at).toISOString().split('T')[0] : ''}" style="width: 100%;" ${!uc.expires_at ? "disabled" : ""} />
+                            <input type="date" class="cert-expires-at" value="${uc.expires_at ? new Date(uc.expires_at).toISOString().split("T")[0] : ""}" style="width: 100%;" ${!uc.expires_at ? "disabled" : ""} />
                         </div>
                     </div>
                     <div class="backend-grid">

@@ -13,22 +13,10 @@ import {
   buildNameLookup,
 } from "../seed-utils";
 
-type JobCsv = {
-  id: string;
-  title: string;
-  serial_number: string;
-  category?: string;
-  description?: string;
-  seniority_level?: string;
+import { Job } from "../../src/models/jobs";
+
+type JobCsv = Partial<Record<keyof Job, string>> & {
   industry_name?: string;
-  products?: string;
-  tools_and_tech?: string;
-  tags?: string;
-  metadata?: string;
-  score?: string;
-  deleted_at?: string;
-  created_at?: string;
-  updated_at?: string;
 };
 
 export async function seedJobs(prisma: PrismaClient) {
@@ -48,9 +36,9 @@ export async function seedJobs(prisma: PrismaClient) {
     if (r.industry_name && !industryId) unmatchedIndustries.add(r.industry_name);
 
     return {
-      id: r.id,
-      title: r.title,
-      serial_number: r.serial_number,
+      id: r.id!,
+      title: r.title!,
+      serial_number: r.serial_number!,
 
       category: parseEnum(r.category, JobCategory),
 
@@ -64,13 +52,7 @@ export async function seedJobs(prisma: PrismaClient) {
       toolsAndTech: toStringArray(r.tools_and_tech),
       tags: toStringArray(r.tags),
 
-      metadata: toJson(r.metadata),
-
       score: r.score && r.score !== "" ? Number(r.score) : null,
-
-      deletedAt: toDate(r.deleted_at, false),
-      createdAt: toDate(r.created_at, true) as Date,
-      updatedAt: toDate(r.updated_at, true) as Date,
     };
   });
 

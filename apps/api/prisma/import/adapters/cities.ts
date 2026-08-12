@@ -6,7 +6,6 @@ import {
   checkEnumArray,
   checkFloat,
   checkInt,
-  checkJson,
   checkRequiredFk,
   checkRequiredText,
   checkScaleEnum,
@@ -40,7 +39,6 @@ const EXPECTED_COLUMNS = [
   "people_description",
   "latitude",
   "longitude",
-  "metadata",
   // M2M free-text column (City<->Industry, "main industries").
   "main_industries",
 ];
@@ -68,7 +66,9 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
   ],
 
   async buildFkContext(prisma: PrismaClient): Promise<CitiesFk> {
-    const countries = await prisma.country.findMany({ select: { isoCode: true } });
+    const countries = await prisma.country.findMany({
+      select: { isoCode: true },
+    });
     return { validCountryIsoCodes: new Set(countries.map((c) => c.isoCode)) };
   },
 
@@ -96,10 +96,19 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
     const currency = checkEnum(row.currency, Currency, "currency", true);
     if (currency.issue) errors.push(currency.issue);
 
-    const costOfLiving = checkScaleEnum(row.cost_of_living, CostOfLiving, "cost_of_living");
+    const costOfLiving = checkScaleEnum(
+      row.cost_of_living,
+      CostOfLiving,
+      "cost_of_living",
+    );
     if (costOfLiving.issue) warnings.push(costOfLiving.issue);
 
-    const language = checkEnumArray(row.language, Language, "language", LANGUAGE_ALIASES);
+    const language = checkEnumArray(
+      row.language,
+      Language,
+      "language",
+      LANGUAGE_ALIASES,
+    );
     warnings.push(...language.issues);
 
     // The column stays INTEGER in the database (see the note on migration
@@ -119,19 +128,22 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
 
     const medianSalary = checkInt(row.median_salary, "median_salary");
     if (medianSalary.issue) warnings.push(medianSalary.issue);
-    const medianHomePrice = checkInt(row.median_home_price, "median_home_price");
+    const medianHomePrice = checkInt(
+      row.median_home_price,
+      "median_home_price",
+    );
     if (medianHomePrice.issue) warnings.push(medianHomePrice.issue);
     const averageRent = checkInt(row.average_rent, "average_rent");
     if (averageRent.issue) warnings.push(averageRent.issue);
-    const numberOfUniversities = checkInt(row.number_of_universities, "number_of_universities");
+    const numberOfUniversities = checkInt(
+      row.number_of_universities,
+      "number_of_universities",
+    );
     if (numberOfUniversities.issue) warnings.push(numberOfUniversities.issue);
     const latitude = checkFloat(row.latitude, "latitude");
     if (latitude.issue) warnings.push(latitude.issue);
     const longitude = checkFloat(row.longitude, "longitude");
     if (longitude.issue) warnings.push(longitude.issue);
-
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
 
     return {
       naturalKey: serialNumber.value,
@@ -161,7 +173,6 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
         peopleDescription: row.people_description || null,
         latitude: latitude.value,
         longitude: longitude.value,
-        metadata: metadata.value,
       },
       errors,
       warnings,

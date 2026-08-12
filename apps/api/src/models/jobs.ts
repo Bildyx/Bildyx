@@ -15,11 +15,7 @@ export const JobSchema = z.object({
   products: zStringArray(),
   tools_and_tech: zStringArray(),
   tags: zStringArray(),
-  metadata: z.any().nullable().optional(),
   score: z.number().int().min(0).nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -37,9 +33,6 @@ export const GetJobSchema = z.object({
 // POST
 export const PostJobSchema = JobSchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
 });
 
 // PATCH

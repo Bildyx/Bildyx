@@ -31,6 +31,7 @@ $isCompanyAdminHeader = $headerMode === 'company-admin';
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>css/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
 </head>
 <body<?= $bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
     <header class="site-header<?= $isCompanyAdminHeader ? ' site-header--company-admin' : '' ?>">
@@ -222,7 +223,7 @@ $isCompanyAdminHeader = $headerMode === 'company-admin';
             const text = String(link.textContent || '').toLowerCase();
 
             return (
-                href.includes('compagny_con.php') ||
+                href.includes('company_con_admin.php') ||
                 href.includes('create-team') ||
                 href.includes('team-create') ||
                 href.includes('team-builder') ||

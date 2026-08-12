@@ -5,7 +5,11 @@ import {
   LanguageSchema,
   QualityOfLifeSchema,
 } from "./utils/enums";
-import { zEnumArray, zNullableString, zNullableStringCoercive } from "./utils/preprocessors";
+import {
+  zEnumArray,
+  zNullableString,
+  zNullableStringCoercive,
+} from "./utils/preprocessors";
 
 export const CountrySchema = z.object({
   iso_code: z.string().length(2),
@@ -62,10 +66,6 @@ export const CountrySchema = z.object({
   religion: zNullableString(),
   cultural_values: z.string().nullable().optional(),
   people_description: z.string().nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -78,14 +78,10 @@ export const GetCountrySchema = z.object({
 });
 
 // POST
-export const PostCountrySchema = CountrySchema.omit({
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
-});
+export const PostCountrySchema = CountrySchema;
 
 // PATCH
-export const PutCountrySchema = PostCountrySchema.partial();
+export const PutCountrySchema = CountrySchema.partial();
 
 // DELETE
 export const DeleteCountrySchema = z.object({

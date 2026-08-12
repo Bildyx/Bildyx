@@ -1,5 +1,5 @@
 import * as esbuild from "esbuild";
-import { readdirSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 
@@ -13,6 +13,23 @@ const entryPoints = readdirSync(jsDir)
 
 const isWatch = process.argv.includes("--watch");
 
+let env = {};
+try {
+  const envContent = readFileSync(fileURLToPath(new URL("../api/.env", import.meta.url)), "utf8");
+  for (const line of envContent.split("\n")) {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (match) {
+      let value = match[2] || "";
+      value = value.trim();
+      if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+      if (value.startsWith("'") && value.endsWith("'")) value = value.slice(1, -1);
+      env[match[1]] = value;
+    }
+  }
+} catch (e) {
+  console.log("No .env found, skipping environment variables injection", e);
+}
+
 const ctx = await esbuild.context({
   entryPoints,
   outdir: outDir,
@@ -23,6 +40,10 @@ const ctx = await esbuild.context({
   sourcemap: isWatch ? "inline" : false,
   minify: !isWatch,
   logLevel: "info",
+  define: {
+    "process.env.SUPABASE_URL": JSON.stringify(env.SUPABASE_URL || ""),
+    "process.env.SUPABASE_ANON_KEY": JSON.stringify(env.SUPABASE_ANON_KEY || ""),
+  },
 });
 
 if (isWatch) {

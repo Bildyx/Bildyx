@@ -6,8 +6,6 @@ export const PersonalityTestSchema = z.object({
   name: z.string().trim().min(1),
   description: z.string().nullable().optional(),
   is_active: z.boolean(),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -23,8 +21,6 @@ export const GetPersonalityTestSchema = z.object({
 // POST
 export const PostPersonalityTestSchema = PersonalityTestSchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
 });
 
 // PATCH

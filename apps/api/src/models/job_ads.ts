@@ -27,10 +27,6 @@ export const JobAdSchema = z.object({
   published_at: z.date().nullable().optional().default(null),
   expires_at: z.date().nullable().optional().default(null),
   tags: zStringArray(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -52,9 +48,6 @@ export const GetJobAdSchema = z.object({
 // POST
 export const PostJobAdSchema = JobAdSchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
 });
 
 // PATCH

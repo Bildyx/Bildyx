@@ -17,10 +17,6 @@ export const SubjectSchema = z.object({
   website_url: z.string().nullable().optional(),
   logo_url: z.string().nullable().optional(),
   tags: zStringArray(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
   score: z.number().int().min(0).nullable().optional(),
 });
 
@@ -38,9 +34,6 @@ export const GetSubjectSchema = z.object({
 // POST
 export const PostSubjectSchema = SubjectSchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
 });
 
 // PATCH

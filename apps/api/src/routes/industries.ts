@@ -85,15 +85,13 @@ export const industries = {
         });
       }
 
-      const { metadata, ...rest } = input;
+      const { ...rest } = input;
 
       const industry = await database
         .insertInto("industries")
         .values({
           ...rest,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -118,7 +116,7 @@ export const industries = {
     .input(z.object({ industryId: z.uuid() }).merge(PutIndustrySchema))
     .output(IndustrySchema)
     .handler(async ({ input }) => {
-      const { industryId, metadata, ...rest } = input;
+      const { industryId, ...rest } = input;
 
       const existing = await database
         .selectFrom("industries")
@@ -131,7 +129,7 @@ export const industries = {
 
       const industry = await database
         .updateTable("industries")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set(rest)
         .where("id", "=", industryId)
         .returningAll()
         .executeTakeFirst();

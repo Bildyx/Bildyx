@@ -1,4 +1,4 @@
-﻿import { ORPCError } from "@orpc/server";
+import { ORPCError } from "@orpc/server";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
 import {
@@ -42,7 +42,7 @@ export const user_sessions = {
         .selectFrom("user_sessions")
         .selectAll()
         .where("user_id", "=", input.userId)
-        .orderBy("created_at", "desc")
+        .orderBy("expires_at", "desc")
         .execute();
     }),
 

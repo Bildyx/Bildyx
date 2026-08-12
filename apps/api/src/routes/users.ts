@@ -30,10 +30,7 @@ export const users = {
     .handler(async ({ input }) => {
       const { email, role, status } = input;
 
-      let query = database
-        .selectFrom("users")
-        .where("deleted_at", "is", null)
-        .selectAll();
+      let query = database.selectFrom("users").selectAll();
 
       if (email) {
         query = query.where("email", "ilike", `%${email.trim()}%`);
@@ -47,7 +44,7 @@ export const users = {
         query = query.where("status", "=", status);
       }
 
-      return await query.orderBy("created_at", "desc").execute();
+      return await query.execute();
     }),
 
   // 2. Get a user by ID
@@ -66,7 +63,6 @@ export const users = {
         .selectFrom("users")
         .selectAll()
         .where("id", "=", input.userId)
-        .where("deleted_at", "is", null)
         .executeTakeFirst();
 
       if (!user) {
@@ -91,7 +87,6 @@ export const users = {
       const existing = await database
         .selectFrom("users")
         .where("email", "=", input.email)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -137,7 +132,6 @@ export const users = {
       const existing = await database
         .selectFrom("users")
         .where("id", "=", userId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -147,10 +141,7 @@ export const users = {
 
       const user = await database
         .updateTable("users")
-        .set({
-          ...updates,
-          updated_at: new Date(),
-        } as Insertable<Users>)
+        .set(updates)
         .where("id", "=", userId)
         .returningAll()
         .executeTakeFirst();
@@ -206,8 +197,7 @@ export const users = {
       if (input.userIds.length === 0) return;
 
       await database
-        .updateTable("users")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("users")
         .where("id", "in", input.userIds)
         .execute();
     }),

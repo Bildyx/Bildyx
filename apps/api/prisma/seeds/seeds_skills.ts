@@ -7,36 +7,17 @@ import {
   parseEnum,
 } from "../seed-utils";
 
-type SkillCsv = {
-  id: string;
-  name: string;
-  serial_number: string;
-  type?: string;
-  category?: string;
-  description?: string;
-  icon_url?: string;
-  industry?: string;
-  difficulty?: string;
-  used_in?: string;
-  jobs?: string;
-  product_categories?: string;
-  common_fields_of_study?: string;
-  related_abilities?: string;
-  time_to_master?: string;
-  score?: string;
-  metadata?: string;
-  deleted_at?: string;
-  created_at?: string;
-  updated_at?: string;
-};
+import { Skill } from "../../src/models/skills";
+
+type SkillCsv = Partial<Record<keyof Skill, string>>;
 
 export async function seedSkills(prisma: PrismaClient) {
   const rows = readCsv<SkillCsv>("skills.csv");
 
   const data: Prisma.SkillCreateManyInput[] = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    serial_number: r.serial_number,
+    id: r.id!,
+    name: r.name!,
+    serial_number: r.serial_number!,
 
     type: r.type || null,
 
@@ -59,12 +40,6 @@ export async function seedSkills(prisma: PrismaClient) {
     timeToMaster: r.time_to_master || null,
 
     score: r.score && r.score !== "" ? Number(r.score) : null,
-
-    metadata: toJson(r.metadata),
-
-    deletedAt: toDate(r.deleted_at, false),
-    createdAt: toDate(r.created_at, true) as Date,
-    updatedAt: toDate(r.updated_at, true) as Date,
   }));
 
   const result = await prisma.skill.createMany({

@@ -6,8 +6,6 @@ export const AuditLogSchema = z.object({
   user_id: z.uuid(),
   action: z.string(),
   ip_address: z.string().nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  created_at: z.date(),
 });
 
 // GET
@@ -25,7 +23,6 @@ export const PostAuditLogSchema = z.object({
   user_id: z.uuid(),
   action: z.string().min(1),
   ip_address: z.string().nullable().optional(),
-  metadata: z.any().nullable().optional(),
 });
 
 // DELETE

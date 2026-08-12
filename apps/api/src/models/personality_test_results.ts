@@ -6,8 +6,6 @@ export const PersonalityTestResultSchema = z.object({
   user_profile_id: z.uuid(),
   test_id: z.uuid(),
   completed_at: z.date(),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -24,8 +22,6 @@ export const GetPersonalityTestResultSchema = z.object({
 export const PostPersonalityTestResultSchema = PersonalityTestResultSchema.omit(
   {
     id: true,
-    created_at: true,
-    updated_at: true,
   },
 );
 
@@ -96,4 +92,3 @@ export const DeleteByTestCodeSchema = z.object({
 export const DeleteByTestCodeResponseSchema = z.object({
   success: z.boolean(),
 });
-

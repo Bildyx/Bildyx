@@ -8,7 +8,6 @@ export const UserSessionSchema = z.object({
   revoked_at: z.date().nullable().optional(),
   ip_address: z.string().nullable().optional(),
   user_agent: z.string().nullable().optional(),
-  created_at: z.date(),
 });
 
 // GET

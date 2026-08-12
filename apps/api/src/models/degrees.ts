@@ -10,10 +10,6 @@ export const DegreeSchema = z.object({
   duration_years: z.number().min(0).nullable().optional(),
   description: z.string().nullable().optional(),
   score: z.number().int().min(0).nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -29,9 +25,6 @@ export const GetDegreeSchema = z.object({
 // POST
 export const PostDegreeSchema = DegreeSchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
 });
 
 // PATCH

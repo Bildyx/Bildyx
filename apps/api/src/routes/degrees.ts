@@ -90,15 +90,11 @@ export const degrees = {
         });
       }
 
-      const { metadata, ...rest } = input;
-
       const degree = await database
         .insertInto("degrees")
         .values({
-          ...rest,
+          ...input,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -123,7 +119,7 @@ export const degrees = {
     .input(z.object({ degreeId: z.uuid() }).merge(PutDegreeSchema))
     .output(DegreeSchema)
     .handler(async ({ input }) => {
-      const { degreeId, metadata, ...rest } = input;
+      const { degreeId, ...rest } = input;
 
       const existing = await database
         .selectFrom("degrees")
@@ -137,7 +133,7 @@ export const degrees = {
 
       const degree = await database
         .updateTable("degrees")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set(rest)
         .where("id", "=", degreeId)
         .returningAll()
         .executeTakeFirst();

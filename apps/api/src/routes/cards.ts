@@ -281,7 +281,6 @@ export const cards = {
             "ownership",
             "jurisdiction",
             "known_for",
-            "project",
             "budget",
             "founded",
             "founders",
@@ -289,8 +288,6 @@ export const cards = {
             "student_count",
             "undergraduates",
             "postgraduates",
-            "subsidiaries",
-            "offices",
             "members",
             "personnel",
             "numberOfEmployees",
@@ -300,7 +297,6 @@ export const cards = {
             "products",
             "services",
             "facilities",
-            "partners",
             "programs_activities",
           ])
           .where(isUuid ? "id" : "slug", "=", id)

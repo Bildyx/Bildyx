@@ -203,32 +203,10 @@ export async function saveProfile() {
       '[data-profile-dirty="true"]',
     );
     if (profileDirtyEl) {
-      let existingMeta: Record<string, any> = {};
-      if (currentProfile.metadata) {
-        try {
-          existingMeta =
-            typeof currentProfile.metadata === "string"
-              ? JSON.parse(currentProfile.metadata)
-              : currentProfile.metadata;
-        } catch (e) {
-          console.error("Failed to parse metadata:", e);
-          existingMeta = currentProfile.metadata || {};
-        }
-      }
-
-      delete existingMeta.experiences;
-      delete existingMeta.skills;
-      delete existingMeta.languages;
-
       promises.push(
         profileService
           .update(currentProfile.id, {
             biography: biography || null,
-            metadata: {
-              ...existingMeta,
-              role,
-              displayName: name,
-            },
           })
           .then(() => {
             profileDirtyEl.removeAttribute("data-profile-dirty");
@@ -285,7 +263,8 @@ export async function saveProfile() {
           let levelEnum = "FLUENT";
           if (chip.classList.contains("is-native")) levelEnum = "NATIVE";
           else if (chip.classList.contains("is-fluent")) levelEnum = "FLUENT";
-          else if (chip.classList.contains("is-intermediate")) levelEnum = "CONVERSATIONAL";
+          else if (chip.classList.contains("is-intermediate"))
+            levelEnum = "CONVERSATIONAL";
 
           const langData = {
             language: langEnum as any,

@@ -8,26 +8,10 @@ import {
   buildNameLookup,
 } from "../seed-utils";
 
-type SubjectCsv = {
-  id: string;
-  name: string;
-  serial_number: string;
-  type?: string;
-  description?: string;
-  short_description?: string;
-  category?: string;
-  competitors?: string;
-  vendors?: string;
-  fun_fact?: string;
+import { Subject } from "../../src/models/subjects";
+
+type SubjectCsv = Partial<Record<keyof Subject, string>> & {
   organization_name?: string;
-  website_url?: string;
-  logo_url?: string;
-  tags?: string;
-  score?: string;
-  metadata?: string;
-  deleted_at?: string;
-  created_at?: string;
-  updated_at?: string;
 };
 
 export async function seedSubjects(prisma: PrismaClient) {
@@ -49,9 +33,9 @@ export async function seedSubjects(prisma: PrismaClient) {
     }
 
     return {
-      id: r.id,
-      name: r.name,
-      serial_number: r.serial_number,
+      id: r.id!,
+      name: r.name!,
+      serial_number: r.serial_number!,
 
       type: r.type || null,
 
@@ -73,12 +57,6 @@ export async function seedSubjects(prisma: PrismaClient) {
       tags: toStringArray(r.tags),
 
       score: r.score && r.score !== "" ? Number(r.score) : null,
-
-      metadata: toJson(r.metadata),
-
-      deleted_at: toDate(r.deleted_at, false),
-      created_at: toDate(r.created_at, true) as Date,
-      updated_at: toDate(r.updated_at, true) as Date,
     };
   });
 

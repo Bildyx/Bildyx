@@ -5,6 +5,7 @@ export const UserExperienceSchema = z.object({
   id: z.uuid(),
   user_profile_id: z.uuid(),
   organization_id: zNullableUUID(),
+  subject_id: zNullableUUID(),
   job_id: zNullableUUID(),
   title: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
@@ -23,27 +24,12 @@ export const GetUserExperienceSchema = z.object({
 });
 
 // POST
-export const PostUserExperienceSchema = z.object({
-  user_profile_id: z.uuid(),
-  organization_id: zNullableUUID(),
-  job_id: zNullableUUID(),
-  title: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  start_year: z.number().nullable().optional(),
-  end_year: z.number().nullable().optional(),
-  current: z.boolean().optional(),
+export const PostUserExperienceSchema = UserExperienceSchema.omit({
+  id: true,
 });
 
 // PATCH
-export const PutUserExperienceSchema = z.object({
-  organization_id: zNullableUUID(),
-  job_id: zNullableUUID(),
-  title: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  start_year: z.number().nullable().optional(),
-  end_year: z.number().nullable().optional(),
-  current: z.boolean().optional(),
-});
+export const PutUserExperienceSchema = PostUserExperienceSchema.partial();
 
 // DELETE
 export const DeleteUserExperienceSchema = z.object({
