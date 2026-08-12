@@ -93,5 +93,11 @@ export function useAuthNav() {
     navigate(redirectPath);
   }, []);
 
-  return { isLoggedIn, accountType, isMenuOpen, setIsMenuOpen, signOut, refresh };
+  /** Ported from the .mr-smart-login click handler in js/microresume.ts */
+  const getSmartLoginPath = useCallback(() => {
+    if (!isLoggedIn) return "/login";
+    return accountType === "company" ? "/company-admin" : "/profile";
+  }, [isLoggedIn, accountType]);
+
+  return { isLoggedIn, accountType, isMenuOpen, setIsMenuOpen, signOut, refresh, getSmartLoginPath };
 }

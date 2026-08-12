@@ -50,7 +50,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "postcss": "^8.5.15",
-    "pptxgenjs": "^4.0.0",
+    "pptxgenjs": "^1.1.5",
     "prismjs": "^1.30.0",
     "sharp": "^0.35.3",
     "skia-canvas": "^3.0.6",

@@ -7,6 +7,24 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsService from "./pages/TermsService";
 import WhyBuiltIt from "./pages/WhyBuiltIt";
 import Generic from "./pages/Generic";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import CompanyArchives from "./pages/CompanyArchives";
+import CompanyArchiveTrue from "./pages/CompanyArchiveTrue";
+import Microresume from "./pages/Microresume";
+import MicroresumeExample from "./pages/MicroresumeExample";
+import WhyTeams from "./pages/WhyTeams";
+import TeamExample from "./pages/TeamExample";
+import MyJobs from "./pages/MyJobs";
+import TargetList from "./pages/TargetList";
+import CompanyCon from "./pages/CompanyCon";
+import Login from "./pages/Login";
+import TestsPreferences from "./pages/TestsPreferences";
+import Test from "./pages/Test";
+import ResultTest from "./pages/ResultTest";
+import Profile from "./pages/Profile";
+import CompanyAdmin from "./pages/CompanyAdmin";
 import NotYetMigrated from "./pages/NotYetMigrated";
 
 export default function App() {
@@ -21,23 +39,24 @@ export default function App() {
       <Route path="/terms-service" element={<TermsService />} />
       <Route path="/why-built-it" element={<WhyBuiltIt />} />
       <Route path="/coming-soon/:page" element={<Generic />} />
-
-      {/* Not yet migrated — placeholders so nav links don't 404 */}
-      <Route path="/login" element={<NotYetMigrated name="Log In / Sign Up" originalFile="login.php" />} />
-      <Route path="/forgot-password" element={<NotYetMigrated name="Forgot Password" originalFile="forgot-password.php" />} />
-      <Route path="/reset-password" element={<NotYetMigrated name="Reset Password" originalFile="reset-password.php" />} />
-      <Route path="/verify-email" element={<NotYetMigrated name="Verify Email" originalFile="verify-email.php" />} />
-      <Route path="/profile" element={<NotYetMigrated name="Profile" originalFile="profile.php" />} />
-      <Route path="/microresume" element={<NotYetMigrated name="Create MicroResume" originalFile="microresume.php" />} />
-      <Route path="/microresume-example" element={<NotYetMigrated name="MicroResume Example" originalFile="microresume-example.php" />} />
-      <Route path="/target-list" element={<NotYetMigrated name="Target List" originalFile="target-list.php" />} />
-      <Route path="/my-jobs" element={<NotYetMigrated name="My Jobs" originalFile="my-jobs.php" />} />
-      <Route path="/tests-preferences" element={<NotYetMigrated name="Tests & Preferences" originalFile="tests-preferences.php" />} />
-      <Route path="/team-example" element={<NotYetMigrated name="Team Example" originalFile="team-example.php" />} />
-      <Route path="/why-teams" element={<NotYetMigrated name="Why Teams" originalFile="why-teams.php" />} />
-      <Route path="/company-archives" element={<NotYetMigrated name="Company Archives" originalFile="company-archives.php" />} />
-      <Route path="/company-con" element={<NotYetMigrated name="Company (Connected)" originalFile="company_con.php" />} />
-      <Route path="/company-admin" element={<NotYetMigrated name="Company Admin" originalFile="company_con_admin.php" />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/company-archives" element={<CompanyArchives />} />
+      <Route path="/company-archive-connected" element={<CompanyArchiveTrue />} />
+      <Route path="/microresume" element={<Microresume />} />
+      <Route path="/microresume-example" element={<MicroresumeExample />} />
+      <Route path="/why-teams" element={<WhyTeams />} />
+      <Route path="/team-example" element={<TeamExample />} />
+      <Route path="/my-jobs" element={<MyJobs />} />
+      <Route path="/target-list" element={<TargetList />} />
+      <Route path="/company-con" element={<CompanyCon />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/tests-preferences" element={<TestsPreferences />} />
+      <Route path="/tests-preferences/test" element={<Test />} />
+      <Route path="/tests-preferences/result" element={<ResultTest />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/company-admin" element={<CompanyAdmin />} />
 
       <Route path="*" element={<NotYetMigrated name="Not Found" originalFile="(no PHP equivalent)" />} />
     </Routes>

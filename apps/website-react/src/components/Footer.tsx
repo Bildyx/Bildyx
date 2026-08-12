@@ -1,12 +1,18 @@
 import { Link } from "react-router-dom";
 
-export default function Footer() {
+type FooterProps = {
+  /** Small text appended after the footer logo, e.g. "MicroResume" (see js/microresume.ts) */
+  brandSuffix?: string;
+};
+
+export default function Footer({ brandSuffix = "" }: FooterProps) {
   return (
     <footer className="site-footer">
       <div className="footer-content">
         <div className="footer-brand">
           <Link to="/" className="footer-logo" aria-label="Bildyx home">
             <img src="/images/Logo.png" alt="Bildyx" />
+            {brandSuffix && <span className="mr-footer-brand-suffix">{brandSuffix}</span>}
           </Link>
           <p>A structured, modular visibility layer for modern hiring.</p>
         </div>

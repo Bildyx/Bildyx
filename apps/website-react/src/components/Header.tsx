@@ -7,6 +7,12 @@ type HeaderProps = {
   backHref?: string;
   backLabel?: string;
   statusLabel?: string;
+  /** Small text appended after the logo, e.g. "MicroResume" (see js/microresume.ts) */
+  brandSuffix?: string;
+  /** Extra nav rendered between the logo and the auth buttons, e.g. in-page anchor links */
+  centerNav?: React.ReactNode;
+  /** Replace the whole auth nav with a single account icon (see js/microresume-example.ts) */
+  simpleAccountIcon?: boolean;
 };
 
 export default function Header({
@@ -15,6 +21,9 @@ export default function Header({
   backHref = "",
   backLabel = "",
   statusLabel = "Unpublished",
+  brandSuffix = "",
+  centerNav,
+  simpleAccountIcon = false,
 }: HeaderProps) {
   const { isLoggedIn, isMenuOpen, setIsMenuOpen, signOut } = useAuthNav();
   const navigate = useNavigate();
@@ -42,9 +51,28 @@ export default function Header({
         ) : (
           <Link to="/" className="logo" aria-label="Bildyx home">
             <img src="/images/Logo.png" alt="Bildyx" />
+            {brandSuffix && <span className="mr-brand-suffix">{brandSuffix}</span>}
           </Link>
         )}
 
+        {centerNav}
+
+        {simpleAccountIcon ? (
+          <nav className="nav-buttons" aria-label="Authentication and account">
+            <Link className="mre-account-button" to="/coming-soon/account" aria-label="Account">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                <path
+                  d="M5.8 19c.6-3.2 2.8-5 6.2-5s5.6 1.8 6.2 5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </Link>
+          </nav>
+        ) : (
         <nav
           className={`nav-buttons${isCompanyAdmin ? " nav-buttons--company-admin is-authenticated" : ""}${
             !isCompanyAdmin && isLoggedIn ? " is-authenticated" : ""
@@ -97,6 +125,7 @@ export default function Header({
             </div>
           </div>
         </nav>
+        )}
       </div>
     </header>
   );
