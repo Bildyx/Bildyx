@@ -41,8 +41,7 @@ export const organizations = {
         .selectFrom("organizations")
         .leftJoin("cities", "cities.id", "organizations.city_id")
         .leftJoin("countries", "countries.iso_code", "cities.country_id")
-        .selectAll("organizations")
-        .where("organizations.deleted_at", "is", null);
+        .selectAll("organizations");
 
       if (name) {
         query = query.where("organizations.name", "ilike", `%${name.trim()}%`);
@@ -126,7 +125,6 @@ export const organizations = {
       const data = await database
         .selectFrom("organizations")
         .where("id", "=", input.organizationId)
-        .where("deleted_at", "is", null)
         .selectAll()
         .executeTakeFirst();
 
@@ -151,7 +149,6 @@ export const organizations = {
       const existing = await database
         .selectFrom("organizations")
         .where("slug", "=", input.slug)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -161,15 +158,13 @@ export const organizations = {
         });
       }
 
-      const { metadata, ...rest } = input;
+      const { ...rest } = input;
 
       const organization = await database
         .insertInto("organizations")
         .values({
           ...rest,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -194,12 +189,11 @@ export const organizations = {
     .input(z.object({ organizationId: z.uuid() }).merge(PutOrganizationSchema))
     .output(OrganizationSchema)
     .handler(async ({ input }) => {
-      const { organizationId, metadata, ...rest } = input;
+      const { organizationId, ...rest } = input;
 
       const existing = await database
         .selectFrom("organizations")
         .where("id", "=", organizationId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -211,8 +205,6 @@ export const organizations = {
         .updateTable("organizations")
         .set({
           ...rest,
-          updated_at: new Date(),
-          metadata: metadata as any,
         } as any)
         .where("id", "=", organizationId)
         .returningAll()
@@ -241,7 +233,6 @@ export const organizations = {
       const existing = await database
         .selectFrom("organizations")
         .where("id", "=", input.organizationId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -250,8 +241,7 @@ export const organizations = {
       }
 
       await database
-        .updateTable("organizations")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("organizations")
         .where("id", "=", input.organizationId)
         .execute();
     }),
@@ -268,8 +258,7 @@ export const organizations = {
     .output(z.void())
     .handler(async ({ input }) => {
       await database
-        .updateTable("organizations")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("organizations")
         .where("id", "in", input.organizationIds)
         .execute();
     }),

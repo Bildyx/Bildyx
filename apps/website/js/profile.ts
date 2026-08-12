@@ -14,7 +14,7 @@ import {
 import { loadUserData } from "./profile/rendering";
 import { saveProfile } from "./profile/saving";
 import { $, $$ } from "./helpers";
-import { userService } from "./profile/services";
+import { profileService } from "./profile/services";
 
 const panels = ["profilePanel", "testsPanel", "jobsPanel", "settingsPanel"];
 
@@ -644,7 +644,7 @@ export function updateProfileMetaSummary() {
       reader.onload = async () => {
         const base64 = reader.result as string;
         try {
-          await userService.update(session.userId, {
+          await profileService.update(session.userId, {
             avatar_url: base64,
           });
           profileAvatar.style.backgroundImage = `url("${base64}")`;

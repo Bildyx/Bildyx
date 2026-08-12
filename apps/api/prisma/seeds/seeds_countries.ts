@@ -18,57 +18,9 @@ import {
   parseEnumArray,
 } from "../seed-utils";
 
-type CountryCsv = {
-  id: string;
-  name: string;
-  serial_number: string;
-  iso_code?: string;
-  capital_name?: string;
-  flag_url?: string;
-  population?: string;
-  area_km2?: string;
-  gdp_usd?: string;
-  gdp_per_capita_usd?: string;
-  hdi?: string;
-  currency?: string;
-  officialLanguages?: string;
-  calling_code?: string;
-  government_type?: string;
-  quality_of_life?: string;
-  temperatures?: string;
-  climate?: string;
-  crime_rate?: string;
-  income_inequality?: string;
-  work_life_balance?: string;
-  main_industries?: string;
-  number_of_multinational_hqs?: string;
-  median_salary?: string;
-  cost_of_living?: string;
-  median_home_price?: string;
-  average_rent?: string;
-  interesting_fact?: string;
-  citizenship_process?: string;
-  work_permit?: string;
-  global_competitiveness_index?: string;
-  level_of_globalisation?: string;
-  number_of_international_students?: string;
-  number_of_foreign_organizations?: string;
-  personal_income_tax?: string;
-  number_of_tourists?: string;
-  number_of_airports?: string;
-  quality_of_education?: string;
-  degree_holders?: string;
-  number_of_universities?: string;
-  top_universities?: string;
-  ethnic_groups?: string;
-  religion?: string;
-  cultural_values?: string;
-  people_description?: string;
-  metadata?: string;
-  deleted_at?: string;
-  created_at?: string;
-  updated_at?: string;
-};
+import { Country } from "../../src/models/countries";
+
+type CountryCsv = Partial<Record<keyof Country, string>>;
 
 export async function seedCountries(prisma: PrismaClient) {
   const rows = readCsv<CountryCsv>("countries.csv");
@@ -84,8 +36,8 @@ export async function seedCountries(prisma: PrismaClient) {
     .filter((r) => r.iso_code && r.iso_code.trim() !== "")
     .map((r) => ({
       isoCode: r.iso_code!.trim().toUpperCase().slice(0, 2),
-      name: r.name,
-      serial_number: r.serial_number,
+      name: r.name!,
+      serial_number: r.serial_number!,
 
       capitalName: r.capital_name || null,
       flagUrl: r.flag_url || null,
@@ -141,12 +93,6 @@ export async function seedCountries(prisma: PrismaClient) {
 
       culturalValues: r.cultural_values || null,
       peopleDescription: r.people_description || null,
-
-      metadata: toJson(r.metadata),
-
-      deletedAt: toDate(r.deleted_at, false),
-      createdAt: toDate(r.created_at, true) as Date,
-      updatedAt: toDate(r.updated_at, true) as Date,
     }));
 
   const result = await prisma.country.createMany({

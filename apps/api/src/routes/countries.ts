@@ -11,7 +11,6 @@ import {
   DeleteCountriesBulkSchema,
 } from "../models/countries";
 import { z } from "zod";
-import { randomUUID } from "node:crypto";
 
 export const countries = {
   getAll: publicProcedure
@@ -86,13 +85,10 @@ export const countries = {
         });
       }
 
-      const { metadata, ...rest } = input;
-
       const country = await database
         .insertInto("countries")
         .values({
           ...input,
-          updated_at: new Date(),
         } as any)
         .returningAll()
         .executeTakeFirst();
@@ -114,10 +110,12 @@ export const countries = {
       path: "/countries/{countryId}",
       tags: ["Country"],
     })
-    .input(z.object({ countryId: z.string().length(2) }).merge(PutCountrySchema))
+    .input(
+      z.object({ countryId: z.string().length(2) }).merge(PutCountrySchema),
+    )
     .output(CountrySchema)
     .handler(async ({ input }) => {
-      const { countryId, metadata, ...data } = input;
+      const { countryId, ...data } = input;
 
       const existing = await database
         .selectFrom("countries")
@@ -131,7 +129,7 @@ export const countries = {
 
       const country = await database
         .updateTable("countries")
-        .set({ ...data, updated_at: new Date() } as any)
+        .set({ ...data } as any)
         .where("iso_code", "=", countryId)
         .returningAll()
         .executeTakeFirst();

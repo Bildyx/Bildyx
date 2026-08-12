@@ -39,7 +39,7 @@ export const audit_logs = {
         query = query.where("action", "ilike", `%${action.trim()}%`);
       }
 
-      return await query.orderBy("created_at", "desc").execute();
+      return await query.execute();
     }),
 
   // 2. Get all logs for a user
@@ -68,7 +68,6 @@ export const audit_logs = {
         .selectFrom("audit_logs")
         .selectAll()
         .where("user_id", "=", input.userId)
-        .orderBy("created_at", "desc")
         .execute();
     }),
 
@@ -119,14 +118,13 @@ export const audit_logs = {
         throw new ORPCError("NOT_FOUND", { message: "User not found" });
       }
 
-      const { metadata, ...rest } = input;
+      const { ...rest } = input;
 
       const log = await database
         .insertInto("audit_logs")
         .values({
           ...rest,
           id: randomUUID(),
-          metadata: metadata as any,
         } as Insertable<AuditLogs>)
         .returningAll()
         .executeTakeFirst();

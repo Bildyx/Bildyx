@@ -5,7 +5,6 @@ export const UserTargetListSchema = z.object({
   id: z.uuid(),
   user_profile_id: z.uuid(),
   organization_id: z.uuid(),
-  created_at: z.date(),
 });
 
 // GET
@@ -21,7 +20,6 @@ export const GetUserTargetListSchema = z.object({
 // POST
 export const PostUserTargetListSchema = UserTargetListSchema.omit({
   id: true,
-  created_at: true,
 });
 
 // DELETE

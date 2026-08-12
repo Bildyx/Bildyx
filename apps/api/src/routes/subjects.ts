@@ -27,9 +27,7 @@ export const subjects = {
     .handler(async ({ input }) => {
       const { name, category, organization_id } = input;
 
-      let query = database
-        .selectFrom("subjects")
-        .where("deleted_at", "is", null);
+      let query = database.selectFrom("subjects");
 
       if (name) {
         const p = `%${name.trim()}%`;
@@ -62,7 +60,6 @@ export const subjects = {
       const data = await database
         .selectFrom("subjects")
         .where("id", "=", input.subjectId)
-        .where("deleted_at", "is", null)
         .selectAll()
         .executeTakeFirst();
 
@@ -86,8 +83,7 @@ export const subjects = {
     .handler(async ({ input }) => {
       let checkQuery = database
         .selectFrom("subjects")
-        .where("name", "ilike", input.name)
-        .where("deleted_at", "is", null);
+        .where("name", "ilike", input.name);
 
       if (input.organization_id) {
         checkQuery = checkQuery.where(
@@ -108,15 +104,11 @@ export const subjects = {
         });
       }
 
-      const { metadata, ...rest } = input;
-
       const subject = await database
         .insertInto("subjects")
         .values({
-          ...rest,
+          ...input,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -141,12 +133,11 @@ export const subjects = {
     .input(z.object({ subjectId: z.uuid() }).merge(PutSubjectSchema))
     .output(SubjectSchema)
     .handler(async ({ input }) => {
-      const { subjectId, metadata, ...rest } = input;
+      const { subjectId, ...rest } = input;
 
       const existing = await database
         .selectFrom("subjects")
         .where("id", "=", subjectId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -156,7 +147,7 @@ export const subjects = {
 
       const subject = await database
         .updateTable("subjects")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set(rest)
         .where("id", "=", subjectId)
         .returningAll()
         .executeTakeFirst();
@@ -184,7 +175,6 @@ export const subjects = {
       const existing = await database
         .selectFrom("subjects")
         .where("id", "=", input.subjectId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -193,8 +183,7 @@ export const subjects = {
       }
 
       await database
-        .updateTable("subjects")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("subjects")
         .where("id", "=", input.subjectId)
         .execute();
     }),
@@ -211,8 +200,7 @@ export const subjects = {
     .output(z.void())
     .handler(async ({ input }) => {
       await database
-        .updateTable("subjects")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("subjects")
         .where("id", "in", input.subjectIds)
         .execute();
     }),

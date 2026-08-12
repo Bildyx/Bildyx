@@ -28,18 +28,25 @@ export const cities = {
     .handler(async ({ input }) => {
       const { name, country_id } = input;
 
-      let query = database.selectFrom("cities");
+      let query = database
+        .selectFrom("cities")
+        .innerJoin("countries", "countries.iso_code", "cities.country_id");
 
       if (name) {
         const p = `%${name.trim()}%`;
-        query = query.where("name", "ilike", p);
+        query = query.where("cities.name", "ilike", p);
       }
 
       if (country_id) {
         query = query.where("country_id", "=", country_id);
       }
 
-      return await query.selectAll().orderBy("name", "asc").execute();
+      return await query
+        .select("cities.id")
+        .select("cities.name")
+        .select("countries.name as country_name")
+        .orderBy("name", "asc")
+        .execute();
     }),
 
   getById: publicProcedure
@@ -124,8 +131,6 @@ export const cities = {
         .values({
           ...input,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: input.metadata,
         } as any)
         .returningAll()
         .executeTakeFirst();
@@ -150,7 +155,7 @@ export const cities = {
     .input(z.object({ cityId: z.uuid() }).merge(PutCitySchema))
     .output(CitySchema)
     .handler(async ({ input }) => {
-      const { cityId, metadata, ...data } = input;
+      const { cityId, ...data } = input;
 
       const existing = await database
         .selectFrom("cities")

@@ -54,7 +54,6 @@ export const auth = {
       const existing = await database
         .selectFrom("users")
         .where("email", "=", emailLower)
-        .where("deleted_at", "is", null)
         .select(["id", "email_verified", "verification_expires_at"])
         .executeTakeFirst();
 
@@ -118,7 +117,6 @@ export const auth = {
               name: input.companyName.trim(),
               slug: slug,
               serial_number: generateSerialNumber("COMPANY"),
-              updated_at: new Date(),
             })
             .execute();
 
@@ -136,7 +134,6 @@ export const auth = {
               last_verification_sent_at: new Date(),
               organization_id: orgId,
               marketing_opt_in: input.marketing ?? false,
-              updated_at: new Date(),
             })
             .execute();
         } else {
@@ -164,24 +161,24 @@ export const auth = {
               verification_code: verificationCode,
               verification_expires_at: verificationExpiresAt,
               last_verification_sent_at: new Date(),
-              first_name: input.firstName.trim(),
-              last_name: input.lastName.trim(),
-              display_name: `${input.firstName.trim()} ${input.lastName.trim()}`,
               marketing_opt_in: input.marketing ?? false,
-              updated_at: new Date(),
             })
             .execute();
         }
 
-        await trx
-          .insertInto("user_profiles")
-          .values({
-            id: randomUUID(),
-            user_id: userId,
-            is_public: true,
-            updated_at: new Date(),
-          })
-          .execute();
+        const profileValues: any = {
+          id: randomUUID(),
+          user_id: userId,
+          is_public: true,
+        };
+
+        if (input.accountType === "seeker" && input.firstName && input.lastName) {
+          profileValues.first_name = input.firstName.trim();
+          profileValues.last_name = input.lastName.trim();
+          profileValues.display_name = `${input.firstName.trim()} ${input.lastName.trim()}`;
+        }
+
+        await trx.insertInto("user_profiles").values(profileValues).execute();
       });
 
       sendVerificationEmail(emailLower, verificationCode).catch((err) => {
@@ -216,7 +213,6 @@ export const auth = {
         .selectFrom("users")
         .selectAll()
         .where("email", "=", emailLower)
-        .where("deleted_at", "is", null)
         .executeTakeFirst();
 
       if (!user) {
@@ -276,7 +272,6 @@ export const auth = {
           user_id: user.id,
           token_hash: tokenHash,
           expires_at: expiresAt,
-          created_at: new Date(),
         })
         .execute();
 
@@ -286,7 +281,6 @@ export const auth = {
         .set({
           failed_login_attempts: 0,
           last_login_at: new Date(),
-          updated_at: new Date(),
         })
         .where("id", "=", user.id)
         .execute();
@@ -305,7 +299,7 @@ export const auth = {
 
       const userProfile = await database
         .selectFrom("user_profiles")
-        .select("id")
+        .select(["id", "first_name", "last_name"])
         .where("user_id", "=", user.id)
         .executeTakeFirst();
 
@@ -314,8 +308,8 @@ export const auth = {
         user: {
           id: user.id,
           email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
+          first_name: userProfile?.first_name || null,
+          last_name: userProfile?.last_name || null,
           role: user.role,
           profile_id: userProfile?.id || null,
           organization_id: user.organization_id || null,
@@ -341,7 +335,6 @@ export const auth = {
         .selectFrom("users")
         .selectAll()
         .where("email", "=", emailLower)
-        .where("deleted_at", "is", null)
         .executeTakeFirst();
 
       if (!user) {
@@ -387,7 +380,6 @@ export const auth = {
             verification_code: null,
             verification_expires_at: null,
             last_login_at: new Date(),
-            updated_at: new Date(),
           })
           .where("id", "=", user.id)
           .execute();
@@ -399,7 +391,6 @@ export const auth = {
             user_id: user.id,
             token_hash: tokenHash,
             expires_at: expiresAt,
-            created_at: new Date(),
           })
           .execute();
       });
@@ -452,7 +443,6 @@ export const auth = {
       const user = await database
         .selectFrom("users")
         .where("email", "=", emailLower)
-        .where("deleted_at", "is", null)
         .select(["id", "last_reset_sent_at"])
         .executeTakeFirst();
 
@@ -481,7 +471,6 @@ export const auth = {
           reset_token: resetToken,
           reset_expires_at: resetExpiresAt,
           last_reset_sent_at: now,
-          updated_at: now,
         })
         .where("id", "=", user.id)
         .execute();
@@ -517,7 +506,6 @@ export const auth = {
         .selectFrom("users")
         .selectAll()
         .where("email", "=", emailLower)
-        .where("deleted_at", "is", null)
         .executeTakeFirst();
 
       if (!user) {
@@ -550,7 +538,6 @@ export const auth = {
           reset_token: null,
           reset_expires_at: null,
           password_changed_at: new Date(),
-          updated_at: new Date(),
         })
         .where("id", "=", user.id)
         .execute();
@@ -578,7 +565,6 @@ export const auth = {
         .selectFrom("users")
         .selectAll()
         .where("email", "=", emailLower)
-        .where("deleted_at", "is", null)
         .executeTakeFirst();
 
       if (!user || user.email_verified) {
@@ -620,7 +606,6 @@ export const auth = {
           verification_code: code,
           verification_expires_at: expires,
           last_verification_sent_at: now,
-          updated_at: now,
         })
         .where("id", "=", user.id)
         .execute();
@@ -691,7 +676,6 @@ export const auth = {
         .selectFrom("users")
         .selectAll()
         .where("email", "=", emailLower)
-        .where("deleted_at", "is", null)
         .executeTakeFirst();
 
       if (!user) {
@@ -809,7 +793,6 @@ export const auth = {
           expires_at: expiresAt,
           ip_address: ctx.req.ip || null,
           user_agent: ctx.req.get("user-agent") || null,
-          created_at: new Date(),
         })
         .execute();
 
@@ -843,90 +826,5 @@ export const auth = {
           </body>
         </html>
       `);
-    }),
-
-  // 11. GET CURRENT USER (from session cookie)
-  me: publicProcedure
-    .route({
-      method: "GET",
-      summary: "Get current authenticated user",
-      description:
-        "Returns the user linked to the current session cookie. Used by the frontend to hydrate session state.",
-      path: "/auth/me",
-      tags: ["Auth"],
-    })
-    .handler(async ({ context }) => {
-      const ctx = context as any;
-      const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
-      const token = ctx?.req?.cookies?.[cookieName];
-
-      if (!token) {
-        throw new ORPCError("UNAUTHORIZED", {
-          message: "No active session",
-        });
-      }
-
-      const tokenHash = createHash("sha256").update(token).digest("hex");
-
-      const session = await database
-        .selectFrom("user_sessions")
-        .selectAll()
-        .where("token_hash", "=", tokenHash)
-        .where("revoked_at", "is", null)
-        .executeTakeFirst();
-
-      if (!session) {
-        throw new ORPCError("UNAUTHORIZED", {
-          message: "Session not found or revoked",
-        });
-      }
-
-      if (new Date(session.expires_at) < new Date()) {
-        throw new ORPCError("UNAUTHORIZED", {
-          message: "Session expired",
-        });
-      }
-
-      const user = await database
-        .selectFrom("users")
-        .select([
-          "id",
-          "email",
-          "first_name",
-          "last_name",
-          "display_name",
-          "role",
-          "avatar_url",
-          "organization_id",
-        ])
-        .where("id", "=", session.user_id)
-        .where("deleted_at", "is", null)
-        .executeTakeFirst();
-
-      if (!user) {
-        throw new ORPCError("NOT_FOUND", {
-          message: "User not found",
-        });
-      }
-
-      const userProfile = await database
-        .selectFrom("user_profiles")
-        .select("id")
-        .where("user_id", "=", user.id)
-        .executeTakeFirst();
-
-      return {
-        user: {
-          id: user.id,
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          display_name: user.display_name,
-          role: user.role,
-          avatar_url: user.avatar_url,
-          organization_id: user.organization_id,
-          profile_id: userProfile?.id || null,
-        },
-      };
     }),
 };

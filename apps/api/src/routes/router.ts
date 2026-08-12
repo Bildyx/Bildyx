@@ -22,7 +22,6 @@ import { user_skills } from "./user_skills";
 import { user_experiences } from "./user_experiences";
 import { audit_logs } from "./audit_logs";
 import { cards } from "./cards";
-import { studyFields } from "./study_fields";
 import { personalityTests } from "./personality_tests";
 import { personalityCriteria } from "./personality_criteria";
 import { personalityQuestions } from "./personality_questions";
@@ -30,6 +29,16 @@ import { personalityTestResults } from "./personality_test_results";
 import { personalityAnswers } from "./personality_answers";
 import { personalityCriterionScores } from "./personality_criterion_scores";
 import { user_target_lists } from "./user_target_lists";
+import { teams } from "./teams";
+import { team_customers } from "./team_customers";
+import { team_investors } from "./team_investors";
+import { team_members } from "./team_members";
+import { team_offices } from "./team_offices";
+import { team_partners } from "./team_partners";
+import { team_photos } from "./team_photos";
+import { team_profiles } from "./team_profiles";
+import { team_subjects } from "./team_subjects";
+import { team_subsidiaries } from "./team_subsidiaries";
 
 export const router = publicProcedure.router({
   auth,
@@ -55,7 +64,6 @@ export const router = publicProcedure.router({
   user_experiences,
   audit_logs,
   cards,
-  studyFields,
   personalityTests,
   personalityCriteria,
   personalityQuestions,
@@ -63,5 +71,15 @@ export const router = publicProcedure.router({
   personalityAnswers,
   personalityCriterionScores,
   user_target_lists,
+  teams,
+  team_customers,
+  team_investors,
+  team_members,
+  team_offices,
+  team_partners,
+  team_photos,
+  team_profiles,
+  team_subjects,
+  team_subsidiaries,
 });
 export type Router = typeof router;

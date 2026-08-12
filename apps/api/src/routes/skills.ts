@@ -27,7 +27,7 @@ export const skills = {
     .handler(async ({ input }) => {
       const { name, category, difficulty } = input;
 
-      let query = database.selectFrom("skills").where("deleted_at", "is", null);
+      let query = database.selectFrom("skills");
 
       if (name) {
         const p = `%${name.trim()}%`;
@@ -60,7 +60,6 @@ export const skills = {
       const data = await database
         .selectFrom("skills")
         .where("id", "=", input.skillId)
-        .where("deleted_at", "is", null)
         .selectAll()
         .executeTakeFirst();
 
@@ -85,7 +84,6 @@ export const skills = {
       const existing = await database
         .selectFrom("skills")
         .where("name", "ilike", input.name)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -95,15 +93,13 @@ export const skills = {
         });
       }
 
-      const { metadata, ...rest } = input;
+      const { ...rest } = input;
 
       const skill = await database
         .insertInto("skills")
         .values({
           ...rest,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -128,12 +124,11 @@ export const skills = {
     .input(z.object({ skillId: z.uuid() }).merge(PutSkillSchema))
     .output(SkillSchema)
     .handler(async ({ input }) => {
-      const { skillId, metadata, ...rest } = input;
+      const { skillId, ...rest } = input;
 
       const existing = await database
         .selectFrom("skills")
         .where("id", "=", skillId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -143,7 +138,7 @@ export const skills = {
 
       const skill = await database
         .updateTable("skills")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set({ ...rest })
         .where("id", "=", skillId)
         .returningAll()
         .executeTakeFirst();
@@ -171,7 +166,6 @@ export const skills = {
       const existing = await database
         .selectFrom("skills")
         .where("id", "=", input.skillId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -180,8 +174,7 @@ export const skills = {
       }
 
       await database
-        .updateTable("skills")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("skills")
         .where("id", "=", input.skillId)
         .execute();
     }),
@@ -198,8 +191,7 @@ export const skills = {
     .output(z.void())
     .handler(async ({ input }) => {
       await database
-        .updateTable("skills")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("skills")
         .where("id", "in", input.skillIds)
         .execute();
     }),

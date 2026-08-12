@@ -132,10 +132,7 @@ export const user_experiences = {
 
       const exp = await database
         .updateTable("user_experiences")
-        .set({
-          ...updates,
-          updated_at: new Date(),
-        } as Insertable<UserExperiences>)
+        .set(updates as any)
         .where("id", "=", userExperienceId)
         .returningAll()
         .executeTakeFirst();

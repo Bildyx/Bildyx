@@ -66,17 +66,34 @@ function validProfessionalEmail(email: string) {
   return domain && !blockedDomains.includes(domain);
 }
 
-
 function normalizeAccountType(value: any) {
   const raw = String(value || "")
     .toLowerCase()
     .replace(/[\s_-]/g, "");
 
-  if (["company", "business", "employer", "organization", "organisation", "recruiter"].includes(raw)) {
+  if (
+    [
+      "company",
+      "business",
+      "employer",
+      "organization",
+      "organisation",
+      "recruiter",
+    ].includes(raw)
+  ) {
     return "company";
   }
 
-  if (["seeker", "jobseeker", "jobseekers", "candidate", "student", "user"].includes(raw)) {
+  if (
+    [
+      "seeker",
+      "jobseeker",
+      "jobseekers",
+      "candidate",
+      "student",
+      "user",
+    ].includes(raw)
+  ) {
     return "seeker";
   }
 
@@ -112,7 +129,10 @@ function savePendingAccountType(accountType: string, userId?: string) {
   localStorage.setItem("bildyx_pending_account_type", accountType);
 
   if (userId) {
-    sessionStorage.setItem(`bildyx_pending_account_type_${userId}`, accountType);
+    sessionStorage.setItem(
+      `bildyx_pending_account_type_${userId}`,
+      accountType,
+    );
     localStorage.setItem(`bildyx_pending_account_type_${userId}`, accountType);
   }
 }
@@ -145,7 +165,9 @@ function getAccountType(user: any) {
 }
 
 function getRedirectUrl(user: any) {
-  return getAccountType(user) === "company" ? "compagny_con.php" : "profile.php";
+  return getAccountType(user) === "company"
+    ? "company_con_admin.php"
+    : "profile.php";
 }
 
 function saveBildyxSession(user: any, fallbackEmail = "") {
@@ -494,8 +516,9 @@ function activateAuthTab(target: string) {
     email = user.email;
 
     const pendingAccountType =
-      normalizeAccountType(user?.accountType || user?.account_type || user?.role) ||
-      readPendingAccountType(userId);
+      normalizeAccountType(
+        user?.accountType || user?.account_type || user?.role,
+      ) || readPendingAccountType(userId);
 
     if (pendingAccountType) {
       savePendingAccountType(pendingAccountType, userId);
@@ -584,7 +607,11 @@ function activateAuthTab(target: string) {
         const verifiedUser = getAuthUser(data);
         const pendingAccountType = readPendingAccountType(userId);
 
-        if (pendingAccountType && !verifiedUser.accountType && !verifiedUser.account_type) {
+        if (
+          pendingAccountType &&
+          !verifiedUser.accountType &&
+          !verifiedUser.account_type
+        ) {
           verifiedUser.accountType = pendingAccountType;
         }
 

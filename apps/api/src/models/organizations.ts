@@ -15,7 +15,6 @@ export const OrganizationSchema = z.object({
   ownership: z.string().nullable().optional(),
   jurisdiction: z.string().nullable().optional(),
   known_for: z.string().nullable().optional(),
-  project: z.string().nullable().optional(),
   budget: z.string().nullable().optional(),
   founded: z.string().nullable().optional(),
   founders: z.array(z.string()).nullable().optional(),
@@ -23,8 +22,6 @@ export const OrganizationSchema = z.object({
   student_count: z.coerce.number().int().min(0).nullable().optional(),
   undergraduates: z.coerce.number().int().min(0).nullable().optional(),
   postgraduates: z.coerce.number().int().min(0).nullable().optional(),
-  subsidiaries: z.string().nullable().optional(),
-  offices: z.string().nullable().optional(),
   score: z.number().int().min(0).nullable().optional(),
   members: z.number().int().min(0).nullable().optional(),
   personnel: z.number().int().min(0).nullable().optional(),
@@ -35,12 +32,10 @@ export const OrganizationSchema = z.object({
   products: z.array(z.string()).nullable().optional(),
   services: z.array(z.string()).nullable().optional(),
   facilities: z.array(z.string()).nullable().optional(),
-  partners: z.array(z.string()).nullable().optional(),
   programs_activities: z.array(z.string()).nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
+  profile_url: z.string().nullable().optional(),
+  avatar_url: z.string().nullable().optional(),
+  is_public: z.boolean().nullable().optional(),
 });
 
 // GET
@@ -72,9 +67,6 @@ export const GetOrganizationSchema = z.object({
 // POST
 export const PostOrganizationSchema = OrganizationSchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
 });
 
 // PATCH

@@ -10,15 +10,12 @@ export const UserProfileSchema = z.object({
   linkedin_url: z.string().nullable().optional(),
   github_url: z.string().nullable().optional(),
   website_url: z.string().nullable().optional(),
-  locale: z.string().nullable().optional(),
-  timezone: z.string().nullable().optional(),
   is_public: z.boolean(),
-  current_job_id: z.uuid().nullable().optional(),
-  current_job_started_at: z.date().nullable().optional(),
-  current_organization_id: z.uuid().nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  created_at: z.date(),
-  updated_at: z.date(),
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
+  display_name: z.string().nullable().optional(),
+  avatar_url: z.string().nullable().optional(),
+  role: z.string().nullable().optional(),
 });
 
 // GET
@@ -26,6 +23,7 @@ export const GetUserProfilesSchema = z.object({
   userId: zNullableUUID(),
   countryId: z.string().length(2).optional(),
   cityId: zNullableUUID(),
+  excludeOrganizations: z.boolean().optional().or(z.string().transform((v) => v === "true")),
 });
 
 export const GetUserProfileSchema = z.object({
@@ -37,27 +35,12 @@ export const GetUserProfileByUserSchema = z.object({
 });
 
 // POST
-export const PostUserProfileSchema = z.object({
-  user_id: z.uuid(),
-  biography: z.string().nullable().optional(),
-  country_id: z.string().length(2).nullable().optional(),
-  city_id: zNullableUUID(),
-  linkedin_url: z.string().nullable().optional(),
-  github_url: z.string().nullable().optional(),
-  website_url: z.string().nullable().optional(),
-  locale: z.string().nullable().optional(),
-  timezone: z.string().nullable().optional(),
-  is_public: z.boolean().optional(),
-  current_job_id: zNullableUUID(),
-  current_job_started_at: z.date().nullable().optional(),
-  current_organization_id: zNullableUUID(),
-  metadata: z.any().nullable().optional(),
+export const PostUserProfileSchema = UserProfileSchema.omit({
+  id: true,
 });
 
 // PATCH
-export const PutUserProfileSchema = PostUserProfileSchema.omit({
-  user_id: true,
-}).partial();
+export const PutUserProfileSchema = PostUserProfileSchema.partial();
 
 // DELETE
 export const DeleteUserProfileSchema = z.object({

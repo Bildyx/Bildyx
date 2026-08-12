@@ -16,10 +16,6 @@ export const CertificationSchema = z.object({
   difficulty: DifficultyLevelEnum.nullable().optional(),
   website_url: z.string().nullable().optional(),
   score: z.number().int().min(0).nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional(),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 export const GetCertificationsSchema = z.object({
@@ -33,20 +29,8 @@ export const GetCertificationSchema = z.object({
 });
 
 // POST
-export const PostCertificationSchema = z.object({
-  name: z.string().trim().min(1),
-  serial_number: z.string().trim().min(1),
-  issuing_organization_id: zNullableUUID(),
-  description: z.string().nullable().optional(),
-  level: z.string().nullable().optional(),
-  category: CertificationCategoryEnum.nullable().optional(),
-  products: z.array(z.string()).nullable().optional(),
-  jobs: z.array(z.string()).nullable().optional(),
-  validity_duration_months: z.number().int().min(0).nullable().optional(),
-  difficulty: DifficultyLevelEnum.nullable().optional(),
-  website_url: z.string().nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  score: z.number().int().min(0).nullable().optional(),
+export const PostCertificationSchema = CertificationSchema.omit({
+  id: true,
 });
 
 // PATCH

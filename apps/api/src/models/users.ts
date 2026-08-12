@@ -6,10 +6,6 @@ export const UserSchema = z.object({
   email: z.email(),
   email_verified: z.boolean(),
   password_hash: z.string(),
-  first_name: z.string().nullable().optional(),
-  last_name: z.string().nullable().optional(),
-  display_name: z.string().nullable().optional(),
-  avatar_url: z.string().nullable().optional(),
   organization_id: z.uuid().nullable().optional(),
   marketing_opt_in: z.boolean(),
   verification_code: z.string().nullable().optional(),
@@ -24,10 +20,6 @@ export const UserSchema = z.object({
   failed_login_attempts: z.number().int(),
   locked_until: z.date().nullable().optional(),
   password_changed_at: z.date().nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional(),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -42,18 +34,8 @@ export const GetUserSchema = z.object({
 });
 
 // POST
-export const PostUserSchema = z.object({
-  email: z.email(),
-  password_hash: z.string().min(1),
-  first_name: z.string().nullable().optional(),
-  last_name: z.string().nullable().optional(),
-  display_name: z.string().nullable().optional(),
-  avatar_url: z.string().nullable().optional(),
-  organization_id: z.uuid().nullable().optional(),
-  marketing_opt_in: z.boolean().optional(),
-  role: UserRoleEnum.optional(),
-  status: UserStatusEnum.optional(),
-  metadata: z.any().nullable().optional(),
+export const PostUserSchema = UserSchema.omit({
+  id: true,
 });
 
 // PATCH

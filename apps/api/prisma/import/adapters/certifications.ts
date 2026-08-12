@@ -4,7 +4,6 @@ import { buildNameLookup, toStringArray } from "../../seed-utils";
 import {
   checkEnum,
   checkInt,
-  checkJson,
   checkOptionalFk,
   checkRequiredText,
 } from "../checks";
@@ -23,7 +22,6 @@ const EXPECTED_COLUMNS = [
   "difficulty",
   "website_url",
   "score",
-  "metadata",
 ];
 
 export interface CertificationsFk {
@@ -40,7 +38,9 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
   expectedColumns: EXPECTED_COLUMNS,
 
   async buildFkContext(prisma: PrismaClient): Promise<CertificationsFk> {
-    const organizations = await prisma.organization.findMany({ select: { id: true, name: true } });
+    const organizations = await prisma.organization.findMany({
+      select: { id: true, name: true },
+    });
     return { resolveOrganizationId: buildNameLookup(organizations) };
   },
 
@@ -54,10 +54,20 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
     const name = checkRequiredText(row.name, "name");
     if (name.issue) errors.push(name.issue);
 
-    const category = checkEnum(row.category, CertificationCategory, "category", false);
+    const category = checkEnum(
+      row.category,
+      CertificationCategory,
+      "category",
+      false,
+    );
     if (category.issue) warnings.push(category.issue);
 
-    const difficulty = checkEnum(row.difficulty, DifficultyLevel, "difficulty", false);
+    const difficulty = checkEnum(
+      row.difficulty,
+      DifficultyLevel,
+      "difficulty",
+      false,
+    );
     if (difficulty.issue) warnings.push(difficulty.issue);
 
     const issuingOrganizationId = checkOptionalFk(
@@ -67,13 +77,14 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
     );
     if (issuingOrganizationId.issue) warnings.push(issuingOrganizationId.issue);
 
-    const validityDurationMonths = checkInt(row.validity_duration_months, "validity_duration_months");
-    if (validityDurationMonths.issue) warnings.push(validityDurationMonths.issue);
+    const validityDurationMonths = checkInt(
+      row.validity_duration_months,
+      "validity_duration_months",
+    );
+    if (validityDurationMonths.issue)
+      warnings.push(validityDurationMonths.issue);
     const score = checkInt(row.score, "score");
     if (score.issue) warnings.push(score.issue);
-
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
 
     return {
       naturalKey: serialNumber.value,
@@ -90,7 +101,6 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
         difficulty: difficulty.value,
         websiteUrl: row.website_url || null,
         score: score.value,
-        metadata: metadata.value,
       },
       errors,
       warnings,

@@ -104,15 +104,13 @@ export const jobs = {
         });
       }
 
-      const { metadata, ...rest } = input;
+      const { ...rest } = input;
 
       const job = await database
         .insertInto("jobs")
         .values({
           ...rest,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -137,7 +135,7 @@ export const jobs = {
     .input(z.object({ jobId: z.uuid() }).merge(PutJobSchema))
     .output(JobSchema)
     .handler(async ({ input }) => {
-      const { jobId, metadata, ...rest } = input;
+      const { jobId, ...rest } = input;
 
       const existing = await database
         .selectFrom("jobs")
@@ -151,7 +149,7 @@ export const jobs = {
 
       const job = await database
         .updateTable("jobs")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set({ ...rest })
         .where("id", "=", jobId)
         .returningAll()
         .executeTakeFirst();

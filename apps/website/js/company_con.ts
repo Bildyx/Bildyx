@@ -1,0 +1,199 @@
+// @ts-nocheck
+(() => {
+  "use strict";
+  const KEY = "bildyx_company_con_profile_v3";
+  let teamId = null,
+    mode = "people";
+  const $ = (s) => document.querySelector(s),
+    E = {
+      name: $("[data-company-name]"),
+      company: $("[data-public-company-card]"),
+      parent: $("[data-public-parent-card]"),
+      tabs: $("#ccTeamTabs"),
+      members: $("#ccMembers"),
+      offices: $("#ccOffices"),
+      products: $("#ccProducts"),
+      badge: $("#ccTeamBadge"),
+      points: $("#ccProfilePoints"),
+      portfolio: $("#ccPortfolioSlots"),
+      brands: $("#ccBrandSlots"),
+      photos: $("#ccPhotoSlots"),
+      partners: $("#ccPartnerSlots"),
+      customers: $("#ccCustomerSlots"),
+    };
+  const esc = (v) =>
+    String(v || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  const read = () => {
+    try {
+      return JSON.parse(localStorage.getItem(KEY) || "null");
+    } catch {
+      return null;
+    }
+  };
+  function active(p) {
+    return p?.teams?.find((t) => t.id === teamId) || p?.teams?.[0] || null;
+  }
+  function summary(str, label) {
+    return `<div class="cc-summary"><strong>${esc(str)}</strong><span>${esc(label)}</span></div>`;
+  }
+  function renderCards(p) {
+    if (E.name) E.name.textContent = p?.companyName || "Company Profile";
+    if (E.company)
+      E.company.innerHTML = p?.companyName
+        ? summary(p.companyName, "Company Profile")
+        : '<div class="cc-empty-slot"></div>';
+    if (E.parent)
+      E.parent.innerHTML = p?.parentCompany
+        ? summary(p.parentCompany, "Parent Company")
+        : '<div class="cc-empty-slot"></div>';
+  }
+  function renderTabs(p) {
+    if (!E.tabs) return;
+    const teams = p?.teams || [];
+    if (!teams.length) {
+      E.tabs.innerHTML = "";
+      teamId = null;
+      return;
+    }
+    const a = active(p);
+    teamId = a.id;
+    E.tabs.innerHTML = teams
+      .map(
+        (t) =>
+          `<button class="cc-team-tab${t.id === teamId ? " is-active" : ""}" data-id="${esc(t.id)}">${esc(t.name)}</button>`,
+      )
+      .join("");
+    E.tabs.querySelectorAll("button").forEach(
+      (b) =>
+        (b.onclick = () => {
+          teamId = b.dataset.id;
+          render(p);
+        }),
+    );
+  }
+  function renderMembers(p) {
+    if (!E.members) return;
+    const m = (p?.members || []).filter(
+      (x) => !teamId || !x.teamId || x.teamId === teamId,
+    );
+    E.members.innerHTML = m.length
+      ? m
+          .map(
+            (x) =>
+              `<article class="cc-member-card"><span></span><div class="cc-member-name">${esc(x.name)}</div><div class="cc-member-role">${esc(x.jobTitle)}</div></article>`,
+          )
+          .join("")
+      : '<div class="cc-empty-message">No team members added yet.</div>';
+  }
+  function renderOffices(p) {
+    if (!E.offices) return;
+    E.offices.innerHTML = (p?.offices || [])
+      .map(
+        (x) =>
+          `<article class="cc-office"><div class="cc-office-dot"></div><span>${esc(x.name)}</span></article>`,
+      )
+      .join("");
+  }
+  function renderProducts(p) {
+    if (!E.products) return;
+    E.products.innerHTML = (p?.products || [])
+      .map(
+        (x, i) =>
+          `<button class="cc-product-chip${i === 0 ? " is-active" : ""}">${esc(x.name)}</button>`,
+      )
+      .join("");
+  }
+  function renderProfile(p) {
+    if (!E.badge || !E.points) return;
+    const a = active(p);
+    if (!a) {
+      E.badge.textContent = "No team selected";
+      E.points.innerHTML =
+        '<p class="cc-profile-empty">No team profile added yet.</p>';
+      return;
+    }
+    E.badge.textContent = a.name;
+    const pr = p?.teamProfiles?.[a.id];
+    if (!pr) {
+      E.points.innerHTML =
+        '<p class="cc-profile-empty">No team profile added yet.</p>';
+      return;
+    }
+    const points =
+      mode === "operate"
+        ? [
+            ["How We're Led", pr.led],
+            ["What We're Solving Now", pr.solving],
+            ["A Typical Day", pr.day],
+            ["What We Value", pr.value],
+            ["Growth Here", pr.growth],
+          ]
+        : [
+            ["Who We Are", pr.who],
+            ["What We're Great At", pr.great],
+            ["Team Culture", pr.culture],
+            ["How We Work Together", pr.work],
+            ["This team is NOT for you if...", pr.notFor, true],
+          ];
+    E.points.innerHTML =
+      points
+        .filter(([, t]) => String(t || "").trim())
+        .map(
+          ([h, t, w]) =>
+            `<section class="cc-profile-point${w ? " is-warning" : ""}"><h3>${esc(h)}</h3><p>${esc(t)}</p></section>`,
+        )
+        .join("") ||
+      '<p class="cc-profile-empty">No team profile added yet.</p>';
+  }
+  function renderBig(el, arr, n = 2) {
+    if (!el) return;
+    arr = arr || [];
+    el.innerHTML = arr.length
+      ? arr
+          .slice(0, n)
+          .map(
+            (x) =>
+              `<article class="cc-large-slot cc-summary"><strong>${esc(x.name)}</strong><span>${esc(x.status || "Saved from admin")}</span></article>`,
+          )
+          .join("")
+      : Array.from({ length: n })
+          .map(() => '<div class="cc-large-slot"></div>')
+          .join("");
+  }
+  function renderMedia(el, arr, label) {
+    if (!el) return;
+    el.innerHTML = arr?.length ? summary(arr.length, label) : "";
+  }
+  function render(p = read()) {
+    renderCards(p);
+    renderTabs(p);
+    renderMembers(p);
+    renderOffices(p);
+    renderProducts(p);
+    renderProfile(p);
+    renderBig(E.portfolio, p?.products);
+    renderBig(E.brands, p?.brands);
+    renderMedia(E.photos, p?.photos, "photo(s) saved from admin");
+    renderMedia(E.partners, p?.partners, "partner(s) saved from admin");
+    renderMedia(E.customers, p?.customers, "customer(s) saved from admin");
+  }
+  document.querySelectorAll(".cc-profile-button").forEach(
+    (b) =>
+      (b.onclick = () => {
+        mode = b.dataset.profileMode || "people";
+        document
+          .querySelectorAll(".cc-profile-button")
+          .forEach((x) => x.classList.toggle("is-active", x === b));
+        renderProfile(read());
+      }),
+  );
+  addEventListener("storage", (e) => {
+    if (e.key === KEY) render();
+  });
+  render();
+})();

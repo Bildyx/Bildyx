@@ -36,7 +36,7 @@ export const user_target_lists = {
         query = query.where("organization_id", "=", organization_id);
       }
 
-      return await query.selectAll().orderBy("created_at", "desc").execute();
+      return await query.selectAll().orderBy("id", "desc").execute();
     }),
 
   getById: publicProcedure

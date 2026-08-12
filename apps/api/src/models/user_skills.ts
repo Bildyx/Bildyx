@@ -6,7 +6,6 @@ export const UserSkillSchema = z.object({
   user_profile_id: z.uuid(),
   skill_id: z.uuid(),
   level: DifficultyLevelEnum.nullable().optional(),
-  name: z.string().optional(),
 });
 
 // GET

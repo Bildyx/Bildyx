@@ -34,10 +34,6 @@ export const CitySchema = z.object({
   people_description: z.string().nullable().optional(),
   latitude: z.number().min(-90).max(90).nullable().optional(),
   longitude: z.number().min(-180).max(180).nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional(),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -53,14 +49,12 @@ export const GetCitySchema = z.object({
 export const CityListItemSchema = z.object({
   id: z.uuid(),
   name: z.string(),
+  country_name: z.string(),
 });
 
 // POST
 export const PostCitySchema = CitySchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
 });
 
 // PATCH
@@ -78,3 +72,4 @@ export const DeleteCitiesBulkSchema = z.object({
 export type City = z.infer<typeof CitySchema>;
 export type PostCity = z.infer<typeof PostCitySchema>;
 export type PutCity = z.infer<typeof PutCitySchema>;
+export type CityListItem = z.infer<typeof CityListItemSchema>;

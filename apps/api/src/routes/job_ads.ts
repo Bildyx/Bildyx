@@ -36,9 +36,7 @@ export const job_ads = {
         city_id,
       } = input;
 
-      let query = database
-        .selectFrom("job_ads")
-        .where("deleted_at", "is", null);
+      let query = database.selectFrom("job_ads");
 
       if (name) {
         const p = `%${name.trim()}%`;
@@ -69,7 +67,7 @@ export const job_ads = {
         query = query.where("city_id", "=", city_id);
       }
 
-      return await query.selectAll().orderBy("created_at", "desc").execute();
+      return await query.selectAll().execute();
     }),
 
   getById: publicProcedure
@@ -86,7 +84,6 @@ export const job_ads = {
       const data = await database
         .selectFrom("job_ads")
         .where("id", "=", input.jobAdId)
-        .where("deleted_at", "is", null)
         .selectAll()
         .executeTakeFirst();
 
@@ -108,15 +105,13 @@ export const job_ads = {
     .input(PostJobAdSchema)
     .output(JobAdSchema)
     .handler(async ({ input }) => {
-      const { metadata, ...rest } = input;
+      const { ...rest } = input;
 
       const job_ad = await database
         .insertInto("job_ads")
         .values({
           ...rest,
           id: randomUUID(),
-          updated_at: new Date(),
-          metadata: metadata as any,
         })
         .returningAll()
         .executeTakeFirst();
@@ -141,12 +136,11 @@ export const job_ads = {
     .input(z.object({ jobAdId: z.uuid() }).merge(PutJobAdSchema))
     .output(JobAdSchema)
     .handler(async ({ input }) => {
-      const { jobAdId, metadata, ...rest } = input;
+      const { jobAdId, ...rest } = input;
 
       const existing = await database
         .selectFrom("job_ads")
         .where("id", "=", jobAdId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -156,7 +150,7 @@ export const job_ads = {
 
       const job_ad = await database
         .updateTable("job_ads")
-        .set({ ...rest, updated_at: new Date(), metadata: metadata as any })
+        .set(rest)
         .where("id", "=", jobAdId)
         .returningAll()
         .executeTakeFirst();
@@ -184,7 +178,6 @@ export const job_ads = {
       const existing = await database
         .selectFrom("job_ads")
         .where("id", "=", input.jobAdId)
-        .where("deleted_at", "is", null)
         .select("id")
         .executeTakeFirst();
 
@@ -193,8 +186,7 @@ export const job_ads = {
       }
 
       await database
-        .updateTable("job_ads")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("job_ads")
         .where("id", "=", input.jobAdId)
         .execute();
     }),
@@ -211,8 +203,7 @@ export const job_ads = {
     .output(z.void())
     .handler(async ({ input }) => {
       await database
-        .updateTable("job_ads")
-        .set({ deleted_at: new Date() })
+        .deleteFrom("job_ads")
         .where("id", "in", input.jobAdIds)
         .execute();
     }),

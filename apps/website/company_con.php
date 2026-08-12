@@ -1,14 +1,14 @@
 <?php
 $pageTitle = 'Company — Bildyx';
 $pageDescription = 'Connected company profile page on Bildyx.';
-$pageScript = 'js/compagny_con.ts';
-$bodyClass = 'company-page compagny-con-page';
+$pageScript = 'js/company_con.ts';
+$bodyClass = 'company-page company-con-page';
 $showMainNav = false;
 
 ob_start();
 require __DIR__ . '/includes/header.php';
 $sharedHeader = ob_get_clean();
-$companyStylesheet = '<link rel="stylesheet" href="css/compagny_con.css" />';
+$companyStylesheet = '<link rel="stylesheet" href="css/company_con.css" />';
 echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 ?>
 
@@ -23,14 +23,14 @@ echo str_replace('</head>', "    {$companyStylesheet}\n</head>", $sharedHeader);
 <main class="cc-page">
   <div class="cc-company-bar">
     <span data-company-name>Company Profile</span>
-    <a class="cc-edit-link" href="compagny_con_admin.php"><span>✎</span> Edit</a>
+    <a class="cc-edit-link" href="company_con_admin.php"><span>✎</span> Edit</a>
   </div>
   <div class="cc-layout">
     <aside class="cc-left-rail">
       <section class="cc-company-card" data-public-company-card><div class="cc-empty-slot"></div></section>
       <h1>Parent Company</h1>
       <section class="cc-company-card cc-company-card--small" data-public-parent-card><div class="cc-empty-slot"></div></section>
-      <a class="cc-archive-link" href="compagny_archive_true.php"><span>▣</span> Company Archives</a>
+      <a class="cc-archive-link" href="company_archive_true.php"><span>▣</span> Company Archives</a>
     </aside>
     <section class="cc-content">
       <section class="cc-team-panel">

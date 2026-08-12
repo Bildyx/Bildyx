@@ -19,10 +19,6 @@ export const SkillSchema = z.object({
   related_abilities: zStringArray(),
   time_to_master: z.string().nullable().optional(),
   score: z.number().int().min(0).nullable().optional(),
-  metadata: z.any().nullable().optional(),
-  deleted_at: z.date().nullable().optional().default(null),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 // GET
@@ -40,9 +36,6 @@ export const GetSkillSchema = z.object({
 // POST
 export const PostSkillSchema = SkillSchema.omit({
   id: true,
-  created_at: true,
-  updated_at: true,
-  deleted_at: true,
 });
 
 // PATCH

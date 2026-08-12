@@ -68,7 +68,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             .selectFrom("users")
             .select(["id", "email", "role", "email_verified"])
             .where("email", "=", email)
-            .where("deleted_at", "is", null)
             .executeTakeFirst();
 
           if (existingUser) {
@@ -81,7 +80,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                   verification_expires_at: null,
                   last_verification_sent_at: null,
                   status: "ACTIVE",
-                  updated_at: new Date(),
                 })
                 .where("id", "=", existingUser.id)
                 .execute();
@@ -107,10 +105,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               .values({
                 id: userId,
                 email,
-                first_name: profile.name?.givenName || "",
-                last_name: profile.name?.familyName || "",
-                display_name: profile.displayName || "",
-                avatar_url: profile.photos?.[0]?.value || null,
                 role: "CANDIDATE",
                 marketing_opt_in: false,
                 email_verified: true,
@@ -119,7 +113,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 verification_expires_at: null,
                 last_verification_sent_at: null,
                 status: "ACTIVE",
-                updated_at: new Date(),
               })
               .execute();
 
@@ -128,8 +121,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               .values({
                 id: randomUUID(),
                 user_id: userId,
+                first_name: profile.name?.givenName || "",
+                last_name: profile.name?.familyName || "",
+                display_name: profile.displayName || "",
+                avatar_url: profile.photos?.[0]?.value || null,
                 is_public: true,
-                updated_at: new Date(),
               })
               .execute();
           });

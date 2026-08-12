@@ -7,8 +7,6 @@ import {
 } from "@prisma/client";
 import {
   readCsv,
-  toJson,
-  toDate,
   toInt,
   toIntLoose,
   toFloat,
@@ -17,38 +15,9 @@ import {
   parseEnumArray,
 } from "../seed-utils";
 
-type CityCsv = {
-  id: string;
-  name: string;
-  serial_number: string;
-  country_id: string;
-  is_capital?: string;
-  state_province?: string;
-  population?: string;
-  number_of_multinational_hqs?: string;
-  number_of_airports?: string;
-  largest_organization?: string;
-  currency?: string;
-  median_salary?: string;
-  cost_of_living?: string;
-  median_home_price?: string;
-  average_rent?: string;
-  temperatures?: string;
-  climate?: string;
-  interesting_fact?: string;
-  degree_holders?: string;
-  number_of_universities?: string;
-  top_universities?: string;
-  number_of_nationalities?: string;
-  language?: string;
-  people_description?: string;
-  latitude?: string;
-  longitude?: string;
-  metadata?: string;
-  deleted_at?: string;
-  created_at?: string;
-  updated_at?: string;
-};
+import { City } from "../../src/models/cities";
+
+type CityCsv = Partial<Record<keyof City, string>>;
 
 export async function seedCities(prisma: PrismaClient) {
   const rows = readCsv<CityCsv>("cities.csv");
@@ -58,7 +27,7 @@ export async function seedCities(prisma: PrismaClient) {
   });
   const validCountryIds = new Set(existingCountries.map((c) => c.isoCode));
 
-  const skipped = rows.filter((r) => !validCountryIds.has(r.country_id));
+  const skipped = rows.filter((r) => !validCountryIds.has(r.country_id!));
   if (skipped.length > 0) {
     console.warn(
       `Cities skipped (unknown country_id): ${skipped
@@ -68,13 +37,13 @@ export async function seedCities(prisma: PrismaClient) {
   }
 
   const data: Prisma.CityCreateManyInput[] = rows
-    .filter((r) => validCountryIds.has(r.country_id))
+    .filter((r) => validCountryIds.has(r.country_id!))
     .map((r) => ({
-      id: r.id,
-      name: r.name,
-      serial_number: r.serial_number,
+      id: r.id!,
+      name: r.name!,
+      serial_number: r.serial_number!,
 
-      countryId: r.country_id,
+      countryId: r.country_id!,
 
       isCapital: toBool(r.is_capital),
       stateProvince: r.state_province || null,
@@ -109,12 +78,6 @@ export async function seedCities(prisma: PrismaClient) {
 
       latitude: toFloat(r.latitude),
       longitude: toFloat(r.longitude),
-
-      metadata: toJson(r.metadata),
-
-      deletedAt: toDate(r.deleted_at, false),
-      createdAt: toDate(r.created_at, true) as Date,
-      updatedAt: toDate(r.updated_at, true) as Date,
     }));
 
   const result = await prisma.city.createMany({

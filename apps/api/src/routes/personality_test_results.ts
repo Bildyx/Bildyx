@@ -104,7 +104,6 @@ export const personalityTestResults = {
         .values({
           ...input,
           id: randomUUID(),
-          updated_at: new Date(),
         })
         .returningAll()
         .executeTakeFirst();
@@ -147,7 +146,7 @@ export const personalityTestResults = {
 
       const result = await database
         .updateTable("personality_test_results")
-        .set({ ...rest, updated_at: new Date() })
+        .set(rest)
         .where("id", "=", resultId)
         .returningAll()
         .executeTakeFirst();
@@ -317,8 +316,6 @@ export const personalityTestResults = {
             user_profile_id: input.user_profile_id,
             test_id: test.id,
             completed_at: new Date(),
-            created_at: new Date(),
-            updated_at: new Date(),
           })
           .execute();
 

@@ -1,6 +1,7 @@
 import { getRPCClient } from "@repo/api-client";
 import type {
   City,
+  CityListItem,
   PostCity,
   PutCity,
 } from "@repo/models/cities";
@@ -8,7 +9,7 @@ import type {
 export class CityService {
   private readonly rpcClient = getRPCClient("http://localhost:3000");
 
-  public async getAll(filters?: { name?: string; country_id?: string }): Promise<City[]> {
+  public async getAll(filters?: { name?: string; country_id?: string }): Promise<CityListItem[]> {
     return await this.rpcClient.cities.getAll(filters || {});
   }
 

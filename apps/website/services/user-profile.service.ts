@@ -18,6 +18,10 @@ export class UserProfileService {
     return await this.rpcClient.user_profiles.getById({ profileId });
   }
 
+  public async getAll(input: { userId?: string; countryId?: string; cityId?: string; excludeOrganizations?: boolean } = {}): Promise<UserProfile[]> {
+    return await this.rpcClient.user_profiles.getAll(input);
+  }
+
   public async create(input: PostUserProfile): Promise<UserProfile> {
     return await this.rpcClient.user_profiles.create(input);
   }

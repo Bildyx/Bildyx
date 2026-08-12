@@ -361,6 +361,14 @@ export const LanguageProficiencyEnum = z.enum([
   "PROFESSIONAL",
 ]);
 
+export const TeamVisibilityEnum = z.enum(["PUBLIC", "PRIVATE", "LIMITED"]);
+
+export const TeamSubjectStatusEnum = z.enum([
+  "MAIN_FOCUS",
+  "RUNNER_UPS",
+  "HIGH_PRIORITY",
+]);
+
 const SUBTYPE_PREFIX_MAP: Record<string, string> = {
   COMPANY: "COM",
   GOVERNMENT: "GOV",
