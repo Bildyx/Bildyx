@@ -168,7 +168,7 @@ export const cities = {
 
       const city = await database
         .updateTable("cities")
-        .set({ ...data, updated_at: new Date() } as any)
+        .set({ ...data } as any)
         .where("id", "=", cityId)
         .returningAll()
         .executeTakeFirst();

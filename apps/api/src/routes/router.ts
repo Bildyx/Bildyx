@@ -9,6 +9,7 @@ import { jobs } from "./jobs";
 import { job_ads } from "./job_ads";
 import { job_ads_skills } from "./job_ads_skills";
 import { subjects } from "./subjects";
+import { subject_categories } from "./subject_categories";
 import { skills } from "./skills";
 import { organizations } from "./organizations";
 import { users } from "./users";
@@ -39,6 +40,7 @@ import { organization_offices } from "./organization_offices";
 import { organization_subsidiaries } from "./organization_subsidiaries";
 import { organization_partners } from "./organization_partners";
 import { organization_photos } from "./organization_photos";
+import { target_list } from "./target_list";
 
 export const router = publicProcedure.router({
   auth,
@@ -51,6 +53,7 @@ export const router = publicProcedure.router({
   job_ads,
   job_ads_skills,
   subjects,
+  subject_categories,
   skills,
   organizations,
   organization_customers,
@@ -81,5 +84,6 @@ export const router = publicProcedure.router({
   team_members,
   team_profiles,
   team_subjects,
+  target_list,
 });
 export type Router = typeof router;

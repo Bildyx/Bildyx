@@ -28,6 +28,8 @@ export const OrganizationSchema = z.object({
   numberOfEmployees: EmployeeCountRangeEnum.nullable().optional(),
   parent_organization_id: z.uuid().nullable().optional(),
   city_id: z.uuid().nullable().optional(),
+  industry_id: z.uuid().nullable().optional(),
+  website_url: z.string().nullable().optional(),
   research_areas: z.array(z.string()).nullable().optional(),
   products: z.array(z.string()).nullable().optional(),
   services: z.array(z.string()).nullable().optional(),

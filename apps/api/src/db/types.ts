@@ -91,8 +91,6 @@ export type Skillimportance = "NICE_TO_HAVE" | "PREFERRED" | "REQUIRED";
 
 export type StorageBuckettype = "ANALYTICS" | "STANDARD" | "VECTOR";
 
-export type Subjectcategory = "API" | "HARDWARE" | "OTHER" | "PHYSICAL_PRODUCT" | "PLATFORM" | "SERVICE" | "SOFTWARE";
-
 export type Teamsubjectstatus = "HIGH_PRIORITY" | "MAIN_FOCUS" | "RUNNER_UPS";
 
 export type Teamvisibility = "LIMITED" | "PRIVATE" | "PUBLIC";
@@ -703,28 +701,28 @@ export interface Jobs {
 }
 
 export interface OrganizationCustomers {
-  customer_id: string | null;
+  customer_id: string;
   id: Generated<string>;
-  organization_id: string | null;
+  organization_id: string;
 }
 
 export interface OrganizationInvestors {
   id: Generated<string>;
-  investor_id: string | null;
-  organization_id: string | null;
+  investor_id: string;
+  organization_id: string;
 }
 
 export interface OrganizationOffices {
   city_id: string;
   id: Generated<string>;
-  organization_id: string | null;
+  organization_id: string;
   type: string;
 }
 
 export interface OrganizationPartners {
   id: Generated<string>;
-  organization_id: string | null;
-  partner_id: string | null;
+  organization_id: string;
+  partner_id: string;
 }
 
 export interface OrganizationPhotos {
@@ -745,6 +743,7 @@ export interface Organizations {
   founded: string | null;
   founders: string[] | null;
   id: string;
+  industry_id: string | null;
   is_public: boolean | null;
   jurisdiction: string | null;
   known_for: string | null;
@@ -769,12 +768,13 @@ export interface Organizations {
   type1: string | null;
   type2: string | null;
   undergraduates: number | null;
+  website_url: string | null;
 }
 
 export interface OrganizationSubsidiaries {
   id: Generated<string>;
-  organization_id: string | null;
-  subsidiary_id: string | null;
+  organization_id: string;
+  subsidiary_id: string;
 }
 
 export interface PersonalityAnswers {
@@ -982,18 +982,24 @@ export interface StudyFields {
   updated_at: Timestamp;
 }
 
+export interface SubjectCategories {
+  id: Generated<string>;
+  name: string;
+  parent_id: string | null;
+}
+
 export interface Subjects {
-  category: Subjectcategory | null;
   competitors: string[] | null;
   description: string | null;
   fun_fact: string | null;
   id: string;
   logo_url: string | null;
   name: string;
-  organization_id: string | null;
+  organization_id: string;
   score: number | null;
   serial_number: string;
   short_description: string | null;
+  subject_category_id: string;
   tags: string[] | null;
   type: string | null;
   vendors: string[] | null;
@@ -1006,7 +1012,7 @@ export interface TeamMembers {
   is_leader: Generated<boolean | null>;
   job_id: string;
   profile_image: string | null;
-  team_id: string | null;
+  team_id: string;
 }
 
 export interface TeamProfiles {
@@ -1037,7 +1043,7 @@ export interface TeamSubjects {
   id: Generated<string>;
   status: Teamsubjectstatus;
   subject_id: string;
-  team_id: string | null;
+  team_id: string;
 }
 
 export interface UserCertifications {
@@ -1238,6 +1244,7 @@ export interface DB {
   "storage.s3_multipart_uploads_parts": StorageS3MultipartUploadsParts;
   "storage.vector_indexes": StorageVectorIndexes;
   StudyFields: StudyFields;
+  subject_categories: SubjectCategories;
   subjects: Subjects;
   team_members: TeamMembers;
   team_profiles: TeamProfiles;

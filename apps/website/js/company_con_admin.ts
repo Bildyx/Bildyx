@@ -220,16 +220,18 @@ function renderTabs() {
     });
   });
 
-  el.querySelectorAll<HTMLElement>("[data-edit-team-quick]").forEach((pencil) => {
-    pencil.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const teamId = pencil.dataset.editTeamQuick!;
-      activeTeamId = teamId;
-      render();
-      open("edit-team", { teamId });
-    });
-  });
+  el.querySelectorAll<HTMLElement>("[data-edit-team-quick]").forEach(
+    (pencil) => {
+      pencil.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const teamId = pencil.dataset.editTeamQuick!;
+        activeTeamId = teamId;
+        render();
+        open("edit-team", { teamId });
+      });
+    },
+  );
 
   el.querySelectorAll<HTMLElement>("[data-delete-team-quick]").forEach(
     (btn) => {
@@ -524,7 +526,8 @@ function renderChips(
           teamObj !== null &&
           officeObj !== undefined &&
           teamObj.city_id === officeObj.city_id;
-        spanContent = '<i class="bi bi-building" style="font-size: 20px; color: #fff;"></i>';
+        spanContent =
+          '<i class="bi bi-building" style="font-size: 20px; color: #fff;"></i>';
       } else {
         text = item.name || "";
       }
@@ -1291,7 +1294,8 @@ function fillCitySelect(container: HTMLElement) {
     });
     const officeCities = Array.from(officeCitiesMap.values());
 
-    container.innerHTML = `<option value="" disabled selected>Select city</option>` +
+    container.innerHTML =
+      `<option value="" disabled selected>Select city</option>` +
       officeCities
         .map(
           (c: CityListItem) =>
@@ -1325,7 +1329,9 @@ async function open(name: string, payload: Record<string, string> = {}) {
   const templateName = name === "edit-team" ? "team" : name;
   if (templateName === "team") {
     if (offices.length === 0) {
-      toast.error("Veuillez d'abord ajouter un bureau (office) dans la section correspondante.");
+      toast.error(
+        "Veuillez d'abord ajouter un bureau (office) dans la section correspondante.",
+      );
       return;
     }
   }
@@ -1850,7 +1856,9 @@ function bindModal() {
         '[data-field="visibility"]',
       )?.value || "PUBLIC") as "PUBLIC" | "PRIVATE" | "LIMITED";
 
-      const citySelect = content!.querySelector<HTMLSelectElement>('select[data-field="city"]');
+      const citySelect = content!.querySelector<HTMLSelectElement>(
+        'select[data-field="city"]',
+      );
       const city_id = citySelect ? citySelect.value : "";
       if (!city_id) {
         toast.warning("Please select a city.");
@@ -1999,7 +2007,7 @@ function bindModal() {
           try {
             const created = await teamMemberService.create({
               fullname,
-              team_id: team_id || undefined,
+              team_id: team_id,
               job_id,
               profile_image,
               is_leader: false,
@@ -2420,6 +2428,11 @@ function bindModal() {
         content!.querySelector<HTMLSelectElement>('[data-field="prodStatus"]')
           ?.value || "";
 
+      if (!activeTeamId) {
+        toast.error("Unable to identify your team.");
+        return;
+      }
+
       if (!subject_id) {
         toast.warning("Please select a product or service first.");
         return;
@@ -2429,7 +2442,7 @@ function bindModal() {
         return;
       }
 
-      const team_id = activeTeamId || undefined;
+      const team_id = activeTeamId;
 
       const addProdBtn = content?.querySelector<HTMLButtonElement>(
         "[data-add-product-portfolio]",

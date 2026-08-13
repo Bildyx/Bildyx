@@ -21,7 +21,10 @@ import {
   CancelUnverifiedOutputSchema,
 } from "../models/auth";
 import { randomUUID, randomBytes, createHash } from "node:crypto";
-import { generateSerialNumber } from "../models/utils/enums.js";
+import {
+  generateSerialNumber,
+  OrganizationSubtypeEnum,
+} from "../models/utils/enums.js";
 import {
   hashPassword,
   verifyPassword,
@@ -116,7 +119,14 @@ export const auth = {
               id: orgId,
               name: input.companyName.trim(),
               slug: slug,
-              serial_number: generateSerialNumber("COMPANY"),
+              subtype: OrganizationSubtypeEnum.enum.COMPANY,
+              serial_number: generateSerialNumber(
+                OrganizationSubtypeEnum.enum.COMPANY,
+              ),
+              profile_url: input.companyName
+                .trim()
+                .replace(" ", "-")
+                .toLowerCase(),
             })
             .execute();
 
@@ -172,7 +182,11 @@ export const auth = {
           is_public: true,
         };
 
-        if (input.accountType === "seeker" && input.firstName && input.lastName) {
+        if (
+          input.accountType === "seeker" &&
+          input.firstName &&
+          input.lastName
+        ) {
           profileValues.first_name = input.firstName.trim();
           profileValues.last_name = input.lastName.trim();
           profileValues.display_name = `${input.firstName.trim()} ${input.lastName.trim()}`;

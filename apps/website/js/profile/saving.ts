@@ -5,10 +5,6 @@ import {
   userExperienceService,
   educationService,
   userCertificationService,
-  degreeService,
-  organizationService,
-  certificationService,
-  jobService,
   skillService,
 } from "./services";
 import {
@@ -19,8 +15,7 @@ import {
   deletedEducations,
   deletedCertifications,
 } from "./state";
-import { $, $$ } from "../helpers";
-import { showToast } from "../profile";
+import { $, toast } from "../helpers";
 
 export function parseLanguageLabel(label: string): string {
   const SPECIAL: Record<string, string> = {
@@ -35,85 +30,6 @@ export function parseLanguageLabel(label: string): string {
   };
   if (SPECIAL[label]) return SPECIAL[label];
   return label.toUpperCase().replace(/[^A-Z0-9]+/g, "_");
-}
-
-export async function resolveOrCreateDegree(
-  name: string,
-): Promise<string | null> {
-  try {
-    const list = await degreeService.getAll({ name });
-    const existing = list.find(
-      (d: any) => d.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (existing) return existing.id;
-  } catch (_) {}
-  try {
-    const res = await degreeService.create({
-      name: name.trim(),
-      serial_number:
-        "DEG-" + Math.random().toString(36).substring(2, 11).toUpperCase(),
-      level: "BACHELOR",
-    });
-    return res.id;
-  } catch (err) {
-    console.error("Failed to create degree:", err);
-    return null;
-  }
-}
-
-export async function resolveOrCreateOrganization(
-  name: string,
-): Promise<string | null> {
-  try {
-    const list = await organizationService.getAll({ name });
-    const existing = list.find(
-      (o: any) => o.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (existing) return existing.id;
-  } catch (_) {}
-  try {
-    const res = await organizationService.create({
-      name: name.trim(),
-      serial_number:
-        "ORG-" + Math.random().toString(36).substring(2, 11).toUpperCase(),
-      slug: name.trim(),
-      subtype: "COMPANY",
-    });
-    return res.id;
-  } catch (err) {
-    console.error("Failed to create organization:", err);
-    return null;
-  }
-}
-
-export async function resolveOrCreateCertification(
-  name: string,
-  issuingOrgId?: string | null,
-): Promise<string | null> {
-  try {
-    let list = await certificationService.getAll();
-    if (name) {
-      list = list.filter((c: any) =>
-        c.name.toLowerCase().includes(name.toLowerCase()),
-      );
-    }
-    const existing = list.find(
-      (c: any) => c.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (existing) return existing.id;
-  } catch (_) {}
-  try {
-    const res = await certificationService.create({
-      name: name.trim(),
-      serial_number:
-        "CERT-" + Math.random().toString(36).substring(2, 11).toUpperCase(),
-      issuing_organization_id: issuingOrgId || null,
-    });
-    return res.id;
-  } catch (err) {
-    console.error("Failed to create certification:", err);
-    return null;
-  }
 }
 
 export async function resolveOrCreateSkill(
@@ -135,29 +51,6 @@ export async function resolveOrCreateSkill(
     return res.id;
   } catch (err) {
     console.error("Failed to create skill:", err);
-    return null;
-  }
-}
-
-export async function resolveOrCreateJob(
-  title: string,
-): Promise<string | null> {
-  try {
-    const list = await jobService.getAll({ name: title });
-    const existing = list.find(
-      (j: any) => j.title.toLowerCase() === title.toLowerCase(),
-    );
-    if (existing) return existing.id;
-  } catch (_) {}
-  try {
-    const res = await jobService.create({
-      title: title.trim(),
-      serial_number:
-        "JOB-" + Math.random().toString(36).substring(2, 11).toUpperCase(),
-    });
-    return res.id;
-  } catch (err) {
-    console.error("Failed to create job:", err);
     return null;
   }
 }
@@ -185,7 +78,7 @@ export async function saveProfile() {
       role,
     };
     localStorage.setItem("bildyx_profile_draft", JSON.stringify(payload));
-    showToast("Profile saved locally (offline)");
+    toast.info("Profile saved locally (offline)");
     return;
   }
 
@@ -207,6 +100,8 @@ export async function saveProfile() {
         profileService
           .update(currentProfile.id, {
             biography: biography || null,
+            role: role || null,
+            display_name: name || null,
           })
           .then(() => {
             profileDirtyEl.removeAttribute("data-profile-dirty");
@@ -356,6 +251,9 @@ export async function saveProfile() {
           const roleSlot = card.querySelector<HTMLElement>(
             '[data-card-slot="role-card"]',
           );
+          const subjectSlot = card.querySelector<HTMLElement>(
+            '[data-card-slot="subject-card"]',
+          );
 
           let orgId =
             companySlot?.dataset.orgId ||
@@ -363,6 +261,7 @@ export async function saveProfile() {
             null;
 
           let jobId = roleSlot?.dataset.roleId || null;
+          let subjectId = subjectSlot?.dataset.subjectId || null;
 
           console.log("ROLE SLOT");
           console.log(jobId);
@@ -370,6 +269,7 @@ export async function saveProfile() {
           const expData = {
             organization_id: orgId,
             job_id: jobId,
+            subject_id: subjectId,
             title: roleTitle || null,
             description: summary || null,
             start_year: startYear,
@@ -523,9 +423,9 @@ export async function saveProfile() {
     await Promise.all(promises);
     sessionStorage.removeItem("user_experience_keywords");
     sessionStorage.removeItem("user_work_org_ids");
-    showToast("Profile saved");
+    toast.success("Profile saved");
   } catch (err) {
     console.error("[profile.ts] Save profile error:", err);
-    showToast("Failed to sync with API.", "error");
+    toast.error("Failed to sync with API.");
   }
 }

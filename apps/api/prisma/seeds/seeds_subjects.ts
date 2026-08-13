@@ -12,6 +12,7 @@ import { Subject } from "../../src/models/subjects";
 
 type SubjectCsv = Partial<Record<keyof Subject, string>> & {
   organization_name?: string;
+  category?: string;
 };
 
 export async function seedSubjects(prisma: PrismaClient) {
@@ -26,11 +27,30 @@ export async function seedSubjects(prisma: PrismaClient) {
   const resolveOrganizationId = buildNameLookup(organizations);
   const unmatchedOrganizations = new Set<string>();
 
+  // Ensure all SubjectCategory enum values exist in the database subject_categories table
+  const categories = Object.values(SubjectCategory);
+  const existingCategories = await prisma.subject_categories.findMany();
+  const existingNames = new Set(existingCategories.map((c) => c.name));
+
+  const missingCategories = categories.filter((c) => !existingNames.has(c));
+  if (missingCategories.length > 0) {
+    await prisma.subject_categories.createMany({
+      data: missingCategories.map((name) => ({ name })),
+    });
+  }
+
+  const allCategories = await prisma.subject_categories.findMany();
+  const categoryMap = new Map(allCategories.map((c) => [c.name.toUpperCase(), c.id]));
+  const otherCategoryId = categoryMap.get("OTHER")!;
+
   const data: Prisma.SubjectCreateManyInput[] = rows.map((r) => {
     const organization_id = resolveOrganizationId(r.organization_name);
     if (r.organization_name && !organization_id) {
       unmatchedOrganizations.add(r.organization_name);
     }
+
+    const categoryKey = (r.category || "").trim().toUpperCase();
+    const subject_category_id = categoryMap.get(categoryKey) || otherCategoryId;
 
     return {
       id: r.id!,
@@ -42,14 +62,13 @@ export async function seedSubjects(prisma: PrismaClient) {
       description: r.description || null,
       short_description: r.short_description || null,
 
-      category: parseEnum(r.category, SubjectCategory),
-
       competitors: toStringArray(r.competitors),
       vendors: toStringArray(r.vendors),
 
       fun_fact: r.fun_fact || null,
 
-      organization_id,
+      organization_id: organization_id!,
+      subject_category_id,
 
       website_url: r.website_url || null,
       logo_url: r.logo_url || null,

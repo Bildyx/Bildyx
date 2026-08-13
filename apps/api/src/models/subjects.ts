@@ -4,16 +4,16 @@ import { zNullableUUID, zStringArray } from "./utils/preprocessors";
 
 export const SubjectSchema = z.object({
   id: z.uuid(),
+  organization_id: z.uuid(),
+  subject_category_id: z.uuid(),
   name: z.string().trim().min(1),
   serial_number: z.string().trim().min(1),
   type: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   short_description: z.string().nullable().optional(),
-  category: SubjectCategoryEnum.nullable().optional(),
   competitors: zStringArray(),
   vendors: zStringArray(),
   fun_fact: z.string().nullable().optional(),
-  organization_id: zNullableUUID(),
   website_url: z.string().nullable().optional(),
   logo_url: z.string().nullable().optional(),
   tags: zStringArray(),
@@ -23,8 +23,8 @@ export const SubjectSchema = z.object({
 // GET
 export const GetSubjectsSchema = z.object({
   name: z.string().optional(),
-  category: SubjectCategoryEnum.optional(),
   organization_id: zNullableUUID(),
+  subject_category_id: zNullableUUID(),
 });
 
 export const GetSubjectSchema = z.object({
