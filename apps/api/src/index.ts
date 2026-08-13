@@ -100,37 +100,31 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           const userId = randomUUID();
 
           await database.transaction().execute(async (trx) => {
-          await trx
-            .insertInto("users")
-            .values({
-              id: userId,
-              email,
-              first_name: profile.name?.givenName || "",
-              last_name: profile.name?.familyName || "",
-              display_name: profile.displayName || "",
-              avatar_url: profile.photos?.[0]?.value || null,
-              role: "CANDIDATE",
-              marketing_opt_in: false,
-              email_verified: true,
-              password_hash: randomPasswordHash,
-              verification_code: null,
-              verification_expires_at: null,
-              last_verification_sent_at: null,
-              status: "ACTIVE",
-              updated_at: new Date(),
-            })
-            .execute();
+            await trx
+              .insertInto("users")
+              .values({
+                id: userId,
+                email,
+                role: "CANDIDATE",
+                marketing_opt_in: false,
+                email_verified: true,
+                password_hash: randomPasswordHash,
+                verification_code: null,
+                verification_expires_at: null,
+                last_verification_sent_at: null,
+                status: "ACTIVE",
+              })
+              .execute();
 
-          await trx
-            .insertInto("user_profiles")
-            .values({
-              id: randomUUID(),
-              user_id: userId,
-              is_public: true,
-              updated_at: new Date(),
-            })
-            .execute();
-        });
+            await trx
+              .insertInto("user_profiles")
+              .values({
+                id: randomUUID(),
+                user_id: userId,
+                is_public: true,
+              })
+              .execute();
+          });
 
           const newUser = {
             id: userId,

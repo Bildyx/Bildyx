@@ -64,7 +64,6 @@ async function seed() {
       name: "Test Organization Inc.",
       slug: "test-organization-inc",
       serial_number: generateSerialNumber("COMPANY"),
-      updated_at: new Date(),
   })
   .execute();
   console.log(`Created Organization: Test Organization Inc. (${orgId})`);
@@ -83,7 +82,6 @@ async function seed() {
       category: "TECHNICAL",
       validity_duration_months: 24,
       website_url: "https://aws.amazon.com",
-      updated_at: new Date(),
     })
     .execute();
   console.log(
@@ -103,7 +101,6 @@ async function seed() {
       category: "PROJECTMANAGEMENT",
       validity_duration_months: 36,
       website_url: "https://pmi.org",
-      updated_at: new Date(),
   })
   .execute();
   console.log(
