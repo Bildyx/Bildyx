@@ -91,8 +91,6 @@ export type Skillimportance = "NICE_TO_HAVE" | "PREFERRED" | "REQUIRED";
 
 export type StorageBuckettype = "ANALYTICS" | "STANDARD" | "VECTOR";
 
-export type Subjectcategory = "API" | "HARDWARE" | "OTHER" | "PHYSICAL_PRODUCT" | "PLATFORM" | "SERVICE" | "SOFTWARE";
-
 export type Teamsubjectstatus = "HIGH_PRIORITY" | "MAIN_FOCUS" | "RUNNER_UPS";
 
 export type Teamvisibility = "LIMITED" | "PRIVATE" | "PUBLIC";
@@ -702,6 +700,38 @@ export interface Jobs {
   tools_and_tech: string[] | null;
 }
 
+export interface OrganizationCustomers {
+  customer_id: string;
+  id: Generated<string>;
+  organization_id: string;
+}
+
+export interface OrganizationInvestors {
+  id: Generated<string>;
+  investor_id: string;
+  organization_id: string;
+}
+
+export interface OrganizationOffices {
+  city_id: string;
+  id: Generated<string>;
+  organization_id: string;
+  type: string;
+}
+
+export interface OrganizationPartners {
+  id: Generated<string>;
+  organization_id: string;
+  partner_id: string;
+}
+
+export interface OrganizationPhotos {
+  id: Generated<string>;
+  name: string | null;
+  organization_id: string;
+  url: string;
+}
+
 export interface Organizations {
   authority: string | null;
   avatar_url: string | null;
@@ -713,6 +743,7 @@ export interface Organizations {
   founded: string | null;
   founders: string[] | null;
   id: string;
+  industry_id: string | null;
   is_public: boolean | null;
   jurisdiction: string | null;
   known_for: string | null;
@@ -737,6 +768,13 @@ export interface Organizations {
   type1: string | null;
   type2: string | null;
   undergraduates: number | null;
+  website_url: string | null;
+}
+
+export interface OrganizationSubsidiaries {
+  id: Generated<string>;
+  organization_id: string;
+  subsidiary_id: string;
 }
 
 export interface PersonalityAnswers {
@@ -944,34 +982,28 @@ export interface StudyFields {
   updated_at: Timestamp;
 }
 
+export interface SubjectCategories {
+  id: Generated<string>;
+  name: string;
+  parent_id: string | null;
+}
+
 export interface Subjects {
-  category: Subjectcategory | null;
   competitors: string[] | null;
   description: string | null;
   fun_fact: string | null;
   id: string;
   logo_url: string | null;
   name: string;
-  organization_id: string | null;
+  organization_id: string;
   score: number | null;
   serial_number: string;
   short_description: string | null;
+  subject_category_id: string;
   tags: string[] | null;
   type: string | null;
   vendors: string[] | null;
   website_url: string | null;
-}
-
-export interface TeamCustomers {
-  id: Generated<string>;
-  organization_id: string | null;
-  team_id: string | null;
-}
-
-export interface TeamInvestors {
-  id: Generated<string>;
-  organization_id: string | null;
-  team_id: string | null;
 }
 
 export interface TeamMembers {
@@ -980,26 +1012,7 @@ export interface TeamMembers {
   is_leader: Generated<boolean | null>;
   job_id: string;
   profile_image: string | null;
-  team_id: string | null;
-}
-
-export interface TeamOffices {
-  city_id: string;
-  id: Generated<string>;
-  type: string;
-}
-
-export interface TeamPartners {
-  id: Generated<string>;
-  organization_id: string | null;
-  team_id: string | null;
-}
-
-export interface TeamPhotos {
-  id: Generated<string>;
-  name: string | null;
   team_id: string;
-  url: string;
 }
 
 export interface TeamProfiles {
@@ -1030,12 +1043,7 @@ export interface TeamSubjects {
   id: Generated<string>;
   status: Teamsubjectstatus;
   subject_id: string;
-}
-
-export interface TeamSubsidiaries {
-  id: Generated<string>;
-  organization_id: string | null;
-  team_id: string | null;
+  team_id: string;
 }
 
 export interface UserCertifications {
@@ -1210,6 +1218,12 @@ export interface DB {
   job_ad_skills: JobAdSkills;
   job_ads: JobAds;
   jobs: Jobs;
+  organization_customers: OrganizationCustomers;
+  organization_investors: OrganizationInvestors;
+  organization_offices: OrganizationOffices;
+  organization_partners: OrganizationPartners;
+  organization_photos: OrganizationPhotos;
+  organization_subsidiaries: OrganizationSubsidiaries;
   organizations: Organizations;
   personality_answers: PersonalityAnswers;
   personality_criteria: PersonalityCriteria;
@@ -1230,16 +1244,11 @@ export interface DB {
   "storage.s3_multipart_uploads_parts": StorageS3MultipartUploadsParts;
   "storage.vector_indexes": StorageVectorIndexes;
   StudyFields: StudyFields;
+  subject_categories: SubjectCategories;
   subjects: Subjects;
-  team_customers: TeamCustomers;
-  team_investors: TeamInvestors;
   team_members: TeamMembers;
-  team_offices: TeamOffices;
-  team_partners: TeamPartners;
-  team_photos: TeamPhotos;
   team_profiles: TeamProfiles;
   team_subjects: TeamSubjects;
-  team_subsidiaries: TeamSubsidiaries;
   teams: Teams;
   user_certifications: UserCertifications;
   user_education_fields: UserEducationFields;

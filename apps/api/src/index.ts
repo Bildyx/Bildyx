@@ -192,21 +192,25 @@ app.get("/spec.json", async (req, res) => {
 app.get("/enums/languages", (_req, res) => {
   res.json(LanguageSchema.options);
 });
-app.use("/css", express.static(path.resolve(__dirname, "templates/organizations")));
+app.use(
+  "/css",
+  express.static(path.resolve(__dirname, "templates/organizations")),
+);
 
 // Serve icon/logo images statically (replaces per-request Base64 encoding)
-const iconsDir =
-  fs.existsSync(path.resolve(process.cwd(), "../../Files/icons"))
-    ? path.resolve(process.cwd(), "../../Files/icons")
-    : fs.existsSync(path.resolve(process.cwd(), "Files/icons"))
-      ? path.resolve(process.cwd(), "Files/icons")
-      : path.resolve(__dirname, "../../../../Files/icons");
+const iconsDir = fs.existsSync(path.resolve(process.cwd(), "../../Files/icons"))
+  ? path.resolve(process.cwd(), "../../Files/icons")
+  : fs.existsSync(path.resolve(process.cwd(), "Files/icons"))
+    ? path.resolve(process.cwd(), "Files/icons")
+    : path.resolve(__dirname, "../../../../Files/icons");
 
-app.use("/static/icons", express.static(iconsDir, {
-  maxAge: "7d",
-  immutable: true,
-}));
-
+app.use(
+  "/static/icons",
+  express.static(iconsDir, {
+    maxAge: "7d",
+    immutable: true,
+  }),
+);
 
 app.use(async (req, res, next) => {
   try {

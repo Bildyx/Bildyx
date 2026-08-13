@@ -9,6 +9,7 @@ import { jobs } from "./jobs";
 import { job_ads } from "./job_ads";
 import { job_ads_skills } from "./job_ads_skills";
 import { subjects } from "./subjects";
+import { subject_categories } from "./subject_categories";
 import { skills } from "./skills";
 import { organizations } from "./organizations";
 import { users } from "./users";
@@ -30,15 +31,16 @@ import { personalityAnswers } from "./personality_answers";
 import { personalityCriterionScores } from "./personality_criterion_scores";
 import { user_target_lists } from "./user_target_lists";
 import { teams } from "./teams";
-import { team_customers } from "./team_customers";
-import { team_investors } from "./team_investors";
 import { team_members } from "./team_members";
-import { team_offices } from "./team_offices";
-import { team_partners } from "./team_partners";
-import { team_photos } from "./team_photos";
 import { team_profiles } from "./team_profiles";
 import { team_subjects } from "./team_subjects";
-import { team_subsidiaries } from "./team_subsidiaries";
+import { organization_customers } from "./organization_customers";
+import { organization_investors } from "./organization_investors";
+import { organization_offices } from "./organization_offices";
+import { organization_subsidiaries } from "./organization_subsidiaries";
+import { organization_partners } from "./organization_partners";
+import { organization_photos } from "./organization_photos";
+import { target_list } from "./target_list";
 
 export const router = publicProcedure.router({
   auth,
@@ -51,8 +53,15 @@ export const router = publicProcedure.router({
   job_ads,
   job_ads_skills,
   subjects,
+  subject_categories,
   skills,
   organizations,
+  organization_customers,
+  organization_investors,
+  organization_offices,
+  organization_partners,
+  organization_photos,
+  organization_subsidiaries,
   users,
   user_sessions,
   user_profiles,
@@ -72,14 +81,9 @@ export const router = publicProcedure.router({
   personalityCriterionScores,
   user_target_lists,
   teams,
-  team_customers,
-  team_investors,
   team_members,
-  team_offices,
-  team_partners,
-  team_photos,
   team_profiles,
   team_subjects,
-  team_subsidiaries,
+  target_list,
 });
 export type Router = typeof router;

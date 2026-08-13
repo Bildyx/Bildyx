@@ -1,33 +1,38 @@
 import { getRPCClient } from "@repo/api-client";
 import type {
-  TeamPhoto,
-  PostTeamPhoto,
-  PutTeamPhoto,
-} from "@repo/models/team_photos";
+  OrganizationPhoto,
+  PostOrganizationPhoto,
+  PutOrganizationPhoto,
+} from "@repo/models/organization_photos";
 
 export class TeamPhotoService {
   private readonly rpcClient = getRPCClient("http://localhost:3000");
 
-  public async getAll(filters?: { team_id?: string }): Promise<TeamPhoto[]> {
-    return await this.rpcClient.team_photos.getAll(filters || {});
+  public async getAll(filters?: {
+    organization_id?: string;
+  }): Promise<OrganizationPhoto[]> {
+    return await this.rpcClient.organization_photos.getAll(filters || {} as any);
   }
 
-  public async getById(teamPhotoId: string): Promise<TeamPhoto> {
-    return await this.rpcClient.team_photos.getById({ teamPhotoId });
+  public async getById(organizationPhotoId: string): Promise<OrganizationPhoto> {
+    return await this.rpcClient.organization_photos.getById({ organizationPhotoId });
   }
 
-  public async create(input: PostTeamPhoto): Promise<TeamPhoto> {
-    return await this.rpcClient.team_photos.create(input);
+  public async create(input: PostOrganizationPhoto): Promise<OrganizationPhoto> {
+    return await this.rpcClient.organization_photos.create(input);
   }
 
   public async update(
-    teamPhotoId: string,
-    input: PutTeamPhoto,
-  ): Promise<TeamPhoto> {
-    return await this.rpcClient.team_photos.update({ teamPhotoId, ...input });
+    organizationPhotoId: string,
+    input: PutOrganizationPhoto,
+  ): Promise<OrganizationPhoto> {
+    return await this.rpcClient.organization_photos.update({
+      organizationPhotoId,
+      ...input,
+    });
   }
 
-  public async delete(teamPhotoId: string): Promise<void> {
-    await this.rpcClient.team_photos.delete({ teamPhotoId });
+  public async delete(organizationPhotoId: string): Promise<void> {
+    await this.rpcClient.organization_photos.delete({ organizationPhotoId });
   }
 }

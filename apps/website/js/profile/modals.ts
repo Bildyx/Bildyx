@@ -10,11 +10,10 @@ import {
   cityService,
   countryService,
 } from "./services";
-import { $ } from "../helpers";
+import { $, toast } from "../helpers";
 import {
   updateProfileMetaSummary,
   scheduleAutosave,
-  showToast,
   escapeHtml,
 } from "../profile";
 import { alignCardsHeight } from "./rendering";
@@ -39,14 +38,14 @@ export const SLOT_MAPPING: Record<string, SlotConfig> = {
     subProp: "subtype",
     toastSuccess: "Organisation card updated!",
   },
-  "product-card": {
+  "subject-card": {
     title: "Select a Product / Service",
     placeholder: "Search for a product or service...",
     searchEndpoint: "/subjects",
-    cardEndpointPrefix: "/cards/product/",
+    cardEndpointPrefix: "/cards/subject/",
     displayProp: "name",
     subProp: "category",
-    toastSuccess: "Product card updated!",
+    toastSuccess: "Subject card updated!",
   },
   "role-card": {
     title: "Select a Role / Position",
@@ -143,7 +142,7 @@ export async function fetchCardHtml(
 ): Promise<string> {
   if (cardSlot === "company-card" || cardSlot === "university-card") {
     return await cardService.getOrganization(entityId);
-  } else if (cardSlot === "product-card" || cardSlot === "brand-card") {
+  } else if (cardSlot === "subject-card" || cardSlot === "brand-card") {
     return await cardService.getSubject(entityId);
   } else if (cardSlot === "role-card") {
     return await cardService.getJob(entityId);
@@ -286,7 +285,7 @@ export async function openLanguageModal(
         overlay?.querySelector("#langSelect") as HTMLSelectElement | null
       )?.value;
       if (!lang) {
-        showToast("Please select a language.", "error");
+        toast.error("Please select a language.");
         return;
       }
       const level =
@@ -370,7 +369,7 @@ export async function openSkillModal(onConfirm: (skillName: string) => void) {
     const skill = (overlay!.querySelector("#skillSelect") as HTMLSelectElement)
       .value;
     if (!skill) {
-      showToast("Please select a skill.", "error");
+      toast.error("Please select a skill.");
       return;
     }
     closeSkillModal();
@@ -527,7 +526,7 @@ export async function selectOrganization(orgId: string) {
 
   if (!slotToUpdate) {
     console.error("Erreur : Aucun emplacement (slot) valide n'a été trouvé.");
-    showToast("Error: slot not found.", "error");
+    toast.error("Error: slot not found.");
     closeOrgModal();
     return;
   }
@@ -537,7 +536,7 @@ export async function selectOrganization(orgId: string) {
 
   targetSlotForModal = null;
   closeOrgModal();
-  showToast("Loading card...");
+  toast.info("Loading card...");
 
   try {
     const entryCard = slotToUpdate.closest(".entry-card");
@@ -620,12 +619,12 @@ export async function selectOrganization(orgId: string) {
     }
 
     await fetchAndRenderCardSlot(slotToUpdate, slotType, orgId);
-    showToast(config.toastSuccess);
+    toast.success(config.toastSuccess);
     updateProfileMetaSummary();
     scheduleAutosave();
   } catch (err) {
     console.error("Erreur sélection organisation :", err);
-    showToast("Failed to update the card.", "error");
+    toast.error("Failed to update the card.");
   }
 }
 
@@ -649,7 +648,7 @@ export async function resolveAndSetSlotMetadata(
           }
         }
       }
-    } else if (slotType === "product-card" || slotType === "brand-card") {
+    } else if (slotType === "subject-card" || slotType === "brand-card") {
       const subj = await subjectService.getById(entityId);
       if (subj) slot.dataset.entityName = subj.name;
     } else if (slotType === "role-card") {
@@ -680,8 +679,8 @@ export async function fetchAndRenderCardSlot(
   await resolveAndSetSlotMetadata(slotToUpdate, slotType, entityId);
 
   if (slotType === "company-card") slotToUpdate.dataset.orgId = entityId;
-  else if (slotType === "product-card" || slotType === "brand-card")
-    slotToUpdate.dataset.productId = entityId;
+  else if (slotType === "subject-card" || slotType === "brand-card")
+    slotToUpdate.dataset.subjectId = entityId;
   else if (slotType === "role-card") slotToUpdate.dataset.roleId = entityId;
   else if (slotType === "client-card")
     slotToUpdate.dataset.industryId = entityId;
@@ -706,8 +705,7 @@ export async function fetchAndRenderCardSlot(
       slotToUpdate.classList.remove("is-loading");
       let placeholderText = "Backend Slot";
       if (slotType === "company-card") placeholderText = "Company card";
-      else if (slotType === "product-card")
-        placeholderText = "Product/Service card";
+      else if (slotType === "subject-card") placeholderText = "Subject card";
       else if (slotType === "role-card") placeholderText = "Role card";
       else if (slotType === "brand-card") placeholderText = "Brand card";
       else if (slotType === "client-card")
@@ -778,8 +776,7 @@ export async function fetchAndRenderCardSlot(
     slotToUpdate.classList.remove("is-loading");
     let placeholderText = "Backend Slot";
     if (slotType === "company-card") placeholderText = "Company card";
-    else if (slotType === "product-card")
-      placeholderText = "Product/Service card";
+    else if (slotType === "subject-card") placeholderText = "Subject card";
     else if (slotType === "role-card") placeholderText = "Role card";
     else if (slotType === "brand-card") placeholderText = "Brand card";
     else if (slotType === "client-card")

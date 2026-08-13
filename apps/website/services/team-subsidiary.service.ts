@@ -1,39 +1,39 @@
 import { getRPCClient } from "@repo/api-client";
 import type {
-  TeamSubsidiary,
-  PostTeamSubsidiary,
-  PutTeamSubsidiary,
-} from "@repo/models/team_subsidiaries";
+  OrganizationSubsidiary,
+  PostOrganizationSubsidiary,
+  PutOrganizationSubsidiary,
+} from "@repo/models/organization_subsidiaries";
 
 export class TeamSubsidiaryService {
   private readonly rpcClient = getRPCClient("http://localhost:3000");
 
   public async getAll(filters?: {
-    team_id?: string;
     organization_id?: string;
-  }): Promise<TeamSubsidiary[]> {
-    return await this.rpcClient.team_subsidiaries.getAll(filters || {});
+    subsidiary_id?: string;
+  }): Promise<OrganizationSubsidiary[]> {
+    return await this.rpcClient.organization_subsidiaries.getAll(filters || {} as any);
   }
 
-  public async getById(teamSubsidiaryId: string): Promise<TeamSubsidiary> {
-    return await this.rpcClient.team_subsidiaries.getById({ teamSubsidiaryId });
+  public async getById(organizationSubsidiaryId: string): Promise<OrganizationSubsidiary> {
+    return await this.rpcClient.organization_subsidiaries.getById({ organizationSubsidiaryId });
   }
 
-  public async create(input: PostTeamSubsidiary): Promise<TeamSubsidiary> {
-    return await this.rpcClient.team_subsidiaries.create(input);
+  public async create(input: PostOrganizationSubsidiary): Promise<OrganizationSubsidiary> {
+    return await this.rpcClient.organization_subsidiaries.create(input);
   }
 
   public async update(
-    teamSubsidiaryId: string,
-    input: PutTeamSubsidiary,
-  ): Promise<TeamSubsidiary> {
-    return await this.rpcClient.team_subsidiaries.update({
-      teamSubsidiaryId,
+    organizationSubsidiaryId: string,
+    input: PutOrganizationSubsidiary,
+  ): Promise<OrganizationSubsidiary> {
+    return await this.rpcClient.organization_subsidiaries.update({
+      organizationSubsidiaryId,
       ...input,
     });
   }
 
-  public async delete(teamSubsidiaryId: string): Promise<void> {
-    await this.rpcClient.team_subsidiaries.delete({ teamSubsidiaryId });
+  public async delete(organizationSubsidiaryId: string): Promise<void> {
+    await this.rpcClient.organization_subsidiaries.delete({ organizationSubsidiaryId });
   }
 }

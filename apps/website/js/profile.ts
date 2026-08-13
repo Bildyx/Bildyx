@@ -13,30 +13,19 @@ import {
 } from "./profile/modals";
 import { loadUserData } from "./profile/rendering";
 import { saveProfile } from "./profile/saving";
-import { $, $$ } from "./helpers";
+import { $, $$, toast } from "./helpers";
 import { profileService } from "./profile/services";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_ANON_KEY!,
+);
 
 const panels = ["profilePanel", "testsPanel", "jobsPanel", "settingsPanel"];
 
 let toastTimer: number | null = null;
 let autosaveTimer: number | null = null;
-
-// ─── Toast ────────────────────────────────────────────────
-export function showToast(message: string, type = "default") {
-  let toast = $(".profile-toast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.className = "profile-toast";
-    document.body.appendChild(toast);
-  }
-  toast.textContent = message;
-  toast.className = `profile-toast ${type === "error" ? "is-error" : ""}`;
-  toast.classList.add("is-visible");
-  if (toastTimer) window.clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => {
-    toast.classList.remove("is-visible");
-  }, 2400);
-}
 
 // ─── Management des Panneaux ─────────────────────────────
 export function showPanel(panelId: string) {
@@ -92,7 +81,7 @@ export function toggleEdit(button: HTMLElement) {
   button.classList.toggle("is-editing", isEditing);
   button.textContent = isEditing ? "✓" : "✎";
   setAreaEditable(target, isEditing);
-  showToast(isEditing ? "Editing enabled." : "Changes saved locally.");
+  toast.info(isEditing ? "Editing enabled." : "Changes saved locally.");
 }
 
 // ─── Auto-save ─────────────────────────────────────────────
@@ -133,7 +122,7 @@ export function addChip(containerId: string) {
   const current = container.querySelectorAll(".chip").length;
 
   if (current >= limit) {
-    showToast(`Maximum ${limit} items.`);
+    toast.warning(`Maximum ${limit} items.`);
     return;
   }
 
@@ -156,7 +145,7 @@ export function addChip(containerId: string) {
           label.toLowerCase(),
       );
       if (exists) {
-        showToast("Already added!", "error");
+        toast.error("Already added!");
         return;
       }
 
@@ -165,7 +154,7 @@ export function addChip(containerId: string) {
       chip.dataset.unsaved = "true";
       chip.innerHTML = `${escapeHtml(label)} <button type="button" aria-label="Remove ${escapeHtml(label)}">×</button>`;
       container.appendChild(chip);
-      showToast("Language added.");
+      toast.success("Language added.");
       updateProfileMetaSummary();
       scheduleAutosave();
     });
@@ -178,7 +167,7 @@ export function addChip(containerId: string) {
           skillName.toLowerCase(),
       );
       if (exists) {
-        showToast("Already added!", "error");
+        toast.error("Already added!");
         return;
       }
 
@@ -187,7 +176,7 @@ export function addChip(containerId: string) {
       chip.dataset.unsaved = "true";
       chip.innerHTML = `${escapeHtml(skillName)} <button type="button" aria-label="Remove ${escapeHtml(skillName)}">×</button>`;
       container.appendChild(chip);
-      showToast("Skill added.");
+      toast.success("Skill added.");
       updateProfileMetaSummary();
       scheduleAutosave();
     });
@@ -203,7 +192,7 @@ export function addChip(containerId: string) {
         label.toLowerCase(),
     );
     if (exists) {
-      showToast("Already added!", "error");
+      toast.error("Already added!");
       return;
     }
 
@@ -212,7 +201,7 @@ export function addChip(containerId: string) {
     chip.dataset.unsaved = "true";
     chip.innerHTML = `${escapeHtml(label)} <button type="button" aria-label="Remove ${escapeHtml(label)}">×</button>`;
     container.appendChild(chip);
-    showToast("Item added.");
+    toast.success("Item added.");
     updateProfileMetaSummary();
     scheduleAutosave();
   }
@@ -232,7 +221,7 @@ export function removeChip(button: HTMLElement) {
       }
     }
     chip.remove();
-    showToast("Removed.");
+    toast.success("Removed.");
     scheduleAutosave();
   }
 }
@@ -247,7 +236,7 @@ export function toggleSelectableSkill(button: HTMLElement) {
   ).length;
 
   if (!isActive && activeCount >= 5) {
-    showToast("Maximum 5 skills allowed.", "error");
+    toast.error("Maximum 5 skills allowed.");
     return;
   }
 
@@ -312,12 +301,8 @@ export function addExperience() {
                 <p class="word-counter">0/60 words</p>
                 <div class="backend-grid backend-grid--three">
                     <section><h4>Company</h4><div class="backend-slot" data-card-slot="company-card">Company card</div></section>
-                    <section><h4>Product/Service</h4><div class="backend-slot" data-card-slot="product-card">Product/Service card</div></section>
+                    <section><h4>Product/Service</h4><div class="backend-slot" data-card-slot="subject-card">Product/Service card</div></section>
                     <section><h4>Role</h4><div class="backend-slot" data-card-slot="role-card">Role card</div></section>
-                </div>
-                <div class="backend-grid backend-grid--two">
-                    <section><h4>Brands</h4><button class="inline-link" type="button">Add brand (optional)...</button><div class="backend-slot backend-slot--small" data-card-slot="brand-card">Brand card</div></section>
-                    <section><h4>Client/Industry</h4><button class="inline-link" type="button">Add client/industry...</button><div class="backend-slot backend-slot--small" data-card-slot="client-card">Client/Industry card</div></section>
                 </div>
             </div>
         `;
@@ -342,7 +327,7 @@ export function addExperience() {
     });
   }
 
-  showToast("Experience added.");
+  toast.success("Experience added.");
 }
 
 // ─── Add Education Card ────────────────────────────────────
@@ -397,7 +382,7 @@ export function addEducation() {
     txt.addEventListener("input", () => updateWordCounter(txt));
   }
 
-  showToast("Education added.");
+  toast.success("Education added.");
 }
 
 // ─── Add Certification Card ────────────────────────────────
@@ -441,7 +426,7 @@ export function addCertification() {
             </div>
         `;
   grid.appendChild(article);
-  showToast("Certification added.");
+  toast.success("Certification added.");
 }
 
 // ─── Entry collapse and delete triggers ───────────────────
@@ -477,7 +462,7 @@ export function removeEntry(button: HTMLElement) {
   entry.remove();
   renumberExperiences();
   updateProfileMetaSummary();
-  showToast("Item removed.");
+  toast.success("Item removed.");
   scheduleAutosave();
 }
 
@@ -544,16 +529,10 @@ export function updateProfileMetaSummary() {
         : "—";
   }
 
-  const products = [
-    ...getUniqueValues(
-      '.backend-slot[data-card-slot="product-card"].is-filled',
-      "entityName",
-    ),
-    ...getUniqueValues(
-      '.backend-slot[data-card-slot="brand-card"].is-filled',
-      "entityName",
-    ),
-  ];
+  const products = getUniqueValues(
+    '.backend-slot[data-card-slot="subject-card"].is-filled',
+    "entityName",
+  );
   const uniqueProducts = Array.from(new Set(products));
   if (productsSpan) {
     productsSpan.innerHTML =
@@ -632,32 +611,50 @@ export function updateProfileMetaSummary() {
       const file = avatarInput.files && avatarInput.files[0];
       if (!file) return;
 
-      const session = getSession();
-      if (!session || !session.userId) {
-        showToast("Error: no active session.", "error");
+      const profileId = currentProfile?.id;
+      if (!profileId) {
+        toast.error("Error: profile not loaded yet.");
         return;
       }
 
-      showToast("Uploading avatar...");
+      toast.info("Uploading avatar...");
 
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result as string;
-        try {
-          await profileService.update(session.userId, {
-            avatar_url: base64,
+      try {
+        const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
           });
-          profileAvatar.style.backgroundImage = `url("${base64}")`;
-          profileAvatar.style.backgroundSize = "cover";
-          profileAvatar.style.backgroundPosition = "center";
-          profileAvatar.textContent = "";
-          showToast("Profile avatar updated successfully!");
-        } catch (err) {
-          console.error("Failed to update profile avatar:", err);
-          showToast("Failed to upload avatar.", "error");
+
+        if (uploadError) {
+          toast.error("Failed to upload avatar image.");
+          console.error("Upload error:", uploadError);
+          return;
         }
-      };
-      reader.readAsDataURL(file);
+
+        const { data: urlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(uploadData.path);
+
+        const url = urlData.publicUrl;
+
+        await profileService.update(profileId, {
+          avatar_url: url,
+        });
+
+        profileAvatar.style.backgroundImage = `url("${url}")`;
+        profileAvatar.style.backgroundSize = "cover";
+        profileAvatar.style.backgroundPosition = "center";
+        profileAvatar.textContent = "";
+        toast.success("Profile avatar updated successfully!");
+      } catch (err) {
+        console.error("Failed to update profile avatar:", err);
+        toast.error("Failed to upload avatar.");
+      }
     });
   }
 })();
@@ -741,7 +738,7 @@ document.addEventListener("click", (e) => {
       const avatarEl = $("#profileAvatar");
       if (avatarEl)
         avatarEl.textContent = initials.trim().substring(0, 3).toUpperCase();
-      showToast("Avatar updated.");
+      toast.success("Avatar updated.");
     }
     return;
   }
@@ -784,7 +781,7 @@ document.addEventListener("click", (e) => {
   if (slot) {
     if (target.classList.contains("slot-clear-btn")) {
       delete slot.dataset.orgId;
-      delete slot.dataset.productId;
+      delete slot.dataset.subjectId;
       delete slot.dataset.roleId;
       delete slot.dataset.industryId;
       delete slot.dataset.universityId;
@@ -797,8 +794,7 @@ document.addEventListener("click", (e) => {
       const slotType = slot.dataset.cardSlot;
       let placeholderText = "Backend Slot";
       if (slotType === "company-card") placeholderText = "Company card";
-      else if (slotType === "product-card")
-        placeholderText = "Product/Service card";
+      else if (slotType === "subject-card") placeholderText = "Subject card";
       else if (slotType === "role-card") placeholderText = "Role card";
       else if (slotType === "brand-card") placeholderText = "Brand card";
       else if (slotType === "client-card")
@@ -868,7 +864,7 @@ document.addEventListener("change", (e) => {
         roundPlace.style.backgroundImage = `url("${reader.result}")`;
         roundPlace.style.backgroundSize = "cover";
         roundPlace.style.backgroundPosition = "center";
-        showToast("Experience image updated!");
+        toast.success("Experience image updated!");
         updateProfileMetaSummary();
         scheduleAutosave();
       }

@@ -36,7 +36,7 @@ export const teams = {
       if (input.visibility) {
         query = query.where("visibility", "=", input.visibility as any);
       }
-      return await query.selectAll().execute() as any;
+      return (await query.selectAll().execute()) as any;
     }),
 
   getById: publicProcedure
@@ -79,7 +79,9 @@ export const teams = {
         .returningAll()
         .executeTakeFirst();
       if (!team) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create team" });
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to create team",
+        });
       }
       return team as any;
     }),
@@ -117,17 +119,24 @@ export const teams = {
     .input(DeleteTeamSchema)
     .output(z.void())
     .handler(async ({ input }) => {
-      const existing = await database
-        .selectFrom("teams")
-        .selectAll()
-        .where("id", "=", input.teamId)
-        .executeTakeFirst();
-      if (!existing) {
-        throw new ORPCError("NOT_FOUND", { message: "Team not found" });
+      try {
+        const existing = await database
+          .selectFrom("teams")
+          .selectAll()
+          .where("id", "=", input.teamId)
+          .executeTakeFirst();
+        if (!existing) {
+          throw new ORPCError("NOT_FOUND", { message: "Team not found" });
+        }
+        await database
+          .deleteFrom("teams")
+          .where("id", "=", input.teamId)
+          .execute();
+      } catch (error) {
+        console.error("Error deleting team:", error);
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to delete team",
+        });
       }
-      await database
-        .deleteFrom("teams")
-        .where("id", "=", input.teamId)
-        .execute();
     }),
 };
