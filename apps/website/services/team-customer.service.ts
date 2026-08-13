@@ -1,39 +1,47 @@
 import { getRPCClient } from "@repo/api-client";
 import type {
-  TeamCustomer,
-  PostTeamCustomer,
-  PutTeamCustomer,
-} from "@repo/models/team_customers";
+  OrganizationCustomer,
+  PostOrganizationCustomer,
+  PutOrganizationCustomer,
+} from "@repo/models/organization_customers";
 
 export class TeamCustomerService {
   private readonly rpcClient = getRPCClient("http://localhost:3000");
 
   public async getAll(filters?: {
-    team_id?: string;
     organization_id?: string;
-  }): Promise<TeamCustomer[]> {
-    return await this.rpcClient.team_customers.getAll(filters || {});
+    customer_id?: string;
+  }): Promise<OrganizationCustomer[]> {
+    return await this.rpcClient.organization_customers.getAll(filters || {} as any);
   }
 
-  public async getById(teamCustomerId: string): Promise<TeamCustomer> {
-    return await this.rpcClient.team_customers.getById({ teamCustomerId });
+  public async getById(
+    organizationCustomerId: string,
+  ): Promise<OrganizationCustomer> {
+    return await this.rpcClient.organization_customers.getById({
+      organizationCustomerId,
+    });
   }
 
-  public async create(input: PostTeamCustomer): Promise<TeamCustomer> {
-    return await this.rpcClient.team_customers.create(input);
+  public async create(
+    input: PostOrganizationCustomer,
+  ): Promise<OrganizationCustomer> {
+    return await this.rpcClient.organization_customers.create(input);
   }
 
   public async update(
-    teamCustomerId: string,
-    input: PutTeamCustomer,
-  ): Promise<TeamCustomer> {
-    return await this.rpcClient.team_customers.update({
-      teamCustomerId,
+    organizationCustomerId: string,
+    input: PutOrganizationCustomer,
+  ): Promise<OrganizationCustomer> {
+    return await this.rpcClient.organization_customers.update({
+      organizationCustomerId,
       ...input,
     });
   }
 
-  public async delete(teamCustomerId: string): Promise<void> {
-    await this.rpcClient.team_customers.delete({ teamCustomerId });
+  public async delete(organizationCustomerId: string): Promise<void> {
+    await this.rpcClient.organization_customers.delete({
+      organizationCustomerId,
+    });
   }
 }

@@ -676,7 +676,9 @@ button:disabled {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f4d18b, #7185b2);
+  background: linear-gradient(135deg, #94a3b8, #475569);
+  display: grid;
+  place-items: center;
 }
 
 .ca-chip.product span {
@@ -1881,13 +1883,101 @@ body.modal-open {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
   animation: ca-shimmer 1.5s infinite;
 }
 
 @keyframes ca-shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.ca-skeleton-text {
+  height: 16px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.ca-skeleton-text::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: ca-shimmer 1.5s infinite;
+}
+
+.ca-skeleton-chip {
+  width: 90px;
+  height: 28px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.ca-skeleton-chip::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: ca-shimmer 1.5s infinite;
+}
+
+.ca-skeleton-card {
+  height: 260px;
+  width: 100%;
+  background: #e2e8f0;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ca-skeleton-card::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: ca-shimmer 1.5s infinite;
 }
 
 .ca-empty-photos {
@@ -1941,12 +2031,68 @@ body.modal-open {
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   font-size: 14px;
-  transition: background 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    transform 0.1s;
 }
 
 .ca-card-delete-btn:hover {
   background: rgb(185, 28, 28);
   transform: scale(1.05);
+}
+
+/* ============================================================
+   HORIZONTAL CAROUSEL FOR ALL GROUPS
+   ============================================================ */
+.ca-carousel {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  gap: 16px !important;
+  width: 100% !important;
+  padding: 8px 4px !important;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar */
+.ca-carousel::-webkit-scrollbar {
+  height: 6px;
+}
+.ca-carousel::-webkit-scrollbar-track {
+  background: rgba(36, 71, 244, 0.05);
+  border-radius: 99px;
+}
+.ca-carousel::-webkit-scrollbar-thumb {
+  background: rgba(36, 71, 244, 0.2);
+  border-radius: 99px;
+}
+.ca-carousel::-webkit-scrollbar-thumb:hover {
+  background: rgba(36, 71, 244, 0.4);
+}
+
+/* Specific flex basis to prevent shrinking */
+.ca-photos-grid.ca-carousel .ca-photo-item,
+.ca-photos-grid.ca-carousel .ca-photo-skeleton {
+  flex: 0 0 160px !important;
+  width: 160px !important;
+  margin: 0 !important;
+}
+
+.ca-org-grid.ca-carousel .ca-card-slot {
+  flex: 0 0 280px !important;
+  width: 280px !important;
+  min-height: 380px !important;
+  margin: 0 !important;
+}
+
+#caPortfolio.ca-carousel .ca-card-slot {
+  flex: 0 0 280px !important;
+  width: 280px !important;
+  min-height: 260px !important;
+  margin: 0 !important;
 }

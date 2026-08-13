@@ -1,39 +1,39 @@
 import { getRPCClient } from "@repo/api-client";
 import type {
-  TeamInvestor,
-  PostTeamInvestor,
-  PutTeamInvestor,
-} from "@repo/models/team_investors";
+  OrganizationInvestor,
+  PostOrganizationInvestor,
+  PutOrganizationInvestor,
+} from "@repo/models/organization_investors";
 
 export class TeamInvestorService {
   private readonly rpcClient = getRPCClient("http://localhost:3000");
 
   public async getAll(filters?: {
-    team_id?: string;
     organization_id?: string;
-  }): Promise<TeamInvestor[]> {
-    return await this.rpcClient.team_investors.getAll(filters || {});
+    investor_id?: string;
+  }): Promise<OrganizationInvestor[]> {
+    return await this.rpcClient.organization_investors.getAll(filters || {} as any);
   }
 
-  public async getById(teamInvestorId: string): Promise<TeamInvestor> {
-    return await this.rpcClient.team_investors.getById({ teamInvestorId });
+  public async getById(organizationInvestorId: string): Promise<OrganizationInvestor> {
+    return await this.rpcClient.organization_investors.getById({ organizationInvestorId });
   }
 
-  public async create(input: PostTeamInvestor): Promise<TeamInvestor> {
-    return await this.rpcClient.team_investors.create(input);
+  public async create(input: PostOrganizationInvestor): Promise<OrganizationInvestor> {
+    return await this.rpcClient.organization_investors.create(input);
   }
 
   public async update(
-    teamInvestorId: string,
-    input: PutTeamInvestor,
-  ): Promise<TeamInvestor> {
-    return await this.rpcClient.team_investors.update({
-      teamInvestorId,
+    organizationInvestorId: string,
+    input: PutOrganizationInvestor,
+  ): Promise<OrganizationInvestor> {
+    return await this.rpcClient.organization_investors.update({
+      organizationInvestorId,
       ...input,
     });
   }
 
-  public async delete(teamInvestorId: string): Promise<void> {
-    await this.rpcClient.team_investors.delete({ teamInvestorId });
+  public async delete(organizationInvestorId: string): Promise<void> {
+    await this.rpcClient.organization_investors.delete({ organizationInvestorId });
   }
 }

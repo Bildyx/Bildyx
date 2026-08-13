@@ -702,6 +702,38 @@ export interface Jobs {
   tools_and_tech: string[] | null;
 }
 
+export interface OrganizationCustomers {
+  customer_id: string | null;
+  id: Generated<string>;
+  organization_id: string | null;
+}
+
+export interface OrganizationInvestors {
+  id: Generated<string>;
+  investor_id: string | null;
+  organization_id: string | null;
+}
+
+export interface OrganizationOffices {
+  city_id: string;
+  id: Generated<string>;
+  organization_id: string | null;
+  type: string;
+}
+
+export interface OrganizationPartners {
+  id: Generated<string>;
+  organization_id: string | null;
+  partner_id: string | null;
+}
+
+export interface OrganizationPhotos {
+  id: Generated<string>;
+  name: string | null;
+  organization_id: string;
+  url: string;
+}
+
 export interface Organizations {
   authority: string | null;
   avatar_url: string | null;
@@ -737,6 +769,12 @@ export interface Organizations {
   type1: string | null;
   type2: string | null;
   undergraduates: number | null;
+}
+
+export interface OrganizationSubsidiaries {
+  id: Generated<string>;
+  organization_id: string | null;
+  subsidiary_id: string | null;
 }
 
 export interface PersonalityAnswers {
@@ -962,18 +1000,6 @@ export interface Subjects {
   website_url: string | null;
 }
 
-export interface TeamCustomers {
-  id: Generated<string>;
-  organization_id: string | null;
-  team_id: string | null;
-}
-
-export interface TeamInvestors {
-  id: Generated<string>;
-  organization_id: string | null;
-  team_id: string | null;
-}
-
 export interface TeamMembers {
   fullname: string;
   id: Generated<string>;
@@ -981,25 +1007,6 @@ export interface TeamMembers {
   job_id: string;
   profile_image: string | null;
   team_id: string | null;
-}
-
-export interface TeamOffices {
-  city_id: string;
-  id: Generated<string>;
-  type: string;
-}
-
-export interface TeamPartners {
-  id: Generated<string>;
-  organization_id: string | null;
-  team_id: string | null;
-}
-
-export interface TeamPhotos {
-  id: Generated<string>;
-  name: string | null;
-  team_id: string;
-  url: string;
 }
 
 export interface TeamProfiles {
@@ -1030,11 +1037,6 @@ export interface TeamSubjects {
   id: Generated<string>;
   status: Teamsubjectstatus;
   subject_id: string;
-}
-
-export interface TeamSubsidiaries {
-  id: Generated<string>;
-  organization_id: string | null;
   team_id: string | null;
 }
 
@@ -1210,6 +1212,12 @@ export interface DB {
   job_ad_skills: JobAdSkills;
   job_ads: JobAds;
   jobs: Jobs;
+  organization_customers: OrganizationCustomers;
+  organization_investors: OrganizationInvestors;
+  organization_offices: OrganizationOffices;
+  organization_partners: OrganizationPartners;
+  organization_photos: OrganizationPhotos;
+  organization_subsidiaries: OrganizationSubsidiaries;
   organizations: Organizations;
   personality_answers: PersonalityAnswers;
   personality_criteria: PersonalityCriteria;
@@ -1231,15 +1239,9 @@ export interface DB {
   "storage.vector_indexes": StorageVectorIndexes;
   StudyFields: StudyFields;
   subjects: Subjects;
-  team_customers: TeamCustomers;
-  team_investors: TeamInvestors;
   team_members: TeamMembers;
-  team_offices: TeamOffices;
-  team_partners: TeamPartners;
-  team_photos: TeamPhotos;
   team_profiles: TeamProfiles;
   team_subjects: TeamSubjects;
-  team_subsidiaries: TeamSubsidiaries;
   teams: Teams;
   user_certifications: UserCertifications;
   user_education_fields: UserEducationFields;

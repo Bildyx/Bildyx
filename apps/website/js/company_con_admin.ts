@@ -14,18 +14,25 @@ import { CardService } from "../services/card.service";
 import { getSession, toast } from "./helpers";
 import { Team } from "@repo/models/teams";
 import { TeamMember } from "@repo/models/team_members";
-import { TeamOffice } from "@repo/models/team_offices";
+import {
+  PostOrganizationOffice,
+  OrganizationOffice,
+} from "@repo/models/organization_offices";
 import { TeamProfile } from "@repo/models/team_profiles";
-import { PostTeamPhoto, TeamPhoto } from "@repo/models/team_photos";
-import { TeamPartner } from "@repo/models/team_partners";
-import { TeamCustomer } from "@repo/models/team_customers";
-import { TeamInvestor } from "@repo/models/team_investors";
-import { TeamSubsidiary } from "@repo/models/team_subsidiaries";
+import { OrganizationPhoto } from "@repo/models/organization_photos";
+import { OrganizationPartner } from "@repo/models/organization_partners";
+import { OrganizationCustomer } from "@repo/models/organization_customers";
+import { OrganizationInvestor } from "@repo/models/organization_investors";
+import { OrganizationSubsidiary } from "@repo/models/organization_subsidiaries";
 import { UserProfile } from "@repo/models/user_profiles";
 import { CityListItem } from "@repo/models/cities";
 import { Job } from "@repo/models/jobs";
 import { JobService } from "../services/job.service";
 import { createClient } from "@supabase/supabase-js";
+import { TeamSubjectService } from "../services/team-subject.service";
+import { SubjectService } from "../services/subject.service";
+import { TeamSubject } from "@repo/models/team_subjects";
+import { Subject } from "@repo/models/subjects";
 
 // ─── Services ────────────────────────────────────────────────────────────────
 const teamService = new TeamService();
@@ -42,18 +49,22 @@ const teamInvestorService = new TeamInvestorService();
 const teamSubsidiaryService = new TeamSubsidiaryService();
 const cityService = new CityService();
 const jobService = new JobService();
+const teamSubjectService = new TeamSubjectService();
+const subjectService = new SubjectService();
 
 let teams: Team[] = [];
 let members: TeamMember[] = [];
-let offices: TeamOffice[] = [];
+let offices: OrganizationOffice[] = [];
 let teamProfiles: Record<string, TeamProfile> = {};
-let photos: TeamPhoto[] = [];
-let partners: TeamPartner[] = [];
-let customers: TeamCustomer[] = [];
-let investors: TeamInvestor[] = [];
-let subsidiaries: TeamSubsidiary[] = [];
+let photos: OrganizationPhoto[] = [];
+let partners: OrganizationPartner[] = [];
+let customers: OrganizationCustomer[] = [];
+let investors: OrganizationInvestor[] = [];
+let subsidiaries: OrganizationSubsidiary[] = [];
 let cities: CityListItem[] = [];
 let jobs: Job[] = [];
+let teamSubjects: TeamSubject[] = [];
+let allSubjects: Subject[] = [];
 
 let activeTeamId: string | null = null;
 let mode: "people" | "operate" = "people";
@@ -92,6 +103,36 @@ const DEFAULT_AVATAR = `data:image/svg+xml,${encodeURIComponent(`
 function confirmDelete() {
   return window.confirm("Are you sure you want to delete this item?");
 }
+
+async function withLoading(
+  btn: HTMLButtonElement,
+  action: () => Promise<void>,
+) {
+  if (btn.disabled) return;
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = "0.6";
+  btn.style.cursor = "not-allowed";
+  btn.innerHTML = `<span class="ca-spinner" style="display:inline-block; width:12px; height:12px; border:2px solid currentColor; border-radius:50%; border-top-color:transparent; animation:ca-spin 0.8s linear infinite; margin-right:6px; vertical-align:middle;"></span>Loading...`;
+
+  try {
+    await action();
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = "";
+    btn.style.cursor = "";
+    btn.innerHTML = originalText;
+  }
+}
+
+// Inject CSS style for ca-spin once
+const style = document.createElement("style");
+style.textContent = `
+@keyframes ca-spin {
+  to { transform: rotate(360deg); }
+}
+`;
+document.head.appendChild(style);
 
 function activeTeam() {
   return teams.find((t) => t.id === activeTeamId) || teams[0] || null;
@@ -163,6 +204,7 @@ function renderTabs() {
         <button class="${team.id === activeTeamId ? "is-active" : ""}" data-id="${esc(team.id)}">
           ${esc(team.name)}
           <span class="ca-item-actions">
+            <span class="ca-item-action" data-edit-team-quick="${esc(team.id)}">✎</span>
             <span class="ca-item-action danger" data-delete-team-quick="${esc(team.id)}">×</span>
           </span>
         </button>
@@ -175,7 +217,17 @@ function renderTabs() {
       if ((e.target as Element).closest(".ca-item-actions")) return;
       activeTeamId = btn.dataset.id!;
       render();
-      open("edit-team", { teamId: activeTeamId });
+    });
+  });
+
+  el.querySelectorAll<HTMLElement>("[data-edit-team-quick]").forEach((pencil) => {
+    pencil.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const teamId = pencil.dataset.editTeamQuick!;
+      activeTeamId = teamId;
+      render();
+      open("edit-team", { teamId });
     });
   });
 
@@ -447,7 +499,7 @@ function renderMembers() {
 
 function renderChips(
   selector: string,
-  arr: Array<{ id: string }>,
+  arr: Array<{ id: string; name?: string }>,
   type?: string,
 ) {
   const el = $(selector);
@@ -455,17 +507,41 @@ function renderChips(
   const editKind = selector === "#caOffices" ? "office" : "product";
 
   el.innerHTML = (arr || [])
-    .map(
-      (item) => `
+    .map((item) => {
+      let text = "";
+      let isMain = false;
+      let spanContent = "";
+      if (selector === "#caOffices") {
+        const officeObj = offices.find((o) => o.id === item.id);
+        const cityObj = cities.find((c) => c.id === officeObj?.city_id);
+        if (cityObj) {
+          text = `${cityObj.name}, ${cityObj.country_name}`;
+        } else {
+          text = "Office";
+        }
+        const teamObj = activeTeam();
+        isMain =
+          teamObj !== null &&
+          officeObj !== undefined &&
+          teamObj.city_id === officeObj.city_id;
+        spanContent = '<i class="bi bi-building" style="font-size: 20px; color: #fff;"></i>';
+      } else {
+        text = item.name || "";
+      }
+
+      return `
         <div class="ca-chip ${type || ""}">
           <div class="ca-item-actions">
             <button class="ca-item-action" type="button" data-edit-${editKind}="${esc(item.id)}">✎</button>
             <button class="ca-item-action danger" type="button" data-delete-${editKind}-quick="${esc(item.id)}">×</button>
           </div>
-          <span></span>
+          <span style="${isMain ? "box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ca-blue);" : ""}">${spanContent}</span>
+          <div style="text-align: center; margin-top: 4px; font-weight: 500; font-size: 11px; color: ${
+            isMain ? "var(--ca-blue)" : "var(--ca-muted)"
+          };">${esc(text)}</div>
         </div>
-      `,
-    )
+      `;
+    })
     .join("");
 
   if (editKind === "office") {
@@ -721,11 +797,8 @@ function renderStatus() {
 
   const photoEl = $("#caPhotos");
   if (photoEl) {
-    const activeTeamPhotos = photos.filter(
-      (p) => !activeTeamId || p.team_id === activeTeamId,
-    );
-    photoEl.innerHTML = activeTeamPhotos.length
-      ? activeTeamPhotos
+    photoEl.innerHTML = photos.length
+      ? photos
           .map(
             (p) => `
             <div class="ca-photo-item">
@@ -755,10 +828,7 @@ function renderStatus() {
   }
   const photosCount = $("#caPhotosCount");
   if (photosCount) {
-    const activeTeamPhotos = photos.filter(
-      (p) => !activeTeamId || p.team_id === activeTeamId,
-    );
-    photosCount.textContent = `${activeTeamPhotos.length}/10`;
+    photosCount.textContent = `${photos.length}/10`;
   }
 
   renderOrgSections();
@@ -782,15 +852,20 @@ async function renderOrgSections() {
       continue;
     }
 
-    el.className = "ca-org-grid";
+    el.className = "ca-org-grid ca-carousel";
     el.innerHTML = arr
-      .map(
-        (item) => `
-        <div class="ca-card-slot" id="slot-${esc(item.id)}" data-org-id="${esc(item.organization_id)}">
-          <div class="ca-photo-skeleton" style="height: 100%; border-radius: 14px;"></div>
-        </div>
-      `,
-      )
+      .map((item) => {
+        const targetOrgId =
+          item.partner_id ||
+          item.customer_id ||
+          item.investor_id ||
+          item.subsidiary_id;
+        return `
+            <div class="ca-card-slot" id="slot-${esc(item.id)}" data-org-id="${esc(targetOrgId)}">
+              <div class="ca-photo-skeleton" style="height: 100%; border-radius: 14px;"></div>
+            </div>
+          `;
+      })
       .join("");
 
     arr.forEach(async (item) => {
@@ -798,7 +873,12 @@ async function renderOrgSections() {
       if (!slot) return;
 
       try {
-        const html = await cardService.getOrganization(item.organization_id);
+        const targetOrgId =
+          item.partner_id ||
+          item.customer_id ||
+          item.investor_id ||
+          item.subsidiary_id;
+        const html = await cardService.getOrganization(targetOrgId);
         slot.innerHTML = "";
 
         const iframe = document.createElement("iframe");
@@ -959,6 +1039,88 @@ async function renderParentCompany() {
   }
 }
 
+async function renderPortfolio() {
+  const el = $("#caPortfolio");
+  if (!el) return;
+
+  const activeSubs = teamSubjects.filter((ts) => ts.team_id === activeTeamId);
+
+  if (activeSubs.length === 0) {
+    el.className = "";
+    el.innerHTML = "No products or services added yet.";
+    return;
+  }
+
+  el.className = "ca-org-grid ca-carousel";
+  el.innerHTML = "";
+
+  activeSubs.forEach(async (ts) => {
+    const slot = document.createElement("div");
+    slot.className = "ca-card-slot";
+    slot.style.minHeight = "260px";
+    slot.innerHTML = `<div class="ca-photo-skeleton" style="height: 100%; border-radius: 14px;"></div>`;
+    el.appendChild(slot);
+
+    try {
+      const html = await cardService.getSubject(ts.subject_id);
+      slot.innerHTML = "";
+
+      const iframe = document.createElement("iframe");
+      iframe.className = "org-card-frame";
+      iframe.srcdoc = `<html><head><style>html,body{margin:0;padding:0;overflow:hidden;font-family:"Plus Jakarta Sans",system-ui,sans-serif}.scale-wrap{position:absolute;top:0;left:0;transform-origin:top left;width:500px}.main-card{height:100%!important;box-sizing:border-box}.footer-row{margin-top:auto!important}</style></head><body><div class="scale-wrap" id="scaleWrap">${html}</div></body></html>`;
+
+      const alignCardHeight = () => {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow?.document;
+          const wrap = doc?.getElementById("scaleWrap");
+          if (!wrap) return;
+
+          const cardWidth = 500;
+          const slotWidth = slot.clientWidth || 300;
+          const scale = slotWidth / cardWidth;
+
+          wrap.style.transform = `scale(${scale})`;
+          const rect = wrap.getBoundingClientRect();
+
+          iframe.style.height = `${rect.height}px`;
+          slot.style.minHeight = `${rect.height}px`;
+          slot.style.height = `${rect.height}px`;
+        } catch (e) {
+          console.warn("Failed to scale product iframe", e);
+        }
+      };
+
+      iframe.addEventListener("load", alignCardHeight);
+      window.addEventListener("resize", alignCardHeight);
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "ca-card-delete-btn";
+      delBtn.type = "button";
+      delBtn.innerHTML = '<i class="bi bi-trash3-fill"></i>';
+      delBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirmDelete()) return;
+        try {
+          await teamSubjectService.delete(ts.id);
+          teamSubjects = teamSubjects.filter((s) => s.id !== ts.id);
+          window.removeEventListener("resize", alignCardHeight);
+          await renderPortfolio();
+          render(); // Updates the chips too
+        } catch (err) {
+          toast.error("Failed to delete product.");
+          console.error(err);
+        }
+      });
+
+      slot.appendChild(iframe);
+      slot.appendChild(delBtn);
+    } catch (err) {
+      console.error("Failed to load product card", err);
+      slot.innerHTML = `<div style="padding: 24px; color: var(--ca-danger);">Failed to load card</div>`;
+    }
+  });
+}
+
 function render() {
   renderTabs();
   renderMembers();
@@ -966,12 +1128,21 @@ function render() {
     "#caOffices",
     offices.map((o) => ({ id: o.id || o.city_id })),
   );
-  renderChips("#caProducts", [], "product");
+  const activeTeamSubs = teamSubjects.filter(
+    (ts) => ts.team_id === activeTeamId,
+  );
+  const teamProds = activeTeamSubs.map((ts) => {
+    const s = allSubjects.find((sub) => sub.id === ts.subject_id);
+    return {
+      id: ts.id,
+      name: s ? s.name : "Product",
+    };
+  });
+  renderChips("#caProducts", teamProds, "product");
   renderProfile();
-  renderStatus();
   updateProfileButton();
   refreshEditUI();
-  renderParentCompany();
+  renderPortfolio();
 
   const logoBtn = $("#caCompanyLogoBtn");
   if (logoBtn) {
@@ -991,18 +1162,26 @@ function render() {
     }
   }
 
-  const addMemberBtn = $<HTMLButtonElement>('[data-open-modal="member"]');
-  if (addMemberBtn) {
-    const disabled = teams.length === 0;
-    addMemberBtn.disabled = disabled;
-    if (disabled) {
-      addMemberBtn.style.opacity = "0.5";
-      addMemberBtn.style.cursor = "not-allowed";
-    } else {
-      addMemberBtn.style.opacity = "";
-      addMemberBtn.style.cursor = "";
+  const disabled = teams.length === 0;
+  const buttonsToDisable = [
+    $('[data-open-modal="member"]'),
+    $('[data-open-modal="profile"]'),
+    $('[data-open-modal="product"]'),
+    $('[data-open-modal="brand"]'),
+  ];
+
+  buttonsToDisable.forEach((btn) => {
+    if (btn) {
+      (btn as HTMLButtonElement).disabled = disabled;
+      if (disabled) {
+        (btn as HTMLElement).style.opacity = "0.5";
+        (btn as HTMLElement).style.cursor = "not-allowed";
+      } else {
+        (btn as HTMLElement).style.opacity = "";
+        (btn as HTMLElement).style.cursor = "";
+      }
     }
-  }
+  });
 }
 
 // ─── Modal helpers ────────────────────────────────────────────────────────────
@@ -1030,6 +1209,12 @@ function hydrateEditModal(name: string, payload: Record<string, string> = {}) {
     );
     if (idField) idField.value = team.id;
     if (nameField) nameField.value = team.name;
+    const citySelect = content.querySelector<HTMLSelectElement>(
+      'select[data-field="city"]',
+    );
+    if (citySelect && team.city_id) {
+      citySelect.value = team.city_id;
+    }
   }
   if (name === "edit-member") {
     const member = members.find((m) => m.id === payload.memberId);
@@ -1094,14 +1279,35 @@ function hydrateEditModal(name: string, payload: Record<string, string> = {}) {
 }
 
 function fillCitySelect(container: HTMLElement) {
-  container.innerHTML = cities.length
-    ? cities
+  const isSelectElement = container instanceof HTMLSelectElement;
+
+  if (isSelectElement) {
+    const officeCitiesMap = new Map<string, CityListItem>();
+    offices.forEach((o) => {
+      const cityObj = cities.find((c) => c.id === o.city_id);
+      if (cityObj) {
+        officeCitiesMap.set(cityObj.id, cityObj);
+      }
+    });
+    const officeCities = Array.from(officeCitiesMap.values());
+
+    container.innerHTML = `<option value="" disabled selected>Select city</option>` +
+      officeCities
         .map(
           (c: CityListItem) =>
-            `<div class="ca-cselect-opt" data-value="${esc(c.id)}" role="option">${esc(`${c.name}, ${c.country_name}`)}</div>`,
+            `<option value="${esc(c.id)}">${esc(`${c.name}, ${c.country_name}`)}</option>`,
         )
-        .join("")
-    : '<div class="ca-cselect-opt is-disabled">No cities available</div>';
+        .join("");
+  } else {
+    container.innerHTML = cities.length
+      ? cities
+          .map(
+            (c: CityListItem) =>
+              `<div class="ca-cselect-opt" data-value="${esc(c.id)}" role="option">${esc(`${c.name}, ${c.country_name}`)}</div>`,
+          )
+          .join("")
+      : '<div class="ca-cselect-opt is-disabled">No cities available</div>';
+  }
 }
 
 function fillJobSelect(container: HTMLElement) {
@@ -1117,6 +1323,12 @@ function fillJobSelect(container: HTMLElement) {
 
 async function open(name: string, payload: Record<string, string> = {}) {
   const templateName = name === "edit-team" ? "team" : name;
+  if (templateName === "team") {
+    if (offices.length === 0) {
+      toast.error("Veuillez d'abord ajouter un bureau (office) dans la section correspondante.");
+      return;
+    }
+  }
   const template = document.getElementById(
     "modal-" + templateName,
   ) as HTMLTemplateElement | null;
@@ -1129,7 +1341,7 @@ async function open(name: string, payload: Record<string, string> = {}) {
     .forEach(fillTeamSelect);
 
   const cityContainer = content.querySelector<HTMLElement>(
-    '[data-field="city"] .ca-cselect-opts-container',
+    '[data-field="city"] .ca-cselect-opts-container, [data-field="office-city"] .ca-cselect-opts-container, select[data-field="city"]',
   );
   if (cityContainer) {
     fillCitySelect(cityContainer);
@@ -1520,6 +1732,69 @@ async function open(name: string, payload: Record<string, string> = {}) {
     });
   }
 
+  const prodSearchInput = content.querySelector<HTMLInputElement>(
+    '[data-field="prodSearchInput"]',
+  );
+  const prodSearchResults = content.querySelector<HTMLElement>(
+    '[data-field="prodSearchResults"]',
+  );
+  const selectedProdIdHidden = content.querySelector<HTMLInputElement>(
+    '[data-field="selectedProdId"]',
+  );
+  const addProdButton = content.querySelector<HTMLButtonElement>(
+    "[data-add-product-portfolio]",
+  );
+
+  if (prodSearchInput && prodSearchResults) {
+    prodSearchInput.addEventListener("input", async () => {
+      const query = prodSearchInput.value.trim();
+      if (query.length < 5) {
+        prodSearchResults.innerHTML = "";
+        prodSearchResults.style.display = "none";
+        if (addProdButton) addProdButton.disabled = true;
+        if (selectedProdIdHidden) selectedProdIdHidden.value = "";
+        return;
+      }
+
+      try {
+        prodSearchResults.innerHTML =
+          '<li style="padding: 8px 12px; color: #94a3b8; font-size: 12px;">Searching...</li>';
+        prodSearchResults.style.display = "block";
+
+        const prods = await subjectService.getAll({ name: query });
+        prodSearchResults.innerHTML = "";
+
+        if (!prods || prods.length === 0) {
+          prodSearchResults.innerHTML =
+            '<li style="padding: 8px 12px; color: #94a3b8; font-size: 12px;">No results found</li>';
+          return;
+        }
+
+        prods.forEach((prod: any) => {
+          const li = document.createElement("li");
+          li.className = "ca-cselect-opt";
+          li.style.paddingLeft = "12px";
+          li.textContent = prod.name;
+          li.addEventListener("click", () => {
+            prodSearchInput.value = prod.name;
+            if (selectedProdIdHidden) selectedProdIdHidden.value = prod.id;
+            if (addProdButton) addProdButton.disabled = false;
+            prodSearchResults.style.display = "none";
+          });
+          prodSearchResults.appendChild(li);
+        });
+      } catch (err) {
+        console.error(err);
+        prodSearchResults.innerHTML =
+          '<li style="padding: 8px 12px; color: #ef4444; font-size: 12px;">Error loading products</li>';
+      }
+    });
+
+    prodSearchInput.addEventListener("keydown", (e) => {
+      if (e.key === " ") e.stopPropagation();
+    });
+  }
+
   overlay.classList.add("open");
   document.body.classList.add("modal-open");
   bindModal();
@@ -1575,10 +1850,8 @@ function bindModal() {
         '[data-field="visibility"]',
       )?.value || "PUBLIC") as "PUBLIC" | "PRIVATE" | "LIMITED";
 
-      const city_id =
-        content!.querySelector<HTMLInputElement>(
-          '[data-field="office-city"] [data-cselect-value]',
-        )?.value || "";
+      const citySelect = content!.querySelector<HTMLSelectElement>('select[data-field="city"]');
+      const city_id = citySelect ? citySelect.value : "";
       if (!city_id) {
         toast.warning("Please select a city.");
         return;
@@ -1588,48 +1861,55 @@ function bindModal() {
         content!.querySelector<HTMLSelectElement>('[data-field="product"]')
           ?.value || "";
 
-      try {
-        if (teamId) {
-          const updated = await teamService.update(teamId, {
-            name,
-            type,
-            visibility,
-            city_id,
-            product_service:
-              product_service === "None" ? null : product_service,
-          });
-          const idx = teams.findIndex((t) => t.id === teamId);
-          if (idx !== -1) {
-            teams[idx] = updated;
+      const saveBtn = content?.querySelector<HTMLButtonElement>(
+        "[data-save-team-btn]",
+      );
+      if (saveBtn) {
+        await withLoading(saveBtn, async () => {
+          try {
+            if (teamId) {
+              const updated = await teamService.update(teamId, {
+                name,
+                type,
+                visibility,
+                city_id,
+                product_service:
+                  product_service === "None" ? null : product_service,
+              });
+              const idx = teams.findIndex((t) => t.id === teamId);
+              if (idx !== -1) {
+                teams[idx] = updated;
+              }
+              activeTeamId = teamId;
+              render();
+              closeModal();
+              toast.success(`"${name}" has been updated.`);
+            } else {
+              const created = await teamService.create({
+                name,
+                type,
+                visibility,
+                city_id,
+                product_service:
+                  product_service === "None" ? null : product_service,
+              });
+              teams.push({
+                id: created.id,
+                name: created.name,
+                type: created.type,
+                city_id: created.city_id,
+                visibility: created.visibility || "PUBLIC",
+              });
+              activeTeamId = created.id;
+              render();
+              closeModal();
+              toast.success(`"${name}" has been added successfully.`);
+            }
+          } catch (err) {
+            toast.error("Failed to save the team.");
+            console.error(err);
           }
-          activeTeamId = teamId;
-          render();
-          closeModal();
-          toast.success(`"${name}" has been updated.`);
-        } else {
-          const created = await teamService.create({
-            name,
-            type,
-            visibility,
-            city_id,
-            product_service:
-              product_service === "None" ? null : product_service,
-          });
-          teams.push({
-            id: created.id,
-            name: created.name,
-            type: created.type,
-            city_id: created.city_id,
-            visibility: created.visibility || "PUBLIC",
-          });
-          activeTeamId = created.id;
-          render();
-          closeModal();
-          toast.success(`"${name}" has been added successfully.`);
-        }
-      } catch (err) {
-        toast.error("Failed to save the team.");
-        console.error(err);
+        });
       }
     });
 
@@ -1712,21 +1992,27 @@ function bindModal() {
         return;
       }
 
-      try {
-        const created = await teamMemberService.create({
-          fullname,
-          team_id: team_id || undefined,
-          job_id,
-          profile_image,
-          is_leader: false,
+      const addMemberBtn =
+        content?.querySelector<HTMLButtonElement>("[data-add-member]");
+      if (addMemberBtn) {
+        await withLoading(addMemberBtn, async () => {
+          try {
+            const created = await teamMemberService.create({
+              fullname,
+              team_id: team_id || undefined,
+              job_id,
+              profile_image,
+              is_leader: false,
+            });
+            members.push(created);
+            activeTeamId = team_id || activeTeamId;
+            render();
+            closeModal();
+            toast.success(`"${fullname}" has been added successfully.`);
+          } catch (err) {
+            console.error("CREATE TEAM MEMBER ERROR:", err);
+          }
         });
-        members.push(created);
-        activeTeamId = team_id || activeTeamId;
-        render();
-        closeModal();
-        toast.success(`"${fullname}" has been added successfully.`);
-      } catch (err) {
-        console.error("CREATE TEAM MEMBER ERROR:", err);
       }
     });
 
@@ -1784,27 +2070,34 @@ function bindModal() {
         profile_image = urlData.publicUrl;
       }
 
-      try {
-        const updated = await teamMemberService.update(memberId, {
-          fullname,
-          team_id: member.team_id || undefined,
-          job_id,
-          profile_image,
+      const updateMemberBtn = content?.querySelector<HTMLButtonElement>(
+        "[data-update-member]",
+      );
+      if (updateMemberBtn) {
+        await withLoading(updateMemberBtn, async () => {
+          try {
+            const updated = await teamMemberService.update(memberId, {
+              fullname,
+              team_id: member.team_id || undefined,
+              job_id,
+              profile_image,
+            });
+
+            const idx = members.findIndex((m) => m.id === memberId);
+
+            if (idx !== -1) {
+              members[idx] = updated;
+            }
+
+            render();
+            closeModal();
+
+            toast.success(`"${fullname}" has been updated successfully.`);
+          } catch (err) {
+            toast.error("Failed to update the member.");
+            console.error(err);
+          }
         });
-
-        const idx = members.findIndex((m) => m.id === memberId);
-
-        if (idx !== -1) {
-          members[idx] = updated;
-        }
-
-        render();
-        closeModal();
-
-        toast.success(`"${fullname}" has been updated successfully.`);
-      } catch (err) {
-        toast.error("Failed to update the member.");
-        console.error(err);
       }
     });
 
@@ -1838,36 +2131,42 @@ function bindModal() {
         what_we_value: field("what_we_value"),
         growth_here: field("growth_here"),
       };
-
-      try {
-        const existing = teamProfiles[team_id];
-        if (existing?.id) {
-          await teamProfileService.update(existing.id, profilePayload);
-        } else {
-          const created = await teamProfileService.create(profilePayload);
-          (profilePayload as any).id = created.id;
-        }
-        teamProfiles[team_id] = {
-          id: (profilePayload as any).id || teamProfiles[team_id]?.id,
-          team_id: team_id,
-          who_we_are: field("who_we_are"),
-          what_were_great_at: field("what_were_great_at"),
-          team_culture: field("team_culture"),
-          how_we_work_together: field("how_we_work_together"),
-          this_team_is_not_for_you_if: field("this_team_is_not_for_you_if"),
-          how_were_led: field("how_were_led"),
-          what_were_solving_now: field("what_were_solving_now"),
-          typical_day: field("typical_day"),
-          what_we_value: field("what_we_value"),
-          growth_here: field("growth_here"),
-        };
-        activeTeamId = team_id;
-        render();
-        closeModal();
-        toast.success("The team profile has been updated.");
-      } catch (err) {
-        toast.error("Failed to save the profile.");
-        console.error(err);
+      const saveProfileBtn = content?.querySelector<HTMLButtonElement>(
+        "[data-save-profile]",
+      );
+      if (saveProfileBtn) {
+        await withLoading(saveProfileBtn, async () => {
+          try {
+            const existing = teamProfiles[team_id];
+            if (existing?.id) {
+              await teamProfileService.update(existing.id, profilePayload);
+            } else {
+              const created = await teamProfileService.create(profilePayload);
+              (profilePayload as any).id = created.id;
+            }
+            teamProfiles[team_id] = {
+              id: (profilePayload as any).id || teamProfiles[team_id]?.id,
+              team_id: team_id,
+              who_we_are: field("who_we_are"),
+              what_were_great_at: field("what_were_great_at"),
+              team_culture: field("team_culture"),
+              how_we_work_together: field("how_we_work_together"),
+              this_team_is_not_for_you_if: field("this_team_is_not_for_you_if"),
+              how_were_led: field("how_were_led"),
+              what_were_solving_now: field("what_were_solving_now"),
+              typical_day: field("typical_day"),
+              what_we_value: field("what_we_value"),
+              growth_here: field("growth_here"),
+            };
+            activeTeamId = team_id;
+            render();
+            closeModal();
+            toast.success("The team profile has been updated.");
+          } catch (err) {
+            toast.error("Failed to save the profile.");
+            console.error(err);
+          }
+        });
       }
     });
 
@@ -1884,15 +2183,13 @@ function bindModal() {
             )?.value || "";
           const officeType = "MAIN";
           try {
-            const created = await teamOfficeService.create({
+            const office: PostOrganizationOffice = {
+              organization_id: myOrganization.id,
               city_id,
               type: officeType,
-            });
-            offices.push({
-              id: created.id,
-              city_id: created.city_id,
-              type: created.type,
-            });
+            };
+            const created = await teamOfficeService.create(office);
+            offices.push(created);
             renderChips(
               "#caOffices",
               offices.map((o) => ({ id: o.id || o.city_id })),
@@ -1923,52 +2220,42 @@ function bindModal() {
               .querySelector<HTMLInputElement>('[data-field="orgSearchInput"]')
               ?.value.trim() || key;
           const team_id = activeTeamId || undefined;
-          try {
-            let created: { id: string };
-            if (key === "partners") {
-              created = await teamPartnerService.create({
-                team_id,
-                organization_id,
-              });
-              partners.push({
-                id: created.id,
-                organization_id: organization_id || "",
-              });
-            } else if (key === "customers") {
-              created = await teamCustomerService.create({
-                team_id,
-                organization_id,
-              });
-              customers.push({
-                id: created.id,
-                organization_id: organization_id || "",
-              });
-            } else if (key === "investors") {
-              created = await teamInvestorService.create({
-                team_id,
-                organization_id,
-              });
-              investors.push({
-                id: created.id,
-                organization_id: organization_id || "",
-              });
-            } else {
-              created = await teamSubsidiaryService.create({
-                team_id,
-                organization_id,
-              });
-              subsidiaries.push({
-                id: created.id,
-                organization_id: organization_id || "",
-              });
+          const addBtn = btn;
+          await withLoading(addBtn, async () => {
+            try {
+              if (key === "partners") {
+                const created = await teamPartnerService.create({
+                  organization_id: myOrganization.id,
+                  partner_id: organization_id,
+                });
+                partners.push(created);
+              } else if (key === "customers") {
+                const created = await teamCustomerService.create({
+                  organization_id: myOrganization.id,
+                  customer_id: organization_id,
+                });
+                customers.push(created);
+              } else if (key === "investors") {
+                const created = await teamInvestorService.create({
+                  organization_id: myOrganization.id,
+                  investor_id: organization_id,
+                });
+                investors.push(created);
+              } else {
+                const created = await teamSubsidiaryService.create({
+                  organization_id: myOrganization.id,
+                  subsidiary_id: organization_id,
+                });
+                subsidiaries.push(created);
+              }
+              renderStatus();
+              closeModal();
+              toast.success(`"${displayName}" has been added.`);
+            } catch (err) {
+              toast.error("Failed to add the item.");
+              console.error(err);
             }
-            renderStatus();
-            closeModal();
-            toast.success(`"${displayName}" has been added.`);
-          } catch (err) {
-            toast.error("Failed to add the item.");
-            console.error(err);
-          }
+          });
         }
       };
     });
@@ -1977,11 +2264,6 @@ function bindModal() {
   content
     ?.querySelector("[data-add-photo]")
     ?.addEventListener("click", async () => {
-      const team_id = activeTeamId || "";
-      if (!team_id) {
-        toast.error("You need a team to add photos.");
-        return;
-      }
       if (photos.length >= 10) {
         toast.warning("You have reached the 10-photo limit.");
         return;
@@ -1995,38 +2277,47 @@ function bindModal() {
         return;
       }
 
-      try {
-        const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-        const filePath = `${crypto.randomUUID()}.${fileExt}`;
+      const addPhotoBtn =
+        content?.querySelector<HTMLButtonElement>("[data-add-photo]");
+      if (addPhotoBtn) {
+        await withLoading(addPhotoBtn, async () => {
+          try {
+            const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+            const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("avatars")
-          .upload(filePath, file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
+            const { data: uploadData, error: uploadError } =
+              await supabase.storage.from("avatars").upload(filePath, file, {
+                cacheControl: "3600",
+                upsert: false,
+              });
 
-        if (uploadError) {
-          toast.error("Failed to upload photo.");
-          console.error("Upload error:", uploadError);
-          return;
-        }
+            if (uploadError) {
+              toast.error("Failed to upload photo.");
+              console.error("Upload error:", uploadError);
+              return;
+            }
 
-        const { data: urlData } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(uploadData.path);
+            const { data: urlData } = supabase.storage
+              .from("avatars")
+              .getPublicUrl(uploadData.path);
 
-        const url = urlData.publicUrl;
-        const name = `Photo ${photos.length + 1}`;
+            const url = urlData.publicUrl;
+            const name = `Photo ${photos.length + 1}`;
 
-        const created = await teamPhotoService.create({ url, name, team_id });
-        photos.push(created);
-        renderStatus();
-        closeModal();
-        toast.success("The photo has been added successfully.");
-      } catch (err) {
-        toast.error("Failed to add the photo.");
-        console.error(err);
+            const created = await teamPhotoService.create({
+              url,
+              name,
+              organization_id: myOrganization.id,
+            });
+            photos.push(created);
+            renderStatus();
+            closeModal();
+            toast.success("The photo has been added successfully.");
+          } catch (err) {
+            toast.error("Failed to add the photo.");
+            console.error(err);
+          }
+        });
       }
     });
 
@@ -2046,20 +2337,127 @@ function bindModal() {
         toast.error("Unable to identify your company.");
         return;
       }
-      try {
-        const updated = await organizationService.update(myOrgId, {
-          parent_organization_id: parentId,
+      const addParentBtn =
+        content?.querySelector<HTMLButtonElement>("[data-add-parent]");
+      if (addParentBtn) {
+        await withLoading(addParentBtn, async () => {
+          try {
+            const updated = await organizationService.update(myOrgId, {
+              parent_organization_id: parentId,
+            });
+            myOrganization = updated;
+            await renderParentCompany();
+            closeModal();
+            toast.success("Parent company connected successfully.");
+          } catch (err) {
+            toast.error("Failed to connect parent company.");
+            console.error(err);
+          }
         });
-        myOrganization = updated;
-        await renderParentCompany();
-        closeModal();
-        toast.success("Parent company connected successfully.");
-      } catch (err) {
-        toast.error("Failed to connect parent company.");
-        console.error(err);
       }
     });
 
+  // ── Add Office/City (Add City modal) ──
+  content
+    ?.querySelector("[data-add-office]")
+    ?.addEventListener("click", async () => {
+      const city_id =
+        content!.querySelector<HTMLInputElement>(
+          '[data-field="office-city"] [data-cselect-value]',
+        )?.value || "";
+      const type =
+        content!.querySelector<HTMLSelectElement>('[data-field="officeType"]')
+          ?.value || "";
+
+      if (!city_id) {
+        toast.warning("Please select a city first.");
+        return;
+      }
+      if (!type) {
+        toast.warning("Please select a type of office.");
+        return;
+      }
+
+      const addOfficeBtn =
+        content?.querySelector<HTMLButtonElement>("[data-add-office]");
+      if (addOfficeBtn) {
+        await withLoading(addOfficeBtn, async () => {
+          try {
+            const office: PostOrganizationOffice = {
+              city_id,
+              organization_id: myOrganization.id,
+              type,
+            };
+            const created = await teamOfficeService.create(office);
+            offices.push(created);
+            renderChips(
+              "#caOffices",
+              offices.map((o) => ({ id: o.id || o.city_id })),
+            );
+            closeModal();
+
+            const cityObj = cities.find((c) => c.id === city_id);
+            const cityName = cityObj
+              ? `${cityObj.name}, ${cityObj.country_name}`
+              : "Office";
+            toast.success(`"${cityName}" has been added.`);
+          } catch (err) {
+            toast.error("Failed to add the office.");
+            console.error(err);
+          }
+        });
+      }
+    });
+  // ── Add Product/Service to Portfolio ──
+  content
+    ?.querySelector("[data-add-product-portfolio]")
+    ?.addEventListener("click", async () => {
+      const subject_id =
+        content!.querySelector<HTMLInputElement>(
+          '[data-field="selectedProdId"]',
+        )?.value || "";
+      const status =
+        content!.querySelector<HTMLSelectElement>('[data-field="prodStatus"]')
+          ?.value || "";
+
+      if (!subject_id) {
+        toast.warning("Please select a product or service first.");
+        return;
+      }
+      if (!status) {
+        toast.warning("Please select a status.");
+        return;
+      }
+
+      const team_id = activeTeamId || undefined;
+
+      const addProdBtn = content?.querySelector<HTMLButtonElement>(
+        "[data-add-product-portfolio]",
+      );
+      if (addProdBtn) {
+        await withLoading(addProdBtn, async () => {
+          try {
+            const created = await teamSubjectService.create({
+              team_id,
+              subject_id,
+              status: status as any,
+            });
+            teamSubjects.push(created);
+            render();
+            closeModal();
+
+            const prodName =
+              content!.querySelector<HTMLInputElement>(
+                '[data-field="prodSearchInput"]',
+              )?.value || "Product/Service";
+            toast.success(`"${prodName}" has been added.`);
+          } catch (err) {
+            toast.error("Failed to add the product/service.");
+            console.error(err);
+          }
+        });
+      }
+    });
   // ── Save Company Logo ──
   content
     ?.querySelector("[data-save-logo]")
@@ -2096,38 +2494,43 @@ function bindModal() {
         return;
       }
 
-      try {
-        const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-        const filePath = `logos/${myOrgId}/${crypto.randomUUID()}.${fileExt}`;
+      const saveLogoBtn =
+        content?.querySelector<HTMLButtonElement>("[data-save-logo]");
+      if (saveLogoBtn) {
+        await withLoading(saveLogoBtn, async () => {
+          try {
+            const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+            const filePath = `logos/${myOrgId}/${crypto.randomUUID()}.${fileExt}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("avatars")
-          .upload(filePath, file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
+            const { data: uploadData, error: uploadError } =
+              await supabase.storage.from("avatars").upload(filePath, file, {
+                cacheControl: "3600",
+                upsert: false,
+              });
 
-        if (uploadError) {
-          toast.error("Failed to upload logo.");
-          console.error("Upload error:", uploadError);
-          return;
-        }
+            if (uploadError) {
+              toast.error("Failed to upload logo.");
+              console.error("Upload error:", uploadError);
+              return;
+            }
 
-        const { data: urlData } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(uploadData.path);
+            const { data: urlData } = supabase.storage
+              .from("avatars")
+              .getPublicUrl(uploadData.path);
 
-        const avatar_url = urlData.publicUrl;
-        const updated = await organizationService.update(myOrgId, {
-          avatar_url,
+            const avatar_url = urlData.publicUrl;
+            const updated = await organizationService.update(myOrgId, {
+              avatar_url,
+            });
+            myOrganization = updated;
+            render();
+            closeModal();
+            toast.success("Company logo updated successfully.");
+          } catch (err) {
+            toast.error("Failed to save the company logo.");
+            console.error(err);
+          }
         });
-        myOrganization = updated;
-        render();
-        closeModal();
-        toast.success("Company logo updated successfully.");
-      } catch (err) {
-        toast.error("Failed to save the company logo.");
-        console.error(err);
       }
     });
 
@@ -2246,7 +2649,81 @@ async function loadData() {
     loader.style.display = "block";
     realContent.style.display = "none";
   }
+
+  // Show skeletons on other page elements while loading
+  const nameEl = $("[data-company-name]");
+  if (nameEl) {
+    nameEl.innerHTML =
+      '<div class="ca-skeleton-text" style="width: 140px; margin: 0 auto; height: 24px;"></div>';
+  }
+
+  const parentContainer = $("#caParentCompanyContainer");
+  if (parentContainer) {
+    parentContainer.innerHTML =
+      '<div class="ca-skeleton-card" style="height: 120px; border-radius: 12px;"></div>';
+  }
+
+  const logoBtn = $("#caCompanyLogoBtn");
+  if (logoBtn) {
+    logoBtn.innerHTML =
+      '<div class="ca-skeleton-card" style="width: 100%; height: 100%; border-radius: 12px; margin: 0;"></div>';
+  }
+
+  const caOffices = $("#caOffices");
+  if (caOffices) {
+    caOffices.innerHTML = `
+      <div class="ca-skeleton-chip" style="width: 100px;"></div>
+      <div class="ca-skeleton-chip" style="width: 80px; margin-left: 8px;"></div>
+      <div class="ca-skeleton-chip" style="width: 120px; margin-left: 8px;"></div>
+    `;
+  }
+
+  const caProducts = $("#caProducts");
+  if (caProducts) {
+    caProducts.innerHTML = `
+      <div class="ca-skeleton-chip" style="width: 130px;"></div>
+      <div class="ca-skeleton-chip" style="width: 90px; margin-left: 8px;"></div>
+    `;
+  }
+
+  const caTeamProfile = $("#caTeamProfile");
+  if (caTeamProfile) {
+    caTeamProfile.innerHTML = `
+      <div class="ca-skeleton-text" style="width: 100%;"></div>
+      <div class="ca-skeleton-text" style="width: 95%;"></div>
+      <div class="ca-skeleton-text" style="width: 80%;"></div>
+    `;
+  }
+
+  const caPortfolio = $("#caPortfolio");
+  if (caPortfolio) {
+    caPortfolio.innerHTML = `
+      <div class="ca-org-grid">
+        <div class="ca-skeleton-card" style="height: 180px;"></div>
+        <div class="ca-skeleton-card" style="height: 180px;"></div>
+      </div>
+    `;
+  }
+
+  const orgSelectors = [
+    "#caPartners",
+    "#caCustomers",
+    "#caInvestors",
+    "#caSubsidiaries",
+  ];
+  orgSelectors.forEach((selector) => {
+    const el = $(selector);
+    if (el) {
+      el.className = "ca-org-grid";
+      el.innerHTML = `
+        <div class="ca-skeleton-card" style="height: 260px;"></div>
+        <div class="ca-skeleton-card" style="height: 260px;"></div>
+      `;
+    }
+  });
+
   try {
+    const myOrgId = getSession()?.companyId;
     const [
       teamsData,
       membersData,
@@ -2259,6 +2736,9 @@ async function loadData() {
       subsidiariesData,
       citiesData,
       jobsData,
+      teamSubjectsData,
+      subjectsData,
+      orgData,
     ] = await Promise.all([
       teamService.getAll(),
       teamMemberService.getAll(),
@@ -2271,10 +2751,16 @@ async function loadData() {
       teamSubsidiaryService.getAll(),
       cityService.getAll(),
       jobService.getAll(),
+      teamSubjectService.getAll(),
+      subjectService.getAll(),
+      myOrgId ? organizationService.getById(myOrgId) : Promise.resolve(null),
     ]);
 
     cities = citiesData;
     jobs = jobsData;
+    teamSubjects = teamSubjectsData;
+    allSubjects = subjectsData;
+    myOrganization = orgData;
 
     teams = teamsData.map((t) => ({
       id: t.id,
@@ -2296,7 +2782,7 @@ async function loadData() {
     offices = officesData.map((o) => ({
       id: o.id,
       city_id: o.city_id,
-      name: o.city_id,
+      organization_id: o.organization_id,
       type: o.type,
     }));
 
@@ -2321,45 +2807,51 @@ async function loadData() {
 
     photos = photosData.map((p) => ({
       id: p.id,
-      team_id: p.team_id,
+      organization_id: p.organization_id,
       url: p.url,
       name: p.name || "",
     }));
 
     partners = partnersData.map((p) => ({
       id: p.id,
-      team_id: p.team_id || "",
-      organization_id: p.organization_id || "",
+      organization_id: p.organization_id,
+      partner_id: p.partner_id,
     }));
 
     customers = customersData.map((c) => ({
       id: c.id,
-      team_id: c.team_id || "",
-      organization_id: c.organization_id || "",
+      organization_id: c.organization_id,
+      customer_id: c.customer_id,
     }));
 
     investors = investorsData.map((i) => ({
       id: i.id,
-      team_id: i.team_id || "",
-      organization_id: i.organization_id || "",
+      organization_id: i.organization_id,
+      investor_id: i.investor_id,
     }));
 
     subsidiaries = subsidiariesData.map((s) => ({
       id: s.id,
-      team_id: s.team_id || "",
-      organization_id: s.organization_id || "",
+      organization_id: s.organization_id,
+      subsidiary_id: s.subsidiary_id,
     }));
 
-    const myOrgId = getSession()?.companyId;
-    if (myOrgId) {
-      try {
-        myOrganization = await organizationService.getById(myOrgId);
-      } catch (err) {
-        console.error("Failed to load company organization profile:", err);
+    if (myOrganization) {
+      const nameEl = $("[data-company-name]");
+      if (nameEl) nameEl.textContent = myOrganization.name;
+
+      const urlTextEl = $("[data-profile-url-text]");
+      if (urlTextEl) {
+        const defaultSlug = myOrganization.name
+          .toLowerCase()
+          .replace(/[\s_]+/g, "-");
+        urlTextEl.textContent = myOrganization.profile_url || defaultSlug;
       }
     }
 
     activeTeamId = teams[0]?.id || null;
+    renderParentCompany();
+    renderStatus();
     render();
   } catch (err) {
     toast.error("Failed to load team data.");
@@ -2544,4 +3036,278 @@ document.addEventListener("DOMContentLoaded", () => {
       tabsContainer.scrollBy({ left: 150, behavior: "smooth" });
     };
   }
+
+  const editUrlBtn = $(".ca-url-edit-btn") as HTMLButtonElement | null;
+  const cancelUrlBtn = $(".ca-url-cancel-btn") as HTMLButtonElement | null;
+  const saveUrlBtn = $(".ca-url-save-btn") as HTMLButtonElement | null;
+  const urlDisplay = $(".ca-profile-url-display") as HTMLElement | null;
+  const urlEdit = $(".ca-profile-url-edit") as HTMLElement | null;
+  const urlInput = $(".ca-url-input") as HTMLInputElement | null;
+  const urlText = $("[data-profile-url-text]");
+
+  if (
+    editUrlBtn &&
+    cancelUrlBtn &&
+    saveUrlBtn &&
+    urlDisplay &&
+    urlEdit &&
+    urlInput &&
+    urlText
+  ) {
+    editUrlBtn.addEventListener("click", () => {
+      urlInput.value = urlText.textContent || "";
+      urlDisplay.style.display = "none";
+      urlEdit.style.display = "flex";
+      urlInput.focus();
+    });
+
+    cancelUrlBtn.addEventListener("click", () => {
+      urlEdit.style.display = "none";
+      urlDisplay.style.display = "flex";
+    });
+
+    saveUrlBtn.addEventListener("click", async () => {
+      const newUrl = urlInput.value
+        .trim()
+        .toLowerCase()
+        .replace(/[\s_]+/g, "-");
+      if (!newUrl) {
+        toast.warning("Profile URL slug cannot be empty.");
+        return;
+      }
+
+      const myOrgId = getSession()?.companyId;
+      if (!myOrgId) {
+        toast.error("Unable to identify your company.");
+        return;
+      }
+
+      try {
+        saveUrlBtn.setAttribute("disabled", "true");
+        saveUrlBtn.style.opacity = "0.5";
+
+        const updated = await organizationService.update(myOrgId, {
+          profile_url: newUrl,
+        });
+        myOrganization = updated;
+        urlText.textContent = updated.profile_url || newUrl;
+
+        urlEdit.style.display = "none";
+        urlDisplay.style.display = "flex";
+        toast.success("Profile URL updated successfully.");
+      } catch (err) {
+        toast.error("Failed to update Profile URL.");
+        console.error(err);
+      } finally {
+        saveUrlBtn.removeAttribute("disabled");
+        saveUrlBtn.style.opacity = "";
+      }
+    });
+
+    urlInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        saveUrlBtn.click();
+      } else if (e.key === "Escape") {
+        cancelUrlBtn.click();
+      }
+    });
+  }
+
+  /* =========================================================
+     CUSTOM SELECTS
+  ========================================================== */
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    const trigger = target.closest(".ca-cselect-trigger");
+    const opt = target.closest(".ca-cselect-opt");
+    const toggle = target.closest(".ca-toggle-btn[data-member-mode]");
+
+    // Close opened selects which do not contain the click.
+    document.querySelectorAll(".ca-cselect.is-open").forEach((el) => {
+      if (!el.contains(target)) {
+        el.classList.remove("is-open");
+      }
+    });
+
+    // Open / close clicked select.
+    if (trigger) {
+      const wrap = trigger.closest(".ca-cselect");
+      if (wrap) {
+        wrap.classList.toggle("is-open");
+      }
+    }
+
+    // Select an option.
+    if (opt) {
+      const wrap = opt.closest(".ca-cselect");
+      if (!wrap) return;
+
+      const val =
+        (opt as HTMLElement).dataset.value !== undefined
+          ? (opt as HTMLElement).dataset.value
+          : opt.textContent?.trim() || "";
+
+      const label = opt.textContent?.trim() || "";
+
+      const valEl = wrap.querySelector(".ca-cselect-val");
+      const hiddenIn = wrap.querySelector<HTMLInputElement>(
+        "[data-cselect-value]",
+      );
+
+      if (valEl) {
+        valEl.textContent = label;
+        valEl.classList.remove("is-placeholder");
+      }
+
+      if (hiddenIn) {
+        hiddenIn.value = val!;
+        hiddenIn.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      wrap.querySelectorAll(".ca-cselect-opt").forEach((o) => {
+        o.classList.toggle("is-selected", o === opt);
+      });
+
+      wrap.classList.remove("is-open");
+    }
+
+    // Member mode toggle.
+    if (toggle) {
+      const group = toggle.closest(".ca-toggle-group");
+      if (!group) return;
+
+      let modalEl = toggle.closest(".ca-modal, [id^='companyAdmin']");
+      if (!modalEl) {
+        modalEl = document.getElementById("companyAdminModalContent");
+      }
+
+      group.querySelectorAll(".ca-toggle-btn").forEach((b) => {
+        b.classList.remove("is-active");
+      });
+
+      toggle.classList.add("is-active");
+
+      const modeVal = (toggle as HTMLElement).dataset.memberMode;
+      if (modalEl) {
+        modalEl.querySelectorAll("[data-member-panel]").forEach((el) => {
+          (el as HTMLElement).style.display =
+            (el as HTMLElement).dataset.memberPanel === modeVal ? "" : "none";
+        });
+      }
+    }
+  });
+
+  /* =========================================================
+     IMAGE UPLOAD
+  ========================================================== */
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    const uploadButton = target.closest('[data-field="uploadButton"]');
+    const changeButton = target.closest('[data-action="changeImage"]');
+    const removeButton = target.closest('[data-action="removeImage"]');
+
+    if (uploadButton || changeButton) {
+      const wrapper = (uploadButton || changeButton)!.closest(
+        ".ca-image-upload-wrapper",
+      );
+      const fileInput = wrapper
+        ? wrapper.querySelector<HTMLInputElement>('input[type="file"]')
+        : null;
+      if (fileInput) {
+        fileInput.click();
+      }
+    }
+
+    if (removeButton) {
+      const wrapper = removeButton.closest(".ca-image-upload-wrapper");
+      if (!wrapper) return;
+
+      const fileInput =
+        wrapper.querySelector<HTMLInputElement>('input[type="file"]');
+      const previewArea = wrapper.querySelector<HTMLElement>(
+        '[data-field="previewArea"]',
+      );
+      const uploadBtn = wrapper.querySelector<HTMLElement>(
+        '[data-field="uploadButton"]',
+      );
+      const previewImg = wrapper.querySelector<HTMLImageElement>(
+        '[data-field="previewImg"]',
+      );
+
+      if (fileInput) fileInput.value = "";
+      if (previewImg) previewImg.src = "";
+      if (previewArea) previewArea.style.display = "none";
+      if (uploadBtn) uploadBtn.style.display = "";
+    }
+  });
+
+  /* =========================================================
+     IMAGE VALIDATION / PREVIEW
+  ========================================================== */
+  document.addEventListener("change", (e) => {
+    const target = e.target as HTMLElement;
+    const input = target.closest(
+      ".ca-image-upload-wrapper input[type='file']",
+    ) as HTMLInputElement | null;
+
+    if (!input || !input.files || !input.files[0]) {
+      return;
+    }
+
+    const file = input.files[0];
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image.");
+      input.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image must be smaller than 5MB.");
+      input.value = "";
+      return;
+    }
+
+    const wrapper = input.closest(".ca-image-upload-wrapper");
+    if (!wrapper) return;
+
+    const previewImg = wrapper.querySelector<HTMLImageElement>(
+      '[data-field="previewImg"]',
+    );
+    const previewArea = wrapper.querySelector<HTMLElement>(
+      '[data-field="previewArea"]',
+    );
+    const uploadBtn = wrapper.querySelector<HTMLElement>(
+      '[data-field="uploadButton"]',
+    );
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (previewImg) previewImg.src = reader.result as string;
+      if (previewArea) previewArea.style.display = "flex";
+      if (uploadBtn) uploadBtn.style.display = "none";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  /* =========================================================
+     PROFILE WORD / CHARACTER COUNTER
+  ========================================================== */
+  document.addEventListener("input", (e) => {
+    const target = e.target as HTMLElement;
+    const ta = target.closest(
+      ".ca-tfield textarea",
+    ) as HTMLTextAreaElement | null;
+    if (!ta) return;
+
+    const field = ta.closest(".ca-tfield");
+    const counter = field && field.querySelector(".ca-wcount");
+    if (!counter) return;
+
+    const text = ta.value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const chars = ta.value.length;
+
+    counter.textContent = `${words}/30 words · ${chars}/180 chars`;
+    ta.style.borderColor = chars > 180 ? "var(--ca-danger)" : "";
+  });
 });

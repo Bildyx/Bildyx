@@ -27,6 +27,9 @@ export const team_subjects = {
       if (input.subject_id) {
         query = query.where("subject_id", "=", input.subject_id);
       }
+      if (input.team_id) {
+        query = query.where("team_id", "=", input.team_id);
+      }
       if (input.status) {
         query = query.where("status", "=", input.status as any);
       }
