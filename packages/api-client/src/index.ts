@@ -5,10 +5,7 @@ import { router } from "../../../apps/api/src/routes/router";
 
 export const getRPCClient = (): RouterClient<typeof router> => {
   // Plus aucune trace de "process", évite le crash du navigateur
-  const baseUrl =
-    typeof window !== "undefined" && (window as any).API_URL
-      ? (window as any).API_URL
-      : "http://localhost:3000";
+  const baseUrl = (window as any).API_URL;
 
   const rpcLink = new RPCLink({
     url: baseUrl + "/rpc",

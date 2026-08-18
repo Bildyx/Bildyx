@@ -472,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const top = window.screenY + (window.outerHeight - height) / 2;
 
       window.open(
-        "http://localhost:3000/api/auth/google",
+        `${process.env.API_URL}/api/auth/google`,
         "GoogleLogin",
         `width=${width},height=${height},left=${left},top=${top},popup=yes,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`,
       );
@@ -480,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.addEventListener("message", (event) => {
-    if (event.origin !== "http://localhost:3000") return;
+    if (event.origin !== process.env.API_URL) return;
 
     if (event.data?.type === "GOOGLE_LOGIN_SUCCESS") {
       const user = getAuthUser(event.data);
