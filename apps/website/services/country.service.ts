@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { Country, PostCountry, PutCountry } from "@repo/models/countries";
 
 export class CountryService {

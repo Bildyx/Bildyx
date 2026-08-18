@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { User, PostUser, PutUser } from "@repo/models/users";
 
 export class UserService {

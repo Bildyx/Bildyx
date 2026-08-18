@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { JobAd, PostJobAd, PutJobAd } from "@repo/models/job_ads";
 
 export class JobAdService {

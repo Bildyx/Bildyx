@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { UserSession, PostUserSession } from "@repo/models/user_sessions";
 
 export class UserSessionService {

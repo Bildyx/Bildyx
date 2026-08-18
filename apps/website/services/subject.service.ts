@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { Subject, PostSubject, PutSubject } from "@repo/models/subjects";
 
 export class SubjectService {

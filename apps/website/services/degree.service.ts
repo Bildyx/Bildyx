@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { Degree, PostDegree, PutDegree } from "@repo/models/degrees";
 
 export class DegreeService {

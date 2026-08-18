@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 
 export class CardService {
   private readonly rpcClient = getRPCClient();

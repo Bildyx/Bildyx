@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { Skill, PostSkill, PutSkill } from "@repo/models/skills";
 
 export class SkillService {

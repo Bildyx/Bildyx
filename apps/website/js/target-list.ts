@@ -1,7 +1,7 @@
 import { getSession } from "./helpers";
 import { CardService } from "../services/card.service";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "../services/rpc";
 
 const rpc = getRPCClient();
 const cardService = new CardService();

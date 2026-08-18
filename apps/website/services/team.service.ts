@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { Team, PostTeam, PutTeam } from "@repo/models/teams";
 
 export class TeamService {
