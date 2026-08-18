@@ -18,13 +18,12 @@ import WhyTeams from "./pages/WhyTeams";
 import TeamExample from "./pages/TeamExample";
 import MyJobs from "./pages/MyJobs";
 import TargetList from "./pages/TargetList";
-import CompanyCon from "./pages/CompanyCon";
 import Login from "./pages/Login";
 import TestsPreferences from "./pages/TestsPreferences";
 import Test from "./pages/Test";
 import ResultTest from "./pages/ResultTest";
 import Profile from "./pages/Profile";
-import CompanyAdmin from "./pages/CompanyAdmin";
+import CompanyProfile from "./pages/CompanyProfile";
 import NotYetMigrated from "./pages/NotYetMigrated";
 
 export default function App() {
@@ -43,22 +42,30 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/company-archives" element={<CompanyArchives />} />
-      <Route path="/company-archive-connected" element={<CompanyArchiveTrue />} />
+      <Route
+        path="/company-archive-connected"
+        element={<CompanyArchiveTrue />}
+      />
       <Route path="/microresume" element={<Microresume />} />
       <Route path="/microresume-example" element={<MicroresumeExample />} />
       <Route path="/why-teams" element={<WhyTeams />} />
       <Route path="/team-example" element={<TeamExample />} />
       <Route path="/my-jobs" element={<MyJobs />} />
       <Route path="/target-list" element={<TargetList />} />
-      <Route path="/company-con" element={<CompanyCon />} />
       <Route path="/login" element={<Login />} />
       <Route path="/tests-preferences" element={<TestsPreferences />} />
       <Route path="/tests-preferences/test" element={<Test />} />
       <Route path="/tests-preferences/result" element={<ResultTest />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/company-admin" element={<CompanyAdmin />} />
+      <Route path="/:slug" element={<CompanyProfile />} />
+      <Route path="/:slug/admin" element={<CompanyProfile />} />
 
-      <Route path="*" element={<NotYetMigrated name="Not Found" originalFile="(no PHP equivalent)" />} />
+      <Route
+        path="*"
+        element={
+          <NotYetMigrated name="Not Found" originalFile="(no PHP equivalent)" />
+        }
+      />
     </Routes>
   );
 }

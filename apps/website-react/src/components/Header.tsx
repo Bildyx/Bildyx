@@ -1,22 +1,24 @@
+import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthNav } from "../hooks/useAuthNav";
+import { getSession } from "../lib/session";
+import { OrganizationService } from "../services/organization.service";
+
+const organizationService = new OrganizationService();
 
 type HeaderProps = {
-  mode?: "default" | "company-admin";
+  isAdmin?: boolean;
   centerLabel?: string;
   backHref?: string;
   backLabel?: string;
   statusLabel?: string;
-  /** Small text appended after the logo, e.g. "MicroResume" (see js/microresume.ts) */
   brandSuffix?: string;
-  /** Extra nav rendered between the logo and the auth buttons, e.g. in-page anchor links */
   centerNav?: React.ReactNode;
-  /** Replace the whole auth nav with a single account icon (see js/microresume-example.ts) */
   simpleAccountIcon?: boolean;
 };
 
 export default function Header({
-  mode = "default",
+  isAdmin = false,
   centerLabel = "",
   backHref = "",
   backLabel = "",
@@ -27,12 +29,36 @@ export default function Header({
 }: HeaderProps) {
   const { isLoggedIn, isMenuOpen, setIsMenuOpen, signOut } = useAuthNav();
   const navigate = useNavigate();
-  const isCompanyAdmin = mode === "company-admin";
+
+  const session = getSession();
+
+  const [isCompany, setIsCompany] = useState(
+    !!session?.organizationId || !!session?.companyId,
+  );
+  const [redirectPath, setRedirectPath] = useState("/profile");
+
+  useEffect(() => {
+    const orgId = session?.organizationId || session?.companyId;
+    if (!orgId) return;
+    setIsCompany(true);
+    organizationService
+      .getById(orgId as string)
+      .then((org) => {
+        if (org?.profile_url) {
+          setRedirectPath(`/${org.profile_url}/admin`);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch organization", err));
+  }, []);
 
   return (
-    <header className={`site-header${isCompanyAdmin ? " site-header--company-admin" : ""}`}>
-      <div className={`header-content${isCompanyAdmin ? " header-content--company-admin" : ""}`}>
-        {isCompanyAdmin ? (
+    <header
+      className={`site-header${isAdmin ? " site-header--company-admin" : ""}`}
+    >
+      <div
+        className={`header-content${isAdmin ? " header-content--company-admin" : ""}`}
+      >
+        {isAdmin ? (
           <>
             <div className="company-admin-header-left">
               <Link to="/" className="logo" aria-label="Bildyx home">
@@ -46,12 +72,16 @@ export default function Header({
               )}
             </div>
 
-            <div className="company-admin-header-title">{centerLabel || "F-CAREER"}</div>
+            <div className="company-admin-header-title">
+              {centerLabel || "F-CAREER"}
+            </div>
           </>
         ) : (
           <Link to="/" className="logo" aria-label="Bildyx home">
             <img src="/images/Logo.png" alt="Bildyx" />
-            {brandSuffix && <span className="mr-brand-suffix">{brandSuffix}</span>}
+            {brandSuffix && (
+              <span className="mr-brand-suffix">{brandSuffix}</span>
+            )}
           </Link>
         )}
 
@@ -59,72 +89,86 @@ export default function Header({
 
         {simpleAccountIcon ? (
           <nav className="nav-buttons" aria-label="Authentication and account">
-            <Link className="mre-account-button" to="/coming-soon/account" aria-label="Account">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-                <path
-                  d="M5.8 19c.6-3.2 2.8-5 6.2-5s5.6 1.8 6.2 5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
+            <Link
+              className="mre-account-button"
+              to="/coming-soon/account"
+              aria-label="Account"
+            >
+              <i className="bi bi-person-fill" aria-hidden="true"></i>
             </Link>
           </nav>
         ) : (
-        <nav
-          className={`nav-buttons${isCompanyAdmin ? " nav-buttons--company-admin is-authenticated" : ""}${
-            !isCompanyAdmin && isLoggedIn ? " is-authenticated" : ""
-          }`}
-          aria-label="Authentication and account"
-        >
-          {isCompanyAdmin && (
-            <>
-              <button className="company-admin-status-pill" type="button">
-                <span aria-hidden="true">◎</span>
-                <span>{statusLabel}</span>
-              </button>
-              <button className="company-admin-header-icon" type="button" aria-label="Notifications">
-                ♧
-              </button>
-              <button className="company-admin-header-icon" type="button" aria-label="Settings">
-                ⚙
-              </button>
-            </>
-          )}
+          <nav
+            className={`nav-buttons${isAdmin ? " nav-buttons--company-admin is-authenticated" : ""}${
+              !isAdmin && isLoggedIn ? " is-authenticated" : ""
+            }`}
+            aria-label="Authentication and account"
+          >
+            {isAdmin && (
+              <>
+                <button className="company-admin-status-pill" type="button">
+                  <i className="bi bi-circle" aria-hidden="true"></i>
+                  <span>{statusLabel}</span>
+                </button>
+                <button
+                  className="company-admin-header-icon"
+                  type="button"
+                  aria-label="Notifications"
+                >
+                  <i className="bi bi-bell"></i>
+                </button>
+                <button
+                  className="company-admin-header-icon"
+                  type="button"
+                  aria-label="Settings"
+                >
+                  <i className="bi bi-gear"></i>
+                </button>
+              </>
+            )}
 
-          <NavLink to="/login" className="login">
-            Log In
-          </NavLink>
-          <NavLink to="/login?tab=signup" className="signup">
-            Sign Up
-          </NavLink>
+            <NavLink to="/login" className="login">
+              Log In
+            </NavLink>
+            <NavLink to="/login?tab=signup" className="signup">
+              Sign Up
+            </NavLink>
 
-          <div className="account-menu">
-            <button
-              className="account-trigger"
-              type="button"
-              aria-label="Account menu"
-              aria-expanded={isMenuOpen}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsMenuOpen(!isMenuOpen);
-              }}
-            >
-              <span aria-hidden="true">𖡌</span>
-            </button>
-
-            <div className={`account-dropdown${isMenuOpen ? " is-open" : ""}`}>
-              <Link to="/privacy-policy">
-                <span aria-hidden="true">▱</span> Privacy
-              </Link>
-              <button type="button" onClick={() => signOut(navigate, "/login")}>
-                <span aria-hidden="true">↪</span> Sign Out
+            <div className={`account-menu${isMenuOpen ? " is-open" : ""}`}>
+              <button
+                className="account-trigger"
+                type="button"
+                aria-label="Account menu"
+                aria-expanded={isMenuOpen}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMenuOpen(!isMenuOpen);
+                }}
+              >
+                <i className="bi bi-person-fill" aria-hidden="true"></i>
               </button>
+
+              <div
+                className={`account-dropdown${isMenuOpen ? " is-open" : ""}`}
+              >
+                <Link to={redirectPath}>
+                  <i className="bi bi-person" aria-hidden="true"></i> My Profile
+                </Link>
+
+                <Link to="/privacy-policy">
+                  <i className="bi bi-shield-lock" aria-hidden="true"></i>{" "}
+                  Privacy
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut(navigate, "/login")}
+                >
+                  <i className="bi bi-box-arrow-right" aria-hidden="true"></i>{" "}
+                  Sign Out
+                </button>
+              </div>
             </div>
-          </div>
-        </nav>
+          </nav>
         )}
       </div>
     </header>

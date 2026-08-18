@@ -9,13 +9,9 @@ import { toast } from "../lib/toast";
 import { AuthService } from "../services/auth.service";
 import { UserService } from "../services/user.service";
 import {
-  clearPendingAccountType,
   getAuthUser,
   getRedirectPath,
-  normalizeAccountType,
-  readPendingAccountType,
   saveBildyxSession,
-  savePendingAccountType,
 } from "../lib/authSession";
 
 const authService = new AuthService();
@@ -29,7 +25,7 @@ export default function VerifyEmail() {
   const userId = searchParams.get("userId") || "";
 
   const [email, setEmail] = useState("");
-  const emailRef = useRef(""); // mirrors `email` closure var in the original script for the click/unload guards
+  const emailRef = useRef("");
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState("");
   const [pageError, setPageError] = useState("");
@@ -47,9 +43,6 @@ export default function VerifyEmail() {
         const user = await userService.getById(userId);
         setEmail(user.email);
         emailRef.current = user.email;
-
-        const pendingAccountType = normalizeAccountType(user?.accountType || user?.role) || readPendingAccountType(userId);
-        if (pendingAccountType) savePendingAccountType(pendingAccountType, userId);
       } catch (err) {
         console.error(err);
         toast.error("Error loading verification screen");
@@ -57,7 +50,6 @@ export default function VerifyEmail() {
     })();
   }, [userId, navigate]);
 
-  // Guard against accidental navigation away (matches beforeunload in verify-email.ts)
   useEffect(() => {
     function handleBeforeUnload(event: BeforeUnloadEvent) {
       if (emailRef.current) {
@@ -69,7 +61,6 @@ export default function VerifyEmail() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // Intercept clicks on links back to login/home to offer the "delete unverified account" confirmation
   useEffect(() => {
     async function cancelUnverifiedAccountAndGo(targetPath: string) {
       const confirmed = window.confirm(
@@ -85,12 +76,14 @@ export default function VerifyEmail() {
         }
       }
 
-      emailRef.current = ""; // prevent the beforeunload prompt
+      emailRef.current = "";
       navigate(targetPath);
     }
 
     function handleDocumentClick(event: MouseEvent) {
-      const link = (event.target as HTMLElement)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      const link = (event.target as HTMLElement)?.closest?.(
+        "a[href]",
+      ) as HTMLAnchorElement | null;
       if (!link) return;
 
       const path = new URL(link.href, window.location.origin).pathname;
@@ -115,20 +108,20 @@ export default function VerifyEmail() {
 
     setIsSubmitting(true);
     try {
-      const data = await authService.verifyEmail({ email: email.trim(), code: code.trim() });
+      const data = await authService.verifyEmail({
+        email: email.trim(),
+        code: code.trim(),
+      });
       toast.success("Email verified! Redirecting to your profile...");
-      emailRef.current = ""; // prevent the beforeunload prompt
+      emailRef.current = "";
 
       const verifiedUser = getAuthUser(data);
-      const pendingAccountType = readPendingAccountType(userId);
-      if (pendingAccountType && !verifiedUser.accountType && !verifiedUser.account_type) {
-        verifiedUser.accountType = pendingAccountType;
-      }
 
       saveBildyxSession(verifiedUser, email.trim());
-      clearPendingAccountType(userId);
 
-      setTimeout(() => navigate(getRedirectPath(verifiedUser)), 1500);
+      setTimeout(async () => {
+        navigate(await getRedirectPath(verifiedUser));
+      }, 1500);
     } catch (err) {
       const message = extractErrorMessage(err, "Verification failed");
       const finalMessage =
@@ -173,11 +166,20 @@ export default function VerifyEmail() {
           </div>
 
           <p className="switch-text">
-            Verification target: <strong>{email || "your email address"}</strong>
+            Verification target:{" "}
+            <strong>{email || "your email address"}</strong>
           </p>
 
           {pageError && (
-            <p style={{ display: "block", margin: "12px 0 0", color: "#dc2626", fontWeight: 700, textAlign: "center" }}>
+            <p
+              style={{
+                display: "block",
+                margin: "12px 0 0",
+                color: "#dc2626",
+                fontWeight: 700,
+                textAlign: "center",
+              }}
+            >
               {pageError}
             </p>
           )}
@@ -215,7 +217,10 @@ export default function VerifyEmail() {
           </button>
 
           <p className="switch-text" style={{ marginTop: 16 }}>
-            Already verified? <Link className="link-btn" to="/login">Log in</Link>
+            Already verified?{" "}
+            <Link className="link-btn" to="/login">
+              Log in
+            </Link>
           </p>
         </form>
       </AuthLayout>

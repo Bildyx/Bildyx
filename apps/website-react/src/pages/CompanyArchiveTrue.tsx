@@ -14,7 +14,7 @@ export default function CompanyArchiveTrue() {
       <main className="cc-page">
         <div className="cc-company-bar">
           <span>Company Archives</span>
-          <Link className="cc-edit-link" to="/company-admin">
+          <Link className="cc-edit-link" to="/">
             ‹ Back
           </Link>
         </div>

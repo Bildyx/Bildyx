@@ -11,7 +11,6 @@ import { getRPCClient } from "@repo/api-client";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import OrgCard from "../components/OrgCard";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { CardService } from "../services/card.service";
 import "../css/target-list.css";

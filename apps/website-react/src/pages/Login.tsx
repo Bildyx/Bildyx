@@ -5,7 +5,11 @@ import Footer from "../components/Footer";
 import AuthLayout from "../components/AuthLayout";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useCaptcha } from "../hooks/useCaptcha";
-import { extractErrorMessage, passwordScore, validEmail } from "../lib/formHelpers";
+import {
+  extractErrorMessage,
+  passwordScore,
+  validEmail,
+} from "../lib/formHelpers";
 import { toast } from "../lib/toast";
 import {
   addAttempt,
@@ -16,6 +20,7 @@ import {
   tooManyAttempts,
 } from "../lib/authSession";
 import { AuthService, type SignupInput } from "../services/auth.service";
+import { User } from "@repo/models/users";
 
 const authService = new AuthService();
 
@@ -85,7 +90,12 @@ export default function Login() {
       savePendingAccountType(accountType, data.userId);
       navigate(`/verify-email?userId=${encodeURIComponent(data.userId)}`);
     } catch (err) {
-      let errorData: { data?: { issues?: { path: string[]; message: string }[] }; message?: string } | undefined;
+      let errorData:
+        | {
+            data?: { issues?: { path: string[]; message: string }[] };
+            message?: string;
+          }
+        | undefined;
       if (err instanceof Error) {
         try {
           errorData = JSON.parse(err.message);
@@ -136,9 +146,10 @@ export default function Login() {
     setIsLoggingIn(true);
     try {
       const data = await authService.login({ email, password: loginPassword });
-      const user = getAuthUser(data);
+      const user: User = getAuthUser(data);
       saveBildyxSession(user, email);
-      navigate(getRedirectPath(user));
+      const redirectPath = await getRedirectPath(user);
+      navigate(redirectPath);
     } catch (err) {
       addAttempt(email);
       toast.error(extractErrorMessage(err, "Invalid credentials"));
@@ -186,19 +197,43 @@ export default function Login() {
           </button>
         </div>
 
-        <form className={`auth-form${activeTab === "signup" ? " active" : ""}`} noValidate onSubmit={handleSignup}>
+        <form
+          className={`auth-form${activeTab === "signup" ? " active" : ""}`}
+          noValidate
+          onSubmit={handleSignup}
+        >
           <div className="form-heading">
             <h2>Create an account</h2>
             <p>Select your account type to get started.</p>
           </div>
 
-          <div className="account-switch" role="radiogroup" aria-label="Account type">
-            <label className={`account-option${accountType === "company" ? " active" : ""}`}>
-              <input type="radio" name="accountType" value="company" checked={accountType === "company"} onChange={() => setAccountType("company")} />
+          <div
+            className="account-switch"
+            role="radiogroup"
+            aria-label="Account type"
+          >
+            <label
+              className={`account-option${accountType === "company" ? " active" : ""}`}
+            >
+              <input
+                type="radio"
+                name="accountType"
+                value="company"
+                checked={accountType === "company"}
+                onChange={() => setAccountType("company")}
+              />
               <span>Company</span>
             </label>
-            <label className={`account-option${accountType === "seeker" ? " active" : ""}`}>
-              <input type="radio" name="accountType" value="seeker" checked={accountType === "seeker"} onChange={() => setAccountType("seeker")} />
+            <label
+              className={`account-option${accountType === "seeker" ? " active" : ""}`}
+            >
+              <input
+                type="radio"
+                name="accountType"
+                value="seeker"
+                checked={accountType === "seeker"}
+                onChange={() => setAccountType("seeker")}
+              />
               <span>Job Seeker</span>
             </label>
           </div>
@@ -206,7 +241,9 @@ export default function Login() {
           {accountType === "company" ? (
             <div className="field">
               <label htmlFor="companyName">Company Name</label>
-              <div className={`input-wrap${signupErrors.companyName ? " invalid" : ""}`}>
+              <div
+                className={`input-wrap${signupErrors.companyName ? " invalid" : ""}`}
+              >
                 <input
                   id="companyName"
                   name="companyName"
@@ -223,7 +260,11 @@ export default function Login() {
           ) : (
             <div>
               <div className="social-row social-row-single">
-                <button type="button" className="social-btn google-btn" onClick={handleGoogleSignup}>
+                <button
+                  type="button"
+                  className="social-btn google-btn"
+                  onClick={handleGoogleSignup}
+                >
                   <img src="/images/google.svg" alt="" />
                   Continue with Google
                 </button>
@@ -236,7 +277,9 @@ export default function Login() {
               <div className="field-grid">
                 <div className="field">
                   <label htmlFor="firstName">First Name</label>
-                  <div className={`input-wrap${signupErrors.firstName ? " invalid" : ""}`}>
+                  <div
+                    className={`input-wrap${signupErrors.firstName ? " invalid" : ""}`}
+                  >
                     <input
                       id="firstName"
                       name="firstName"
@@ -253,7 +296,9 @@ export default function Login() {
 
                 <div className="field">
                   <label htmlFor="lastName">Last Name</label>
-                  <div className={`input-wrap${signupErrors.lastName ? " invalid" : ""}`}>
+                  <div
+                    className={`input-wrap${signupErrors.lastName ? " invalid" : ""}`}
+                  >
                     <input
                       id="lastName"
                       name="lastName"
@@ -272,13 +317,21 @@ export default function Login() {
           )}
 
           <div className="field">
-            <label htmlFor="email">{accountType === "company" ? "Work Email" : "Email"}</label>
-            <div className={`input-wrap${signupErrors.email ? " invalid" : ""}`}>
+            <label htmlFor="email">
+              {accountType === "company" ? "Work Email" : "Email"}
+            </label>
+            <div
+              className={`input-wrap${signupErrors.email ? " invalid" : ""}`}
+            >
               <input
                 id="email"
                 name="email"
                 type="email"
-                placeholder={accountType === "company" ? "name@company.com" : "you@example.com"}
+                placeholder={
+                  accountType === "company"
+                    ? "name@company.com"
+                    : "you@example.com"
+                }
                 maxLength={120}
                 autoComplete="email"
                 required
@@ -291,7 +344,9 @@ export default function Login() {
 
           <div className="field">
             <label htmlFor="password">Password</label>
-            <div className={`input-wrap${signupErrors.password ? " invalid" : ""}`}>
+            <div
+              className={`input-wrap${signupErrors.password ? " invalid" : ""}`}
+            >
               <input
                 id="password"
                 name="password"
@@ -307,14 +362,24 @@ export default function Login() {
               <button
                 className="icon-btn toggle-password"
                 type="button"
-                aria-label={showSignupPassword ? "Hide password" : "Show password"}
+                aria-label={
+                  showSignupPassword ? "Hide password" : "Show password"
+                }
                 onClick={() => setShowSignupPassword((v) => !v)}
               >
                 {showSignupPassword ? "🙈" : "👁"}
               </button>
             </div>
-            <meter className="password-meter" min={0} max={4} value={Math.min(4, passwordScore(signupPassword))} />
-            <small className="hint">Minimum 8 characters, with uppercase, lowercase, number and symbol recommended.</small>
+            <meter
+              className="password-meter"
+              min={0}
+              max={4}
+              value={Math.min(4, passwordScore(signupPassword))}
+            />
+            <small className="hint">
+              Minimum 8 characters, with uppercase, lowercase, number and symbol
+              recommended.
+            </small>
             <small className="error">{signupErrors.password}</small>
           </div>
 
@@ -322,10 +387,18 @@ export default function Login() {
             <div>
               <strong>Security check</strong>
               <p>
-                Solve this quick captcha: <span className="captcha-question">{signupCaptcha.question}</span>
+                Solve this quick captcha:{" "}
+                <span className="captcha-question">
+                  {signupCaptcha.question}
+                </span>
               </p>
             </div>
-            <button className="captcha-refresh" type="button" aria-label="Refresh captcha" onClick={signupCaptcha.refresh}>
+            <button
+              className="captcha-refresh"
+              type="button"
+              aria-label="Refresh captcha"
+              onClick={signupCaptcha.refresh}
+            >
               Refresh
             </button>
             <input
@@ -341,23 +414,44 @@ export default function Login() {
           <small className="captcha-error error">{signupCaptcha.error}</small>
 
           <label className="check-line">
-            <input type="checkbox" required checked={terms} onChange={(e) => setTerms(e.target.checked)} />
+            <input
+              type="checkbox"
+              required
+              checked={terms}
+              onChange={(e) => setTerms(e.target.checked)}
+            />
             <span>
-              I agree to the <Link to="/terms-service">Terms of Service</Link> and <Link to="/privacy-policy">Privacy Policy</Link>.
+              I agree to the <Link to="/terms-service">Terms of Service</Link>{" "}
+              and <Link to="/privacy-policy">Privacy Policy</Link>.
             </span>
           </label>
 
           <label className="check-line muted">
-            <input type="checkbox" checked={marketing} onChange={(e) => setMarketing(e.target.checked)} />
-            <span>I agree to receive emails about recruitment services from Bildyx. I can unsubscribe at any time.</span>
+            <input
+              type="checkbox"
+              checked={marketing}
+              onChange={(e) => setMarketing(e.target.checked)}
+            />
+            <span>
+              I agree to receive emails about recruitment services from Bildyx.
+              I can unsubscribe at any time.
+            </span>
           </label>
 
           <button className="submit-btn" type="submit" disabled={isSigningUp}>
-            {isSigningUp ? "..." : accountType === "company" ? "Create Company Account" : "Create Job Seeker Account"}
+            {isSigningUp
+              ? "..."
+              : accountType === "company"
+                ? "Create Company Account"
+                : "Create Job Seeker Account"}
           </button>
         </form>
 
-        <form className={`auth-form${activeTab === "login" ? " active" : ""}`} noValidate onSubmit={handleLogin}>
+        <form
+          className={`auth-form${activeTab === "login" ? " active" : ""}`}
+          noValidate
+          onSubmit={handleLogin}
+        >
           <div className="form-heading center">
             <h2>Log In</h2>
             <p>Welcome back! Please enter your details.</p>
@@ -386,7 +480,9 @@ export default function Login() {
               <label htmlFor="loginPassword">Password</label>
               <Link to="/forgot-password">Forgot password?</Link>
             </div>
-            <div className={`input-wrap${loginErrors.password ? " invalid" : ""}`}>
+            <div
+              className={`input-wrap${loginErrors.password ? " invalid" : ""}`}
+            >
               <input
                 id="loginPassword"
                 name="password"
@@ -401,7 +497,9 @@ export default function Login() {
               <button
                 className="icon-btn toggle-password"
                 type="button"
-                aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                aria-label={
+                  showLoginPassword ? "Hide password" : "Show password"
+                }
                 onClick={() => setShowLoginPassword((v) => !v)}
               >
                 {showLoginPassword ? "🙈" : "👁"}
@@ -414,10 +512,18 @@ export default function Login() {
             <div>
               <strong>Security check</strong>
               <p>
-                Solve this quick captcha: <span className="captcha-question">{loginCaptcha.question}</span>
+                Solve this quick captcha:{" "}
+                <span className="captcha-question">
+                  {loginCaptcha.question}
+                </span>
               </p>
             </div>
-            <button className="captcha-refresh" type="button" aria-label="Refresh captcha" onClick={loginCaptcha.refresh}>
+            <button
+              className="captcha-refresh"
+              type="button"
+              aria-label="Refresh captcha"
+              onClick={loginCaptcha.refresh}
+            >
               Refresh
             </button>
             <input
@@ -438,7 +544,11 @@ export default function Login() {
 
           <p className="switch-text">
             Don&apos;t have an account?{" "}
-            <button type="button" className="link-btn" onClick={() => setActiveTab("signup")}>
+            <button
+              type="button"
+              className="link-btn"
+              onClick={() => setActiveTab("signup")}
+            >
               Sign up
             </button>
           </p>

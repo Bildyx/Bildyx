@@ -12,9 +12,31 @@ function parseJSON(value: string | null): Session {
 }
 
 function normalizeType(value: unknown): AccountType {
-  const raw = String(value || "").toLowerCase().replace(/[\s_-]/g, "");
-  if (["company", "business", "employer", "organization", "organisation", "recruiter"].includes(raw)) return "company";
-  if (["seeker", "jobseeker", "jobseekers", "candidate", "student", "user"].includes(raw)) return "seeker";
+  const raw = String(value || "")
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+  if (
+    [
+      "company",
+      "business",
+      "employer",
+      "organization",
+      "organisation",
+      "recruiter",
+    ].includes(raw)
+  )
+    return "company";
+  if (
+    [
+      "seeker",
+      "jobseeker",
+      "jobseekers",
+      "candidate",
+      "student",
+      "user",
+    ].includes(raw)
+  )
+    return "seeker";
   return "";
 }
 
@@ -24,22 +46,35 @@ function readSession(): Session {
     parseJSON(localStorage.getItem("bildyx_session")) ||
     parseJSON(localStorage.getItem("bildyx_user"));
   if (!session) return null;
-  if (!sessionStorage.getItem("bildyx_session")) sessionStorage.setItem("bildyx_session", JSON.stringify(session));
-  if (!localStorage.getItem("bildyx_session")) localStorage.setItem("bildyx_session", JSON.stringify(session));
+  if (!sessionStorage.getItem("bildyx_session"))
+    sessionStorage.setItem("bildyx_session", JSON.stringify(session));
+  if (!localStorage.getItem("bildyx_session"))
+    localStorage.setItem("bildyx_session", JSON.stringify(session));
   return session;
 }
 
 function hasActiveSession(session: Session): boolean {
   if (!session) return false;
   return Boolean(
-    session.userId || session.id || session._id || session.email || session.accountType || session.account_type || session.role,
+    session.userId ||
+    session.id ||
+    session._id ||
+    session.email ||
+    session.accountType ||
+    session.account_type ||
+    session.role,
   );
 }
 
 function getAccountType(session: Session): AccountType {
   if (!session) return "";
   return normalizeType(
-    session.accountType || session.account_type || session.userType || session.user_type || session.role || session.type,
+    session.accountType ||
+      session.account_type ||
+      session.userType ||
+      session.user_type ||
+      session.role ||
+      session.type,
   );
 }
 
@@ -76,7 +111,8 @@ export function useAuthNav() {
   useEffect(() => {
     if (!isMenuOpen) return;
     const close = () => setIsMenuOpen(false);
-    const closeOnEsc = (e: KeyboardEvent) => e.key === "Escape" && setIsMenuOpen(false);
+    const closeOnEsc = (e: KeyboardEvent) =>
+      e.key === "Escape" && setIsMenuOpen(false);
     document.addEventListener("click", close);
     document.addEventListener("keydown", closeOnEsc);
     return () => {
@@ -88,16 +124,20 @@ export function useAuthNav() {
   const isLoggedIn = hasActiveSession(session);
   const accountType = getAccountType(session);
 
-  const signOut = useCallback((navigate: (path: string) => void, redirectPath: string) => {
-    clearAuthSession();
-    navigate(redirectPath);
-  }, []);
+  const signOut = useCallback(
+    (navigate: (path: string) => void, redirectPath: string) => {
+      clearAuthSession();
+      navigate(redirectPath);
+    },
+    [],
+  );
 
-  /** Ported from the .mr-smart-login click handler in js/microresume.ts */
-  const getSmartLoginPath = useCallback(() => {
-    if (!isLoggedIn) return "/login";
-    return accountType === "company" ? "/company-admin" : "/profile";
-  }, [isLoggedIn, accountType]);
-
-  return { isLoggedIn, accountType, isMenuOpen, setIsMenuOpen, signOut, refresh, getSmartLoginPath };
+  return {
+    isLoggedIn,
+    accountType,
+    isMenuOpen,
+    setIsMenuOpen,
+    signOut,
+    refresh,
+  };
 }

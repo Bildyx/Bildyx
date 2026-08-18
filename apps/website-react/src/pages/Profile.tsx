@@ -41,7 +41,6 @@ export default function Profile() {
     setShowLangModal,
     showSkillModal,
     setShowSkillModal,
-    skillSuggestions,
     openSkillPicker,
     addLanguage,
     removeLanguage,

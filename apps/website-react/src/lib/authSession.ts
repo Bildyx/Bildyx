@@ -1,16 +1,9 @@
+import { User } from "@repo/models/users";
+import { OrganizationService } from "../services/organization.service";
+
 export type AccountType = "company" | "seeker" | "";
 
-export function normalizeAccountType(value: unknown): string {
-  const raw = String(value || "").toLowerCase().replace(/[\s_-]/g, "");
-
-  if (["company", "business", "employer", "organization", "organisation", "recruiter"].includes(raw)) return "company";
-  if (["seeker", "jobseeker", "jobseekers", "candidate", "student", "user"].includes(raw)) return "seeker";
-
-  return raw;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getAuthUser(data: any): any {
+export function getAuthUser(data: any) {
   return data?.user || data?.data?.user || data?.data || data || {};
 }
 
@@ -24,7 +17,11 @@ export function readPendingAccountType(userId?: string): string {
       ""
     );
   }
-  return sessionStorage.getItem("bildyx_pending_account_type") || localStorage.getItem("bildyx_pending_account_type") || "";
+  return (
+    sessionStorage.getItem("bildyx_pending_account_type") ||
+    localStorage.getItem("bildyx_pending_account_type") ||
+    ""
+  );
 }
 
 export function savePendingAccountType(accountType: string, userId?: string) {
@@ -32,7 +29,10 @@ export function savePendingAccountType(accountType: string, userId?: string) {
   sessionStorage.setItem("bildyx_pending_account_type", accountType);
   localStorage.setItem("bildyx_pending_account_type", accountType);
   if (userId) {
-    sessionStorage.setItem(`bildyx_pending_account_type_${userId}`, accountType);
+    sessionStorage.setItem(
+      `bildyx_pending_account_type_${userId}`,
+      accountType,
+    );
     localStorage.setItem(`bildyx_pending_account_type_${userId}`, accountType);
   }
 }
@@ -46,29 +46,26 @@ export function clearPendingAccountType(userId?: string) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getAccountType(user: any): string {
-  const accountType = normalizeAccountType(
-    user?.accountType || user?.account_type || user?.userType || user?.user_type || user?.profileType || user?.profile_type || user?.role || user?.type,
-  );
-  if (accountType) return accountType;
-  return normalizeAccountType(readPendingAccountType());
+export async function getRedirectPath(user: User): Promise<string> {
+  if (user.organization_id) {
+    const organizationService = new OrganizationService();
+    const organization = await organizationService.getById(
+      user.organization_id,
+    );
+    if (organization) {
+      return `/${organization.profile_url}/admin`;
+    }
+  }
+  return "/profile";
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getRedirectPath(user: any): string {
-  return getAccountType(user) === "company" ? "/company-admin" : "/profile";
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function saveBildyxSession(user: any, fallbackEmail = "") {
   const sessionInfo = {
-    userId: user?.id || user?.userId || user?._id || null,
-    email: user?.email || fallbackEmail || "",
-    role: user?.role || null,
-    accountType: getAccountType(user),
-    profileId: user?.profileId || user?.profile_id || null,
-    companyId: user?.companyId || user?.company_id || user?.organizationId || user?.organization_id || null,
+    userId: user.id,
+    email: user.email || fallbackEmail || "",
+    role: user.role || null,
+    profileId: user.profile_id || null,
+    companyId: user.organization_id || null,
   };
 
   sessionStorage.setItem("bildyx_session", JSON.stringify(sessionInfo));
@@ -91,7 +88,9 @@ export function tooManyAttempts(email: string): boolean {
   const now = Date.now();
   const key = email.toLowerCase();
   const attempts = readAttempts();
-  const rows = (attempts[key] || []).filter((t: number) => now - t < 10 * 60 * 1000);
+  const rows = (attempts[key] || []).filter(
+    (t: number) => now - t < 10 * 60 * 1000,
+  );
   attempts[key] = rows;
   localStorage.setItem("bildyx_attempts", JSON.stringify(attempts));
   return rows.length >= 5;
