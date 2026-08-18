@@ -26,12 +26,10 @@ export function parseDbDate(dateInput: any): Date {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
 }
 
-export function getFrontendUrl(): string {
-  return FRONTEND_URL;
-}
-
 export function getLoginUrl(tab?: string): string {
-  return tab ? `${FRONTEND_URL}/login.html?tab=${tab}` : `${FRONTEND_URL}/login.html`;
+  return tab
+    ? `${FRONTEND_URL}/login.html?tab=${tab}`
+    : `${FRONTEND_URL}/login.html`;
 }
 
 export function getResetPasswordUrl(email: string, token: string): string {
