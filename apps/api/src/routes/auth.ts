@@ -30,12 +30,12 @@ import {
   verifyPassword,
   parseDbDate,
   getLoginUrl,
-  getFrontendUrl,
 } from "../services/auth.service";
 import {
   sendVerificationEmail,
   sendResetEmail,
 } from "../services/mail.service";
+import { FRONTEND_URL } from "../configuration";
 
 export const auth = {
   // 1. SIGNUP
@@ -819,7 +819,7 @@ export const auth = {
         expires: expiresAt,
       });
 
-      const frontendUrl = getFrontendUrl();
+      const frontendUrl = FRONTEND_URL;
       ctx.res.send(`
         <!DOCTYPE html>
         <html>
