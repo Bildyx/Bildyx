@@ -100,7 +100,6 @@ export const users = {
         .insertInto("users")
         .values({
           id: randomUUID(),
-          updated_at: new Date(),
           ...input,
         } as Insertable<Users>)
         .returningAll()

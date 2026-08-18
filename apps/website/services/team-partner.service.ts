@@ -1,39 +1,39 @@
 import { getRPCClient } from "@repo/api-client";
 import type {
-  TeamPartner,
-  PostTeamPartner,
-  PutTeamPartner,
-} from "@repo/models/team_partners";
+  OrganizationPartner,
+  PostOrganizationPartner,
+  PutOrganizationPartner,
+} from "@repo/models/organization_partners";
 
 export class TeamPartnerService {
   private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
-    team_id?: string;
     organization_id?: string;
-  }): Promise<TeamPartner[]> {
-    return await this.rpcClient.team_partners.getAll(filters || {});
+    partner_id?: string;
+  }): Promise<OrganizationPartner[]> {
+    return await this.rpcClient.organization_partners.getAll(filters || {} as any);
   }
 
-  public async getById(teamPartnerId: string): Promise<TeamPartner> {
-    return await this.rpcClient.team_partners.getById({ teamPartnerId });
+  public async getById(organizationPartnerId: string): Promise<OrganizationPartner> {
+    return await this.rpcClient.organization_partners.getById({ organizationPartnerId });
   }
 
-  public async create(input: PostTeamPartner): Promise<TeamPartner> {
-    return await this.rpcClient.team_partners.create(input);
+  public async create(input: PostOrganizationPartner): Promise<OrganizationPartner> {
+    return await this.rpcClient.organization_partners.create(input);
   }
 
   public async update(
-    teamPartnerId: string,
-    input: PutTeamPartner,
-  ): Promise<TeamPartner> {
-    return await this.rpcClient.team_partners.update({
-      teamPartnerId,
+    organizationPartnerId: string,
+    input: PutOrganizationPartner,
+  ): Promise<OrganizationPartner> {
+    return await this.rpcClient.organization_partners.update({
+      organizationPartnerId,
       ...input,
     });
   }
 
-  public async delete(teamPartnerId: string): Promise<void> {
-    await this.rpcClient.team_partners.delete({ teamPartnerId });
+  public async delete(organizationPartnerId: string): Promise<void> {
+    await this.rpcClient.organization_partners.delete({ organizationPartnerId });
   }
 }

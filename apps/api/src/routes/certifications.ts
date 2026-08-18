@@ -73,9 +73,7 @@ export const certifications = {
     .handler(async () => {
       let query = database.selectFrom("certifications").selectAll();
 
-      const certificationsData = await query
-        .orderBy("name", "asc")
-        .execute();
+      const certificationsData = await query.orderBy("name", "asc").execute();
 
       return certificationsData;
     }),
@@ -125,7 +123,6 @@ export const certifications = {
         .insertInto("certifications")
         .values({
           id: randomUUID(),
-          updated_at: new Date(),
           ...input,
         } as Insertable<Certifications>)
         .returningAll()

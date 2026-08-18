@@ -1,9 +1,9 @@
 import { getRPCClient } from "@repo/api-client";
 import type {
-  TeamOffice,
-  PostTeamOffice,
-  PutTeamOffice,
-} from "@repo/models/team_offices";
+  OrganizationOffice,
+  PostOrganizationOffice,
+  PutOrganizationOffice,
+} from "@repo/models/organization_offices";
 
 export class TeamOfficeService {
   private readonly rpcClient = getRPCClient();
@@ -11,29 +11,29 @@ export class TeamOfficeService {
   public async getAll(filters?: {
     city_id?: string;
     type?: string;
-  }): Promise<TeamOffice[]> {
-    return await this.rpcClient.team_offices.getAll(filters || {});
+  }): Promise<OrganizationOffice[]> {
+    return await this.rpcClient.organization_offices.getAll(filters || {} as any);
   }
 
-  public async getById(teamOfficeId: string): Promise<TeamOffice> {
-    return await this.rpcClient.team_offices.getById({ teamOfficeId });
+  public async getById(organizationOfficeId: string): Promise<OrganizationOffice> {
+    return await this.rpcClient.organization_offices.getById({ organizationOfficeId });
   }
 
-  public async create(input: PostTeamOffice): Promise<TeamOffice> {
-    return await this.rpcClient.team_offices.create(input);
+  public async create(input: PostOrganizationOffice): Promise<OrganizationOffice> {
+    return await this.rpcClient.organization_offices.create(input);
   }
 
   public async update(
-    teamOfficeId: string,
-    input: PutTeamOffice,
-  ): Promise<TeamOffice> {
-    return await this.rpcClient.team_offices.update({
-      teamOfficeId,
+    organizationOfficeId: string,
+    input: PutOrganizationOffice,
+  ): Promise<OrganizationOffice> {
+    return await this.rpcClient.organization_offices.update({
+      organizationOfficeId,
       ...input,
     });
   }
 
-  public async delete(teamOfficeId: string): Promise<void> {
-    await this.rpcClient.team_offices.delete({ teamOfficeId });
+  public async delete(organizationOfficeId: string): Promise<void> {
+    await this.rpcClient.organization_offices.delete({ organizationOfficeId });
   }
 }

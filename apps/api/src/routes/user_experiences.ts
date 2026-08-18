@@ -99,7 +99,6 @@ export const user_experiences = {
         .insertInto("user_experiences")
         .values({
           id: randomUUID(),
-          updated_at: new Date(),
           ...input,
         } as Insertable<UserExperiences>)
         .returningAll()

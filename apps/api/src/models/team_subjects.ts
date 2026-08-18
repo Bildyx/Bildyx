@@ -3,12 +3,14 @@ import { TeamSubjectStatusEnum } from "./utils/enums";
 
 export const TeamSubjectSchema = z.object({
   id: z.uuid(),
+  team_id: z.uuid(),
   subject_id: z.uuid(),
   status: TeamSubjectStatusEnum,
 });
 
 export const GetTeamSubjectsSchema = z.object({
   subject_id: z.uuid().optional(),
+  team_id: z.uuid().optional(),
   status: TeamSubjectStatusEnum.optional(),
 });
 

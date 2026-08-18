@@ -2,11 +2,11 @@ import { z } from "zod";
 
 export const TeamMemberSchema = z.object({
   id: z.uuid(),
-  team_id: z.uuid().nullable().optional(),
+  team_id: z.uuid(),
   fullname: z.string().trim().min(1),
   job_id: z.uuid(),
   profile_image: z.string().nullable().optional(),
-  is_leader: z.boolean().default(false),
+  is_leader: z.boolean().nullable().optional().default(false),
 });
 
 export const GetTeamMembersSchema = z.object({

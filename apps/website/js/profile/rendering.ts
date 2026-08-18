@@ -11,9 +11,8 @@ import {
   formatProficiency,
   fetchAndRenderCardSlot,
 } from "./modals";
-import { $, $$ } from "../helpers";
+import { $, $$, toast } from "../helpers";
 import {
-  showToast,
   escapeHtml,
   updateWordCounter,
   setField,
@@ -130,7 +129,7 @@ export async function loadUserData() {
     await renderCertifications(fullProfile.certifications || []);
   } catch (err) {
     console.error("[profile.ts] Load profile error:", err);
-    showToast("Failed to load user profile.", "error");
+    toast.error("Failed to load user profile.");
   }
 }
 
@@ -224,7 +223,7 @@ export async function renderExperiences(experiences: any[]) {
         id: exp.id,
         company: companyName,
         companyId: exp.organization_id || "",
-        productId: "",
+        subjectId: exp.subject_id || "",
         role: exp.title || "",
         roleId: exp.job_id || "",
         startYear: exp.start_year || "",
@@ -285,12 +284,8 @@ export async function renderExperiences(experiences: any[]) {
                   <p class="word-counter">0/60 words</p>
                   <div class="backend-grid backend-grid--three">
                       <section><h4>Company</h4><div class="backend-slot" data-card-slot="company-card">Company card</div></section>
-                      <section><h4>Product/Service</h4><div class="backend-slot" data-card-slot="product-card">Product/Service card</div></section>
+                      <section><h4>Subject</h4><div class="backend-slot" data-card-slot="subject-card">Subject card</div></section>
                       <section><h4>Role</h4><div class="backend-slot" data-card-slot="role-card">Role card</div></section>
-                  </div>
-                  <div class="backend-grid backend-grid--two">
-                      <section><h4>Brands</h4><button class="inline-link" type="button">Add brand (optional)...</button><div class="backend-slot backend-slot--small" data-card-slot="brand-card">Brand card</div></section>
-                      <section><h4>Client/Industry</h4><button class="inline-link" type="button">Add client/industry...</button><div class="backend-slot backend-slot--small" data-card-slot="client-card">Client/Industry card</div></section>
                   </div>
               </div>
           `;
@@ -327,6 +322,12 @@ export async function renderExperiences(experiences: any[]) {
         '[data-card-slot="role-card"]',
       );
       if (slot) fetchAndRenderCardSlot(slot, "role-card", exp.roleId);
+    }
+    if (exp.subjectId) {
+      const slot = article.querySelector<HTMLElement>(
+        '[data-card-slot="subject-card"]',
+      );
+      if (slot) fetchAndRenderCardSlot(slot, "subject-card", exp.subjectId);
     }
   });
 }

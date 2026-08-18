@@ -73,36 +73,43 @@ export const industries = {
     .input(PostIndustrySchema)
     .output(IndustrySchema)
     .handler(async ({ input }) => {
-      const existing = await database
-        .selectFrom("industries")
-        .where("name", "ilike", input.name)
-        .select("id")
-        .executeTakeFirst();
+      try {
+        const existing = await database
+          .selectFrom("industries")
+          .where("name", "ilike", input.name)
+          .select("id")
+          .executeTakeFirst();
 
-      if (existing) {
-        throw new ORPCError("CONFLICT", {
-          message: "An industry with this name already exists",
-        });
-      }
+        if (existing) {
+          throw new ORPCError("CONFLICT", {
+            message: "An industry with this name already exists",
+          });
+        }
 
-      const { ...rest } = input;
+        const { ...rest } = input;
 
-      const industry = await database
-        .insertInto("industries")
-        .values({
-          ...rest,
-          id: randomUUID(),
-        })
-        .returningAll()
-        .executeTakeFirst();
+        const industry = await database
+          .insertInto("industries")
+          .values({
+            ...rest,
+            id: randomUUID(),
+          })
+          .returningAll()
+          .executeTakeFirst();
 
-      if (!industry) {
+        if (!industry) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to create industry",
+          });
+        }
+
+        return industry;
+      } catch (error) {
+        console.log(error);
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: "Failed to create industry",
         });
       }
-
-      return industry;
     }),
 
   update: publicProcedure

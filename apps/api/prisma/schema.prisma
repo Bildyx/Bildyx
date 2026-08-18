@@ -10,18 +10,19 @@ datasource db {
 }
 
 model Industry {
-  id                 String         @id @default(uuid()) @db.Uuid
-  name               String
-  serial_number      String         @unique
-  description        String?
-  iconUrl            String?        @map("icon_url")
-  score              Int?
-  jobs               Job[]
-  mainIndustryCities City[]         @relation("CityMainIndustries")
-  organizations      Organization[] @relation("OrganizationIndustries")
-  products           Subject[]      @relation("ProductIndustries")
-  industries_A       Industry[]     @relation("RelatedIndustries")
-  industries_B       Industry[]     @relation("RelatedIndustries")
+  id                                                  String         @id @default(uuid()) @db.Uuid
+  name                                                String
+  serial_number                                       String         @unique
+  description                                         String?
+  iconUrl                                             String?        @map("icon_url")
+  score                                               Int?
+  jobs                                                Job[]
+  organizations_organizations_industry_idToindustries Organization[] @relation("organizations_industry_idToindustries")
+  mainIndustryCities                                  City[]         @relation("CityMainIndustries")
+  organizations                                       Organization[] @relation("OrganizationIndustries")
+  products                                            Subject[]      @relation("ProductIndustries")
+  industries_A                                        Industry[]     @relation("RelatedIndustries")
+  industries_B                                        Industry[]     @relation("RelatedIndustries")
 
   @@map("industries")
 }
@@ -80,96 +81,106 @@ model Country {
 }
 
 model City {
-  id                         String         @id @default(uuid()) @db.Uuid
+  id                         String                 @id @default(uuid()) @db.Uuid
   name                       String
-  serial_number              String         @unique
-  countryId                  String         @map("country_id") @db.Char(2)
-  isCapital                  Boolean        @default(false) @map("is_capital")
-  stateProvince              String?        @map("state_province")
+  serial_number              String                 @unique
+  countryId                  String                 @map("country_id") @db.Char(2)
+  isCapital                  Boolean                @default(false) @map("is_capital")
+  stateProvince              String?                @map("state_province")
   population                 String?
-  numberOfMultinationalHqs   String?        @map("number_of_multinational_hqs")
-  numberOfAirports           Int?           @map("number_of_airports")
+  numberOfMultinationalHqs   String?                @map("number_of_multinational_hqs")
+  numberOfAirports           Int?                   @map("number_of_airports")
   largest_organization       String?
   currency                   Currency
-  medianSalary               Int?           @map("median_salary")
-  medianHomePrice            Int?           @map("median_home_price")
-  averageRent                Int?           @map("average_rent")
-  costOfLiving               CostOfLiving?  @map("cost_of_living")
+  medianSalary               Int?                   @map("median_salary")
+  medianHomePrice            Int?                   @map("median_home_price")
+  averageRent                Int?                   @map("average_rent")
+  costOfLiving               CostOfLiving?          @map("cost_of_living")
   temperatures               String?
   climate                    String?
-  interestingFact            String?        @map("interesting_fact")
-  degreeHolders              String?        @map("degree_holders")
-  numberOfUniversities       Int?           @map("number_of_universities")
+  interestingFact            String?                @map("interesting_fact")
+  degreeHolders              String?                @map("degree_holders")
+  numberOfUniversities       Int?                   @map("number_of_universities")
   top_universities           String?
-  numberOfNationalities      String?        @map("number_of_nationalities")
+  numberOfNationalities      String?                @map("number_of_nationalities")
   language                   Language[]
-  peopleDescription          String?        @map("people_description")
+  peopleDescription          String?                @map("people_description")
   latitude                   Float?
   longitude                  Float?
-  country                    Country        @relation(fields: [countryId], references: [isoCode])
+  country                    Country                @relation(fields: [countryId], references: [isoCode])
   jobAds                     JobAd[]
-  headquarteredOrganizations Organization[] @relation("OrganizationHeadquarters")
-  team_offices               team_offices[]
+  organization_offices       organization_offices[]
+  headquarteredOrganizations Organization[]         @relation("OrganizationHeadquarters")
   teams                      teams[]
   userProfiles               UserProfile[]
-  mainIndustries             Industry[]     @relation("CityMainIndustries")
-  organizations_working_area Organization[] @relation("working_area")
+  mainIndustries             Industry[]             @relation("CityMainIndustries")
+  organizations_working_area Organization[]         @relation("working_area")
 
   @@index([countryId])
   @@map("cities")
 }
 
 model Organization {
-  id                   String               @id @default(uuid()) @db.Uuid
-  name                 String
-  slug                 String               @unique
-  ownership            String?
-  mission              String?
-  knownFor             String?              @map("known_for")
-  researchAreas        String[]             @map("research_areas")
-  products             String[]
-  services             String[]
-  budget               String?
-  founded              String?
-  score                Int?
-  city_id              String?              @db.Uuid
-  numberOfEmployees    EmployeeCountRange?
-  parentOrganizationId String?              @map("parent_organization_id") @db.Uuid
-  authority            String?
-  collections          String?
-  description          String?
-  facilities           String[]
-  founders             String[]
-  jurisdiction         String?
-  members              Int?
-  personnel            Int?
-  programsActivities   String[]             @map("programs_activities")
-  serial_number        String               @unique
-  subtype              OrganizationSubType?
-  type1                String?
-  type2                String?
-  undergraduates       Int?
-  studentCount         Int?                 @map("student_count")
-  postgraduates        Int?
-  profile_url          String?
-  avatar_url           String?
-  is_public            Boolean?
-  issuedCertifications Certification[]      @relation("CertificationIssuer")
-  jobAds               JobAd[]
-  headquartersCity     City?                @relation("OrganizationHeadquarters", fields: [city_id], references: [id])
-  parentOrganization   Organization?        @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
-  childAgencies        Organization[]       @relation("OrganizationHierarchy")
-  subjects             Subject[]
-  team_customers       team_customers[]
-  team_investors       team_investors[]
-  team_partners        team_partners[]
-  userEducations       UserEducations[]
-  userExperiences      UserExperience[]
-  userTargetLists      UserTargetList[]
-  user                 User?
-  countries            Country[]            @relation("OrganizationCountries")
-  industries           Industry[]           @relation("OrganizationIndustries")
-  cities_working_area  City[]               @relation("working_area")
+  id                                                                                 String                      @id @default(uuid()) @db.Uuid
+  name                                                                               String
+  slug                                                                               String                      @unique
+  ownership                                                                          String?
+  mission                                                                            String?
+  knownFor                                                                           String?                     @map("known_for")
+  researchAreas                                                                      String[]                    @map("research_areas")
+  products                                                                           String[]
+  services                                                                           String[]
+  budget                                                                             String?
+  founded                                                                            String?
+  score                                                                              Int?
+  city_id                                                                            String?                     @db.Uuid
+  numberOfEmployees                                                                  EmployeeCountRange?
+  parentOrganizationId                                                               String?                     @map("parent_organization_id") @db.Uuid
+  authority                                                                          String?
+  collections                                                                        String?
+  description                                                                        String?
+  facilities                                                                         String[]
+  founders                                                                           String[]
+  jurisdiction                                                                       String?
+  members                                                                            Int?
+  personnel                                                                          Int?
+  programsActivities                                                                 String[]                    @map("programs_activities")
+  serial_number                                                                      String                      @unique
+  subtype                                                                            OrganizationSubType?
+  type1                                                                              String?
+  type2                                                                              String?
+  undergraduates                                                                     Int?
+  studentCount                                                                       Int?                        @map("student_count")
+  postgraduates                                                                      Int?
+  profile_url                                                                        String?
+  avatar_url                                                                         String?
+  is_public                                                                          Boolean?
+  website_url                                                                        String?
+  industry_id                                                                        String?                     @db.Uuid
+  issuedCertifications                                                               Certification[]             @relation("CertificationIssuer")
+  jobAds                                                                             JobAd[]
+  organization_customers_organization_customers_customer_idToorganizations           organization_customers[]    @relation("organization_customers_customer_idToorganizations")
+  organization_customers_organization_customers_organization_idToorganizations       organization_customers[]    @relation("organization_customers_organization_idToorganizations")
+  organization_investors_organization_investors_investor_idToorganizations           organization_investors[]    @relation("organization_investors_investor_idToorganizations")
+  organization_investors_organization_investors_organization_idToorganizations       organization_investors[]    @relation("organization_investors_organization_idToorganizations")
+  organization_offices                                                               organization_offices[]
+  organization_partners_organization_partners_organization_idToorganizations         organization_partners[]     @relation("organization_partners_organization_idToorganizations")
+  organization_partners_organization_partners_partner_idToorganizations              organization_partners[]     @relation("organization_partners_partner_idToorganizations")
+  organization_photos                                                                organization_photos[]
+  organization_subsidiaries_organization_subsidiaries_organization_idToorganizations organization_subsidiaries[] @relation("organization_subsidiaries_organization_idToorganizations")
+  organization_subsidiaries_organization_subsidiaries_subsidiary_idToorganizations   organization_subsidiaries[] @relation("organization_subsidiaries_subsidiary_idToorganizations")
+  headquartersCity                                                                   City?                       @relation("OrganizationHeadquarters", fields: [city_id], references: [id])
+  industries_organizations_industry_idToindustries                                   Industry?                   @relation("organizations_industry_idToindustries", fields: [industry_id], references: [id], onDelete: Cascade)
+  parentOrganization                                                                 Organization?               @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
+  childAgencies                                                                      Organization[]              @relation("OrganizationHierarchy")
+  subjects                                                                           Subject[]
+  userEducations                                                                     UserEducations[]
+  userExperiences                                                                    UserExperience[]
+  userTargetLists                                                                    UserTargetList[]
+  user                                                                               User?
+  countries                                                                          Country[]                   @relation("OrganizationCountries")
+  industries                                                                         Industry[]                  @relation("OrganizationIndustries")
+  cities_working_area                                                                City[]                      @relation("working_area")
 
   @@index([parentOrganizationId])
   @@index([subtype])
@@ -262,27 +273,27 @@ model Degree {
 }
 
 model Subject {
-  id                String           @id @default(uuid()) @db.Uuid
-  name              String
-  serial_number     String           @unique
-  type              String?
-  description       String?
-  short_description String?
-  category          SubjectCategory?
-  competitors       String[]
-  vendors           String[]
-  fun_fact          String?
-  organization_id   String?          @db.Uuid
-  website_url       String?
-  logo_url          String?
-  tags              String[]
-  score             Int?
-  organization      Organization?    @relation(fields: [organization_id], references: [id])
-  team_subjects     team_subjects[]
-  user_experiences  UserExperience[]
-  industries        Industry[]       @relation("ProductIndustries")
+  id                  String             @id @default(uuid()) @db.Uuid
+  name                String
+  serial_number       String             @unique
+  type                String?
+  description         String?
+  short_description   String?
+  competitors         String[]
+  vendors             String[]
+  fun_fact            String?
+  organization_id     String             @db.Uuid
+  website_url         String?
+  logo_url            String?
+  tags                String[]
+  score               Int?
+  subject_category_id String             @db.Uuid
+  organization        Organization       @relation(fields: [organization_id], references: [id], onDelete: SetNull)
+  subject_categories  subject_categories @relation(fields: [subject_category_id], references: [id], onDelete: NoAction)
+  team_subjects       team_subjects[]
+  user_experiences    UserExperience[]
+  industries          Industry[]         @relation("ProductIndustries")
 
-  @@index([category])
   @@index([organization_id])
   @@map("subjects")
 }
@@ -677,54 +688,15 @@ model ImportRowHash {
   @@map("import_row_hashes")
 }
 
-model team_customers {
-  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  team_id         String?       @db.Uuid
-  organization_id String?       @db.Uuid
-  organizations   Organization? @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  teams           teams?        @relation(fields: [team_id], references: [id], onDelete: Cascade)
-}
-
-model team_investors {
-  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  team_id         String?       @db.Uuid
-  organization_id String?       @db.Uuid
-  organizations   Organization? @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  teams           teams?        @relation(fields: [team_id], references: [id], onDelete: Cascade)
-}
-
 model team_members {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  team_id       String?  @db.Uuid
+  team_id       String   @db.Uuid
   fullname      String
   job_id        String   @db.Uuid
   profile_image String?
   is_leader     Boolean? @default(false)
   jobs          Job      @relation(fields: [job_id], references: [id], onDelete: SetNull)
-  teams         teams?   @relation(fields: [team_id], references: [id], onDelete: Cascade)
-}
-
-model team_offices {
-  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  city_id String @db.Uuid
-  type    String
-  cities  City   @relation(fields: [city_id], references: [id], onDelete: Cascade)
-}
-
-model team_partners {
-  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  team_id         String?       @db.Uuid
-  organization_id String?       @db.Uuid
-  organizations   Organization? @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  teams           teams?        @relation(fields: [team_id], references: [id], onDelete: Cascade)
-}
-
-model team_photos {
-  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name    String?
-  url     String
-  team_id String  @db.Uuid
-  teams   teams   @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  teams         teams    @relation(fields: [team_id], references: [id], onDelete: Cascade)
 }
 
 model team_profiles {
@@ -747,29 +719,80 @@ model team_subjects {
   id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   subject_id String            @db.Uuid
   status     TeamSubjectStatus
+  team_id    String            @db.Uuid
   subjects   Subject           @relation(fields: [subject_id], references: [id], onDelete: Cascade)
-}
-
-model team_subsidiaries {
-  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  team_id         String? @db.Uuid
-  organization_id String? @db.Uuid
+  teams      teams             @relation(fields: [team_id], references: [id], onDelete: Cascade)
 }
 
 model teams {
-  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type            String
   name            String
-  visibility      TeamVisibility   @default(PUBLIC)
-  city_id         String           @db.Uuid
+  visibility      TeamVisibility  @default(PUBLIC)
+  city_id         String          @db.Uuid
   product_service String?
-  team_customers  team_customers[]
-  team_investors  team_investors[]
   team_members    team_members[]
-  team_partners   team_partners[]
-  team_photos     team_photos[]
   team_profiles   team_profiles[]
-  cities          City             @relation(fields: [city_id], references: [id], onDelete: SetNull)
+  team_subjects   team_subjects[]
+  cities          City            @relation(fields: [city_id], references: [id], onDelete: SetNull)
+}
+
+model organization_customers {
+  id                                                                  String       @id(map: "team_customers_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization_id                                                     String       @db.Uuid
+  customer_id                                                         String       @db.Uuid
+  organizations_organization_customers_customer_idToorganizations     Organization @relation("organization_customers_customer_idToorganizations", fields: [customer_id], references: [id], onDelete: Cascade)
+  organizations_organization_customers_organization_idToorganizations Organization @relation("organization_customers_organization_idToorganizations", fields: [organization_id], references: [id], onDelete: Cascade)
+}
+
+model organization_investors {
+  id                                                                  String       @id(map: "team_investors_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization_id                                                     String       @db.Uuid
+  investor_id                                                         String       @db.Uuid
+  organizations_organization_investors_investor_idToorganizations     Organization @relation("organization_investors_investor_idToorganizations", fields: [investor_id], references: [id], onDelete: Cascade)
+  organizations_organization_investors_organization_idToorganizations Organization @relation("organization_investors_organization_idToorganizations", fields: [organization_id], references: [id], onDelete: Cascade)
+}
+
+model organization_offices {
+  id              String       @id(map: "team_offices_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  city_id         String       @db.Uuid
+  type            String
+  organization_id String       @db.Uuid
+  organizations   Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  cities          City         @relation(fields: [city_id], references: [id], onDelete: Cascade, map: "team_offices_city_id_fkey")
+}
+
+model organization_partners {
+  id                                                                 String       @id(map: "team_partners_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization_id                                                    String       @db.Uuid
+  partner_id                                                         String       @db.Uuid
+  organizations_organization_partners_organization_idToorganizations Organization @relation("organization_partners_organization_idToorganizations", fields: [organization_id], references: [id], onDelete: Cascade)
+  organizations_organization_partners_partner_idToorganizations      Organization @relation("organization_partners_partner_idToorganizations", fields: [partner_id], references: [id], onDelete: Cascade)
+}
+
+model organization_photos {
+  id              String       @id(map: "team_photos_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String?
+  url             String
+  organization_id String       @db.Uuid
+  organizations   Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+}
+
+model organization_subsidiaries {
+  id                                                                     String       @id(map: "team_subsidiaries_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization_id                                                        String       @db.Uuid
+  subsidiary_id                                                          String       @db.Uuid
+  organizations_organization_subsidiaries_organization_idToorganizations Organization @relation("organization_subsidiaries_organization_idToorganizations", fields: [organization_id], references: [id], onDelete: Cascade, map: "team_subsidiaries_organization_id_fkey")
+  organizations_organization_subsidiaries_subsidiary_idToorganizations   Organization @relation("organization_subsidiaries_subsidiary_idToorganizations", fields: [subsidiary_id], references: [id], onDelete: Cascade, map: "team_subsidiaries_subsidiary_id_fkey")
+}
+
+model subject_categories {
+  id                       String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                     String
+  parent_id                String?              @db.Uuid
+  subject_categories       subject_categories?  @relation("subject_categoriesTosubject_categories", fields: [parent_id], references: [id], onDelete: Cascade)
+  other_subject_categories subject_categories[] @relation("subject_categoriesTosubject_categories")
+  subjects                 Subject[]
 }
 
 enum Currency {
@@ -1250,14 +1273,14 @@ enum LanguageProficiency {
   NATIVE
 }
 
-enum TeamSubjectStatus {
-  MAIN_FOCUS
-  HIGH_PRIORITY
-  RUNNER_UPS
-}
-
 enum TeamVisibility {
   PUBLIC
   LIMITED
   PRIVATE
+}
+
+enum TeamSubjectStatus {
+  MAIN_FOCUS
+  HIGH_PRIORITY
+  RUNNER_UPS
 }

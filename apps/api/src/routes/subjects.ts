@@ -25,7 +25,7 @@ export const subjects = {
     .input(GetSubjectsSchema)
     .output(z.array(SubjectSchema))
     .handler(async ({ input }) => {
-      const { name, category, organization_id } = input;
+      const { name, organization_id, subject_category_id } = input;
 
       let query = database.selectFrom("subjects");
 
@@ -36,11 +36,12 @@ export const subjects = {
         );
       }
 
-      if (category) {
-        query = query.where("category", "=", category);
-      }
       if (organization_id) {
         query = query.where("organization_id", "=", organization_id);
+      }
+
+      if (subject_category_id) {
+        query = query.where("subject_category_id", "=", subject_category_id);
       }
 
       return await query.selectAll().orderBy("name", "asc").execute();
@@ -104,22 +105,28 @@ export const subjects = {
         });
       }
 
-      const subject = await database
-        .insertInto("subjects")
-        .values({
-          ...input,
-          id: randomUUID(),
-        })
-        .returningAll()
-        .executeTakeFirst();
+      try {
+        const subject = await database
+          .insertInto("subjects")
+          .values({
+            ...input,
+            id: randomUUID(),
+          })
+          .returningAll()
+          .executeTakeFirstOrThrow();
 
-      if (!subject) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to create subject",
+        return subject;
+      } catch (error) {
+        console.error("Database Insert Error:", error);
+
+        if (error instanceof ORPCError) throw error;
+
+        throw new ORPCError("BAD_REQUEST", {
+          message:
+            error instanceof Error ? error.message : "Failed to create subject",
+          cause: error,
         });
       }
-
-      return subject;
     }),
 
   update: publicProcedure
@@ -150,13 +157,7 @@ export const subjects = {
         .set(rest)
         .where("id", "=", subjectId)
         .returningAll()
-        .executeTakeFirst();
-
-      if (!subject) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to update subject",
-        });
-      }
+        .executeTakeFirstOrThrow();
 
       return subject;
     }),

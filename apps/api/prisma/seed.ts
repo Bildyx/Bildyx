@@ -11,7 +11,6 @@ import { seedSkills } from "./seeds/seeds_skills";
 import { seedCertifications } from "./seeds/seeds_certifications";
 import { seedDegrees } from "./seeds/seeds_degrees";
 import { seedSubjects } from "./seeds/seeds_subjects";
-import { seedStudyFields } from "./seeds/seeds_studyFields";
 import { seedManyToManyRelations } from "./seeds/seeds_relations";
 import { seedPersonalityTests } from "./seeds/seeds_personality";
 
@@ -35,7 +34,6 @@ async function main() {
   await seedSubjects(prisma);
   await seedSkills(prisma);
   await seedDegrees(prisma);
-  await seedStudyFields(prisma);
 
   // Personality questionnaire content (tests, criteria, questions). No
   // dependency on the other reference models, the source is
