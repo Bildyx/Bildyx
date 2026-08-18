@@ -23,14 +23,29 @@ export const team_offices = {
     .input(GetTeamOfficesSchema)
     .output(z.array(TeamOfficeSchema))
     .handler(async ({ input }) => {
-      let query = database.selectFrom("team_offices");
-      if (input.city_id) {
-        query = query.where("city_id", "=", input.city_id);
+      try {
+        let query = database.selectFrom("team_offices");
+        if (input.city_id) {
+          query = query.where("city_id", "=", input.city_id);
+        }
+        if (input.type) {
+          query = query.where("type", "ilike", `%${input.type.trim()}%`);
+        }
+        return await query.selectAll().execute();
+      } catch (error: any) {
+        // Force l'affichage brut de l'erreur pour voir ce qui se passe
+        console.error("DEBUG ERROR TYPE:", typeof error);
+        console.error(
+          "DEBUG ERROR INSPECT:",
+          JSON.stringify(error, Object.getOwnPropertyNames(error)),
+        );
+        console.error("DEBUG ERROR RAW:", error);
+
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: error?.message || "Failed to load team offices",
+          cause: error,
+        });
       }
-      if (input.type) {
-        query = query.where("type", "ilike", `%${input.type.trim()}%`);
-      }
-      return await query.selectAll().execute() as any;
     }),
 
   getById: publicProcedure
@@ -73,7 +88,9 @@ export const team_offices = {
         .returningAll()
         .executeTakeFirst();
       if (!office) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create team office" });
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Failed to create team office",
+        });
       }
       return office as any;
     }),

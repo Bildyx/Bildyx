@@ -1,7 +1,7 @@
 import { getRPCClient } from "@repo/api-client";
 
 export class PersonalityService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getTestsSummary(userProfileId: string) {
     return await this.rpcClient.personalityTestResults.getTestsSummary({

@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/user_languages";
 
 export class UserLanguageService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getByProfile(userProfileId: string): Promise<UserLanguage[]> {
     return await this.rpcClient.user_languages.getLanguagesByProfile({

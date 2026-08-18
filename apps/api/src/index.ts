@@ -17,8 +17,8 @@ import {
   HOST,
   PORT,
   RPC_PREFIX,
-  API_URL,
-  ALLOWED_ORIGINS,
+  VITE_API_URL,
+  FRONTEND_URL,
 } from "./configuration";
 import { router } from "./routes/router";
 import { database } from "./database";
@@ -34,9 +34,9 @@ const app = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (Postman, curl, server-to-server)
-      if (!origin) return callback(null, true);
-      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      if (!origin || origin === FRONTEND_URL) {
+        return callback(null, true);
+      }
       callback(new Error(`CORS: origin '${origin}' not allowed`));
     },
     credentials: true,
@@ -55,7 +55,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${API_URL}/api/auth/google/callback`,
+        callbackURL: `${VITE_API_URL}/api/auth/google/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -188,21 +188,25 @@ app.get("/spec.json", async (req, res) => {
 app.get("/enums/languages", (_req, res) => {
   res.json(LanguageSchema.options);
 });
-app.use("/css", express.static(path.resolve(__dirname, "templates/organizations")));
+app.use(
+  "/css",
+  express.static(path.resolve(__dirname, "templates/organizations")),
+);
 
 // Serve icon/logo images statically (replaces per-request Base64 encoding)
-const iconsDir =
-  fs.existsSync(path.resolve(process.cwd(), "../../Files/icons"))
-    ? path.resolve(process.cwd(), "../../Files/icons")
-    : fs.existsSync(path.resolve(process.cwd(), "Files/icons"))
-      ? path.resolve(process.cwd(), "Files/icons")
-      : path.resolve(__dirname, "../../../../Files/icons");
+const iconsDir = fs.existsSync(path.resolve(process.cwd(), "../../Files/icons"))
+  ? path.resolve(process.cwd(), "../../Files/icons")
+  : fs.existsSync(path.resolve(process.cwd(), "Files/icons"))
+    ? path.resolve(process.cwd(), "Files/icons")
+    : path.resolve(__dirname, "../../../../Files/icons");
 
-app.use("/static/icons", express.static(iconsDir, {
-  maxAge: "7d",
-  immutable: true,
-}));
-
+app.use(
+  "/static/icons",
+  express.static(iconsDir, {
+    maxAge: "7d",
+    immutable: true,
+  }),
+);
 
 app.use(async (req, res, next) => {
   try {
