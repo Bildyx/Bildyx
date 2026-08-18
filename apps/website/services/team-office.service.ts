@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/organization_offices";
 
 export class TeamOfficeService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     city_id?: string;

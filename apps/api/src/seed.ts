@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { generateSerialNumber } from "./models/utils/enums.js";
 
 async function seed() {
-  console.log("🌱 Database seeding started...");
+  console.log("Database seeding started...");
 
   // 1. Clean up existing test data to allow re-running
   // Clean up referencing job_ad_skills
@@ -64,9 +64,9 @@ async function seed() {
       name: "Test Organization Inc.",
       slug: "test-organization-inc",
       serial_number: generateSerialNumber("COMPANY"),
-    })
-    .execute();
-  console.log(`✅ Created Organization: Test Organization Inc. (${orgId})`);
+  })
+  .execute();
+  console.log(`Created Organization: Test Organization Inc. (${orgId})`);
 
   // 3. Create sample Certifications linked to the Organization
   const certId1 = randomUUID();
@@ -85,7 +85,7 @@ async function seed() {
     })
     .execute();
   console.log(
-    `✅ Created Certification 1: Test AWS Cloud Certification (${certId1})`,
+    `Created Certification 1: Test AWS Cloud Certification (${certId1})`,
   );
 
   const certId2 = randomUUID();
@@ -101,10 +101,10 @@ async function seed() {
       category: "PROJECTMANAGEMENT",
       validity_duration_months: 36,
       website_url: "https://pmi.org",
-    })
-    .execute();
+  })
+  .execute();
   console.log(
-    `✅ Created Certification 2: Test Project Management Professional (${certId2})`,
+    `Created Certification 2: Test Project Management Professional (${certId2})`,
   );
 
   console.log("🏁 Database seeding completed successfully!");
@@ -112,7 +112,7 @@ async function seed() {
 
 seed()
   .catch((err) => {
-    console.error("❌ Seeding failed:", err);
+    console.error("Seeding failed:", err);
     process.exit(1);
   })
   .finally(async () => {

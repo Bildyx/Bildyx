@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/certifications";
 
 export class CertificationService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(): Promise<Certification[]> {
     return await this.rpcClient.certifications.getAll({});
@@ -16,10 +16,19 @@ export class CertificationService {
     organizationId: string,
     filters?: {
       name?: string;
-      category?: "OTHER" | "TECHNICAL" | "PROFESSIONAL" | "PROJECTMANAGEMENT" | "VENDORPRODUCT" | "LANGUAGE";
-    }
+      category?:
+        | "OTHER"
+        | "TECHNICAL"
+        | "PROFESSIONAL"
+        | "PROJECTMANAGEMENT"
+        | "VENDORPRODUCT"
+        | "LANGUAGE";
+    },
   ): Promise<Certification[]> {
-    return await this.rpcClient.certifications.getByOrganization({ organizationId, ...filters });
+    return await this.rpcClient.certifications.getByOrganization({
+      organizationId,
+      ...filters,
+    });
   }
 
   public async getById(certificationId: string): Promise<Certification> {
@@ -30,8 +39,14 @@ export class CertificationService {
     return await this.rpcClient.certifications.create(input);
   }
 
-  public async update(certificationId: string, input: PutCertification): Promise<Certification> {
-    return await this.rpcClient.certifications.update({ certificationId, ...input });
+  public async update(
+    certificationId: string,
+    input: PutCertification,
+  ): Promise<Certification> {
+    return await this.rpcClient.certifications.update({
+      certificationId,
+      ...input,
+    });
   }
 
   public async delete(certificationId: string): Promise<void> {

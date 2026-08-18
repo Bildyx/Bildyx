@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/organization_photos";
 
 export class TeamPhotoService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     organization_id?: string;

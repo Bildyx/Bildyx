@@ -2,7 +2,7 @@ import ejs from "ejs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "node:fs";
-import { API_URL } from "../configuration.js";
+import { VITE_API_URL } from "../configuration.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const TEMPLATES_DIR = path.resolve(__dirname, "../templates");
@@ -12,7 +12,7 @@ export const TEMPLATES_DIR = path.resolve(__dirname, "../templates");
 // ---------------------------------------------------------------------------
 
 export function getIconUrl(category: string, filename: string): string {
-  return `${API_URL}/static/icons/${encodeURIComponent(category)}/${encodeURIComponent(filename)}`;
+  return `${VITE_API_URL}/static/icons/${encodeURIComponent(category)}/${encodeURIComponent(filename)}`;
 }
 
 /**
@@ -208,7 +208,7 @@ export async function renderCardHtml(
   if (organizationCss) {
     return html.replace(
       /<link rel="stylesheet" href="\/css\/organization-card\.css">/g,
-      `<style>${organizationCss}</style>`
+      `<style>${organizationCss}</style>`,
     );
   }
 

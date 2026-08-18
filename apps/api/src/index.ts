@@ -17,8 +17,8 @@ import {
   HOST,
   PORT,
   RPC_PREFIX,
-  API_URL,
-  ALLOWED_ORIGINS,
+  VITE_API_URL,
+  FRONTEND_URL,
 } from "./configuration";
 import { router } from "./routes/router";
 import { database } from "./database";
@@ -34,9 +34,9 @@ const app = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (Postman, curl, server-to-server)
-      if (!origin) return callback(null, true);
-      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      if (!origin || origin === FRONTEND_URL) {
+        return callback(null, true);
+      }
       callback(new Error(`CORS: origin '${origin}' not allowed`));
     },
     credentials: true,
@@ -55,7 +55,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${API_URL}/api/auth/google/callback`,
+        callbackURL: `${VITE_API_URL}/api/auth/google/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -121,10 +121,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               .values({
                 id: randomUUID(),
                 user_id: userId,
-                first_name: profile.name?.givenName || "",
-                last_name: profile.name?.familyName || "",
-                display_name: profile.displayName || "",
-                avatar_url: profile.photos?.[0]?.value || null,
                 is_public: true,
               })
               .execute();
@@ -280,6 +276,7 @@ const server = app.listen(PORT, HOST, () => {
     `API ${util.styleText("bold", `v${VERSION}`)} listening at ${util.styleText("cyan", url)}`,
   );
   console.log(`Ready in ${prettyMilliseconds(elapsedTimeMs)}`);
+  console.log(`API v${VERSION} listening on ${HOST}:${PORT}`);
   console.log();
 });
 

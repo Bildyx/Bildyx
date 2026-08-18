@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm run build && php -S localhost:8000",
     "watch": "node esbuild.config.mjs --watch",
-    "start": "npm run build:ts && php -S localhost:8000",
+    "start": "npm run build:ts && php -S 0.0.0.0:${PORT:-8000}",
     "build": "node esbuild.config.mjs",
     "build:ts": "node esbuild.config.mjs",
     "test": "echo \"No tests for website\""
