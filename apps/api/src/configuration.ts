@@ -1,7 +1,7 @@
 export const NODE_ENV = process.env["NODE_ENV"] ?? "development";
 export const PORT = Number.parseInt(process.env["PORT"] ?? "3000", 10);
 export const HOST = process.env["HOST"] ?? "0.0.0.0";
-export const VITE_API_URL = process.env["VITE_API_URL"];
+export const API_URL = process.env["API_URL"];
 export const FRONTEND_URL = process.env["FRONTEND_URL"];
 export const NAME = "Bildyx API";
 export const VERSION = "1.0.0";

@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import prettyMilliseconds from "pretty-ms";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 import { openAPIGenerator, openAPIHandler, rpcHandler } from "./application";
 import {
   NAME,
@@ -17,7 +18,7 @@ import {
   HOST,
   PORT,
   RPC_PREFIX,
-  VITE_API_URL,
+  API_URL,
   FRONTEND_URL,
 } from "./configuration";
 import { router } from "./routes/router";
@@ -55,7 +56,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${VITE_API_URL}/api/auth/google/callback`,
+        callbackURL: `${API_URL}/api/auth/google/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
