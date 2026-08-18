@@ -3,10 +3,8 @@ import { CardService } from "../services/card.service";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
 import { getRPCClient } from "@repo/api-client";
 
-const rpc = getRPCClient("http://localhost:3000");
+const rpc = getRPCClient();
 const cardService = new CardService();
-
-const PAGE_SIZE = 6;
 
 type TargetRow = {
   id: string;
