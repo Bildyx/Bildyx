@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/user_skills";
 
 export class UserSkillService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getByProfile(userProfileId: string): Promise<UserSkill[]> {
     return await this.rpcClient.user_skills.getSkillsByProfile({

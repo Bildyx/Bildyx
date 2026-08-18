@@ -2,7 +2,7 @@ import { getRPCClient } from "@repo/api-client";
 import type { User, PostUser, PutUser } from "@repo/models/users";
 
 export class UserService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     email?: string;

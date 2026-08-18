@@ -1,8 +1,11 @@
 import { getRPCClient } from "@repo/api-client";
-import type { UserTargetList, PostUserTargetList } from "@repo/models/user_target_lists";
+import type {
+  UserTargetList,
+  PostUserTargetList,
+} from "@repo/models/user_target_lists";
 
 export class UserTargetListService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     user_profile_id?: string;

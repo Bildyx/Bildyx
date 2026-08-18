@@ -7,9 +7,12 @@ import type {
 } from "@repo/models/cities";
 
 export class CityService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
-  public async getAll(filters?: { name?: string; country_id?: string }): Promise<CityListItem[]> {
+  public async getAll(filters?: {
+    name?: string;
+    country_id?: string;
+  }): Promise<CityListItem[]> {
     return await this.rpcClient.cities.getAll(filters || {});
   }
 

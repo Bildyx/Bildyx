@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/organization_customers";
 
 export class TeamCustomerService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     organization_id?: string;

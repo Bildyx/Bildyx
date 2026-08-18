@@ -7,7 +7,7 @@ import type {
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
 
 export class OrganizationService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     name?: string;

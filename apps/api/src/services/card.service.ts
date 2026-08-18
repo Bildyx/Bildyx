@@ -208,7 +208,7 @@ export async function renderCardHtml(
   if (organizationCss) {
     return html.replace(
       /<link rel="stylesheet" href="\/css\/organization-card\.css">/g,
-      `<style>${organizationCss}</style>`
+      `<style>${organizationCss}</style>`,
     );
   }
 

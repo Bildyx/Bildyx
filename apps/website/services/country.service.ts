@@ -1,12 +1,8 @@
 import { getRPCClient } from "@repo/api-client";
-import type {
-  Country,
-  PostCountry,
-  PutCountry,
-} from "@repo/models/countries";
+import type { Country, PostCountry, PutCountry } from "@repo/models/countries";
 
 export class CountryService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(): Promise<Country[]> {
     return await this.rpcClient.countries.getAll({});

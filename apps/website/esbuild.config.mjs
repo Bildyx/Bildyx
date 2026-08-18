@@ -31,9 +31,9 @@ let env = {};
 
 try {
     const envContent = readFileSync(
-        fileURLToPath(new URL("../api/.env", import.meta.url)),
-        "utf8"
-    );
+    fileURLToPath(new URL("../../.env", import.meta.url)),
+    "utf8"
+);
 
     for (const line of envContent.split("\n")) {
         const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
@@ -71,6 +71,8 @@ const ctx = await esbuild.context({
     minify: !isWatch,
     logLevel: "info",
     define: {
+        "process.env.FRONTEND_URL": JSON.stringify(env.FRONTEND_URL || ""),
+        "process.env.API_URL": JSON.stringify(env.API_URL || ""),
         "process.env.SUPABASE_URL": JSON.stringify(env.SUPABASE_URL || ""),
         "process.env.SUPABASE_ANON_KEY": JSON.stringify(env.SUPABASE_ANON_KEY || ""),
     },

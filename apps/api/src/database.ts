@@ -1,4 +1,10 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+
 import { Kysely, PostgresDialect } from "kysely";
 import pg from "pg";
 import type { DB } from "./db/types";
@@ -21,9 +27,7 @@ if (process.env.NODE_ENV === "test") {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    throw new Error(
-      "DATABASE_URL is missing. Please check your .env file.",
-    );
+    throw new Error("DATABASE_URL is missing. Please check your .env file.");
   }
 
   const pool = new Pool({
@@ -46,16 +50,10 @@ if (process.env.NODE_ENV === "test") {
     if (result.rows.length > 0) {
       const oid = result.rows[0].oid;
 
-      pg.types.setTypeParser(
-        oid,
-        pg.types.getTypeParser(1009 as any),
-      );
+      pg.types.setTypeParser(oid, pg.types.getTypeParser(1009 as any));
     }
   } catch (error) {
-    console.error(
-      "Failed to register custom enum array parser:",
-      error,
-    );
+    console.error("Failed to register custom enum array parser:", error);
   }
 
   dialect = new PostgresDialect({
@@ -80,10 +78,7 @@ if (process.env.NODE_ENV === "test") {
     const originalExec = pgliteClient.exec.bind(pgliteClient);
     let schemaLoaded = false;
 
-    pgliteClient.exec = async (
-      sql: string,
-      options?: any,
-    ) => {
+    pgliteClient.exec = async (sql: string, options?: any) => {
       const createsTable = /create\s+table/i.test(sql);
 
       if (createsTable) {
