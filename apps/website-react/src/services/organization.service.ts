@@ -1,49 +1,50 @@
-import { apiGet } from "./httpClient";
+import { getRPCClient } from "@repo/api-client";
+import type {
+  Organization,
+  PostOrganization,
+  PutOrganization,
+} from "@repo/models/organizations";
+import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
 
-export type Organization = {
-  id: string;
-  name?: string;
-  display_name?: string;
-  title?: string;
-  city?: string;
-  country?: string;
-  location?: string;
-  type?: string;
-  subtype?: string;
-  category?: string;
-  industry?: string;
-  description?: string;
-  summary?: string;
-  services?: string | string[];
-  products?: string | string[];
-  metadata?: Record<string, unknown>;
-  [key: string]: unknown;
-};
-
-export type OrganizationFilters = {
-  name?: string;
-  subtypes?: string[];
-  city?: string;
-  country?: string;
-  sizes?: string[];
-  keyword?: string;
-  productFilter?: "same" | "similar" | "different";
-  userExperienceKeywords?: string[];
-};
-
-/** See src/services/httpClient.ts — TODO: swap for the real @repo/api-client oRPC client. */
 export class OrganizationService {
-  public getAll(filters?: OrganizationFilters) {
-    const params = new URLSearchParams();
-    Object.entries(filters || {}).forEach(([key, value]) => {
-      if (value === undefined || value === "") return;
-      params.set(key, Array.isArray(value) ? value.join(",") : String(value));
-    });
-    const query = params.toString();
-    return apiGet<Organization[]>(`/organizations${query ? `?${query}` : ""}`);
+  private readonly rpcClient = getRPCClient("http://localhost:3000");
+
+  public async getAll(filters?: {
+    name?: string;
+    subtypes?: OrganizationSubType[];
+    city?: string;
+    country?: string;
+    sizes?: EmployeeCountRange[];
+    keyword?: string;
+    productFilter?: "same" | "similar" | "different";
+    userExperienceKeywords?: string[];
+  }): Promise<Organization[]> {
+    return await this.rpcClient.organizations.getAll(filters || {});
   }
 
-  public getById(organizationId: string) {
-    return apiGet<Organization>(`/organizations/${organizationId}`);
+  public async getById(organizationId: string): Promise<Organization> {
+    return await this.rpcClient.organizations.getById({ organizationId });
+  }
+
+  public async create(input: PostOrganization): Promise<Organization> {
+    return await this.rpcClient.organizations.create(input);
+  }
+
+  public async update(
+    organizationId: string,
+    input: PutOrganization,
+  ): Promise<Organization> {
+    return await this.rpcClient.organizations.update({
+      organizationId,
+      ...input,
+    });
+  }
+
+  public async delete(organizationId: string): Promise<void> {
+    await this.rpcClient.organizations.delete({ organizationId });
+  }
+
+  public async deleteBulk(organizationIds: string[]): Promise<void> {
+    await this.rpcClient.organizations.deleteBulk({ organizationIds });
   }
 }

@@ -1,29 +1,34 @@
-import { apiDelete, apiGet } from "./httpClient";
+import { getRPCClient } from "@repo/api-client";
+import type { User, PostUser, PutUser } from "@repo/models/users";
 
-export type User = {
-  id: string;
-  email: string;
-  role?: "ADMIN" | "CANDIDATE" | "ORGANIZATION";
-  status?: "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
-  [key: string]: unknown;
-};
-
-/** See src/services/httpClient.ts — TODO: swap for the real @repo/api-client oRPC client. */
 export class UserService {
-  public getAll(filters?: { email?: string; role?: User["role"]; status?: User["status"] }) {
-    const params = new URLSearchParams(filters as Record<string, string>).toString();
-    return apiGet<User[]>(`/users${params ? `?${params}` : ""}`);
+  private readonly rpcClient = getRPCClient("http://localhost:3000");
+
+  public async getAll(filters?: {
+    email?: string;
+    role?: "ADMIN" | "CANDIDATE" | "ORGANIZATION";
+    status?: "ACTIVE" | "DELETED" | "PENDING_VERIFICATION" | "SUSPENDED";
+  }): Promise<User[]> {
+    return await this.rpcClient.users.getAll(filters || {});
   }
 
-  public getById(userId: string) {
-    return apiGet<User>(`/users/${userId}`);
+  public async getById(userId: string): Promise<User> {
+    return await this.rpcClient.users.getUserById({ userId });
   }
 
-  public delete(userId: string) {
-    return apiDelete<void>(`/users/${userId}`);
+  public async create(input: PostUser): Promise<User> {
+    return await this.rpcClient.users.create(input);
   }
 
-  public deleteBulk(userIds: string[]) {
-    return apiDelete<void>(`/users?ids=${userIds.join(",")}`);
+  public async update(userId: string, input: PutUser): Promise<User> {
+    return await this.rpcClient.users.update({ userId, ...input });
+  }
+
+  public async delete(userId: string): Promise<void> {
+    await this.rpcClient.users.delete({ userId });
+  }
+
+  public async deleteBulk(userIds: string[]): Promise<void> {
+    await this.rpcClient.users.deleteBulk({ userIds });
   }
 }

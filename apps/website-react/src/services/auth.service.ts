@@ -1,57 +1,87 @@
-import { apiPost } from "./httpClient";
+import { z } from "zod";
+import { getRPCClient } from "@repo/api-client";
+import {
+  SignupInputSchema,
+  SignupOutputSchema,
+  LoginInputSchema,
+  LoginOutputSchema,
+  VerifyEmailInputSchema,
+  VerifyEmailOutputSchema,
+  ForgotPasswordInputSchema,
+  ForgotPasswordOutputSchema,
+  ResetPasswordInputSchema,
+  ResetPasswordOutputSchema,
+  ResendVerificationInputSchema,
+  ResendVerificationOutputSchema,
+  LogoutOutputSchema,
+  CancelUnverifiedInputSchema,
+  CancelUnverifiedOutputSchema,
+} from "@repo/models/auth";
 
-export type SignupInput = { accountType?: string; email: string; password: string; [key: string]: unknown };
-export type SignupOutput = { userId: string; user?: { id: string; email: string } };
+export type SignupInput = z.infer<typeof SignupInputSchema>;
+export type SignupOutput = z.infer<typeof SignupOutputSchema>;
+export type LoginInput = z.infer<typeof LoginInputSchema>;
+export type LoginOutput = z.infer<typeof LoginOutputSchema>;
+export type VerifyEmailInput = z.infer<typeof VerifyEmailInputSchema>;
+export type VerifyEmailOutput = z.infer<typeof VerifyEmailOutputSchema>;
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordInputSchema>;
+export type ForgotPasswordOutput = z.infer<typeof ForgotPasswordOutputSchema>;
+export type ResetPasswordInput = z.infer<typeof ResetPasswordInputSchema>;
+export type ResetPasswordOutput = z.infer<typeof ResetPasswordOutputSchema>;
+export type ResendVerificationInput = z.infer<
+  typeof ResendVerificationInputSchema
+>;
+export type ResendVerificationOutput = z.infer<
+  typeof ResendVerificationOutputSchema
+>;
+export type LogoutOutput = z.infer<typeof LogoutOutputSchema>;
+export type CancelUnverifiedInput = z.infer<typeof CancelUnverifiedInputSchema>;
+export type CancelUnverifiedOutput = z.infer<
+  typeof CancelUnverifiedOutputSchema
+>;
 
-export type LoginInput = { email: string; password: string };
-export type LoginOutput = { user: { id: string; email: string; accountType?: string }; token?: string };
-
-export type VerifyEmailInput = { email: string; code: string };
-export type VerifyEmailOutput = { user: { id: string; email: string } };
-
-export type ForgotPasswordInput = { email: string };
-export type ForgotPasswordOutput = { success: boolean };
-
-export type ResetPasswordInput = { email: string; token: string; newPassword: string };
-export type ResetPasswordOutput = { success: boolean };
-
-export type ResendVerificationInput = { email: string };
-export type ResendVerificationOutput = { success: boolean };
-
-export type CancelUnverifiedInput = { userId: string };
-export type CancelUnverifiedOutput = { success: boolean };
-
-/** See src/services/httpClient.ts — TODO: swap for the real @repo/api-client oRPC client. */
 export class AuthService {
-  public signup(input: SignupInput) {
-    return apiPost<SignupOutput>("/auth/signup", input);
+  private readonly rpcClient = getRPCClient("http://localhost:3000");
+
+  public async signup(input: SignupInput): Promise<SignupOutput> {
+    return await this.rpcClient.auth.signup(input);
   }
 
-  public login(input: LoginInput) {
-    return apiPost<LoginOutput>("/auth/login", input);
+  public async login(input: LoginInput): Promise<LoginOutput> {
+    return await this.rpcClient.auth.login(input);
   }
 
-  public verifyEmail(input: VerifyEmailInput) {
-    return apiPost<VerifyEmailOutput>("/auth/verify-email", input);
+  public async verifyEmail(
+    input: VerifyEmailInput,
+  ): Promise<VerifyEmailOutput> {
+    return await this.rpcClient.auth.verifyEmail(input);
   }
 
-  public forgotPassword(input: ForgotPasswordInput) {
-    return apiPost<ForgotPasswordOutput>("/auth/forgot-password", input);
+  public async forgotPassword(
+    input: ForgotPasswordInput,
+  ): Promise<ForgotPasswordOutput> {
+    return await this.rpcClient.auth.forgotPassword(input);
   }
 
-  public resetPassword(input: ResetPasswordInput) {
-    return apiPost<ResetPasswordOutput>("/auth/reset-password", input);
+  public async resetPassword(
+    input: ResetPasswordInput,
+  ): Promise<ResetPasswordOutput> {
+    return await this.rpcClient.auth.resetPassword(input);
   }
 
-  public resendVerification(input: ResendVerificationInput) {
-    return apiPost<ResendVerificationOutput>("/auth/resend-verification", input);
+  public async resendVerification(
+    input: ResendVerificationInput,
+  ): Promise<ResendVerificationOutput> {
+    return await this.rpcClient.auth.resendVerification(input);
   }
 
-  public logout(token?: string) {
-    return apiPost<{ success: boolean }>("/auth/logout", { token });
+  public async logout(token?: string): Promise<LogoutOutput> {
+    return await this.rpcClient.auth.logout({ token });
   }
 
-  public cancelUnverified(input: CancelUnverifiedInput) {
-    return apiPost<CancelUnverifiedOutput>("/auth/cancel-unverified", input);
+  public async cancelUnverified(
+    input: CancelUnverifiedInput,
+  ): Promise<CancelUnverifiedOutput> {
+    return await this.rpcClient.auth.cancelUnverified(input);
   }
 }

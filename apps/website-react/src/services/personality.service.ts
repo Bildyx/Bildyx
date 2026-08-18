@@ -1,42 +1,55 @@
-import { apiDelete, apiGet, apiPost } from "./httpClient";
+import { getRPCClient } from "@repo/api-client";
 
-export type PersonalityTest = { id: string; code: string; name: string; description?: string };
-export type PersonalityQuestion = { id: string; order: number; text: string; criterion_id: string; reverse_scored?: boolean };
-export type PersonalityCriterion = { id: string; code: string; name: string };
-export type SavedAnswers = { result: unknown; answers: Record<string, string | number>; scores: Record<string, number> };
-export type TestSummaryItem = { test_id: string; code: string; name: string; description?: string; is_completed: boolean };
-
-/** Paths match apps/api/src/routes/personality_test_results.ts, personality_questions.ts, personality_criteria.ts, personality_tests.ts */
 export class PersonalityService {
-  public getTestsSummary(userProfileId: string) {
-    return apiGet<TestSummaryItem[]>(`/personality-test-results/summary?user_profile_id=${userProfileId}`);
+  private readonly rpcClient = getRPCClient("http://localhost:3000");
+
+  public async getTestsSummary(userProfileId: string) {
+    return await this.rpcClient.personalityTestResults.getTestsSummary({
+      user_profile_id: userProfileId,
+    });
   }
 
-  public getSavedAnswers(userProfileId: string, testCode: string) {
-    return apiGet<SavedAnswers>(`/personality-test-results/saved?user_profile_id=${userProfileId}&test_code=${testCode}`);
+  public async getSavedAnswers(userProfileId: string, testCode: string) {
+    return await this.rpcClient.personalityTestResults.getSavedAnswers({
+      user_profile_id: userProfileId,
+      test_code: testCode,
+    });
   }
 
-  public submitResult(userProfileId: string, testCode: string, answers: Record<string, string | number>) {
-    return apiPost<{ success: boolean; result_id: string }>("/personality-test-results/submit", {
+  public async submitResult(
+    userProfileId: string,
+    testCode: string,
+    answers: Record<string, string | number>,
+  ) {
+    return await this.rpcClient.personalityTestResults.submitResult({
       user_profile_id: userProfileId,
       test_code: testCode,
       answers,
     });
   }
 
-  public deleteByTestCode(userProfileId: string, testCode: string) {
-    return apiDelete<{ success: boolean }>(`/personality-test-results/delete-by-code?user_profile_id=${userProfileId}&test_code=${testCode}`);
+  public async deleteByTestCode(userProfileId: string, testCode: string) {
+    return await this.rpcClient.personalityTestResults.deleteByTestCode({
+      user_profile_id: userProfileId,
+      test_code: testCode,
+    });
   }
 
-  public getQuestionsByTestId(testId: string) {
-    return apiGet<PersonalityQuestion[]>(`/personality-questions?test_id=${testId}`);
+  public async getQuestionsByTestId(testId: string) {
+    return await this.rpcClient.personalityQuestions.getAll({
+      test_id: testId,
+    });
   }
 
-  public getCriteriaByTestId(testId: string) {
-    return apiGet<PersonalityCriterion[]>(`/personality-criteria?test_id=${testId}`);
+  public async getCriteriaByTestId(testId: string) {
+    return await this.rpcClient.personalityCriteria.getAll({
+      test_id: testId,
+    });
   }
 
-  public getTestByCode(code: string) {
-    return apiGet<PersonalityTest[]>(`/personality-tests?code=${code}`);
+  public async getTestByCode(code: string) {
+    return await this.rpcClient.personalityTests.getAll({
+      code,
+    });
   }
 }

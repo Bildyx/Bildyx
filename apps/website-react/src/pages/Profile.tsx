@@ -1,236 +1,108 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { LanguageModal, SkillModal } from "../components/ProfileModals";
-import { CertificationCard, EducationCard, ExperienceCard, type CertificationDraft, type EducationDraft, type ExperienceDraft } from "../components/ProfileEntryCards";
 import { usePageMeta } from "../hooks/usePageMeta";
-import { getSession } from "../lib/session";
-import { toast } from "../lib/toast";
-import { UserService } from "../services/user.service";
-import {
-  skillService,
-  userCertificationService,
-  userEducationService,
-  userExperienceService,
-  userLanguageService,
-  userProfileService,
-  userSkillService,
-  type UserLanguage,
-  type UserSkill,
-} from "../services/profileResources.service";
 import "../css/profile.css";
-
-function uid() {
-  return `local-${Math.random().toString(36).slice(2)}`;
-}
-
-const userService = new UserService();
+import CertificationCard from "../components/cards/CertificationCard";
+import EducationCard from "../components/cards/EducationCard";
+import ExperienceCard from "../components/cards/ExperienceCard";
+import {
+  LanguageModal,
+  formatLanguageLabel,
+} from "../components/modals/LanguageModal";
+import { SkillModal } from "../components/modals/SkillModal";
+import EntitySearchModal from "../components/modals/EntitySearchModal";
+import { useProfile } from "../hooks/useProfile";
 
 export default function Profile() {
-  usePageMeta("Profile — Bildyx", "Build and edit your Bildyx MicroResume profile.");
-  const navigate = useNavigate();
+  usePageMeta(
+    "Profile — Bildyx",
+    "Build and edit your Bildyx MicroResume profile.",
+  );
 
-  const [profileId, setProfileId] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [summary, setSummary] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  const [languages, setLanguages] = useState<UserLanguage[]>([]);
-  const [skills, setSkills] = useState<UserSkill[]>([]);
-  const [experiences, setExperiences] = useState<ExperienceDraft[]>([]);
-  const [educations, setEducations] = useState<EducationDraft[]>([]);
-  const [certifications, setCertifications] = useState<CertificationDraft[]>([]);
-
-  const [meta, setMeta] = useState({
-    worked: "",
-    studied: "",
-    companies: "",
-    products: "",
-    jobs: "",
-    degrees: "",
-    certs: "",
-  });
-
-  const [showLangModal, setShowLangModal] = useState(false);
-  const [showSkillModal, setShowSkillModal] = useState(false);
-  const [skillSuggestions, setSkillSuggestions] = useState<string[]>([]);
-
-  const deletedIds = useRef({
-    languages: [] as string[],
-    skills: [] as string[],
-    experiences: [] as string[],
-    educations: [] as string[],
-    certifications: [] as string[],
-  });
+  const {
+    loaded,
+    isSaving,
+    name,
+    setName,
+    role,
+    setRole,
+    summary,
+    setSummary,
+    avatarUrl,
+    languages,
+    skills,
+    experiences,
+    educations,
+    certifications,
+    entityModalOpen,
+    entityModalSlot,
+    showLangModal,
+    setShowLangModal,
+    showSkillModal,
+    setShowSkillModal,
+    skillSuggestions,
+    openSkillPicker,
+    addLanguage,
+    removeLanguage,
+    addSkill,
+    removeSkill,
+    addExperience,
+    removeExperience,
+    addEducation,
+    removeEducation,
+    addCertification,
+    removeCertification,
+    handleSave,
+    handleSlotClick,
+    handleEntitySelect,
+    handleAvatarChange,
+    lastSavedRef,
+    updateExperience,
+    updateEducation,
+    updateCertification,
+    closeEntityModal,
+  } = useProfile();
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const session = getSession();
-    if (!session?.userId) {
-      navigate("/login");
-      return;
-    }
-
-    (async () => {
-      try {
-        const [user, fullProfile] = await Promise.all([
-          userService.getById(session.userId!),
-          userProfileService.getFullProfileByUserId(session.userId!),
-        ]);
-
-        if (!fullProfile) {
-          setLoaded(true);
-          return;
-        }
-
-        setProfileId(fullProfile.id);
-        setName(fullProfile.display_name || [fullProfile.first_name, fullProfile.last_name].filter(Boolean).join(" ") || user.email || "");
-        setRole(fullProfile.role || "");
-        setSummary(fullProfile.biography || "");
-        setAvatarUrl(fullProfile.avatar_url || null);
-        setLanguages(fullProfile.languages || []);
-        setSkills(fullProfile.skills || []);
-        setExperiences((fullProfile.experiences as ExperienceDraft[]) || []);
-        setEducations((fullProfile.educations as EducationDraft[]) || []);
-        setCertifications((fullProfile.certifications as CertificationDraft[]) || []);
-        setMeta({
-          worked: (fullProfile.countries_worked_in || []).join(", "),
-          studied: (fullProfile.countries_studied_in || []).join(", "),
-          companies: (fullProfile.companies || []).join(", "),
-          products: (fullProfile.products || []).join(", "),
-          jobs: (fullProfile.job_occupations || []).join(", "),
-          degrees: (fullProfile.degrees || []).join(", "),
-          certs: (fullProfile.certifications_meta || []).join(", "),
-        });
-      } catch (err) {
-        console.error("[Profile] Failed to load profile:", err);
-        toast.error("Could not load your profile from the API — showing an empty MicroResume you can fill in manually.");
-      } finally {
-        setLoaded(true);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setAvatarUrl(reader.result as string);
-    reader.readAsDataURL(file);
-  }
-
-  function addLanguage(language: string, level: string) {
-    setLanguages((prev) => [...prev, { id: uid(), userProfileId: profileId || "", language, proficiency: level }]);
-    setShowLangModal(false);
-  }
-
-  function removeLanguage(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.languages.push(id);
-    setLanguages((prev) => prev.filter((l) => l.id !== id));
-  }
-
-  async function openSkillPicker() {
-    try {
-      const all = await skillService.search("");
-      setSkillSuggestions(all.map((s) => s.name).sort());
-    } catch {
-      setSkillSuggestions([]);
-    }
-    setShowSkillModal(true);
-  }
-
-  function addSkill(skillName: string) {
-    setSkills((prev) => [...prev, { id: uid(), userProfileId: profileId || "", name: skillName }]);
-    setShowSkillModal(false);
-  }
-
-  function removeSkill(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.skills.push(id);
-    setSkills((prev) => prev.filter((s) => s.id !== id));
-  }
-
-  function addExperience() {
-    setExperiences((prev) => [...prev, { id: uid(), userProfileId: profileId || "" }]);
-  }
-
-  function removeExperience(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.experiences.push(id);
-    setExperiences((prev) => prev.filter((e) => e.id !== id));
-  }
-
-  function addEducation() {
-    setEducations((prev) => [...prev, { id: uid(), userProfileId: profileId || "" }]);
-  }
-
-  function removeEducation(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.educations.push(id);
-    setEducations((prev) => prev.filter((e) => e.id !== id));
-  }
-
-  function addCertification() {
-    setCertifications((prev) => [...prev, { id: uid(), userProfileId: profileId || "" }]);
-  }
-
-  function removeCertification(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.certifications.push(id);
-    setCertifications((prev) => prev.filter((c) => c.id !== id));
-  }
-
-  async function handleSave() {
-    if (!profileId) {
-      localStorage.setItem("bildyx_profile_draft", JSON.stringify({ savedAt: new Date().toISOString(), name, summary, role }));
-      toast("Profile saved locally (offline)");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const jobs: Promise<unknown>[] = [
-        userProfileService.update(profileId, { display_name: name, role, biography: summary }),
-      ];
-
-      deletedIds.current.languages.forEach((id) => jobs.push(userLanguageService.delete(id)));
-      deletedIds.current.skills.forEach((id) => jobs.push(userSkillService.delete(id)));
-      deletedIds.current.experiences.forEach((id) => jobs.push(userExperienceService.delete(id)));
-      deletedIds.current.educations.forEach((id) => jobs.push(userEducationService.delete(id)));
-      deletedIds.current.certifications.forEach((id) => jobs.push(userCertificationService.delete(id)));
-
-      languages.forEach((lang) => {
-        if (lang.id.startsWith("local-")) jobs.push(userLanguageService.create({ userProfileId: profileId, language: lang.language, proficiency: lang.proficiency }));
-      });
-      skills.forEach((skill) => {
-        if (skill.id.startsWith("local-")) jobs.push(userSkillService.create({ userProfileId: profileId, name: skill.name }));
-      });
-      experiences.forEach((exp) => {
-        const payload = { ...exp, userProfileId: profileId };
-        jobs.push(exp.id.startsWith("local-") ? userExperienceService.create(payload) : userExperienceService.update(exp.id, payload));
-      });
-      educations.forEach((edu) => {
-        const payload = { ...edu, userProfileId: profileId };
-        jobs.push(edu.id.startsWith("local-") ? userEducationService.create(payload) : userEducationService.update(edu.id, payload));
-      });
-      certifications.forEach((cert) => {
-        const payload = { ...cert, userProfileId: profileId };
-        jobs.push(cert.id.startsWith("local-") ? userCertificationService.create(payload) : userCertificationService.update(cert.id, payload));
-      });
-
-      await Promise.all(jobs);
-      deletedIds.current = { languages: [], skills: [], experiences: [], educations: [], certifications: [] };
-      toast.success("Profile saved.");
-    } catch (err) {
-      console.error("[Profile] Save error:", err);
-      toast.error("Could not save your profile. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  }
+  const meta = {
+    worked: experiences
+      .map((e: any) => e.country_name)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", "),
+    studied: educations
+      .map((e: any) => e.country_name || e.university_name)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", "),
+    companies: experiences
+      .map((e) => e.company_name)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", "),
+    products: experiences
+      .map((e) => e.subject_name)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", "),
+    jobs: experiences
+      .map((e) => e.role_title)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", "),
+    degrees: educations
+      .map((e) => e.degree_name)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", "),
+    certs: certifications
+      .map((c) => c.certification_name)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(", "),
+  };
 
   return (
     <>
@@ -238,34 +110,93 @@ export default function Profile() {
 
       <main className="profile-shell">
         <div className="profile-workspace">
-          <article className="profile-card" aria-labelledby="profileName">
+          <article
+            className="profile-card"
+            id="profilePanel"
+            aria-labelledby="profileName"
+          >
             <header className="profile-top">
               <div className="name-zone">
                 <div className="name-pill">
-                  <strong id="profileName" contentEditable suppressContentEditableWarning onBlur={(e) => setName(e.currentTarget.textContent || "")}>
-                    {loaded ? name || "Add your name..." : <span className="skeleton-loader skeleton-name" />}
+                  <strong
+                    id="profileName"
+                    data-field="name"
+                    contentEditable={true}
+                    data-placeholder="Add your name..."
+                    suppressContentEditableWarning
+                    onBlur={(event) => {
+                      const val = event.currentTarget.textContent || "";
+                      setName(val);
+                      if (val !== lastSavedRef.current.name) {
+                        handleSave(true, { name: val });
+                      }
+                    }}
+                  >
+                    {loaded ? (
+                      name
+                    ) : (
+                      <span className="skeleton-loader skeleton-name"></span>
+                    )}
                   </strong>
                   <span>MicroResume</span>
                 </div>
               </div>
 
-              <section className="summary-block" aria-labelledby="career-summary-title">
+              <section
+                className="summary-block"
+                aria-labelledby="career-summary-title"
+              >
                 <h2 className="section-mini-title" id="career-summary-title">
                   Career Summary
                 </h2>
 
                 <div className="summary-row">
                   <div className="avatar-editor">
-                    <div
+                    <button
                       className="profile-avatar"
+                      id="profileAvatar"
+                      data-field="avatar"
+                      type="button"
                       onClick={() => avatarInputRef.current?.click()}
-                      style={avatarUrl ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: "cover" } : undefined}
+                      aria-label="Change profile picture"
+                      style={{
+                        backgroundImage: avatarUrl
+                          ? `url(${avatarUrl})`
+                          : undefined,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
                     />
-                    <input ref={avatarInputRef} className="hidden-file-input" type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatarChange} />
+                    <input
+                      ref={avatarInputRef}
+                      className="hidden-file-input"
+                      id="avatarInput"
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={handleAvatarChange}
+                    />
                   </div>
 
-                  <p className="summary-text" contentEditable suppressContentEditableWarning onBlur={(e) => setSummary(e.currentTarget.textContent || "")}>
-                    {loaded ? summary || "Add career summary..." : <span className="skeleton-loader skeleton-summary" />}
+                  <p
+                    className="summary-text"
+                    data-field="summary"
+                    contentEditable={true}
+                    data-placeholder="Add career summary..."
+                    suppressContentEditableWarning
+                    onBlur={(event) => {
+                      const val = event.currentTarget.textContent || "";
+                      setSummary(val);
+                      if (val !== lastSavedRef.current.summary) {
+                        handleSave(true, { summary: val });
+                      }
+                    }}
+                  >
+                    {loaded ? (
+                      summary
+                    ) : (
+                      <span className="skeleton-loader skeleton-summary"></span>
+                    )}
                   </p>
                 </div>
               </section>
@@ -273,88 +204,337 @@ export default function Profile() {
               <div className="profile-main-grid">
                 <section className="profile-core" aria-labelledby="role-title">
                   <div className="title-line">
-                    <h1 id="role-title" contentEditable suppressContentEditableWarning onBlur={(e) => setRole(e.currentTarget.textContent || "")}>
-                      {loaded ? role || "Add role title..." : <span className="skeleton-loader skeleton-role" />}
+                    <h1
+                      id="role-title"
+                      data-field="role"
+                      contentEditable={true}
+                      data-placeholder="Add role title..."
+                      suppressContentEditableWarning
+                      onBlur={(event) => {
+                        const val = event.currentTarget.textContent || "";
+                        setRole(val);
+                        if (val !== lastSavedRef.current.role) {
+                          handleSave(true, { role: val });
+                        }
+                      }}
+                    >
+                      {loaded ? (
+                        role
+                      ) : (
+                        <span className="skeleton-loader skeleton-role"></span>
+                      )}
                     </h1>
                   </div>
 
-                  <p className="profile-mini-label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <p
+                    className="mini-label"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <svg
+                      className="meta-icon"
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
                     Languages
-                    <button className="chip-add" type="button" aria-label="Add language" onClick={() => setShowLangModal(true)}>
+                    <button
+                      className="chip-add"
+                      type="button"
+                      data-add-chip="languageChips"
+                      aria-label="Add language"
+                      onClick={() => setShowLangModal(true)}
+                    >
                       +
                     </button>
                   </p>
-                  <div className="chip-row" aria-label="Languages">
+                  <div
+                    className="chip-row"
+                    id="languageChips"
+                    aria-label="Languages"
+                    data-chip-limit="5"
+                  >
                     {!loaded ? (
                       <>
-                        <span className="skeleton-loader skeleton-chip" />
-                        <span className="skeleton-loader skeleton-chip" />
+                        <span className="skeleton-loader skeleton-chip"></span>
+                        <span className="skeleton-loader skeleton-chip"></span>
                       </>
                     ) : (
-                      languages.map((lang) => (
-                        <span className="chip" key={lang.id}>
-                          {lang.language} · {lang.proficiency}
-                          <button type="button" aria-label={`Remove ${lang.language}`} onClick={() => removeLanguage(lang.id)}>
-                            ×
+                      languages.map((lang) => {
+                        let levelClass = "";
+                        const prof = lang.proficiency || "FLUENT";
+                        if (prof === "NATIVE") levelClass = "is-native";
+                        else if (prof === "FLUENT") levelClass = "is-fluent";
+                        else levelClass = "is-intermediate";
+
+                        return (
+                          <button
+                            key={lang.id}
+                            type="button"
+                            className={`chip ${levelClass}`}
+                            title="Remove language"
+                            onClick={() => removeLanguage(lang.id)}
+                          >
+                            {formatLanguageLabel(lang.language)}
                           </button>
-                        </span>
-                      ))
+                        );
+                      })
                     )}
                   </div>
 
                   <p className="level-legend">
-                    <span /> Native
-                    <span /> Fluent
-                    <span /> Intermediate
+                    <span></span> Native
+                    <span></span> Fluent
+                    <span></span> Intermediate
                   </p>
 
                   <ul className="profile-meta-list">
                     <li>
-                      <strong>Countries:</strong> <span>{loaded ? meta.worked || "—" : <span className="skeleton-loader skeleton-meta" />}</span>
+                      <svg
+                        className="meta-icon"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                      </svg>
+                      <strong>Countries:</strong>
+                      <span data-field="meta-worked-in">
+                        {loaded ? (
+                          meta.worked || "—"
+                        ) : (
+                          <span className="skeleton-loader skeleton-meta"></span>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      <strong>Studied In:</strong> <span>{loaded ? meta.studied || "—" : <span className="skeleton-loader skeleton-meta" />}</span>
+                      <svg
+                        className="meta-icon"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+                      </svg>
+                      <strong>Studied In:</strong>
+                      <span data-field="meta-studied-in">
+                        {loaded ? (
+                          meta.studied || "—"
+                        ) : (
+                          <span className="skeleton-loader skeleton-meta"></span>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      <strong>Companies:</strong> <span>{loaded ? meta.companies || "—" : <span className="skeleton-loader skeleton-meta" />}</span>
+                      <svg
+                        className="meta-icon"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="4"
+                          y="2"
+                          width="16"
+                          height="20"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <line x1="9" y1="22" x2="9" y2="16"></line>
+                        <line x1="15" y1="22" x2="15" y2="16"></line>
+                        <line x1="9" y1="16" x2="15" y2="16"></line>
+                        <path d="M8 6h2v2H8V6zm0 4h2v2H8v-2zm8-4h2v2h-2V6zm0 4h2v2h-2v-2z"></path>
+                      </svg>
+                      <strong>Companies:</strong>
+                      <span data-field="meta-companies">
+                        {loaded ? (
+                          meta.companies || "—"
+                        ) : (
+                          <span className="skeleton-loader skeleton-meta"></span>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      <strong>Products:</strong> <span>{loaded ? meta.products || "—" : <span className="skeleton-loader skeleton-meta" />}</span>
+                      <svg
+                        className="meta-icon"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+                        <polygon points="12 22.08 12 12 3 6.92 3 17.08 12 22.08"></polygon>
+                        <polygon points="12 22.08 21 17.08 21 6.92 12 12 12 22.08"></polygon>
+                        <polygon points="12 12 21 6.92 12 1.84 3 6.92 12 12"></polygon>
+                      </svg>
+                      <strong>Products:</strong>
+                      <span data-field="meta-products">
+                        {loaded ? (
+                          meta.products || "—"
+                        ) : (
+                          <span className="skeleton-loader skeleton-meta"></span>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      <strong>Job Occupations:</strong> <span>{loaded ? meta.jobs || "—" : <span className="skeleton-loader skeleton-meta" />}</span>
+                      <svg
+                        className="meta-icon"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="2"
+                          y="7"
+                          width="20"
+                          height="14"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                      </svg>
+                      <strong>Job Occupations:</strong>
+                      <span data-field="meta-jobs">
+                        {loaded ? (
+                          meta.jobs || "—"
+                        ) : (
+                          <span className="skeleton-loader skeleton-meta"></span>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      <strong>Degrees:</strong> <span>{loaded ? meta.degrees || "—" : <span className="skeleton-loader skeleton-meta" />}</span>
+                      <svg
+                        className="meta-icon"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                      </svg>
+                      <strong>Degrees:</strong>
+                      <span data-field="meta-degrees">
+                        {loaded ? (
+                          meta.degrees || "—"
+                        ) : (
+                          <span className="skeleton-loader skeleton-meta"></span>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      <strong>Certifications:</strong> <span>{loaded ? meta.certs || "—" : <span className="skeleton-loader skeleton-meta" />}</span>
+                      <svg
+                        className="meta-icon"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="8" r="7"></circle>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                      </svg>
+                      <strong>Certifications:</strong>
+                      <span data-field="meta-certifications">
+                        {loaded ? (
+                          meta.certs || "—"
+                        ) : (
+                          <span className="skeleton-loader skeleton-meta"></span>
+                        )}
+                      </span>
                     </li>
                   </ul>
                 </section>
 
                 <section className="skills-box" aria-labelledby="skills-title">
-                  <div className="title-line title-line--small" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div
+                    className="title-line title-line--small"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
                     <h2 id="skills-title">Top Skills</h2>
-                    <button className="chip-add" type="button" aria-label="Add skill" onClick={openSkillPicker}>
+                    <button
+                      className="chip-add"
+                      type="button"
+                      data-add-chip="skillChips"
+                      aria-label="Add skill"
+                      onClick={openSkillPicker}
+                    >
                       +
                     </button>
                   </div>
 
-                  <div className="chip-row skill-row" aria-label="Top skills">
+                  <div
+                    className="chip-row skill-row"
+                    id="skillChips"
+                    aria-label="Top skills"
+                  >
                     {!loaded ? (
                       <>
-                        <span className="skeleton-loader skeleton-chip" />
-                        <span className="skeleton-loader skeleton-chip" />
+                        <span className="skeleton-loader skeleton-chip"></span>
+                        <span className="skeleton-loader skeleton-chip"></span>
                       </>
                     ) : (
                       skills.map((skill) => (
-                        <span className="chip" key={skill.id}>
-                          {skill.name}
-                          <button type="button" aria-label={`Remove ${skill.name}`} onClick={() => removeSkill(skill.id)}>
-                            ×
-                          </button>
-                        </span>
+                        <button
+                          key={skill.id}
+                          type="button"
+                          className="chip"
+                          title="Remove skill"
+                          onClick={() => removeSkill(skill.id)}
+                        >
+                          {(skill as any).name || skill.skill_id} ×
+                        </button>
                       ))
                     )}
                   </div>
@@ -364,27 +544,38 @@ export default function Profile() {
 
             <hr />
 
-            <section className="builder-section" aria-labelledby="experience-title">
+            <section
+              className="builder-section"
+              aria-labelledby="experience-title"
+            >
               <div className="section-title-row">
                 <h2 id="experience-title">Experiences</h2>
-                <button className="outline-button outline-button--small" type="button" onClick={addExperience}>
+                <button
+                  className="outline-button outline-button--small"
+                  type="button"
+                  id="addExperienceButton"
+                  onClick={addExperience}
+                >
                   + Add
                 </button>
               </div>
 
-              <div className="entry-list">
+              <div
+                className="entry-list"
+                id="experienceList"
+                onBlur={() => handleSave(true)}
+              >
                 {!loaded ? (
-                  <div className="skeleton-loader skeleton-card" />
-                ) : experiences.length === 0 ? (
-                  <p className="empty-message">No experiences added yet.</p>
+                  <div className="skeleton-loader skeleton-card"></div>
                 ) : (
-                  experiences.map((exp, i) => (
+                  experiences.map((experience, index) => (
                     <ExperienceCard
-                      key={exp.id}
-                      index={i}
-                      entry={exp}
-                      onChange={(next) => setExperiences((prev) => prev.map((e) => (e.id === exp.id ? next : e)))}
-                      onRemove={() => removeExperience(exp.id)}
+                      key={experience.id}
+                      experience={experience}
+                      index={index}
+                      onChange={updateExperience}
+                      onDelete={() => removeExperience(experience.id)}
+                      onSlotClick={handleSlotClick}
                     />
                   ))
                 )}
@@ -393,26 +584,37 @@ export default function Profile() {
 
             <hr />
 
-            <section className="builder-section" aria-labelledby="education-title">
+            <section
+              className="builder-section"
+              aria-labelledby="education-title"
+            >
               <div className="section-title-row">
                 <h2 id="education-title">Education</h2>
-                <button className="outline-button outline-button--small" type="button" onClick={addEducation}>
+                <button
+                  className="outline-button outline-button--small"
+                  type="button"
+                  id="addEducationButton"
+                  onClick={addEducation}
+                >
                   + Add
                 </button>
               </div>
 
-              <div className="entry-list">
+              <div
+                className="entry-list"
+                id="educationList"
+                onBlur={() => handleSave(true)}
+              >
                 {!loaded ? (
-                  <div className="skeleton-loader skeleton-card" />
-                ) : educations.length === 0 ? (
-                  <p className="empty-message">No degrees added yet.</p>
+                  <div className="skeleton-loader skeleton-card"></div>
                 ) : (
-                  educations.map((edu) => (
+                  educations.map((education) => (
                     <EducationCard
-                      key={edu.id}
-                      entry={edu}
-                      onChange={(next) => setEducations((prev) => prev.map((e) => (e.id === edu.id ? next : e)))}
-                      onRemove={() => removeEducation(edu.id)}
+                      key={education.id}
+                      education={education}
+                      onChange={updateEducation}
+                      onDelete={() => removeEducation(education.id)}
+                      onSlotClick={handleSlotClick}
                     />
                   ))
                 )}
@@ -421,26 +623,36 @@ export default function Profile() {
 
             <hr />
 
-            <section className="builder-section" aria-labelledby="certification-title">
+            <section
+              className="builder-section"
+              aria-labelledby="certification-title"
+            >
               <div className="section-title-row">
                 <h2 id="certification-title">Certifications</h2>
-                <button className="outline-button outline-button--small" type="button" onClick={addCertification}>
+                <button
+                  className="outline-button outline-button--small"
+                  type="button"
+                  id="addCertificationButton"
+                  onClick={addCertification}
+                >
                   + Add
                 </button>
               </div>
 
-              <div className="cert-grid">
+              <div className="cert-grid" onBlur={() => handleSave(true)}>
                 {!loaded ? (
-                  <div className="skeleton-loader skeleton-card" style={{ height: 80 }} />
-                ) : certifications.length === 0 ? (
-                  <p className="empty-message">No certifications added yet.</p>
+                  <div
+                    className="skeleton-loader skeleton-card"
+                    style={{ height: "80px" }}
+                  ></div>
                 ) : (
-                  certifications.map((cert) => (
+                  certifications.map((certification) => (
                     <CertificationCard
-                      key={cert.id}
-                      entry={cert}
-                      onChange={(next) => setCertifications((prev) => prev.map((c) => (c.id === cert.id ? next : c)))}
-                      onRemove={() => removeCertification(cert.id)}
+                      key={certification.id}
+                      certification={certification}
+                      onChange={updateCertification}
+                      onDelete={() => removeCertification(certification.id)}
+                      onSlotClick={handleSlotClick}
                     />
                   ))
                 )}
@@ -448,36 +660,69 @@ export default function Profile() {
             </section>
 
             <div className="save-row">
-              <button className="save-button" type="button" onClick={handleSave} disabled={isSaving}>
+              <button
+                className="save-button"
+                type="button"
+                id="saveProfileButton"
+                onClick={() => handleSave(false)}
+                disabled={isSaving}
+              >
                 {isSaving ? "Saving..." : "▣ Save Microresume"}
               </button>
             </div>
           </article>
 
           <aside className="profile-side-nav" aria-label="Profile menu">
-            <Link className="side-nav-button is-active" to="/profile">
+            <a className="side-nav-button is-active" href="profile.php">
               <span aria-hidden="true">☻</span>
               Profile
-            </Link>
-            <Link className="side-nav-button" to="/target-list">
+            </a>
+
+            <a className="side-nav-button" href="target-list.php">
               <span aria-hidden="true">◎</span>
               My Target List
-            </Link>
-            <Link className="side-nav-button" to="/tests-preferences">
+            </a>
+
+            <a className="side-nav-button" href="tests-preferences.php">
               <span aria-hidden="true">▣</span>
               Tests &amp;
               <br /> Preferences
-            </Link>
-            <Link className="side-nav-button" to="/coming-soon/settings">
+            </a>
+
+            <a className="side-nav-button" href="settings.php">
               <span aria-hidden="true">⚙</span>
               Settings
-            </Link>
+            </a>
           </aside>
         </div>
       </main>
 
-      {showLangModal && <LanguageModal onConfirm={addLanguage} onClose={() => setShowLangModal(false)} />}
-      {showSkillModal && <SkillModal suggestions={skillSuggestions} onConfirm={addSkill} onClose={() => setShowSkillModal(false)} />}
+      <div
+        className="profile-toast"
+        id="profileToast"
+        role="status"
+        aria-live="polite"
+      >
+        Profile saved.
+      </div>
+
+      <EntitySearchModal
+        open={entityModalOpen}
+        slotType={entityModalSlot}
+        onClose={closeEntityModal}
+        onSelect={handleEntitySelect}
+      />
+
+      <LanguageModal
+        open={showLangModal}
+        onClose={() => setShowLangModal(false)}
+        onConfirm={addLanguage}
+      />
+      <SkillModal
+        open={showSkillModal}
+        onClose={() => setShowSkillModal(false)}
+        onConfirm={addSkill}
+      />
 
       <Footer />
     </>
