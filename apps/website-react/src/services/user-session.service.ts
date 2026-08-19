@@ -1,11 +1,8 @@
-import { getRPCClient } from "@repo/api-client";
-import type {
-  UserSession,
-  PostUserSession,
-} from "@repo/models/user_sessions";
+import { getRPCClient } from "./rpc";
+import type { UserSession, PostUserSession } from "@repo/models/user_sessions";
 
 export class UserSessionService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getByUser(userId: string): Promise<UserSession[]> {
     return await this.rpcClient.user_sessions.getByUser({ userId });

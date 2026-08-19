@@ -4,8 +4,10 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { getSession } from "../lib/session";
-import { PersonalityService, type PersonalityQuestion } from "../services/personality.service";
+import { PersonalityService } from "../services/personality.service";
+import type { PersonalityQuestion } from "@repo/models/personality_questions";
 import "../css/personality-test-pages.css";
+import ProfileAside from "../components/ProfileAside";
 
 const personalityService = new PersonalityService();
 
@@ -288,21 +290,7 @@ export default function Test() {
             </div>
           </section>
 
-          <aside className="pt-side-nav" aria-label="Profile menu">
-            <Link to="/profile">
-              <span>☻</span> Profile
-            </Link>
-            <Link to="/target-list">
-              <span>◎</span> My Target List
-            </Link>
-            <Link className="is-active" to="/tests-preferences">
-              <span>▣</span> Tests &amp;
-              <br /> Preferences
-            </Link>
-            <Link to="/coming-soon/settings">
-              <span>⚙</span> Settings
-            </Link>
-          </aside>
+          <ProfileAside activePage="tests-preferences" />
         </div>
       </main>
 

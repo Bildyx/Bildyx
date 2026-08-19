@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   OrganizationPartner,
   PostOrganizationPartner,
@@ -6,20 +6,28 @@ import type {
 } from "@repo/models/organization_partners";
 
 export class TeamPartnerService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     organization_id?: string;
     partner_id?: string;
   }): Promise<OrganizationPartner[]> {
-    return await this.rpcClient.organization_partners.getAll(filters || {} as any);
+    return await this.rpcClient.organization_partners.getAll(
+      filters || ({} as any),
+    );
   }
 
-  public async getById(organizationPartnerId: string): Promise<OrganizationPartner> {
-    return await this.rpcClient.organization_partners.getById({ organizationPartnerId });
+  public async getById(
+    organizationPartnerId: string,
+  ): Promise<OrganizationPartner> {
+    return await this.rpcClient.organization_partners.getById({
+      organizationPartnerId,
+    });
   }
 
-  public async create(input: PostOrganizationPartner): Promise<OrganizationPartner> {
+  public async create(
+    input: PostOrganizationPartner,
+  ): Promise<OrganizationPartner> {
     return await this.rpcClient.organization_partners.create(input);
   }
 
@@ -34,6 +42,8 @@ export class TeamPartnerService {
   }
 
   public async delete(organizationPartnerId: string): Promise<void> {
-    await this.rpcClient.organization_partners.delete({ organizationPartnerId });
+    await this.rpcClient.organization_partners.delete({
+      organizationPartnerId,
+    });
   }
 }

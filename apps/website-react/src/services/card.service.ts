@@ -1,7 +1,7 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 
 export class CardService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getCountry(id: string, extended?: string): Promise<string> {
     return (await this.rpcClient.cards.getCountry({ id, extended })) as any;

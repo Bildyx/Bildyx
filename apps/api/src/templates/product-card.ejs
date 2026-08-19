@@ -30,7 +30,7 @@
     <div class="main-card">
         <div class="header-row">
             <div class="maygraph-logo">
-                <img src="<%= getIcon('logos', 'Logo-MayGraph_Big1.png') %>" alt="MayGraph" />
+                <img src="<%= (locals.logo_url) ? logo_url : getIcon('logos', 'Logo-MayGraph_Big1.png') %>" alt="Logo" />
             </div>
             <div class="header-title-container">
                 <img src="<%= getIcon('icons', 'product.png') %>" class="header-icon" alt="" />

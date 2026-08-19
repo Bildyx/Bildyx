@@ -1,12 +1,8 @@
-import { getRPCClient } from "@repo/api-client";
-import type {
-  Skill,
-  PostSkill,
-  PutSkill,
-} from "@repo/models/skills";
+import { getRPCClient } from "./rpc";
+import type { Skill, PostSkill, PutSkill } from "@repo/models/skills";
 
 export class SkillService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(): Promise<Skill[]> {
     return await this.rpcClient.skills.getAll({});

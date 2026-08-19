@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   OrganizationPhoto,
   PostOrganizationPhoto,
@@ -6,19 +6,27 @@ import type {
 } from "@repo/models/organization_photos";
 
 export class TeamPhotoService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     organization_id?: string;
   }): Promise<OrganizationPhoto[]> {
-    return await this.rpcClient.organization_photos.getAll(filters || {} as any);
+    return await this.rpcClient.organization_photos.getAll(
+      filters || ({} as any),
+    );
   }
 
-  public async getById(organizationPhotoId: string): Promise<OrganizationPhoto> {
-    return await this.rpcClient.organization_photos.getById({ organizationPhotoId });
+  public async getById(
+    organizationPhotoId: string,
+  ): Promise<OrganizationPhoto> {
+    return await this.rpcClient.organization_photos.getById({
+      organizationPhotoId,
+    });
   }
 
-  public async create(input: PostOrganizationPhoto): Promise<OrganizationPhoto> {
+  public async create(
+    input: PostOrganizationPhoto,
+  ): Promise<OrganizationPhoto> {
     return await this.rpcClient.organization_photos.create(input);
   }
 

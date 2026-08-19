@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   OrganizationSubsidiary,
   PostOrganizationSubsidiary,
@@ -6,20 +6,28 @@ import type {
 } from "@repo/models/organization_subsidiaries";
 
 export class TeamSubsidiaryService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     organization_id?: string;
     subsidiary_id?: string;
   }): Promise<OrganizationSubsidiary[]> {
-    return await this.rpcClient.organization_subsidiaries.getAll(filters || {} as any);
+    return await this.rpcClient.organization_subsidiaries.getAll(
+      filters || ({} as any),
+    );
   }
 
-  public async getById(organizationSubsidiaryId: string): Promise<OrganizationSubsidiary> {
-    return await this.rpcClient.organization_subsidiaries.getById({ organizationSubsidiaryId });
+  public async getById(
+    organizationSubsidiaryId: string,
+  ): Promise<OrganizationSubsidiary> {
+    return await this.rpcClient.organization_subsidiaries.getById({
+      organizationSubsidiaryId,
+    });
   }
 
-  public async create(input: PostOrganizationSubsidiary): Promise<OrganizationSubsidiary> {
+  public async create(
+    input: PostOrganizationSubsidiary,
+  ): Promise<OrganizationSubsidiary> {
     return await this.rpcClient.organization_subsidiaries.create(input);
   }
 
@@ -34,6 +42,8 @@ export class TeamSubsidiaryService {
   }
 
   public async delete(organizationSubsidiaryId: string): Promise<void> {
-    await this.rpcClient.organization_subsidiaries.delete({ organizationSubsidiaryId });
+    await this.rpcClient.organization_subsidiaries.delete({
+      organizationSubsidiaryId,
+    });
   }
 }

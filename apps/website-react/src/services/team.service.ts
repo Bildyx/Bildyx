@@ -1,8 +1,8 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type { Team, PostTeam, PutTeam } from "@repo/models/teams";
 
 export class TeamService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     name?: string;

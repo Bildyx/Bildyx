@@ -1,12 +1,8 @@
-import { getRPCClient } from "@repo/api-client";
-import type {
-  Subject,
-  PostSubject,
-  PutSubject,
-} from "@repo/models/subjects";
+import { getRPCClient } from "./rpc";
+import type { Subject, PostSubject, PutSubject } from "@repo/models/subjects";
 
 export class SubjectService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     name?: string;

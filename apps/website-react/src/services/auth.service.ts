@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import {
   SignupInputSchema,
   SignupOutputSchema,
@@ -41,7 +41,7 @@ export type CancelUnverifiedOutput = z.infer<
 >;
 
 export class AuthService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async signup(input: SignupInput): Promise<SignupOutput> {
     return await this.rpcClient.auth.signup(input);

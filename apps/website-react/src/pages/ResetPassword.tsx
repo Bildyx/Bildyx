@@ -51,7 +51,7 @@ export default function ResetPassword() {
 
     setIsLoading(true);
     try {
-      await authService.resetPassword({ email, token, newPassword: password });
+      await authService.resetPassword({ email, token, password });
       toast.success("Password updated successfully. You can now log in.");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {

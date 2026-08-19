@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { companyGroups, jobs } from "../data/myJobsData";
 import "../css/my-jobs.css";
+import ProfileAside from "../components/ProfileAside";
 
 const SCORE_LABEL: Record<string, string> = { high: "H", medium: "M", empty: "–" };
 
@@ -202,24 +203,7 @@ export default function MyJobs() {
             </div>
           </section>
 
-          <aside className="mj-side-nav" aria-label="Profile menu">
-            <Link to="/profile">
-              <span aria-hidden="true">☻</span> Profile
-            </Link>
-            <Link to="/target-list">
-              <span aria-hidden="true">◎</span> My Target List
-            </Link>
-            <Link to="/tests-preferences">
-              <span aria-hidden="true">▣</span> Tests &amp;
-              <br /> Preferences
-            </Link>
-            <Link className="is-active" to="/my-jobs">
-              <span aria-hidden="true">▥</span> My Jobs
-            </Link>
-            <Link to="/coming-soon/settings">
-              <span aria-hidden="true">⚙</span> Settings
-            </Link>
-          </aside>
+          <ProfileAside activePage="my-jobs" />
         </div>
       </main>
 

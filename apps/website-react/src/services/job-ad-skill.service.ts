@@ -1,11 +1,8 @@
-import { getRPCClient } from "@repo/api-client";
-import type {
-  JobAdSkill,
-  PostJobAdSkill,
-} from "@repo/models/job_ads_skills";
+import { getRPCClient } from "./rpc";
+import type { JobAdSkill, PostJobAdSkill } from "@repo/models/job_ads_skills";
 
 export class JobAdSkillService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getByJobAd(jobAdId: string): Promise<JobAdSkill[]> {
     return await this.rpcClient.job_ads_skills.getByJobAd({ jobAdId });

@@ -7,6 +7,7 @@ import { getSession } from "../lib/session";
 import { generatePixelPerfectPdf, testDetailsMap } from "../lib/personalityReport";
 import { PersonalityService } from "../services/personality.service";
 import "../css/result.css";
+import ProfileAside from "../components/ProfileAside";
 
 const personalityService = new PersonalityService();
 
@@ -190,21 +191,7 @@ export default function ResultTest() {
             </div>
           </section>
 
-          <aside className="res-side-nav" aria-label="Profile menu">
-            <Link to="/profile">
-              <span>☻</span> Profile
-            </Link>
-            <Link to="/target-list">
-              <span>◎</span> My Target List
-            </Link>
-            <Link className="is-active" to="/tests-preferences">
-              <span>▣</span> Tests &amp;
-              <br /> Preferences
-            </Link>
-            <Link to="/coming-soon/settings">
-              <span>⚙</span> Settings
-            </Link>
-          </aside>
+          <ProfileAside activePage="tests-preferences" />
         </div>
       </main>
 

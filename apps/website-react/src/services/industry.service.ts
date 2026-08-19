@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   Industry,
   PostIndustry,
@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/industries";
 
 export class IndustryService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: { name?: string }): Promise<Industry[]> {
     return await this.rpcClient.industries.getAll(filters || {});
@@ -20,7 +20,10 @@ export class IndustryService {
     return await this.rpcClient.industries.create(input);
   }
 
-  public async update(industryId: string, input: PutIndustry): Promise<Industry> {
+  public async update(
+    industryId: string,
+    input: PutIndustry,
+  ): Promise<Industry> {
     return await this.rpcClient.industries.update({ industryId, ...input });
   }
 

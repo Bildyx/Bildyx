@@ -165,7 +165,7 @@ export default function Login() {
     const top = window.screenY + (window.outerHeight - height) / 2;
 
     window.open(
-      "http://localhost:3000/api/auth/google",
+      `${process.env.API_URL}/api/auth/google`,
       "GoogleLogin",
       `width=${width},height=${height},left=${left},top=${top},popup=yes,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`,
     );

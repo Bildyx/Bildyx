@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   OrganizationInvestor,
   PostOrganizationInvestor,
@@ -6,20 +6,28 @@ import type {
 } from "@repo/models/organization_investors";
 
 export class TeamInvestorService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     organization_id?: string;
     investor_id?: string;
   }): Promise<OrganizationInvestor[]> {
-    return await this.rpcClient.organization_investors.getAll(filters || {} as any);
+    return await this.rpcClient.organization_investors.getAll(
+      filters || ({} as any),
+    );
   }
 
-  public async getById(organizationInvestorId: string): Promise<OrganizationInvestor> {
-    return await this.rpcClient.organization_investors.getById({ organizationInvestorId });
+  public async getById(
+    organizationInvestorId: string,
+  ): Promise<OrganizationInvestor> {
+    return await this.rpcClient.organization_investors.getById({
+      organizationInvestorId,
+    });
   }
 
-  public async create(input: PostOrganizationInvestor): Promise<OrganizationInvestor> {
+  public async create(
+    input: PostOrganizationInvestor,
+  ): Promise<OrganizationInvestor> {
     return await this.rpcClient.organization_investors.create(input);
   }
 
@@ -34,6 +42,8 @@ export class TeamInvestorService {
   }
 
   public async delete(organizationInvestorId: string): Promise<void> {
-    await this.rpcClient.organization_investors.delete({ organizationInvestorId });
+    await this.rpcClient.organization_investors.delete({
+      organizationInvestorId,
+    });
   }
 }

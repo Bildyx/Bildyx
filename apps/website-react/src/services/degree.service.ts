@@ -1,12 +1,8 @@
-import { getRPCClient } from "@repo/api-client";
-import type {
-  Degree,
-  PostDegree,
-  PutDegree,
-} from "@repo/models/degrees";
+import { getRPCClient } from "./rpc";
+import type { Degree, PostDegree, PutDegree } from "@repo/models/degrees";
 
 export class DegreeService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     name?: string;

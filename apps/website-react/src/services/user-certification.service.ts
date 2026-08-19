@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   UserCertification,
   PostUserCertification,
@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/user_certifications";
 
 export class UserCertificationService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getByProfile(
     userProfileId: string,

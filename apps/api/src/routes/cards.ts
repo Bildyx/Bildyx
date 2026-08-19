@@ -58,18 +58,42 @@ const GOVERNMENT_RULES: Array<{
   keywords: string[];
   template: string;
 }> = [
-  { keywords: ["upper house", "lower house", "house of", "senate"], template: "organizations/house-card" },
-  { keywords: ["president administration", "vice president administration"], template: "organizations/president-administration-card" },
+  {
+    keywords: ["upper house", "lower house", "house of", "senate"],
+    template: "organizations/house-card",
+  },
+  {
+    keywords: ["president administration", "vice president administration"],
+    template: "organizations/president-administration-card",
+  },
   { keywords: ["agency"], template: "organizations/agency-card" },
   { keywords: ["bureau"], template: "organizations/bureau-card" },
-  { keywords: ["administration"], template: "organizations/administration-card" },
-  { keywords: ["services", "service"], template: "organizations/services-card" },
+  {
+    keywords: ["administration"],
+    template: "organizations/administration-card",
+  },
+  {
+    keywords: ["services", "service"],
+    template: "organizations/services-card",
+  },
   { keywords: ["institute"], template: "organizations/institute-card" },
   { keywords: ["office"], template: "organizations/office-card" },
-  { keywords: ["laboratory", "laboratories"], template: "organizations/laboratories-card" },
-  { keywords: ["directorate", "directorates"], template: "organizations/directorates-card" },
-  { keywords: ["division", "divisions"], template: "organizations/divisions-card" },
-  { keywords: ["program", "programs"], template: "organizations/programs-card" },
+  {
+    keywords: ["laboratory", "laboratories"],
+    template: "organizations/laboratories-card",
+  },
+  {
+    keywords: ["directorate", "directorates"],
+    template: "organizations/directorates-card",
+  },
+  {
+    keywords: ["division", "divisions"],
+    template: "organizations/divisions-card",
+  },
+  {
+    keywords: ["program", "programs"],
+    template: "organizations/programs-card",
+  },
   { keywords: ["task force"], template: "organizations/task-force-card" },
   { keywords: ["board"], template: "organizations/board-card" },
   { keywords: ["commission"], template: "organizations/commissions-card" },
@@ -298,6 +322,7 @@ export const cards = {
             "services",
             "facilities",
             "programs_activities",
+            "avatar_url",
           ])
           .where(isUuid ? "id" : "slug", "=", id)
           .executeTakeFirst();

@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   OrganizationOffice,
   PostOrganizationOffice,
@@ -6,20 +6,28 @@ import type {
 } from "@repo/models/organization_offices";
 
 export class TeamOfficeService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     city_id?: string;
     type?: string;
   }): Promise<OrganizationOffice[]> {
-    return await this.rpcClient.organization_offices.getAll(filters || {} as any);
+    return await this.rpcClient.organization_offices.getAll(
+      filters || ({} as any),
+    );
   }
 
-  public async getById(organizationOfficeId: string): Promise<OrganizationOffice> {
-    return await this.rpcClient.organization_offices.getById({ organizationOfficeId });
+  public async getById(
+    organizationOfficeId: string,
+  ): Promise<OrganizationOffice> {
+    return await this.rpcClient.organization_offices.getById({
+      organizationOfficeId,
+    });
   }
 
-  public async create(input: PostOrganizationOffice): Promise<OrganizationOffice> {
+  public async create(
+    input: PostOrganizationOffice,
+  ): Promise<OrganizationOffice> {
     return await this.rpcClient.organization_offices.create(input);
   }
 

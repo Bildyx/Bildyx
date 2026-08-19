@@ -1,12 +1,8 @@
-import { getRPCClient } from "@repo/api-client";
-import type {
-  Job,
-  PostJob,
-  PutJob,
-} from "@repo/models/jobs";
+import { getRPCClient } from "./rpc";
+import type { Job, PostJob, PutJob } from "@repo/models/jobs";
 
 export class JobService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {
     name?: string;

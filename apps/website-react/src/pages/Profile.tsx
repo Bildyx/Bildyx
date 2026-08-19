@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { usePageMeta } from "../hooks/usePageMeta";
 import "../css/profile.css";
+import ProfileAside from "../components/ProfileAside";
 import CertificationCard from "../components/cards/CertificationCard";
 import EducationCard from "../components/cards/EducationCard";
 import ExperienceCard from "../components/cards/ExperienceCard";
@@ -666,33 +667,16 @@ export default function Profile() {
                 onClick={() => handleSave(false)}
                 disabled={isSaving}
               >
-                {isSaving ? "Saving..." : "▣ Save Microresume"}
+                {isSaving ? "Saving..." : (
+                  <>
+                    <i className="bi bi-floppy-fill me-2"></i>Save Microresume
+                  </>
+                )}
               </button>
             </div>
           </article>
 
-          <aside className="profile-side-nav" aria-label="Profile menu">
-            <a className="side-nav-button is-active" href="profile.php">
-              <span aria-hidden="true">☻</span>
-              Profile
-            </a>
-
-            <a className="side-nav-button" href="target-list.php">
-              <span aria-hidden="true">◎</span>
-              My Target List
-            </a>
-
-            <a className="side-nav-button" href="tests-preferences.php">
-              <span aria-hidden="true">▣</span>
-              Tests &amp;
-              <br /> Preferences
-            </a>
-
-            <a className="side-nav-button" href="settings.php">
-              <span aria-hidden="true">⚙</span>
-              Settings
-            </a>
-          </aside>
+          <ProfileAside activePage="profile" />
         </div>
       </main>
 

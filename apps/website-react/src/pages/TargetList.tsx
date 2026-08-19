@@ -1,4 +1,4 @@
-import {
+import React, {
   useCallback,
   useEffect,
   useMemo,
@@ -7,18 +7,19 @@ import {
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "../services/rpc";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { usePageMeta } from "../hooks/usePageMeta";
-import { CardService } from "../services/card.service";
+import { MatchSection } from "../components/target-list/MatchSection";
+import type { MatchCategory, TargetRow } from "../components/target-list/types";
 import "../css/target-list.css";
+import ProfileAside from "../components/ProfileAside";
 
-const rpc = getRPCClient("http://localhost:3000");
-const cardService = new CardService();
+const rpc = getRPCClient();
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 10;
 
 const SIZE_OPTIONS = [
   {
@@ -101,19 +102,6 @@ const WORK_FOR_OPTIONS = [
 
 type DropdownName = "sizes" | "products" | "workFor";
 
-type MatchCategory = "same" | "similar" | "different";
-
-type TargetRow = {
-  id: string;
-  subject_id?: string | null;
-  match_category?: MatchCategory | null;
-
-  website_url?: string | null;
-  website?: string | null;
-
-  [key: string]: unknown;
-};
-
 type Session = {
   userId?: string;
   profileId?: string;
@@ -126,6 +114,7 @@ type GetTargetsParams = {
   sizes?: EmployeeCountRange[];
   subtypes?: OrganizationSubType[];
   matchFilter?: MatchCategory;
+  keyword?: string;
 };
 
 function getSession(): Session | null {
@@ -188,518 +177,62 @@ const WORK_FOR_SUBTYPES: Record<string, OrganizationSubType[]> = {
   culture: ["MUSEUM", "NATIONAL_PARK", "PUBLIC_PARKS", "LIBRARY"],
 };
 
-function formatWebsiteUrl(url: string): string {
-  const trimmed = url.trim();
-
-  if (!trimmed) {
-    return "";
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  return `https://${trimmed}`;
-}
-
-function SkeletonCard() {
-  return (
-    <div className="backend-slot is-loading">
-      <div className="skeleton-loader skeleton-card" />
-    </div>
-  );
-}
-
-function EmptySubjectCard() {
-  return (
-    <div className="backend-slot is-empty-slot">
-      <span>No subject</span>
-    </div>
-  );
-}
-
-function ErrorCard() {
-  return <div className="backend-slot is-error">Failed to load</div>;
-}
-
-function TargetOrgCard({
-  id,
-  website,
-}: {
-  id: string;
-  website?: string | null;
-}) {
-  const [html, setHtml] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        setError(false);
-
-        const result = await cardService.getOrganization(id);
-
-        if (!cancelled) {
-          setHtml(result);
-        }
-      } catch (err) {
-        console.error(
-          `[target-list] Failed to load organization card ${id}:`,
-          err,
-        );
-
-        if (!cancelled) {
-          setError(true);
-        }
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  const handleClick = useCallback(() => {
-    if (!website) {
-      return;
-    }
-
-    const url = formatWebsiteUrl(website);
-
-    if (!url) {
-      return;
-    }
-
-    window.open(url, "_blank", "noopener,noreferrer");
-  }, [website]);
-
-  if (error) {
-    return <ErrorCard />;
-  }
-
-  if (!html) {
-    return <SkeletonCard />;
-  }
-
-  /*
-   * On garde ici le même comportement visuel que l'ancien
-   * target-list.ts : le HTML de la carte est isolé dans son
-   * propre document afin de pouvoir le scaler proprement.
-   */
-  return (
-    <div
-      className="backend-slot is-filled"
-      style={{
-        cursor: website ? "pointer" : undefined,
-      }}
-      title={website ? `Open ${website}` : undefined}
-      onClick={handleClick}
-      role={website ? "link" : undefined}
-      tabIndex={website ? 0 : undefined}
-      onKeyDown={(event) => {
-        if (website && (event.key === "Enter" || event.key === " ")) {
-          event.preventDefault();
-          handleClick();
-        }
-      }}
-    >
-      <iframe
-        className="org-card-frame"
-        title={`Organization ${id}`}
-        srcDoc={`
-          <!doctype html>
-          <html>
-            <head>
-              <meta charset="UTF-8" />
-              <style>
-                html,
-                body {
-                  margin: 0;
-                  padding: 0;
-                  overflow: hidden;
-                  font-family:
-                    "Plus Jakarta Sans",
-                    system-ui,
-                    sans-serif;
-                }
-
-                .scale-wrap {
-                  position: absolute;
-                  top: 0;
-                  left: 0;
-                  transform-origin: top left;
-                  width: 500px;
-                }
-
-                .main-card {
-                  height: 100% !important;
-                  box-sizing: border-box;
-                }
-
-                .footer-row {
-                  margin-top: auto !important;
-                }
-              </style>
-            </head>
-
-            <body>
-              <div
-                class="scale-wrap"
-                id="scaleWrap"
-              >
-                ${html}
-              </div>
-
-              <script>
-                function scaleCard() {
-                  const wrap =
-                    document.getElementById("scaleWrap");
-
-                  if (!wrap) {
-                    return;
-                  }
-
-                  wrap.style.height = "auto";
-
-                  const mainCard =
-                    wrap.querySelector(".main-card");
-
-                  if (mainCard) {
-                    mainCard.style.setProperty(
-                      "height",
-                      "auto",
-                      "important"
-                    );
-                  }
-
-                  const cardWidth =
-                    wrap.offsetWidth || 500;
-
-                  const cardHeight =
-                    wrap.scrollHeight || 400;
-
-                  const padding = 16;
-
-                  const scale =
-                    Math.min(
-                      (500 - padding) / cardWidth,
-                      1
-                    );
-
-                  const scaledHeight =
-                    cardHeight * scale;
-
-                  const requiredHeight =
-                    scaledHeight + padding;
-
-                  const heightNeeded =
-                    (requiredHeight - padding) /
-                    scale;
-
-                  wrap.style.height =
-                    heightNeeded + "px";
-
-                  wrap.style.transform =
-                    "scale(" + scale + ")";
-
-                  wrap.style.top =
-                    padding / 2 + "px";
-
-                  wrap.style.left =
-                    (500 - cardWidth * scale) /
-                    2 +
-                    "px";
-
-                  if (mainCard) {
-                    mainCard.style.setProperty(
-                      "height",
-                      "100%",
-                      "important"
-                    );
-                  }
-
-                  document.body.dataset.cardHeight =
-                    String(requiredHeight);
-                }
-
-                window.addEventListener(
-                  "load",
-                  scaleCard
-                );
-
-                window.addEventListener(
-                  "resize",
-                  scaleCard
-                );
-              </script>
-            </body>
-          </html>
-        `}
-        style={{
-          width: "100%",
-          minHeight: "400px",
-          border: 0,
-          pointerEvents: "none",
-        }}
-      />
-    </div>
-  );
-}
-
-function TargetSubjectCard({ id }: { id: string }) {
-  const [html, setHtml] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        setError(false);
-
-        const result = await cardService.getSubject(id);
-
-        if (!cancelled) {
-          setHtml(result);
-        }
-      } catch (err) {
-        console.error(`[target-list] Failed to load subject card ${id}:`, err);
-
-        if (!cancelled) {
-          setError(true);
-        }
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  if (error) {
-    return <ErrorCard />;
-  }
-
-  if (!html) {
-    return <SkeletonCard />;
-  }
-
-  return (
-    <div className="backend-slot is-filled">
-      <iframe
-        className="org-card-frame"
-        title={`Subject ${id}`}
-        srcDoc={`
-          <!doctype html>
-          <html>
-            <head>
-              <meta charset="UTF-8" />
-              <style>
-                html,
-                body {
-                  margin: 0;
-                  padding: 0;
-                  overflow: hidden;
-                  font-family:
-                    "Plus Jakarta Sans",
-                    system-ui,
-                    sans-serif;
-                }
-
-                .scale-wrap {
-                  position: absolute;
-                  top: 0;
-                  left: 0;
-                  transform-origin: top left;
-                  width: 500px;
-                }
-
-                .main-card {
-                  height: 100% !important;
-                  box-sizing: border-box;
-                }
-
-                .footer-row {
-                  margin-top: auto !important;
-                }
-              </style>
-            </head>
-
-            <body>
-              <div
-                class="scale-wrap"
-                id="scaleWrap"
-              >
-                ${html}
-              </div>
-
-              <script>
-                function scaleCard() {
-                  const wrap =
-                    document.getElementById("scaleWrap");
-
-                  if (!wrap) {
-                    return;
-                  }
-
-                  wrap.style.height = "auto";
-
-                  const mainCard =
-                    wrap.querySelector(".main-card");
-
-                  if (mainCard) {
-                    mainCard.style.setProperty(
-                      "height",
-                      "auto",
-                      "important"
-                    );
-                  }
-
-                  const cardWidth =
-                    wrap.offsetWidth || 500;
-
-                  const cardHeight =
-                    wrap.scrollHeight || 400;
-
-                  const padding = 16;
-
-                  const scale =
-                    Math.min(
-                      (500 - padding) / cardWidth,
-                      1
-                    );
-
-                  const scaledHeight =
-                    cardHeight * scale;
-
-                  const requiredHeight =
-                    scaledHeight + padding;
-
-                  const heightNeeded =
-                    (requiredHeight - padding) /
-                    scale;
-
-                  wrap.style.height =
-                    heightNeeded + "px";
-
-                  wrap.style.transform =
-                    "scale(" + scale + ")";
-
-                  wrap.style.top =
-                    padding / 2 + "px";
-
-                  wrap.style.left =
-                    (500 - cardWidth * scale) /
-                    2 +
-                    "px";
-
-                  if (mainCard) {
-                    mainCard.style.setProperty(
-                      "height",
-                      "100%",
-                      "important"
-                    );
-                  }
-                }
-
-                window.addEventListener(
-                  "load",
-                  scaleCard
-                );
-
-                window.addEventListener(
-                  "resize",
-                  scaleCard
-                );
-              </script>
-            </body>
-          </html>
-        `}
-        style={{
-          width: "100%",
-          minHeight: "400px",
-          border: 0,
-          pointerEvents: "none",
-        }}
-      />
-    </div>
-  );
-}
-
-function MatchSection({
-  category,
-  rows,
-}: {
-  category: MatchCategory;
-  rows: TargetRow[];
-}) {
-  const label = {
-    same: "Same",
-    similar: "Similar",
-    different: "Different",
-  }[category];
-
-  return (
-    <div className="tl-match-section" data-category={category}>
-      <div className="tl-match-section__header">
-        <h2 className="tl-match-section__title">{label}</h2>
-
-        <span className="tl-match-section__count">{rows.length}</span>
-      </div>
-
-      <div className="tl-match-section__body">
-        {rows.length === 0 ? (
-          <p className="tl-no-results">No results in this category</p>
-        ) : (
-          rows.map((row) => {
-            const website =
-              typeof row.website_url === "string"
-                ? row.website_url
-                : typeof row.website === "string"
-                  ? row.website
-                  : null;
-
-            return (
-              <div className="tl-company-row" key={row.id}>
-                <TargetOrgCard id={row.id} website={website} />
-
-                {row.subject_id ? (
-                  <TargetSubjectCard id={row.subject_id} />
-                ) : (
-                  <EmptySubjectCard />
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
-  );
-}
-
 function LoadingResults() {
   return (
     <div className="tl-match-section">
       <div className="tl-match-section__header tl-skeleton-header">
         <div
           className="skeleton-loader"
-          style={{
-            width: 200,
-            height: 22,
-            borderRadius: 6,
-          }}
+          style={{ width: 200, height: 22, borderRadius: 6 }}
         />
       </div>
-
       <div className="tl-company-row">
-        <SkeletonCard />
-        <SkeletonCard />
+        <div className="tl-inline-card">
+          <div
+            className="skeleton-loader"
+            style={{ width: 44, height: 44, borderRadius: 10, flexShrink: 0 }}
+          />
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
+          >
+            <div
+              className="skeleton-loader"
+              style={{ width: "60%", height: 14, borderRadius: 6 }}
+            />
+            <div
+              className="skeleton-loader"
+              style={{ width: "40%", height: 12, borderRadius: 6 }}
+            />
+          </div>
+        </div>
+        <div className="tl-inline-card">
+          <div
+            className="skeleton-loader"
+            style={{ width: 44, height: 44, borderRadius: 10, flexShrink: 0 }}
+          />
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
+          >
+            <div
+              className="skeleton-loader"
+              style={{ width: "60%", height: 14, borderRadius: 6 }}
+            />
+            <div
+              className="skeleton-loader"
+              style={{ width: "40%", height: 12, borderRadius: 6 }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -772,6 +305,8 @@ export default function TargetList() {
   const [city, setCity] = useState("");
 
   const [country, setCountry] = useState("");
+
+  const [keyword, setKeyword] = useState("");
 
   const [sizes, setSizes] = useState<string[]>([]);
 
@@ -912,23 +447,29 @@ export default function TargetList() {
         subtypes: subtypeFilter.length > 0 ? subtypeFilter : undefined,
 
         /*
-         * Important :
-         * le backend historique attend un seul
-         * matchFilter.
-         *
-         * Si plusieurs valeurs sont cochées,
-         * on ne transmet donc pas de matchFilter,
-         * exactement comme l'ancien target-list.ts.
+         * On envoie matchFilter uniquement si une seule catégorie
+         * est sélectionnée. Sinon, le backend renvoie tout et on
+         * filtre côté client par match_category.
          */
         matchFilter:
           selectedProducts.length === 1 ? selectedProducts[0] : undefined,
+
+        keyword: normalizeText(keyword) || undefined,
       };
 
       const all = (await (rpc as any).target_list.getTargets(
         params,
       )) as TargetRow[];
 
-      setResults(Array.isArray(all) ? all : []);
+      // Si plusieurs catégories cochées : filtrage client-side
+      const filtered =
+        selectedProducts.length > 1
+          ? all.filter((r) =>
+              selectedProducts.includes(r.match_category ?? "different"),
+            )
+          : all;
+
+      setResults(Array.isArray(filtered) ? filtered : []);
 
       setPage(1);
     } catch (err) {
@@ -941,7 +482,15 @@ export default function TargetList() {
     } finally {
       setIsLoading(false);
     }
-  }, [session?.profileId, city, country, sizes, products, subtypeFilter]);
+  }, [
+    session?.profileId,
+    city,
+    country,
+    keyword,
+    sizes,
+    products,
+    subtypeFilter,
+  ]);
 
   /*
    * ---------------------------------------------------------
@@ -980,7 +529,7 @@ export default function TargetList() {
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [city, country]);
+  }, [city, country, keyword]);
 
   /*
    * ---------------------------------------------------------
@@ -1033,6 +582,7 @@ export default function TargetList() {
   function resetFilters() {
     setCity("");
     setCountry("");
+    setKeyword("");
     setSizes([]);
     setProducts([]);
     setWorkFor([]);
@@ -1244,6 +794,8 @@ export default function TargetList() {
                       type="search"
                       placeholder="enter keyword"
                       autoComplete="off"
+                      value={keyword}
+                      onChange={(event) => setKeyword(event.target.value)}
                     />
                   </label>
 
@@ -1347,25 +899,7 @@ export default function TargetList() {
             </section>
           </section>
 
-          <aside className="profile-side-nav" aria-label="Profile menu">
-            <Link className="side-nav-button" to="/profile">
-              <span aria-hidden="true">☻</span> Profile
-            </Link>
-
-            <Link className="side-nav-button is-active" to="/target-list">
-              <span aria-hidden="true">◎</span> My Target List
-            </Link>
-
-            <Link className="side-nav-button" to="/tests-preferences">
-              <span aria-hidden="true">▣</span> Tests &amp;
-              <br />
-              Preferences
-            </Link>
-
-            <Link className="side-nav-button" to="/settings">
-              <span aria-hidden="true">⚙</span> Settings
-            </Link>
-          </aside>
+          <ProfileAside activePage="target-list" />
         </div>
       </main>
 

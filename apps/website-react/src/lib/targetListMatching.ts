@@ -1,4 +1,18 @@
-import type { Organization } from "../services/organization.service";
+import type { Organization as DbOrganization } from "@repo/models/organizations";
+
+export type Organization = DbOrganization & {
+  services?: string[];
+  metadata?: Record<string, any>;
+  display_name?: string;
+  title?: string;
+  city?: string;
+  country?: string;
+  location?: string;
+  type?: string;
+  category?: string;
+  industry?: string;
+  summary?: string;
+};
 
 export const WORK_FOR_SUBTYPES: Record<string, string[]> = {
   companies: ["COMPANY", "PUBLIC_COMPANY", "SOE", "CLUB", "SOCIETY", "CHAMBER_OF_COMMERCE"],

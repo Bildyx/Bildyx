@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   UserEducationField,
   PostUserEducationField,
@@ -6,22 +6,34 @@ import type {
 } from "@repo/models/user_education_fields";
 
 export class UserEducationFieldService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
-  public async getByEducation(userEducationId: string): Promise<UserEducationField[]> {
-    return await this.rpcClient.user_education_fields.getByEducation({ userEducationId });
+  public async getByEducation(
+    userEducationId: string,
+  ): Promise<UserEducationField[]> {
+    return await this.rpcClient.user_education_fields.getByEducation({
+      userEducationId,
+    });
   }
 
   public async getById(fieldId: string): Promise<UserEducationField> {
     return await this.rpcClient.user_education_fields.getById({ fieldId });
   }
 
-  public async create(input: PostUserEducationField): Promise<UserEducationField> {
+  public async create(
+    input: PostUserEducationField,
+  ): Promise<UserEducationField> {
     return await this.rpcClient.user_education_fields.create(input);
   }
 
-  public async update(fieldId: string, input: PutUserEducationField): Promise<UserEducationField> {
-    return await this.rpcClient.user_education_fields.update({ fieldId, ...input });
+  public async update(
+    fieldId: string,
+    input: PutUserEducationField,
+  ): Promise<UserEducationField> {
+    return await this.rpcClient.user_education_fields.update({
+      fieldId,
+      ...input,
+    });
   }
 
   public async delete(fieldId: string): Promise<UserEducationField> {

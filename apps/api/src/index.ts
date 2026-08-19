@@ -272,12 +272,11 @@ const server = app.listen(PORT, HOST, () => {
   const afterTimeMs = performance.now();
   const elapsedTimeMs = afterTimeMs - beforeTimeMs;
 
-  const url = `http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`;
+  const url = `http://${HOST}:${PORT}`;
   console.log(
     `API ${util.styleText("bold", `v${VERSION}`)} listening at ${util.styleText("cyan", url)}`,
   );
   console.log(`Ready in ${prettyMilliseconds(elapsedTimeMs)}`);
-  console.log(`API v${VERSION} listening on ${HOST}:${PORT}`);
   console.log();
 });
 

@@ -1,4 +1,4 @@
-import { getRPCClient } from "@repo/api-client";
+import { getRPCClient } from "./rpc";
 import type {
   UserProfile,
   PostUserProfile,
@@ -6,7 +6,7 @@ import type {
 } from "@repo/models/user_profiles";
 
 export class UserProfileService {
-  private readonly rpcClient = getRPCClient("http://localhost:3000");
+  private readonly rpcClient = getRPCClient();
 
   public async getFullProfileByUserId(userId: string) {
     return await this.rpcClient.user_profiles.getFullProfileByUser({
@@ -18,7 +18,14 @@ export class UserProfileService {
     return await this.rpcClient.user_profiles.getById({ profileId });
   }
 
-  public async getAll(input: { userId?: string; countryId?: string; cityId?: string; excludeOrganizations?: boolean } = {}): Promise<UserProfile[]> {
+  public async getAll(
+    input: {
+      userId?: string;
+      countryId?: string;
+      cityId?: string;
+      excludeOrganizations?: boolean;
+    } = {},
+  ): Promise<UserProfile[]> {
     return await this.rpcClient.user_profiles.getAll(input);
   }
 

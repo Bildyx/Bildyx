@@ -203,9 +203,9 @@ export async function mapCity(row: Record<string, any>) {
   const photoUrl = await fetchWikivoyagePhoto(row.name);
 
   // Dynamic database relations fetching
-  let mainIndustriesStr = null;
-  let largestCompaniesStr = null;
-  let topUniversitiesStr = null;
+  let mainIndustriesStr: string | null = null;
+  let largestCompaniesStr: string | null = null;
+  let topUniversitiesStr: string | null = null;
 
   try {
     if (row.id) {
@@ -356,11 +356,11 @@ export function mapJob(row: Record<string, any>) {
 // ---------------------------------------------------------------------------
 
 export async function mapOrganization(row: Record<string, any>) {
-  let headquartersLocation = null;
-  let cityName = null;
-  let parent = null;
-  let industry = null;
-  let country = null;
+  let headquartersLocation: string | null = null;
+  let cityName: string | null = null;
+  let parent: string | null = null;
+  let industry: string | null = null;
+  let country: string | null = null;
 
   try {
     if (row.id) {
@@ -371,7 +371,10 @@ export async function mapOrganization(row: Record<string, any>) {
           ? database
               .selectFrom("cities")
               .leftJoin("countries", "countries.iso_code", "cities.country_id")
-              .select(["cities.name as cityName", "countries.name as countryName"])
+              .select([
+                "cities.name as cityName",
+                "countries.name as countryName",
+              ])
               .where("cities.id", "=", row.city_id)
               .executeTakeFirst()
           : Promise.resolve(null),
@@ -452,7 +455,9 @@ export async function mapOrganization(row: Record<string, any>) {
     type2: str(row.type2),
     ownership: str(row.ownership),
     collections: str(row.collections),
-    numberOfEmployees: row.numberOfEmployees ? formatEnum(row.numberOfEmployees) : null,
+    numberOfEmployees: row.numberOfEmployees
+      ? formatEnum(row.numberOfEmployees)
+      : null,
     offices: str(row.offices),
     subsidiaries: str(row.subsidiaries),
     known_for: join(row.known_for),
@@ -473,6 +478,7 @@ export async function mapOrganization(row: Record<string, any>) {
     members: fmt(row.members),
     programs_activities: join(row.programs_activities),
     services: join(row.services),
+    avatar_url: str(row.avatar_url),
     year: new Date().getFullYear(),
   };
 }
@@ -551,6 +557,7 @@ export function mapSubject(
     competitors: join(row.competitors),
     funFact: str(row.fun_fact),
     year: new Date().getFullYear(),
+    logo_url: str(row.logo_url),
   };
 }
 
