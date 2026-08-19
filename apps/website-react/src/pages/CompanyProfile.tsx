@@ -7,32 +7,16 @@ import { AddTeamModal } from "../components/modals/AddTeamModal";
 import { AddTeamMemberModal } from "../components/modals/AddTeamMemberModal";
 import { AddCityModal } from "../components/modals/AddCityModal";
 import { PhotoUploadModal } from "../components/modals/PhotoUploadModal";
+import OrgBlock from "../components/company/OrgBlock";
 import { OrgCard } from "../components/company/OrgCard";
 import { SubjectCard } from "../components/company/SubjectCard";
 import { MemberCard } from "../components/company/MemberCard";
 import { OfficeCard } from "../components/company/OfficeCard";
 import { ProductCard } from "../components/company/ProductCard";
+import TeamProfileSide from "../components/company/TeamProfileSide";
 import { useCompanyProfile } from "../hooks/useCompanyProfile";
 
-import type { TeamProfile } from "@repo/models/team_profiles";
-
 import "../css/company_con_admin.css";
-
-const PROFILE_FIELDS_PEOPLE: [string, keyof TeamProfile, boolean?][] = [
-  ["Who We Are", "who_we_are"],
-  ["What We're Great At", "what_were_great_at"],
-  ["Team Culture", "team_culture"],
-  ["How We Work Together", "how_we_work_together"],
-  ["This team is NOT for you if...", "this_team_is_not_for_you_if", true],
-];
-
-const PROFILE_FIELDS_OPERATE: [string, keyof TeamProfile][] = [
-  ["How We're Led", "how_were_led"],
-  ["What We're Solving Now", "what_were_solving_now"],
-  ["A Typical Day", "typical_day"],
-  ["What We Value", "what_we_value"],
-  ["Growth Here", "growth_here"],
-];
 
 function checkSessionGuard(navigate: (path: string) => void) {
   const raw =
@@ -61,8 +45,6 @@ export default function CompanyProfile() {
     teams,
     members,
     offices,
-    teamProfiles,
-    photos,
     partners,
     customers,
     investors,
@@ -71,35 +53,18 @@ export default function CompanyProfile() {
     jobs,
     teamSubjects,
     allSubjects,
-    activeTeamId,
     mode,
     isEditingProfile,
     profileDraft,
     isEditingUrl,
     urlInputVal,
     modal,
-    editingMemberId,
     entitySearchSlot,
     activeTeam,
     filteredMembers,
     teamPhotos,
     teamProfile,
     editingMember,
-    setLoading,
-    setMyOrganization,
-    setTeams,
-    setMembers,
-    setOffices,
-    setTeamProfiles,
-    setPhotos,
-    setPartners,
-    setCustomers,
-    setInvestors,
-    setSubsidiaries,
-    setCities,
-    setJobs,
-    setTeamSubjects,
-    setAllSubjects,
     setActiveTeamId,
     setMode,
     setIsEditingProfile,
@@ -137,15 +102,11 @@ export default function CompanyProfile() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <p>Loading Connected Profile...</p>
+      <div className="d-flex flex-column justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary mb-3" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="text-muted">Loading Connected Profile...</p>
       </div>
     );
   }
@@ -574,87 +535,18 @@ export default function CompanyProfile() {
                   </div>
                 </div>
 
-                <aside className="ca-profile-side">
-                  <div>
-                    <h3>Team Profile</h3>
-                    {isAdminMode && !isEditingProfile && (
-                      <button onClick={startEditProfile} disabled={!activeTeam}>
-                        + Add
-                      </button>
-                    )}
-                  </div>
-
-                  <div>
-                    {!activeTeam ? (
-                      <p className="ca-profile-empty">
-                        No team profile added yet.
-                      </p>
-                    ) : isEditingProfile ? (
-                      <div className="ca-profile-points is-editing">
-                        {(mode === "operate"
-                          ? PROFILE_FIELDS_OPERATE
-                          : PROFILE_FIELDS_PEOPLE
-                        ).map(([title, field, danger]) => (
-                          <section
-                            className={`ca-point ca-point-editing${danger ? " danger" : ""}`}
-                            key={field}
-                          >
-                            <h4>{title}</h4>
-                            <textarea
-                              className="ca-profile-input"
-                              rows={2}
-                              value={profileDraft[field] || ""}
-                              onChange={(e) =>
-                                setProfileDraft({
-                                  ...profileDraft,
-                                  [field]: e.target.value,
-                                })
-                              }
-                            />
-                          </section>
-                        ))}
-                      </div>
-                    ) : !teamProfile ? (
-                      <p className="ca-profile-empty">
-                        No team profile added yet.
-                      </p>
-                    ) : (
-                      <div className="ca-profile-points">
-                        {(mode === "operate"
-                          ? PROFILE_FIELDS_OPERATE
-                          : PROFILE_FIELDS_PEOPLE
-                        )
-                          .filter(([, field]) =>
-                            String(teamProfile[field] || "").trim(),
-                          )
-                          .map(([title, field, danger]) => (
-                            <section
-                              className={`ca-point${danger ? " danger" : ""}`}
-                              key={field}
-                            >
-                              <h4>{title}</h4>
-                              <p>{teamProfile[field]}</p>
-                            </section>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <footer>
-                    <button
-                      className={mode === "people" ? "is-active" : ""}
-                      onClick={() => setMode("people")}
-                    >
-                      People
-                    </button>
-                    <button
-                      className={mode === "operate" ? "is-active" : ""}
-                      onClick={() => setMode("operate")}
-                    >
-                      How We Operate
-                    </button>
-                  </footer>
-                </aside>
+                <TeamProfileSide
+                  isAdminMode={isAdminMode}
+                  isEditingProfile={isEditingProfile}
+                  startEditProfile={startEditProfile}
+                  activeTeam={activeTeam}
+                  mode={mode}
+                  setMode={setMode}
+                  teamProfile={teamProfile}
+                  profileDraft={profileDraft}
+                  setProfileDraft={setProfileDraft}
+                  setIsEditingProfile={setIsEditingProfile}
+                />
               </div>
             </section>
 
@@ -724,125 +616,45 @@ export default function CompanyProfile() {
               </div>
             </section>
 
-            <section className="ca-block">
-              <header>
-                <span>Partners</span>
-                {isAdminMode && (
-                  <button onClick={() => setEntitySearchSlot("partner")}>
-                    + Add Partner
-                  </button>
-                )}
-              </header>
-              <div>
-                {partners.length === 0 ? (
-                  "No partners added yet."
-                ) : (
-                  <div className="ca-org-grid">
-                    {partners.map((partner) => (
-                      <OrgCard
-                        key={partner.id}
-                        orgId={partner.partner_id}
-                        onDelete={
-                          isAdminMode
-                            ? () => removePartner(partner.id)
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
+            <OrgBlock
+              title="Partners"
+              addButtonLabel="+ Add Partner"
+              onAddClick={() => setEntitySearchSlot("partner")}
+              items={partners}
+              orgIdKey="partner_id"
+              isAdminMode={isAdminMode}
+              onDelete={removePartner}
+            />
 
-            <section className="ca-block">
-              <header>
-                <span>Customers</span>
-                {isAdminMode && (
-                  <button onClick={() => setEntitySearchSlot("customer")}>
-                    + Add Customer
-                  </button>
-                )}
-              </header>
-              <div>
-                {customers.length === 0 ? (
-                  "No customers added yet."
-                ) : (
-                  <div className="ca-org-grid">
-                    {customers.map((customer) => (
-                      <OrgCard
-                        key={customer.id}
-                        orgId={customer.customer_id}
-                        onDelete={
-                          isAdminMode
-                            ? () => removeCustomer(customer.id)
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
+            <OrgBlock
+              title="Customers"
+              addButtonLabel="+ Add Customer"
+              onAddClick={() => setEntitySearchSlot("customer")}
+              items={customers}
+              orgIdKey="customer_id"
+              isAdminMode={isAdminMode}
+              onDelete={removeCustomer}
+            />
 
-            <section className="ca-block">
-              <header>
-                <span>Investors</span>
-                {isAdminMode && (
-                  <button onClick={() => setEntitySearchSlot("investor")}>
-                    + Add Investor
-                  </button>
-                )}
-              </header>
-              <div>
-                {investors.length === 0 ? (
-                  "No investors added yet."
-                ) : (
-                  <div className="ca-org-grid">
-                    {investors.map((investor) => (
-                      <OrgCard
-                        key={investor.id}
-                        orgId={investor.investor_id}
-                        onDelete={
-                          isAdminMode
-                            ? () => removeInvestor(investor.id)
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
+            <OrgBlock
+              title="Investors"
+              addButtonLabel="+ Add Investor"
+              onAddClick={() => setEntitySearchSlot("investor")}
+              items={investors}
+              orgIdKey="investor_id"
+              isAdminMode={isAdminMode}
+              onDelete={removeInvestor}
+            />
 
-            <section className="ca-block">
-              <header>
-                <span>Subsidiaries</span>
-                {isAdminMode && (
-                  <button onClick={() => setEntitySearchSlot("subsidiary")}>
-                    + Add Subsidiary
-                  </button>
-                )}
-              </header>
-              <div>
-                {subsidiaries.length === 0 ? (
-                  "No subsidiaries added yet."
-                ) : (
-                  <div className="ca-org-grid">
-                    {subsidiaries.map((sub) => (
-                      <OrgCard
-                        key={sub.id}
-                        orgId={sub.subsidiary_id}
-                        onDelete={
-                          isAdminMode
-                            ? () => removeSubsidiary(sub.id)
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
+            <OrgBlock
+              title="Subsidiaries"
+              addButtonLabel="+ Add Subsidiary"
+              onAddClick={() => setEntitySearchSlot("subsidiary")}
+              items={subsidiaries}
+              orgIdKey="subsidiary_id"
+              isAdminMode={isAdminMode}
+              onDelete={removeSubsidiary}
+            />
           </section>
 
           {isAdminMode && (

@@ -32,7 +32,9 @@ export default function AuthLayout({ children, formLabel }: AuthLayoutProps) {
               </span>
               <div>
                 <h2 className="brand-feature-title">For Companies</h2>
-                <p className="brand-feature-text">Build profile and present your teams to potential candidates.</p>
+                <p className="brand-feature-text">
+                  Build profile and present your teams to potential candidates.
+                </p>
               </div>
             </article>
             <article className="feature-card brand-feature">
@@ -42,7 +44,8 @@ export default function AuthLayout({ children, formLabel }: AuthLayoutProps) {
               <div>
                 <h2 className="brand-feature-title">For Job Seekers</h2>
                 <p className="brand-feature-text">
-                  Create a powerful microresume in minutes. Use Microresume as elevator pitch to potential employers.
+                  Create a powerful microresume in minutes. Use Microresume as
+                  elevator pitch to potential employers.
                 </p>
               </div>
             </article>

@@ -1,104 +1,19 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
-import { getRPCClient } from "../services/rpc";
-
+import { TargetListService, GetTargetsParams } from "../services/target-list.service";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { MatchSection } from "../components/target-list/MatchSection";
 import type { MatchCategory, TargetRow } from "../components/target-list/types";
 import "../css/target-list.css";
+import { getSession } from "../lib/session";
 import ProfileAside from "../components/ProfileAside";
+import { FilterDropdown } from "../components/target-list/FilterDropdown";
+import { LoadingResults } from "../components/target-list/LoadingResults";
 
-const rpc = getRPCClient();
-
-const PAGE_SIZE = 10;
-
-const SIZE_OPTIONS = [
-  {
-    value: "RANGE_1_10",
-    label: "Micro",
-    hint: "1–10 employees",
-  },
-  {
-    value: "RANGE_11_50",
-    label: "Small",
-    hint: "11–50 employees",
-  },
-  {
-    value: "RANGE_51_200",
-    label: "Medium-sized",
-    hint: "51–200 employees",
-  },
-  {
-    value: "RANGE_201_1000",
-    label: "Mid-Market",
-    hint: "201–1,000 employees",
-  },
-  {
-    value: "RANGE_1001_5000",
-    label: "Big",
-    hint: "1,001–5,000 employees",
-  },
-  {
-    value: "RANGE_5000_PLUS",
-    label: "Large, established",
-    hint: "5,000+ employees",
-  },
-] as const;
-
-const PRODUCT_OPTIONS = [
-  {
-    value: "same",
-    label: "Same as I used to work on.",
-  },
-  {
-    value: "similar",
-    label: "Similar to the ones that I used to work on.",
-  },
-  {
-    value: "different",
-    label: "Different from the ones that I used to work on.",
-  },
-] as const;
-
-const WORK_FOR_OPTIONS = [
-  {
-    value: "companies",
-    label: "Companies",
-  },
-  {
-    value: "government",
-    label: "Government & Public Services",
-  },
-  {
-    value: "healthcare",
-    label: "Hospitals & Healthcare Providers",
-  },
-  {
-    value: "education",
-    label: "Education & Research",
-  },
-  {
-    value: "nonprofit",
-    label: "Non-Profit, Community & Advocacy",
-  },
-  {
-    value: "international",
-    label: "International & Diplomatic Organizations",
-  },
-  {
-    value: "culture",
-    label: "Culture, Parks & Heritage",
-  },
-] as const;
+const targetListService = new TargetListService();
 
 type DropdownName = "sizes" | "products" | "workFor";
 
@@ -107,194 +22,13 @@ type Session = {
   profileId?: string;
 };
 
-type GetTargetsParams = {
-  userProfileId: string;
-  city?: string;
-  country?: string;
-  sizes?: EmployeeCountRange[];
-  subtypes?: OrganizationSubType[];
-  matchFilter?: MatchCategory;
-  keyword?: string;
-};
-
-function getSession(): Session | null {
-  try {
-    const raw =
-      sessionStorage.getItem("bildyx_session") ||
-      localStorage.getItem("bildyx_session") ||
-      localStorage.getItem("bildyx_user");
-
-    if (!raw) {
-      return null;
-    }
-
-    return JSON.parse(raw) as Session;
-  } catch (error) {
-    console.error("Failed to read session:", error);
-    return null;
-  }
-}
-
-function normalizeText(value: string): string {
-  return value.trim().toLowerCase();
-}
-
-const WORK_FOR_SUBTYPES: Record<string, OrganizationSubType[]> = {
-  companies: [
-    "COMPANY",
-    "PUBLIC_COMPANY",
-    "SOE",
-    "CLUB",
-    "SOCIETY",
-    "CHAMBER_OF_COMMERCE",
-  ],
-
-  government: [
-    "GOVERNMENT",
-    "STATE_GOVERNMENT",
-    "CITY_GOVERNMENT",
-    "CENTRAL_BANK",
-    "COURT",
-    "ARMY",
-    "NATIONAL_AUDIT_OFFICE",
-    "OMBUDSMAN",
-  ],
-
-  healthcare: ["HOSPITAL"],
-
-  education: [
-    "UNIVERSITY",
-    "RESEARCH_INSTITUTE",
-    "PRIMARY_SCHOOLS",
-    "SECONDARY_SCHOOLS",
-    "THINK_TANK",
-  ],
-
-  nonprofit: ["NON_PROFIT", "NGO", "FOUNDATION", "ASSOCIATION"],
-
-  international: ["INTERNATIONAL_ORGANIZATION", "EMBASSY"],
-
-  culture: ["MUSEUM", "NATIONAL_PARK", "PUBLIC_PARKS", "LIBRARY"],
-};
-
-function LoadingResults() {
-  return (
-    <div className="tl-match-section">
-      <div className="tl-match-section__header tl-skeleton-header">
-        <div
-          className="skeleton-loader"
-          style={{ width: 200, height: 22, borderRadius: 6 }}
-        />
-      </div>
-      <div className="tl-company-row">
-        <div className="tl-inline-card">
-          <div
-            className="skeleton-loader"
-            style={{ width: 44, height: 44, borderRadius: 10, flexShrink: 0 }}
-          />
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: 6,
-            }}
-          >
-            <div
-              className="skeleton-loader"
-              style={{ width: "60%", height: 14, borderRadius: 6 }}
-            />
-            <div
-              className="skeleton-loader"
-              style={{ width: "40%", height: 12, borderRadius: 6 }}
-            />
-          </div>
-        </div>
-        <div className="tl-inline-card">
-          <div
-            className="skeleton-loader"
-            style={{ width: 44, height: 44, borderRadius: 10, flexShrink: 0 }}
-          />
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: 6,
-            }}
-          >
-            <div
-              className="skeleton-loader"
-              style={{ width: "60%", height: 14, borderRadius: 6 }}
-            />
-            <div
-              className="skeleton-loader"
-              style={{ width: "40%", height: 12, borderRadius: 6 }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FilterDropdown({
-  name,
-  label,
-  icon,
-  count,
-  openDropdown,
-  setOpenDropdown,
-  panelClassName = "",
-  children,
-}: {
-  name: DropdownName;
-  label: string;
-  icon: string;
-  count: number;
-  openDropdown: DropdownName | null;
-  setOpenDropdown: React.Dispatch<React.SetStateAction<DropdownName | null>>;
-  panelClassName?: string;
-  children: ReactNode;
-}) {
-  const isOpen = openDropdown === name;
-
-  return (
-    <div className="tl-filter-dropdown">
-      <button
-        className={`tl-filter-chip${isOpen ? " is-open" : ""}`}
-        type="button"
-        aria-expanded={isOpen}
-        onClick={(event) => {
-          event.stopPropagation();
-
-          setOpenDropdown((current) => (current === name ? null : name));
-        }}
-      >
-        <span aria-hidden="true">{icon}</span> {label}{" "}
-        <strong>{count ? `(${count})` : ""}</strong>{" "}
-        <span aria-hidden="true">⌄</span>
-      </button>
-
-      <div
-        className={`tl-filter-panel${
-          panelClassName ? ` ${panelClassName}` : ""
-        }${isOpen ? " is-open" : ""}`}
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
 export default function TargetList() {
   usePageMeta(
     "My Target List — Bildyx",
     "Saved target companies and opportunities on Bildyx.",
   );
+
+  const PAGE_SIZE = 10;
 
   const navigate = useNavigate();
 
@@ -403,8 +137,39 @@ export default function TargetList() {
    */
 
   const subtypeFilter = useMemo(() => {
+    const workForSubtypes: Record<string, OrganizationSubType[]> = {
+      companies: [
+        "COMPANY",
+        "PUBLIC_COMPANY",
+        "SOE",
+        "CLUB",
+        "SOCIETY",
+        "CHAMBER_OF_COMMERCE",
+      ],
+      government: [
+        "GOVERNMENT",
+        "STATE_GOVERNMENT",
+        "CITY_GOVERNMENT",
+        "CENTRAL_BANK",
+        "COURT",
+        "ARMY",
+        "NATIONAL_AUDIT_OFFICE",
+        "OMBUDSMAN",
+      ],
+      healthcare: ["HOSPITAL"],
+      education: [
+        "UNIVERSITY",
+        "RESEARCH_INSTITUTE",
+        "PRIMARY_SCHOOLS",
+        "SECONDARY_SCHOOLS",
+        "THINK_TANK",
+      ],
+      nonprofit: ["NON_PROFIT", "NGO", "FOUNDATION", "ASSOCIATION"],
+      international: ["INTERNATIONAL_ORGANIZATION", "EMBASSY"],
+      culture: ["MUSEUM", "NATIONAL_PARK", "PUBLIC_PARKS", "LIBRARY"],
+    };
     return workFor.flatMap(
-      (group) => WORK_FOR_SUBTYPES[group] ?? [],
+      (group) => workForSubtypes[group] ?? [],
     ) as OrganizationSubType[];
   }, [workFor]);
 
@@ -438,9 +203,9 @@ export default function TargetList() {
       const params: GetTargetsParams = {
         userProfileId: profileId,
 
-        city: normalizeText(city) || undefined,
+        city: city.trim().toLowerCase() || undefined,
 
-        country: normalizeText(country) || undefined,
+        country: country.trim().toLowerCase() || undefined,
 
         sizes: selectedSizes.length > 0 ? selectedSizes : undefined,
 
@@ -454,12 +219,10 @@ export default function TargetList() {
         matchFilter:
           selectedProducts.length === 1 ? selectedProducts[0] : undefined,
 
-        keyword: normalizeText(keyword) || undefined,
+        keyword: keyword.trim().toLowerCase() || undefined,
       };
 
-      const all = (await (rpc as any).target_list.getTargets(
-        params,
-      )) as TargetRow[];
+      const all = await targetListService.getTargets(params);
 
       // Si plusieurs catégories cochées : filtrage client-side
       const filtered =
@@ -732,7 +495,38 @@ export default function TargetList() {
                     openDropdown={openDropdown}
                     setOpenDropdown={setOpenDropdown}
                   >
-                    {SIZE_OPTIONS.map((option) => (
+                    {[
+                      {
+                        value: "RANGE_1_10",
+                        label: "Micro",
+                        hint: "1–10 employees",
+                      },
+                      {
+                        value: "RANGE_11_50",
+                        label: "Small",
+                        hint: "11–50 employees",
+                      },
+                      {
+                        value: "RANGE_51_200",
+                        label: "Medium-sized",
+                        hint: "51–200 employees",
+                      },
+                      {
+                        value: "RANGE_201_1000",
+                        label: "Mid-Market",
+                        hint: "201–1,000 employees",
+                      },
+                      {
+                        value: "RANGE_1001_5000",
+                        label: "Big",
+                        hint: "1,001–5,000 employees",
+                      },
+                      {
+                        value: "RANGE_5000_PLUS",
+                        label: "Large, established",
+                        hint: "5,000+ employees",
+                      },
+                    ].map((option) => (
                       <label key={option.value} className="tl-filter-option">
                         <input
                           type="checkbox"
@@ -763,7 +557,18 @@ export default function TargetList() {
                   >
                     <p>Products and Services</p>
 
-                    {PRODUCT_OPTIONS.map((option) => (
+                    {[
+                      { value: "same", label: "Same as I used to work on." },
+                      {
+                        value: "similar",
+                        label: "Similar to the ones that I used to work on.",
+                      },
+                      {
+                        value: "different",
+                        label:
+                          "Different from the ones that I used to work on.",
+                      },
+                    ].map((option) => (
                       <label
                         key={option.value}
                         className="tl-filter-option tl-filter-option--sentence"
@@ -810,7 +615,27 @@ export default function TargetList() {
                   >
                     <p>I would like to work for</p>
 
-                    {WORK_FOR_OPTIONS.map((option) => (
+                    {[
+                      { value: "companies", label: "Companies" },
+                      {
+                        value: "government",
+                        label: "Government & Public Services",
+                      },
+                      {
+                        value: "healthcare",
+                        label: "Hospitals & Healthcare Providers",
+                      },
+                      { value: "education", label: "Education & Research" },
+                      {
+                        value: "nonprofit",
+                        label: "Non-Profit, Community & Advocacy",
+                      },
+                      {
+                        value: "international",
+                        label: "International & Diplomatic Organizations",
+                      },
+                      { value: "culture", label: "Culture, Parks & Heritage" },
+                    ].map((option) => (
                       <label
                         key={option.value}
                         className="tl-filter-option tl-filter-option--sentence"

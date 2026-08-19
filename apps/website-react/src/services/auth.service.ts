@@ -47,6 +47,10 @@ export class AuthService {
     return await this.rpcClient.auth.signup(input);
   }
 
+  public async me(): Promise<any> {
+    return await this.rpcClient.auth.me();
+  }
+
   public async login(input: LoginInput): Promise<LoginOutput> {
     return await this.rpcClient.auth.login(input);
   }

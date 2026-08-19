@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthLayout from "../components/AuthLayout";
+import FormField from "../components/FormField";
+import CaptchaBox from "../components/CaptchaBox";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useCaptcha } from "../hooks/useCaptcha";
 import { validEmail, extractErrorMessage } from "../lib/formHelpers";
@@ -60,46 +62,21 @@ export default function ForgotPassword() {
             <p>Enter your email address and we will send you a reset link.</p>
           </div>
 
-          <div className="field">
-            <label htmlFor="forgotEmail">Email</label>
-            <div className={`input-wrap${emailError ? " invalid" : ""}`}>
-              <img className="input-icon" src="/images/image.png" alt="" />
-              <input
-                id="forgotEmail"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                maxLength={120}
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <small className="error">{emailError}</small>
-          </div>
+          <FormField
+            id="forgotEmail"
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            maxLength={120}
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={emailError}
+            icon="/images/image.png"
+          />
 
-          <div className="captcha-box">
-            <div>
-              <strong>Security check</strong>
-              <p>
-                Solve this quick captcha: <span className="captcha-question">{captcha.question}</span>
-              </p>
-            </div>
-            <button className="captcha-refresh" type="button" aria-label="Refresh captcha" onClick={captcha.refresh}>
-              Refresh
-            </button>
-            <input
-              className="captcha-answer"
-              type="number"
-              inputMode="numeric"
-              placeholder="Answer"
-              required
-              value={captcha.value}
-              onChange={(e) => captcha.setValue(e.target.value)}
-            />
-          </div>
-          <small className="captcha-error error">{captcha.error}</small>
+          <CaptchaBox captcha={captcha} />
 
           <button className="submit-btn" type="submit" disabled={isLoading}>
             {isLoading ? "..." : "Send reset link"}

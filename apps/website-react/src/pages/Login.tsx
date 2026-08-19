@@ -1,30 +1,27 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthLayout from "../components/AuthLayout";
+import FormField from "../components/FormField";
+import CaptchaBox from "../components/CaptchaBox";
+import RegisterForm from "../components/RegisterForm";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useCaptcha } from "../hooks/useCaptcha";
-import {
-  extractErrorMessage,
-  passwordScore,
-  validEmail,
-} from "../lib/formHelpers";
+import { extractErrorMessage, validEmail } from "../lib/formHelpers";
 import { toast } from "../lib/toast";
 import {
   addAttempt,
   getAuthUser,
   getRedirectPath,
   saveBildyxSession,
-  savePendingAccountType,
   tooManyAttempts,
 } from "../lib/authSession";
-import { AuthService, type SignupInput } from "../services/auth.service";
+import { AuthService } from "../services/auth.service";
 import { User } from "@repo/models/users";
 
 const authService = new AuthService();
 
-type AccountType = "company" | "seeker";
 type FieldErrors = Record<string, string>;
 
 export default function Login() {
@@ -35,89 +32,44 @@ export default function Login() {
   const initialTab = searchParams.get("tab") === "signup" ? "signup" : "login";
   const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
 
-  // ─── Signup form state ──────────────────────────────────────
-  const [accountType, setAccountType] = useState<AccountType>("company");
-  const [companyName, setCompanyName] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [showSignupPassword, setShowSignupPassword] = useState(false);
-  const [terms, setTerms] = useState(false);
-  const [marketing, setMarketing] = useState(false);
-  const [signupErrors, setSignupErrors] = useState<FieldErrors>({});
-  const [isSigningUp, setIsSigningUp] = useState(false);
-  const signupCaptcha = useCaptcha();
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (
+        event.data?.type === "GOOGLE_LOGIN_SUCCESS" ||
+        event.data?.type === "LINKEDIN_LOGIN_SUCCESS"
+      ) {
+        const provider =
+          event.data.type === "GOOGLE_LOGIN_SUCCESS" ? "Google" : "LinkedIn";
+        try {
+          const user = await authService.me();
+          if (user) {
+            saveBildyxSession(user, user.email);
+            const redirectPath = await getRedirectPath(user);
+            navigate(redirectPath);
+          } else {
+            toast.error(`Failed to load ${provider} session.`);
+          }
+        } catch (err) {
+          toast.error(`${provider} authentication failed.`);
+        }
+      }
+      if (event.data?.type === "LINKEDIN_LOGIN_ERROR") {
+        toast.error(`LinkedIn error: ${event.data.error || "unknown error"}`);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [navigate]);
 
   // ─── Login form state ───────────────────────────────────────
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginErrors, setLoginErrors] = useState<FieldErrors>({});
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const loginCaptcha = useCaptcha();
-
-  async function handleSignup(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    let ok = true;
-
-    if (!signupCaptcha.verify()) {
-      toast.warning("Please enter the captcha.");
-      ok = false;
-    }
-    if (!terms) {
-      toast.warning("Please accept the Terms and Privacy Policy.");
-      ok = false;
-    }
-    if (!ok) return;
-
-    const body: SignupInput = {
-      accountType,
-      email: signupEmail.trim(),
-      password: signupPassword.trim(),
-      marketing,
-    };
-    if (accountType === "company") body.companyName = companyName.trim();
-    else {
-      body.firstName = firstName.trim();
-      body.lastName = lastName.trim();
-    }
-
-    setIsSigningUp(true);
-    setSignupErrors({});
-    try {
-      const data = await authService.signup(body);
-      savePendingAccountType(accountType, data.userId);
-      navigate(`/verify-email?userId=${encodeURIComponent(data.userId)}`);
-    } catch (err) {
-      let errorData:
-        | {
-            data?: { issues?: { path: string[]; message: string }[] };
-            message?: string;
-          }
-        | undefined;
-      if (err instanceof Error) {
-        try {
-          errorData = JSON.parse(err.message);
-        } catch {
-          // not JSON, fall through
-        }
-      }
-
-      if (errorData?.data?.issues) {
-        const fieldErrors: FieldErrors = {};
-        errorData.data.issues.forEach((issue) => {
-          fieldErrors[issue.path[0]] = issue.message;
-        });
-        setSignupErrors(fieldErrors);
-        toast.error("Please fix the errors in the form.");
-      } else {
-        toast.error(extractErrorMessage(err, "Sign up failed."));
-      }
-    } finally {
-      setIsSigningUp(false);
-    }
-  }
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -171,6 +123,19 @@ export default function Login() {
     );
   }
 
+  function handleLinkedinSignup() {
+    const width = 520;
+    const height = 650;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    window.open(
+      `${process.env.API_URL}/api/auth/linkedin`,
+      "LinkedInLogin",
+      `width=${width},height=${height},left=${left},top=${top},popup=yes,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`,
+    );
+  }
+
   return (
     <>
       <Header />
@@ -197,255 +162,11 @@ export default function Login() {
           </button>
         </div>
 
-        <form
-          className={`auth-form${activeTab === "signup" ? " active" : ""}`}
-          noValidate
-          onSubmit={handleSignup}
-        >
-          <div className="form-heading">
-            <h2>Create an account</h2>
-            <p>Select your account type to get started.</p>
-          </div>
-
-          <div
-            className="account-switch"
-            role="radiogroup"
-            aria-label="Account type"
-          >
-            <label
-              className={`account-option${accountType === "company" ? " active" : ""}`}
-            >
-              <input
-                type="radio"
-                name="accountType"
-                value="company"
-                checked={accountType === "company"}
-                onChange={() => setAccountType("company")}
-              />
-              <span>Company</span>
-            </label>
-            <label
-              className={`account-option${accountType === "seeker" ? " active" : ""}`}
-            >
-              <input
-                type="radio"
-                name="accountType"
-                value="seeker"
-                checked={accountType === "seeker"}
-                onChange={() => setAccountType("seeker")}
-              />
-              <span>Job Seeker</span>
-            </label>
-          </div>
-
-          {accountType === "company" ? (
-            <div className="field">
-              <label htmlFor="companyName">Company Name</label>
-              <div
-                className={`input-wrap${signupErrors.companyName ? " invalid" : ""}`}
-              >
-                <input
-                  id="companyName"
-                  name="companyName"
-                  type="text"
-                  placeholder="Type at least 3 characters..."
-                  maxLength={80}
-                  autoComplete="organization"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                />
-              </div>
-              <small className="error">{signupErrors.companyName}</small>
-            </div>
-          ) : (
-            <div>
-              <div className="social-row social-row-single">
-                <button
-                  type="button"
-                  className="social-btn google-btn"
-                  onClick={handleGoogleSignup}
-                >
-                  <img src="/images/google.svg" alt="" />
-                  Continue with Google
-                </button>
-              </div>
-
-              <div className="divider">
-                <span>OR</span>
-              </div>
-
-              <div className="field-grid">
-                <div className="field">
-                  <label htmlFor="firstName">First Name</label>
-                  <div
-                    className={`input-wrap${signupErrors.firstName ? " invalid" : ""}`}
-                  >
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      placeholder="Jane"
-                      maxLength={80}
-                      autoComplete="given-name"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                    />
-                  </div>
-                  <small className="error">{signupErrors.firstName}</small>
-                </div>
-
-                <div className="field">
-                  <label htmlFor="lastName">Last Name</label>
-                  <div
-                    className={`input-wrap${signupErrors.lastName ? " invalid" : ""}`}
-                  >
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      placeholder="Parker"
-                      maxLength={80}
-                      autoComplete="family-name"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                    />
-                  </div>
-                  <small className="error">{signupErrors.lastName}</small>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="field">
-            <label htmlFor="email">
-              {accountType === "company" ? "Work Email" : "Email"}
-            </label>
-            <div
-              className={`input-wrap${signupErrors.email ? " invalid" : ""}`}
-            >
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder={
-                  accountType === "company"
-                    ? "name@company.com"
-                    : "you@example.com"
-                }
-                maxLength={120}
-                autoComplete="email"
-                required
-                value={signupEmail}
-                onChange={(e) => setSignupEmail(e.target.value)}
-              />
-            </div>
-            <small className="error">{signupErrors.email}</small>
-          </div>
-
-          <div className="field">
-            <label htmlFor="password">Password</label>
-            <div
-              className={`input-wrap${signupErrors.password ? " invalid" : ""}`}
-            >
-              <input
-                id="password"
-                name="password"
-                type={showSignupPassword ? "text" : "password"}
-                placeholder="••••••••"
-                minLength={8}
-                maxLength={72}
-                autoComplete="new-password"
-                required
-                value={signupPassword}
-                onChange={(e) => setSignupPassword(e.target.value)}
-              />
-              <button
-                className="icon-btn toggle-password"
-                type="button"
-                aria-label={
-                  showSignupPassword ? "Hide password" : "Show password"
-                }
-                onClick={() => setShowSignupPassword((v) => !v)}
-              >
-                {showSignupPassword ? "🙈" : "👁"}
-              </button>
-            </div>
-            <meter
-              className="password-meter"
-              min={0}
-              max={4}
-              value={Math.min(4, passwordScore(signupPassword))}
-            />
-            <small className="hint">
-              Minimum 8 characters, with uppercase, lowercase, number and symbol
-              recommended.
-            </small>
-            <small className="error">{signupErrors.password}</small>
-          </div>
-
-          <div className="captcha-box">
-            <div>
-              <strong>Security check</strong>
-              <p>
-                Solve this quick captcha:{" "}
-                <span className="captcha-question">
-                  {signupCaptcha.question}
-                </span>
-              </p>
-            </div>
-            <button
-              className="captcha-refresh"
-              type="button"
-              aria-label="Refresh captcha"
-              onClick={signupCaptcha.refresh}
-            >
-              Refresh
-            </button>
-            <input
-              className="captcha-answer"
-              type="number"
-              inputMode="numeric"
-              placeholder="Answer"
-              required
-              value={signupCaptcha.value}
-              onChange={(e) => signupCaptcha.setValue(e.target.value)}
-            />
-          </div>
-          <small className="captcha-error error">{signupCaptcha.error}</small>
-
-          <label className="check-line">
-            <input
-              type="checkbox"
-              required
-              checked={terms}
-              onChange={(e) => setTerms(e.target.checked)}
-            />
-            <span>
-              I agree to the <Link to="/terms-service">Terms of Service</Link>{" "}
-              and <Link to="/privacy-policy">Privacy Policy</Link>.
-            </span>
-          </label>
-
-          <label className="check-line muted">
-            <input
-              type="checkbox"
-              checked={marketing}
-              onChange={(e) => setMarketing(e.target.checked)}
-            />
-            <span>
-              I agree to receive emails about recruitment services from Bildyx.
-              I can unsubscribe at any time.
-            </span>
-          </label>
-
-          <button className="submit-btn" type="submit" disabled={isSigningUp}>
-            {isSigningUp
-              ? "..."
-              : accountType === "company"
-                ? "Create Company Account"
-                : "Create Job Seeker Account"}
-          </button>
-        </form>
+        <RegisterForm
+          isActive={activeTab === "signup"}
+          handleGoogleSignup={handleGoogleSignup}
+          handleLinkedinSignup={handleLinkedinSignup}
+        />
 
         <form
           className={`auth-form${activeTab === "login" ? " active" : ""}`}
@@ -457,86 +178,69 @@ export default function Login() {
             <p>Welcome back! Please enter your details.</p>
           </div>
 
-          <div className="field">
-            <label htmlFor="loginEmail">Email</label>
-            <div className={`input-wrap${loginErrors.email ? " invalid" : ""}`}>
-              <input
-                id="loginEmail"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                maxLength={120}
-                autoComplete="email"
-                required
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
+          <div className="social-row" style={{ marginBottom: 20 }}>
+            <button
+              type="button"
+              className="social-btn google-btn"
+              onClick={handleGoogleSignup}
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail"
+                alt=""
               />
-            </div>
-            <small className="error">{loginErrors.email}</small>
+              Google
+            </button>
+            <button
+              type="button"
+              className="social-btn linkedin-btn"
+              onClick={handleLinkedinSignup}
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/LinkedIn_icon.svg/3840px-LinkedIn_icon.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail"
+                alt=""
+              />
+              LinkedIn
+            </button>
           </div>
 
-          <div className="field">
+          <div className="divider" style={{ margin: "20px 0" }}>
+            <span>OR</span>
+          </div>
+
+          <FormField
+            id="loginEmail"
+            name="email"
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            maxLength={120}
+            autoComplete="email"
+            required
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            error={loginErrors.email}
+          />
+
+          <FormField
+            id="loginPassword"
+            name="password"
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            maxLength={72}
+            autoComplete="current-password"
+            required
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            error={loginErrors.password}
+            showPasswordToggle={true}
+          >
             <div className="label-row">
-              <label htmlFor="loginPassword">Password</label>
               <Link to="/forgot-password">Forgot password?</Link>
             </div>
-            <div
-              className={`input-wrap${loginErrors.password ? " invalid" : ""}`}
-            >
-              <input
-                id="loginPassword"
-                name="password"
-                type={showLoginPassword ? "text" : "password"}
-                placeholder="••••••••"
-                maxLength={72}
-                autoComplete="current-password"
-                required
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-              />
-              <button
-                className="icon-btn toggle-password"
-                type="button"
-                aria-label={
-                  showLoginPassword ? "Hide password" : "Show password"
-                }
-                onClick={() => setShowLoginPassword((v) => !v)}
-              >
-                {showLoginPassword ? "🙈" : "👁"}
-              </button>
-            </div>
-            <small className="error">{loginErrors.password}</small>
-          </div>
+          </FormField>
 
-          <div className="captcha-box">
-            <div>
-              <strong>Security check</strong>
-              <p>
-                Solve this quick captcha:{" "}
-                <span className="captcha-question">
-                  {loginCaptcha.question}
-                </span>
-              </p>
-            </div>
-            <button
-              className="captcha-refresh"
-              type="button"
-              aria-label="Refresh captcha"
-              onClick={loginCaptcha.refresh}
-            >
-              Refresh
-            </button>
-            <input
-              className="captcha-answer"
-              type="number"
-              inputMode="numeric"
-              placeholder="Answer"
-              required
-              value={loginCaptcha.value}
-              onChange={(e) => loginCaptcha.setValue(e.target.value)}
-            />
-          </div>
-          <small className="captcha-error error">{loginCaptcha.error}</small>
+          <CaptchaBox captcha={loginCaptcha} />
 
           <button className="submit-btn" type="submit" disabled={isLoggingIn}>
             {isLoggingIn ? "..." : "Log In"}

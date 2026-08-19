@@ -66,6 +66,7 @@ export function saveBildyxSession(user: any, fallbackEmail = "") {
     role: user.role || null,
     profileId: user.profile_id || null,
     companyId: user.organization_id || null,
+    createdAt: Date.now(),
   };
 
   sessionStorage.setItem("bildyx_session", JSON.stringify(sessionInfo));

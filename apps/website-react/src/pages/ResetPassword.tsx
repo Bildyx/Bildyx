@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthLayout from "../components/AuthLayout";
+import FormField from "../components/FormField";
+import CaptchaBox from "../components/CaptchaBox";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useCaptcha } from "../hooks/useCaptcha";
 import { extractErrorMessage } from "../lib/formHelpers";
@@ -23,7 +25,6 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmError, setConfirmError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const captcha = useCaptcha();
   const formRef = useRef<HTMLFormElement>(null);
@@ -77,73 +78,36 @@ export default function ResetPassword() {
             <p>Choose a new password for your account.</p>
           </div>
 
-          <div className="field">
-            <label htmlFor="resetPassword">New Password</label>
-            <div className={`input-wrap${passwordError ? " invalid" : ""}`}>
-              <img className="input-icon" src="/images/image.png" alt="" />
-              <input
-                id="resetPassword"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                minLength={8}
-                maxLength={72}
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                className="icon-btn toggle-password"
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onClick={() => setShowPassword((v) => !v)}
-              >
-                <img className="eye-icon" src="/images/image.png" alt="" />
-              </button>
-            </div>
-            <small className="error">{passwordError}</small>
-          </div>
+          <FormField
+            id="resetPassword"
+            label="New Password"
+            type="password"
+            placeholder="••••••••"
+            minLength={8}
+            maxLength={72}
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={passwordError}
+            icon="/images/image.png"
+            showPasswordToggle={true}
+          />
 
-          <div className="field">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <div className={`input-wrap${confirmError ? " invalid" : ""}`}>
-              <img className="input-icon" src="/images/image.png" alt="" />
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="Repeat password"
-                maxLength={72}
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-            <small className="error">{confirmError}</small>
-          </div>
+          <FormField
+            id="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            placeholder="Repeat password"
+            maxLength={72}
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={confirmError}
+            icon="/images/image.png"
+          />
 
-          <div className="captcha-box">
-            <div>
-              <strong>Security check</strong>
-              <p>
-                Solve this quick captcha: <span className="captcha-question">{captcha.question}</span>
-              </p>
-            </div>
-            <button className="captcha-refresh" type="button" aria-label="Refresh captcha" onClick={captcha.refresh}>
-              Refresh
-            </button>
-            <input
-              className="captcha-answer"
-              type="number"
-              inputMode="numeric"
-              placeholder="Answer"
-              required
-              value={captcha.value}
-              onChange={(e) => captcha.setValue(e.target.value)}
-            />
-          </div>
-          <small className="captcha-error error">{captcha.error}</small>
+          <CaptchaBox captcha={captcha} />
 
           <button className="submit-btn" type="submit" disabled={isLoading}>
             {isLoading ? "..." : "Update Password"}
