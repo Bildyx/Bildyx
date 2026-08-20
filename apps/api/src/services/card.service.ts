@@ -178,7 +178,7 @@ export async function renderCardHtml(
     return `
         <div class="header-row">
             <div class="maygraph-logo">
-                <img src="${logoUrl}" alt="MayGraph" />
+                <img src="${logoUrl}" alt="Logo" />
             </div>
             <div class="company-title">${title}</div>
         </div>`;

@@ -2,6 +2,7 @@ const beforeTimeMs = performance.now();
 import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import util from "node:util";
 import path from "node:path";
 import fs from "node:fs";
@@ -25,6 +26,7 @@ import { router } from "./routes/router";
 import { database } from "./database";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as OpenIDConnectStrategy } from "passport-openidconnect";
 import { randomUUID, randomBytes } from "node:crypto";
 import { hashPassword } from "./services/auth.service";
 import cors from "cors";
@@ -48,7 +50,20 @@ app.use(
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "default_secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  }),
+);
 app.use(passport.initialize());
+app.use(passport.session());
 
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(
@@ -60,6 +75,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
+          console.log(profile);
           const email = profile.emails?.[0]?.value?.toLowerCase();
           if (!email) {
             return done(new Error("Google account has no email"));
@@ -117,11 +133,18 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               })
               .execute();
 
+            const firstName = profile.name?.givenName || null;
+            const lastName = profile.name?.familyName || null;
+            const avatarUrl = profile.photos?.[0]?.value || null;
+
             await trx
               .insertInto("user_profiles")
               .values({
                 id: randomUUID(),
                 user_id: userId,
+                first_name: firstName,
+                last_name: lastName,
+                avatar_url: avatarUrl,
                 is_public: true,
               })
               .execute();
@@ -146,6 +169,164 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     "Google OAuth credentials missing. Google login strategy not loaded.",
   );
 }
+
+if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
+  passport.use(
+    "linkedin",
+    new OpenIDConnectStrategy(
+      {
+        issuer: "https://www.linkedin.com/oauth",
+        authorizationURL: "https://www.linkedin.com/oauth/v2/authorization",
+        tokenURL: "https://www.linkedin.com/oauth/v2/accessToken",
+        userInfoURL: "https://api.linkedin.com/v2/userinfo",
+        clientID: process.env.LINKEDIN_CLIENT_ID,
+        clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+        callbackURL: `${API_URL}/api/auth/linkedin/callback`,
+        scope: ["openid", "profile", "email"],
+      },
+      async (
+        issuer: string,
+        profile: any,
+        context: any,
+        idToken: any,
+        accessToken: any,
+        refreshToken: any,
+        done: any,
+      ) => {
+        try {
+          const callback =
+            typeof done === "function"
+              ? done
+              : typeof accessToken === "function"
+                ? accessToken
+                : context;
+          const token =
+            typeof accessToken === "string"
+              ? accessToken
+              : typeof idToken === "string"
+                ? idToken
+                : null;
+
+          let rawData: any = {};
+          if (token) {
+            const res = await fetch("https://api.linkedin.com/v2/userinfo", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            rawData = await res.json();
+          }
+
+          const email =
+            rawData.email?.toLowerCase() ??
+            profile.email?.toLowerCase() ??
+            profile.emails?.[0]?.value?.toLowerCase();
+
+          if (!email) {
+            return callback(new Error("LinkedIn account has no email"));
+          }
+
+          const firstName =
+            rawData.given_name ??
+            profile.name?.givenName ??
+            profile.givenName ??
+            "Firstname";
+
+          const lastName =
+            rawData.family_name ??
+            profile.name?.familyName ??
+            profile.familyName ??
+            "Lastname";
+
+          const avatarUrl = rawData.picture ?? profile.picture ?? null;
+
+          const existingUser = await database
+            .selectFrom("users")
+            .select(["id", "email", "role", "email_verified"])
+            .where("email", "=", email)
+            .executeTakeFirst();
+
+          if (existingUser) {
+            if (!existingUser.email_verified) {
+              await database
+                .updateTable("users")
+                .set({
+                  email_verified: true,
+                  verification_code: null,
+                  verification_expires_at: null,
+                  last_verification_sent_at: null,
+                  status: "ACTIVE",
+                })
+                .where("id", "=", existingUser.id)
+                .execute();
+
+              return callback(null, {
+                ...existingUser,
+                email_verified: true,
+              });
+            }
+            return callback(null, existingUser);
+          }
+
+          const randomPasswordHash = hashPassword(
+            randomBytes(32).toString("hex"),
+          );
+          const userId = randomUUID();
+
+          await database.transaction().execute(async (trx) => {
+            await trx
+              .insertInto("users")
+              .values({
+                id: userId,
+                email,
+                role: "CANDIDATE",
+                marketing_opt_in: false,
+                email_verified: true,
+                password_hash: randomPasswordHash,
+                verification_code: null,
+                verification_expires_at: null,
+                last_verification_sent_at: null,
+                status: "ACTIVE",
+              })
+              .execute();
+
+            await trx
+              .insertInto("user_profiles")
+              .values({
+                id: randomUUID(),
+                user_id: userId,
+                first_name: firstName,
+                last_name: lastName,
+                avatar_url: avatarUrl,
+                is_public: true,
+              })
+              .execute();
+          });
+
+          return callback(null, {
+            id: userId,
+            email,
+            role: "CANDIDATE",
+            email_verified: true,
+          });
+        } catch (err) {
+          console.error("[LinkedIn] Database/auth error:", err);
+          return typeof done === "function" ? done(err) : null;
+        }
+      },
+    ),
+  );
+} else {
+  console.warn(
+    "LinkedIn OAuth credentials missing. LinkedIn login strategy not loaded.",
+  );
+}
+
+passport.serializeUser((user: any, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user: any, done) => {
+  done(null, user);
+});
 
 app.use(async (req, res, next) => {
   try {
@@ -189,12 +370,12 @@ app.get("/spec.json", async (req, res) => {
 app.get("/enums/languages", (_req, res) => {
   res.json(LanguageSchema.options);
 });
+
 app.use(
   "/css",
   express.static(path.resolve(__dirname, "templates/organizations")),
 );
 
-// Serve icon/logo images statically (replaces per-request Base64 encoding)
 const iconsDir = fs.existsSync(path.resolve(process.cwd(), "../../Files/icons"))
   ? path.resolve(process.cwd(), "../../Files/icons")
   : fs.existsSync(path.resolve(process.cwd(), "Files/icons"))
@@ -272,12 +453,11 @@ const server = app.listen(PORT, HOST, () => {
   const afterTimeMs = performance.now();
   const elapsedTimeMs = afterTimeMs - beforeTimeMs;
 
-  const url = `http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`;
+  const url = `http://${HOST}:${PORT}`;
   console.log(
     `API ${util.styleText("bold", `v${VERSION}`)} listening at ${util.styleText("cyan", url)}`,
   );
   console.log(`Ready in ${prettyMilliseconds(elapsedTimeMs)}`);
-  console.log(`API v${VERSION} listening on ${HOST}:${PORT}`);
   console.log();
 });
 

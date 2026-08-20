@@ -29,6 +29,9 @@ export interface RunResult {
   prunedCount: number;
   // Set when --prune was refused by the safety threshold.
   pruneRefused?: { orphans: number; tracked: number; ratio: number };
+  // Set when --prune was requested but the model has no deletedAtField (see
+  // ImportAdapter.deletedAtField) - soft-delete isn't possible for it yet.
+  pruneUnsupported?: boolean;
   // Unresolved M2M references, reported as warnings.
   m2mWarnings: string[];
 }
@@ -248,7 +251,8 @@ export async function runImportForModel(
   }
 
   let pruneRefused: RunResult["pruneRefused"];
-  if (options.prune) {
+  const pruneUnsupported = options.prune && !adapter.deletedAtField;
+  if (options.prune && adapter.deletedAtField) {
     // Number of keys tracked before this run: orphans + rows found again in
     // the file. A truncated file drives the ratio up.
     const tracked = plan.orphans.length + plan.toUpdate.length + plan.unchanged.length;
@@ -258,7 +262,7 @@ export async function runImportForModel(
     }
   }
 
-  if (options.prune && !pruneRefused) {
+  if (options.prune && adapter.deletedAtField && !pruneRefused) {
     for (const batch of chunk(plan.orphans, CHUNK_SIZE)) {
       const result = await delegate.updateMany({
         where: { [adapter.naturalKeyField]: { in: batch } },
@@ -271,5 +275,12 @@ export async function runImportForModel(
     }
   }
 
-  return { plan, committed: true, prunedCount, ...(pruneRefused ? { pruneRefused } : {}), m2mWarnings };
+  return {
+    plan,
+    committed: true,
+    prunedCount,
+    ...(pruneRefused ? { pruneRefused } : {}),
+    ...(pruneUnsupported ? { pruneUnsupported } : {}),
+    m2mWarnings,
+  };
 }

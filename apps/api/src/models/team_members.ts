@@ -3,8 +3,8 @@ import { z } from "zod";
 export const TeamMemberSchema = z.object({
   id: z.uuid(),
   team_id: z.uuid(),
-  fullname: z.string().trim().min(1),
-  job_id: z.uuid(),
+  fullname: z.string().trim().min(1, "Member name is required."),
+  job_id: z.uuid("Job title is required."),
   profile_image: z.string().nullable().optional(),
   is_leader: z.boolean().nullable().optional().default(false),
 });

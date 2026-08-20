@@ -57,12 +57,12 @@ export function planImport<Row extends CsvRow, Fk>(
   rows: Row[],
   adapter: Pick<
     ImportAdapter<Row, Fk>,
-    "modelName" | "naturalKeyColumn" | "expectedColumns" | "mapRow" | "normalizeNaturalKey"
+    "modelName" | "naturalKeyColumn" | "expectedColumns" | "legacyColumns" | "mapRow" | "normalizeNaturalKey"
   >,
   fkContext: Fk,
   existingHashes: Map<string, string>,
 ): ImportPlan<Row> {
-  const headerCheck = validateHeader(header, adapter.expectedColumns);
+  const headerCheck = validateHeader(header, adapter.expectedColumns, adapter.legacyColumns);
   if (!headerCheck.ok) {
     return emptyPlan<Row>(adapter.modelName, {
       missing: headerCheck.missing,

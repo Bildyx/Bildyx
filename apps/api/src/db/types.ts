@@ -524,6 +524,15 @@ export interface Cities {
   top_universities: string | null;
 }
 
+export interface ContactRequests {
+  email: string;
+  firstname: string;
+  id: Generated<string>;
+  lastname: string;
+  message: string;
+  subject: string;
+}
+
 export interface Countries {
   area_km2: number | null;
   average_rent: number | null;
@@ -1034,6 +1043,7 @@ export interface Teams {
   city_id: string;
   id: Generated<string>;
   name: string;
+  organization_id: string;
   product_service: string | null;
   type: string;
   visibility: Generated<Teamvisibility>;
@@ -1209,6 +1219,7 @@ export interface DB {
   "auth.webauthn_credentials": AuthWebauthnCredentials;
   certifications: Certifications;
   cities: Cities;
+  contact_requests: ContactRequests;
   countries: Countries;
   degrees: Degrees;
   "extensions.pg_stat_statements": ExtensionsPgStatStatements;

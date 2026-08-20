@@ -16,12 +16,12 @@ import type { Insertable } from "kysely";
 import type { UserCertifications } from "../db/types";
 
 export const user_certifications = {
-  // 1. Get all certifications d'un profil
-  getCertificationByProfile: publicProcedure
+  // 1. Get all certifications for a profile
+  getCertificationsByProfile: publicProcedure
     .route({
       method: "GET",
       summary: "List all certifications for a user profile",
-      description: "Get all certifications linked to a specific user profile",
+      description: "Get all user certifications for a specific profile",
       path: "/profiles/{userProfileId}/certifications",
       tags: ["UserCertification"],
     })
@@ -42,97 +42,91 @@ export const user_certifications = {
         .selectFrom("user_certifications")
         .selectAll()
         .where("user_profile_id", "=", input.userProfileId)
-        .orderBy("obtained_at", "desc")
         .execute();
     }),
 
-  // 2. Get a user certification by ID
+  // 2. Get a certification by ID
   getById: publicProcedure
     .route({
       method: "GET",
       summary: "Get a specific user certification",
-      description: "Get a specific user certification by its unique ID",
-      path: "/user-certifications/{userCertificationId}",
+      description: "Get a specific user certification entry by its unique ID",
+      path: "/certifications/{certificationId}",
       tags: ["UserCertification"],
     })
     .input(GetUserCertificationSchema)
     .output(UserCertificationSchema)
     .handler(async ({ input }) => {
-      const cert = await database
+      const education = await database
         .selectFrom("user_certifications")
         .selectAll()
         .where("id", "=", input.userCertificationId)
         .executeTakeFirst();
 
-      if (!cert) {
+      if (!education) {
         throw new ORPCError("NOT_FOUND", {
-          message: "User certification not found",
+          message: "User education not found",
         });
       }
 
-      return cert;
+      return education;
     }),
 
-  // 3. Add a certification to a profile
+  // 3. Create a new certification
   create: publicProcedure
     .route({
       method: "POST",
-      summary: "Add a certification to a user profile",
-      description: "Link a certification to a specific user profile",
-      path: "/user-certifications",
+      summary: "Create a new user certification",
+      description: "Create a new user certification entry",
+      path: "/certifications",
       tags: ["UserCertification"],
     })
     .input(PostUserCertificationSchema)
     .output(UserCertificationSchema)
     .handler(async ({ input }) => {
-      const profile = await database
-        .selectFrom("user_profiles")
-        .where("id", "=", input.user_profile_id)
-        .select("id")
-        .executeTakeFirst();
+      try {
+        const profile = await database
+          .selectFrom("user_profiles")
+          .where("id", "=", input.user_profile_id)
+          .select("id")
+          .executeTakeFirst();
 
-      if (!profile) {
-        throw new ORPCError("NOT_FOUND", { message: "User profile not found" });
-      }
+        if (!profile) {
+          throw new ORPCError("NOT_FOUND", {
+            message: "User profile not found",
+          });
+        }
 
-      const existing = await database
-        .selectFrom("user_certifications")
-        .where("user_profile_id", "=", input.user_profile_id)
-        .where("certification_id", "=", input.certification_id)
-        .select("id")
-        .executeTakeFirst();
+        const education = await database
+          .insertInto("user_certifications")
+          .values({
+            id: randomUUID(),
+            ...input,
+          } as Insertable<UserCertifications>)
+          .returningAll()
+          .executeTakeFirst();
 
-      if (existing) {
-        throw new ORPCError("CONFLICT", {
-          message: "This certification is already linked to this profile",
-        });
-      }
+        if (!education) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to create user education",
+          });
+        }
 
-      const cert = await database
-        .insertInto("user_certifications")
-        .values({
-          id: randomUUID(),
-          ...input,
-        } as Insertable<UserCertifications>)
-        .returningAll()
-        .executeTakeFirst();
-
-      if (!cert) {
+        return education;
+      } catch (error) {
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to create user certification",
+          message: "Failed to create user education : " + error,
         });
       }
-
-      return cert;
     }),
 
-  // 4. Update a certification utilisateur
+  // 4. Update a certification
   update: publicProcedure
     .route({
       method: "PATCH",
       summary: "Update a user certification",
-      description: "Update dates of an existing user certification by its ID",
-      path: "/user-certifications/{userCertificationId}",
+      description: "Update an existing user certification by its ID",
+      path: "/certifications/{userCertificationId}",
       tags: ["UserCertification"],
     })
     .input(
@@ -144,56 +138,56 @@ export const user_certifications = {
     .handler(async ({ input }) => {
       const { userCertificationId, ...updates } = input;
 
-      const cert = await database
+      const certification = await database
         .updateTable("user_certifications")
         .set(updates as Insertable<UserCertifications>)
         .where("id", "=", userCertificationId)
         .returningAll()
         .executeTakeFirst();
 
-      if (!cert) {
+      if (!certification) {
         throw new ORPCError("NOT_FOUND", {
           message: "User certification not found",
         });
       }
 
-      return cert;
+      return certification;
     }),
 
-  // 5. Supprimer une certification utilisateur
+  // 5. Supprimer une certification
   delete: publicProcedure
     .route({
       method: "DELETE",
       summary: "Delete a user certification",
       description: "Delete an existing user certification by its ID",
-      path: "/user-certifications/{userCertificationId}",
+      path: "/certifications/{userCertificationId}",
       tags: ["UserCertification"],
     })
     .input(DeleteUserCertificationSchema)
     .output(UserCertificationSchema)
     .handler(async ({ input }) => {
-      const cert = await database
+      const certification = await database
         .deleteFrom("user_certifications")
         .where("id", "=", input.userCertificationId)
         .returningAll()
         .executeTakeFirst();
 
-      if (!cert) {
+      if (!certification) {
         throw new ORPCError("NOT_FOUND", {
           message: "User certification not found",
         });
       }
 
-      return cert;
+      return certification;
     }),
 
-  // 6. Supprimer plusieurs certifications utilisateur (Bulk)
+  // 6. Supprimer plusieurs certifications (Bulk)
   deleteBulk: publicProcedure
     .route({
       method: "DELETE",
       summary: "Delete multiple user certifications",
-      description: "Delete multiple user certifications by their IDs",
-      path: "/user-certifications",
+      description: "Delete multiple user certification entries by their IDs",
+      path: "/certifications",
       tags: ["UserCertification"],
     })
     .input(DeleteUserCertificationsBulkSchema)

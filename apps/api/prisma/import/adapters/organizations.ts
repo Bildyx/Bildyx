@@ -6,7 +6,6 @@ import { runBatched } from "../batch";
 import {
   checkEnum,
   checkInt,
-  checkJson,
   checkOptionalFk,
   checkRequiredText,
 } from "../checks";
@@ -29,17 +28,14 @@ const EXPECTED_COLUMNS = [
   "mission",
   "known_for",
   "programs_activities",
-  "project",
   "research_areas",
   "description",
   "products",
   "services",
-  "partners",
   "budget",
   "founded",
   "founders",
   "facilities",
-  "offices",
   "authority",
   "jurisdiction",
   "members",
@@ -51,14 +47,18 @@ const EXPECTED_COLUMNS = [
   "city_name",
   "numberOfEmployees",
   "personnel",
-  "subsidiaries",
   "parent_organization_name",
-  "metadata",
   // M2M free-text columns.
   "countries",
   "industries",
   "working_area_cities",
 ];
+
+// "project"/"partners"/"offices"/"subsidiaries"/"metadata": scoped for a
+// pending schema extension (see updates/schema.prisma) that never shipped -
+// Organization has no such columns live. Tolerated in the CSV, never
+// written (see types.ts).
+const LEGACY_COLUMNS = ["project", "partners", "offices", "subsidiaries", "metadata"];
 
 // EmployeeCountRange values look like RANGE_1_10, RANGE_5000_PLUS - handles
 // CSV cells such as "1-10", "1_10", "5000+" (same logic as the previous
@@ -142,8 +142,8 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
   naturalKeyColumn: "name",
   naturalKeyField: "slug",
   normalizeNaturalKey: slugify,
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
   m2mColumns: [
     {
       column: "countries",
@@ -311,9 +311,6 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
     const score = checkInt(row.score, "score");
     if (score.issue) warnings.push(score.issue);
 
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
-
     return {
       naturalKey: slug,
       data: {
@@ -331,17 +328,14 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         mission: row.mission || null,
         knownFor: row.known_for || null,
         programsActivities: toStringArray(row.programs_activities),
-        project: row.project || null,
         researchAreas: toStringArray(row.research_areas),
         description: row.description || null,
         products: toStringArray(row.products),
         services: toStringArray(row.services),
-        partners: toStringArray(row.partners),
         budget: row.budget || null,
         founded: row.founded || null,
         founders: toStringArray(row.founders),
         facilities: toStringArray(row.facilities),
-        offices: row.offices || null,
         authority: row.authority || null,
         jurisdiction: row.jurisdiction || null,
         members: members.value,
@@ -358,10 +352,8 @@ export const organizationsAdapter: ImportAdapter<CsvRow, OrganizationsFk> = {
         city_id: cityId.value,
         numberOfEmployees,
         personnel: personnel.value,
-        subsidiaries: row.subsidiaries || null,
         // Always null here - see afterUpsert.
         parentOrganizationId: null,
-        metadata: metadata.value,
       },
       errors,
       warnings,

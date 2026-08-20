@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/server";
 import passport from "passport";
 import { publicProcedure } from "../oRPC";
 import { database } from "../database";
+import { z } from "zod";
 import {
   SignupInputSchema,
   SignupOutputSchema,
@@ -38,7 +39,6 @@ import {
 import { FRONTEND_URL } from "../configuration";
 
 export const auth = {
-  // 1. SIGNUP
   signup: publicProcedure
     .route({
       method: "POST",
@@ -53,7 +53,6 @@ export const auth = {
     .handler(async ({ input }) => {
       const emailLower = input.email.trim().toLowerCase();
 
-      // Check if user already exists
       const existing = await database
         .selectFrom("users")
         .where("email", "=", emailLower)
@@ -82,10 +81,9 @@ export const auth = {
       const verificationCode = Math.floor(
         100000 + Math.random() * 900000,
       ).toString();
-      const verificationExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // Expires in 1 hour
+      const verificationExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
       const passwordHash = hashPassword(input.password);
 
-      // Perform all operations in a database transaction
       await database.transaction().execute(async (trx) => {
         if (input.accountType === "company") {
           if (!input.companyName || !input.companyName.trim()) {
@@ -93,7 +91,6 @@ export const auth = {
               message: "Company name is required for company accounts",
             });
           }
-          // Generate unique slug
           let slug = input.companyName
             .trim()
             .toLowerCase()
@@ -158,7 +155,6 @@ export const auth = {
                 "First name and last name are required for seeker accounts",
             });
           }
-          // Seekers get a Candidate role and a UserProfile entry
           await trx
             .insertInto("users")
             .values({
@@ -205,11 +201,10 @@ export const auth = {
         message: "Registration successful. Please verify your email.",
         email: emailLower,
         userId: userId,
-        verification_code: verificationCode, // Returned for sandbox debug/testing
+        verification_code: verificationCode,
       };
     }),
 
-  // 2. LOGIN
   login: publicProcedure
     .route({
       method: "POST",
@@ -262,7 +257,6 @@ export const auth = {
 
       const isValid = verifyPassword(input.password, user.password_hash);
       if (!isValid) {
-        // Increment failed attempts
         await database
           .updateTable("users")
           .set({ failed_login_attempts: user.failed_login_attempts + 1 })
@@ -274,10 +268,9 @@ export const auth = {
         });
       }
 
-      // Generate session token and store in DB
       const token = randomBytes(32).toString("hex");
       const tokenHash = createHash("sha256").update(token).digest("hex");
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days session
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       await database
         .insertInto("user_sessions")
@@ -289,7 +282,6 @@ export const auth = {
         })
         .execute();
 
-      // Reset failed attempts and update last login
       await database
         .updateTable("users")
         .set({
@@ -331,7 +323,6 @@ export const auth = {
       };
     }),
 
-  // 3. EMAIL VERIFICATION
   verifyEmail: publicProcedure
     .route({
       method: "POST",
@@ -380,10 +371,9 @@ export const auth = {
         });
       }
 
-      // Generate a session automatically upon successful verification
       const token = randomBytes(32).toString("hex");
       const tokenHash = createHash("sha256").update(token).digest("hex");
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days session
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       await database.transaction().execute(async (trx) => {
         await trx
@@ -440,7 +430,6 @@ export const auth = {
       };
     }),
 
-  // 4. FORGOT PASSWORD
   forgotPassword: publicProcedure
     .route({
       method: "POST",
@@ -476,8 +465,8 @@ export const auth = {
         });
       }
 
-      const resetToken = Math.floor(100000 + Math.random() * 900000).toString(); // Easy code entry
-      const resetExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiration
+      const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+      const resetExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
       await database
         .updateTable("users")
@@ -497,11 +486,10 @@ export const auth = {
 
       return {
         message: "Password reset code sent successfully.",
-        reset_token: resetToken, // Returned for sandbox debug/testing
+        reset_token: resetToken,
       };
     }),
 
-  // 5. RESET PASSWORD
   resetPassword: publicProcedure
     .route({
       method: "POST",
@@ -561,7 +549,6 @@ export const auth = {
       };
     }),
 
-  // 6. RESEND VERIFICATION
   resendVerification: publicProcedure
     .route({
       method: "POST",
@@ -582,7 +569,6 @@ export const auth = {
         .executeTakeFirst();
 
       if (!user || user.email_verified) {
-        // Do not leak existence; return success
         return {
           message:
             "A new verification code has been sent if the account exists.",
@@ -612,7 +598,7 @@ export const auth = {
       }
 
       const code = Math.floor(100000 + Math.random() * 900000).toString();
-      const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiration
+      const expires = new Date(Date.now() + 15 * 60 * 1000);
 
       await database
         .updateTable("users")
@@ -632,11 +618,10 @@ export const auth = {
 
       return {
         message: "Verification code resent successfully.",
-        verification_code: code, // Returned for debugging/testing
+        verification_code: code,
       };
     }),
 
-  // 7. LOGOUT
   logout: publicProcedure
     .route({
       method: "POST",
@@ -672,7 +657,6 @@ export const auth = {
       };
     }),
 
-  // 8. CANCEL UNVERIFIED
   cancelUnverified: publicProcedure
     .route({
       method: "POST",
@@ -707,10 +691,8 @@ export const auth = {
 
       const orgId = user.organization_id;
 
-      // Delete the unverified user
       await database.deleteFrom("users").where("id", "=", user.id).execute();
 
-      // If it was a company account, also clean up the organization record
       if (user.role === "ORGANIZATION" && orgId) {
         await database
           .deleteFrom("organizations")
@@ -723,7 +705,6 @@ export const auth = {
       };
     }),
 
-  // 9. GOOGLE OAUTH START
   google: publicProcedure
     .route({
       method: "GET",
@@ -749,7 +730,6 @@ export const auth = {
       });
     }),
 
-  // 10. GOOGLE OAUTH CALLBACK
   googleCallback: publicProcedure
     .route({
       method: "GET",
@@ -793,10 +773,9 @@ export const auth = {
         return;
       }
 
-      // Create session
       const token = randomBytes(32).toString("hex");
       const tokenHash = createHash("sha256").update(token).digest("hex");
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days session
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       await database
         .insertInto("user_sessions")
@@ -831,6 +810,213 @@ export const auth = {
               if (window.opener) {
                 window.opener.postMessage(
                   { type: "GOOGLE_LOGIN_SUCCESS" },
+                  "${frontendUrl}"
+                );
+              }
+              window.close();
+            </script>
+            <p>You can close this window.</p>
+          </body>
+        </html>
+      `);
+    }),
+
+  me: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Get current authenticated user",
+      description: "Gets the user details for the active session cookie",
+      path: "/auth/me",
+      tags: ["Auth"],
+    })
+    .output(
+      z
+        .object({
+          id: z.string(),
+          email: z.string(),
+          role: z.string(),
+          profile_id: z.string().nullable(),
+          organization_id: z.string().nullable(),
+        })
+        .nullable(),
+    )
+    .handler(async ({ context }) => {
+      const ctx = context as any;
+      const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
+      const token = ctx?.req?.cookies ? ctx.req.cookies[cookieName] : null;
+
+      if (!token) return null;
+
+      const tokenHash = createHash("sha256").update(token).digest("hex");
+
+      const session = await database
+        .selectFrom("user_sessions")
+        .select(["user_id", "expires_at", "revoked_at"])
+        .where("token_hash", "=", tokenHash)
+        .executeTakeFirst();
+
+      if (!session) return null;
+
+      if (
+        session.revoked_at ||
+        parseDbDate(session.expires_at).getTime() < Date.now()
+      ) {
+        return null;
+      }
+
+      const user = await database
+        .selectFrom("users")
+        .select(["id", "email", "role", "organization_id"])
+        .where("id", "=", session.user_id)
+        .executeTakeFirst();
+
+      if (!user) return null;
+
+      const userProfile = await database
+        .selectFrom("user_profiles")
+        .select("id")
+        .where("user_id", "=", user.id)
+        .executeTakeFirst();
+
+      return {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        profile_id: userProfile?.id || null,
+        organization_id: user.organization_id || null,
+      };
+    }),
+
+  linkedin: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Start LinkedIn OAuth flow",
+      path: "/auth/linkedin",
+      tags: ["Auth"],
+    })
+    .handler(async ({ context }) => {
+      try {
+        const ctx = context as any;
+        if (!ctx?.req || !ctx?.res) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Express request/response context missing",
+          });
+        }
+
+        await new Promise<void>((resolve, reject) => {
+          passport.authenticate("linkedin", {
+            scope: ["openid", "profile", "email"],
+          })(ctx.req, ctx.res, (err: any) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }),
+
+  linkedinCallback: publicProcedure
+    .route({
+      method: "GET",
+      summary: "Handle LinkedIn OAuth callback",
+      path: "/auth/linkedin/callback",
+      tags: ["Auth"],
+    })
+    .handler(async ({ context }) => {
+      const ctx = context as any;
+      if (!ctx?.req || !ctx?.res) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: "Express request/response context missing",
+        });
+      }
+
+      const frontendUrl = FRONTEND_URL;
+
+      let user: any;
+      try {
+        user = await new Promise<any>((resolve, reject) => {
+          passport.authenticate(
+            "linkedin",
+            { session: false },
+            (err: any, user: any, info: any) => {
+              if (err) {
+                console.error("[LinkedIn Callback] Error:", err);
+                reject(err);
+              } else if (!user) {
+                console.error("[LinkedIn Callback] Authentication failed. Info:", info);
+                reject(new Error(info?.message || "LinkedIn authentication failed (user not found)."));
+              } else {
+                resolve(user);
+              }
+            },
+          )(ctx.req, ctx.res, (err: any) => {
+            if (err) {
+              console.error("[LinkedIn Callback] Authenticate threw error:", err);
+              reject(err);
+            }
+          });
+        });
+      } catch (err: any) {
+        console.error("[LinkedIn Callback] Caught error in callback handler:", err);
+        ctx.res.send(`
+          <!DOCTYPE html>
+          <html>
+            <head><title>LinkedIn login failed</title></head>
+            <body>
+              <script>
+                if (window.opener) {
+                  window.opener.postMessage(
+                    { type: "LINKEDIN_LOGIN_ERROR", error: ${JSON.stringify(err?.message || String(err))} },
+                    "${frontendUrl}"
+                  );
+                }
+                window.close();
+              </script>
+              <p>Authentication failed: ${err?.message || String(err)}</p>
+            </body>
+          </html>
+        `);
+        return;
+      }
+
+      // Create session
+      const token = randomBytes(32).toString("hex");
+      const tokenHash = createHash("sha256").update(token).digest("hex");
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+      await database
+        .insertInto("user_sessions")
+        .values({
+          id: randomUUID(),
+          user_id: user.id,
+          token_hash: tokenHash,
+          expires_at: expiresAt,
+          ip_address: ctx.req.ip || null,
+          user_agent: ctx.req.get("user-agent") || null,
+        })
+        .execute();
+
+      const cookieName = process.env.SESSION_COOKIE_NAME || "bildyx_session";
+      const secureFlag = process.env.NODE_ENV === "production";
+      ctx.res.cookie(cookieName, token, {
+        httpOnly: true,
+        secure: secureFlag,
+        sameSite: "lax",
+        expires: expiresAt,
+      });
+
+      ctx.res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>LinkedIn login completed</title>
+          </head>
+          <body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage(
+                  { type: "LINKEDIN_LOGIN_SUCCESS" },
                   "${frontendUrl}"
                 );
               }

@@ -7,37 +7,7 @@ import {
   OrganizationSubtypeEnum,
   EmployeeCountRangeEnum,
 } from "../models/utils/enums";
-
-// ─── Input ────────────────────────────────────────────────────────────────────
-
-const GetTargetListSchema = z.object({
-  userProfileId: z.uuid(),
-  matchFilter: z.enum(["same", "similar", "different"]).optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  sizes: z
-    .preprocess(
-      (val) => (typeof val === "string" ? [val] : val),
-      z.array(EmployeeCountRangeEnum),
-    )
-    .optional(),
-  subtypes: z
-    .preprocess(
-      (val) => (typeof val === "string" ? [val] : val),
-      z.array(OrganizationSubtypeEnum),
-    )
-    .optional(),
-  subject_category_id: zNullableUUID(),
-  industry_id: zNullableUUID(),
-});
-
-// ─── Output : une ligne par (org, subject) ────────────────────────────────────
-
-const TargetRowSchema = OrganizationSchema.extend({
-  subject_id: z.uuid().nullable().optional(),
-  subject_category_id: z.uuid().nullable().optional(),
-  match_category: z.enum(["same", "similar", "different"]).optional(),
-});
+import { GetTargetListSchema, TargetRowSchema } from "../models/target_list";
 
 export const target_list = {
   getTargets: publicProcedure
@@ -61,9 +31,9 @@ export const target_list = {
         subtypes,
         subject_category_id,
         industry_id,
+        keyword,
       } = input;
 
-      // ── 1. Expériences de l'user ──────────────────────────────────────────
       const experiences = await database
         .selectFrom("user_experiences")
         .select(["organization_id", "subject_id"])
@@ -81,7 +51,6 @@ export const target_list = {
         ),
       ];
 
-      // ── 2. Industry_id et subject_category_id des expériences ────────────
       let userIndustryIds: string[] = [];
       let userSubjectCategoryIds: string[] = [];
 
@@ -113,15 +82,11 @@ export const target_list = {
         ];
       }
 
-      // ── 3. Query orgs (sans JOIN subjects) ───────────────────────────────
       let orgQuery = database
         .selectFrom("organizations")
         .leftJoin("cities", "cities.id", "organizations.city_id")
         .leftJoin("countries", "countries.iso_code", "cities.country_id")
-        .selectAll("organizations")
-        .$if(expOrgIds.length > 0, (q) =>
-          q.where("organizations.id", "not in", expOrgIds),
-        );
+        .selectAll("organizations");
 
       if (city)
         orgQuery = orgQuery.where("cities.name", "ilike", `%${city.trim()}%`);
@@ -145,8 +110,15 @@ export const target_list = {
           "=",
           industry_id,
         );
+      if (keyword) {
+        orgQuery = orgQuery.where((eb) =>
+          eb.or([
+            eb("organizations.name", "ilike", `%${keyword.trim()}%`),
+            eb("organizations.description", "ilike", `%${keyword.trim()}%`),
+          ]),
+        );
+      }
 
-      // Filtre Same/Similar/Different sur les orgs
       if (matchFilter && userIndustryIds.length > 0) {
         if (matchFilter === "same" || matchFilter === "similar") {
           orgQuery = orgQuery.where(
@@ -177,11 +149,21 @@ export const target_list = {
 
       const orgIds = orgs.map((o) => o.id);
 
-      // ── 4. Tous les subjects de ces orgs ─────────────────────────────────
       let subjectQuery = database
         .selectFrom("subjects")
-        .select(["id", "organization_id", "subject_category_id"])
+        .select([
+          "id",
+          "organization_id",
+          "subject_category_id",
+          "name",
+          "description",
+          "logo_url",
+        ])
         .where("organization_id", "in", orgIds);
+
+      if (expSubjectIds.length > 0) {
+        subjectQuery = subjectQuery.where("id", "not in", expSubjectIds);
+      }
 
       if (subject_category_id) {
         subjectQuery = subjectQuery.where(
@@ -190,47 +172,38 @@ export const target_list = {
           subject_category_id,
         );
       }
-      if (matchFilter === "same" && userSubjectCategoryIds.length > 0) {
-        subjectQuery = subjectQuery.where(
-          "subject_category_id",
-          "in",
-          userSubjectCategoryIds,
-        );
-      } else if (
-        matchFilter === "similar" &&
-        userSubjectCategoryIds.length > 0
-      ) {
-        subjectQuery = subjectQuery.where((eb) =>
-          eb.or([
-            eb("subject_category_id", "is", null),
-            eb("subject_category_id", "not in", userSubjectCategoryIds),
-          ]),
-        );
-      }
 
       const allSubjects = await subjectQuery.execute();
 
-      // Grouper subjects par org_id
       const subjectsByOrg = new Map<
         string,
-        Array<{ id: string; subject_category_id: string | null | undefined }>
+        Array<{
+          id: string;
+          subject_category_id: string | null | undefined;
+          name: string;
+          description: string | null | undefined;
+          logo_url: string | null | undefined;
+        }>
       >();
+
       allSubjects.forEach((s) => {
         if (!s.organization_id) return;
         if (!subjectsByOrg.has(s.organization_id))
           subjectsByOrg.set(s.organization_id, []);
-        subjectsByOrg
-          .get(s.organization_id)!
-          .push({ id: s.id, subject_category_id: s.subject_category_id });
+        subjectsByOrg.get(s.organization_id)!.push({
+          id: s.id,
+          subject_category_id: s.subject_category_id,
+          name: s.name,
+          description: s.description,
+          logo_url: s.logo_url,
+        });
       });
 
-      // ── 5. Construire les rows (une par org-subject pair) ─────────────────
       const rows: z.infer<typeof TargetRowSchema>[] = [];
 
       for (const org of orgs) {
         const subjects = subjectsByOrg.get(org.id) ?? [];
 
-        // Calculer match_category de l'org
         const orgIndustryId = org.industry_id;
         const sameIndustry =
           !!orgIndustryId && userIndustryIds.includes(orgIndustryId);
@@ -250,12 +223,19 @@ export const target_list = {
               ...org,
               subject_id: subj.id,
               subject_category_id: subj.subject_category_id ?? null,
+              subject_name: subj.name,
+              subject_description: subj.description ?? null,
+              subject_logo_url: subj.logo_url ?? null,
               match_category: cat,
             });
           }
         }
       }
 
-      return rows;
+      const filteredRows = matchFilter
+        ? rows.filter((r) => r.match_category === matchFilter)
+        : rows;
+
+      return filteredRows;
     }),
 };

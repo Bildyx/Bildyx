@@ -24,6 +24,11 @@ const EXPECTED_COLUMNS = [
   "score",
 ];
 
+// "metadata": scoped for a pending schema extension (see
+// updates/schema.prisma) that never shipped - Certification has no such
+// column live. Tolerated in the CSV, never written (see types.ts).
+const LEGACY_COLUMNS = ["metadata"];
+
 export interface CertificationsFk {
   resolveOrganizationId: (raw?: string) => string | null;
 }
@@ -34,8 +39,8 @@ export const certificationsAdapter: ImportAdapter<CsvRow, CertificationsFk> = {
   csvFile: "certifications.csv",
   naturalKeyColumn: "serial_number",
   naturalKeyField: "serial_number",
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
 
   async buildFkContext(prisma: PrismaClient): Promise<CertificationsFk> {
     const organizations = await prisma.organization.findMany({

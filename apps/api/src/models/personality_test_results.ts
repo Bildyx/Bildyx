@@ -92,3 +92,5 @@ export const DeleteByTestCodeSchema = z.object({
 export const DeleteByTestCodeResponseSchema = z.object({
   success: z.boolean(),
 });
+
+export type TestSummaryItem = z.infer<typeof TestSummaryItemSchema>;

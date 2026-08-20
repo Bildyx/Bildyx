@@ -3,7 +3,6 @@ import { toStringArray } from "../../seed-utils";
 import {
   checkEnum,
   checkInt,
-  checkJson,
   checkRequiredText,
 } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
@@ -24,8 +23,12 @@ const EXPECTED_COLUMNS = [
   "related_abilities",
   "time_to_master",
   "score",
-  "metadata",
 ];
+
+// "metadata": scoped for a pending schema extension (see
+// updates/schema.prisma) that never shipped - Skill has no such column
+// live. Tolerated in the CSV, never written (see types.ts).
+const LEGACY_COLUMNS = ["metadata"];
 
 export const skillsAdapter: ImportAdapter<CsvRow, void> = {
   modelName: "Skill",
@@ -33,8 +36,8 @@ export const skillsAdapter: ImportAdapter<CsvRow, void> = {
   csvFile: "skills.csv",
   naturalKeyColumn: "serial_number",
   naturalKeyField: "serial_number",
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
 
   async buildFkContext() {},
 
@@ -54,9 +57,6 @@ export const skillsAdapter: ImportAdapter<CsvRow, void> = {
     const score = checkInt(row.score, "score");
     if (score.issue) warnings.push(score.issue);
 
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
-
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -75,7 +75,6 @@ export const skillsAdapter: ImportAdapter<CsvRow, void> = {
         relatedAbilities: toStringArray(row.related_abilities),
         timeToMaster: row.time_to_master || null,
         score: score.value,
-        metadata: metadata.value,
       },
       errors,
       warnings,

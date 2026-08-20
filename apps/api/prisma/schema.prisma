@@ -174,6 +174,7 @@ model Organization {
   parentOrganization                                                                 Organization?               @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id])
   childAgencies                                                                      Organization[]              @relation("OrganizationHierarchy")
   subjects                                                                           Subject[]
+  teams                                                                              teams[]
   userEducations                                                                     UserEducations[]
   userExperiences                                                                    UserExperience[]
   userTargetLists                                                                    UserTargetList[]
@@ -731,10 +732,12 @@ model teams {
   visibility      TeamVisibility  @default(PUBLIC)
   city_id         String          @db.Uuid
   product_service String?
+  organization_id String          @db.Uuid
   team_members    team_members[]
   team_profiles   team_profiles[]
   team_subjects   team_subjects[]
   cities          City            @relation(fields: [city_id], references: [id], onDelete: SetNull)
+  organizations   Organization    @relation(fields: [organization_id], references: [id], onDelete: Cascade)
 }
 
 model organization_customers {
@@ -793,6 +796,15 @@ model subject_categories {
   subject_categories       subject_categories?  @relation("subject_categoriesTosubject_categories", fields: [parent_id], references: [id], onDelete: Cascade)
   other_subject_categories subject_categories[] @relation("subject_categoriesTosubject_categories")
   subjects                 Subject[]
+}
+
+model contact_requests {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstname String
+  lastname  String
+  subject   String
+  message   String
+  email     String
 }
 
 enum Currency {
