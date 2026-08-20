@@ -17,7 +17,7 @@
     "@types/pg": "^8.20.0",
     "cross-env": "^10.1.0",
     "kysely-codegen": "^0.20.0",
-    "prisma": "^6.19.0",
+    "prisma": "^6.12.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
@@ -36,6 +36,7 @@
     "nodemailer": "^9.0.3",
     "pg": "^8.22.0",
     "pretty-ms": "^9.3.0",
+    "vite": "8.2.1",
     "zod": "^4.4.3"
   },
   "scripts": {
