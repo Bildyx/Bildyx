@@ -43,6 +43,11 @@ const EXPECTED_COLUMNS = [
   "main_industries",
 ];
 
+// "metadata": scoped for a pending schema extension (see
+// updates/schema.prisma) that never shipped - City has no such column
+// live. Tolerated in the CSV, never written (see types.ts).
+const LEGACY_COLUMNS = ["metadata"];
+
 export interface CitiesFk {
   validCountryIsoCodes: Set<string>;
 }
@@ -53,8 +58,8 @@ export const citiesAdapter: ImportAdapter<CsvRow, CitiesFk> = {
   csvFile: "cities.csv",
   naturalKeyColumn: "serial_number",
   naturalKeyField: "serial_number",
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
   m2mColumns: [
     {
       column: "main_industries",

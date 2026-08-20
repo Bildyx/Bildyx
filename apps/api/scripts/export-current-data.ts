@@ -33,7 +33,10 @@ interface FieldSpec {
 interface ModelSpec {
   prismaModel: string; // e.g. "industry", "studyFields"
   tableName: string; // matches "<tableName>.csv"
-  deletedAtField: string;
+  // null for a model with no soft-delete column in the live schema (see
+  // ImportAdapter.deletedAtField) - every reference model except
+  // StudyFields today.
+  deletedAtField: string | null;
   fields: FieldSpec[];
 }
 
@@ -126,7 +129,7 @@ async function main() {
       }
 
       const select = buildSelect(modelSpec);
-      const where = { [modelSpec.deletedAtField]: null };
+      const where = modelSpec.deletedAtField ? { [modelSpec.deletedAtField]: null } : {};
 
       const rows = await delegate.findMany({ where, select });
       const header = modelSpec.fields.map((f) => f.column);

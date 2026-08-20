@@ -4,7 +4,6 @@ import { buildNameLookup, toStringArray } from "../../seed-utils";
 import {
   checkEnum,
   checkInt,
-  checkJson,
   checkOptionalFk,
   checkRequiredText,
 } from "../checks";
@@ -20,9 +19,13 @@ const EXPECTED_COLUMNS = [
   "products",
   "tools_and_tech",
   "tags",
-  "metadata",
   "score",
 ];
+
+// "metadata": scoped for a pending schema extension (see
+// updates/schema.prisma) that never shipped - Job has no such column live.
+// Tolerated in the CSV, never written (see types.ts).
+const LEGACY_COLUMNS = ["metadata"];
 
 export interface JobsFk {
   resolveIndustryId: (raw?: string) => string | null;
@@ -34,8 +37,8 @@ export const jobsAdapter: ImportAdapter<CsvRow, JobsFk> = {
   csvFile: "jobs.csv",
   naturalKeyColumn: "serial_number",
   naturalKeyField: "serial_number",
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
 
   async buildFkContext(prisma: PrismaClient): Promise<JobsFk> {
     const industries = await prisma.industry.findMany({ select: { id: true, name: true } });
@@ -64,9 +67,6 @@ export const jobsAdapter: ImportAdapter<CsvRow, JobsFk> = {
     const score = checkInt(row.score, "score");
     if (score.issue) warnings.push(score.issue);
 
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
-
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -79,7 +79,6 @@ export const jobsAdapter: ImportAdapter<CsvRow, JobsFk> = {
         products: toStringArray(row.products),
         toolsAndTech: toStringArray(row.tools_and_tech),
         tags: toStringArray(row.tags),
-        metadata: metadata.value,
         score: score.value,
       },
       errors,

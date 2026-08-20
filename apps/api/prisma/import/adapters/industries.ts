@@ -1,6 +1,5 @@
 import {
   checkInt,
-  checkJson,
   checkRequiredText,
 } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
@@ -10,7 +9,6 @@ const EXPECTED_COLUMNS = [
   "serial_number",
   "description",
   "icon_url",
-  "metadata",
   "score",
   // M2M free-text column (Industry<->Industry self-relation) - included so
   // header validation matches the real template, but relation linking
@@ -19,14 +17,19 @@ const EXPECTED_COLUMNS = [
   "related_industries",
 ];
 
+// "metadata": scoped for a pending schema extension (see
+// updates/schema.prisma) that never shipped - Industry has no such column
+// live. Tolerated in the CSV, never written (see types.ts).
+const LEGACY_COLUMNS = ["metadata"];
+
 export const industriesAdapter: ImportAdapter<CsvRow, void> = {
   modelName: "Industry",
   prismaModel: "industry",
   csvFile: "industries.csv",
   naturalKeyColumn: "serial_number",
   naturalKeyField: "serial_number",
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
   m2mColumns: [
     {
       column: "related_industries",
@@ -52,9 +55,6 @@ export const industriesAdapter: ImportAdapter<CsvRow, void> = {
     const score = checkInt(row.score, "score");
     if (score.issue) warnings.push(score.issue);
 
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
-
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -62,7 +62,6 @@ export const industriesAdapter: ImportAdapter<CsvRow, void> = {
         serial_number: serialNumber.value,
         description: row.description || null,
         iconUrl: row.icon_url || null,
-        metadata: metadata.value,
         score: score.value,
       },
       errors,

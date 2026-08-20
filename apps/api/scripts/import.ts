@@ -115,6 +115,12 @@ function printPlanSummary(adapter: ImportAdapter<CsvRow, unknown>, result: RunRe
     );
   }
 
+  if (result.pruneUnsupported) {
+    console.log(
+      `--prune ignoré: ${adapter.modelName} n'a pas de colonne de soft-delete dans le schéma actuel.`,
+    );
+  }
+
   switch (result.skippedReason) {
     case "header_mismatch":
       break;
