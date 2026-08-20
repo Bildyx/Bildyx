@@ -1,20 +1,16 @@
 import React from "react";
 import BackendCardSlot from "./BackendCardSlot";
+import { UserCertification } from "@repo/models/user_certifications";
 
-export type CertificationCardData = {
-  id: string;
-  obtained_at?: string | null;
-  expires_at?: string | null;
-
-  certification_id?: string | null;
-  certification_name?: string | null;
-};
-
-type Props = {
-  certification: CertificationCardData;
-  onChange?: (certification: CertificationCardData) => void;
-  onDelete?: () => void;
-  onSlotClick?: (slot: HTMLElement) => void;
+const formatDate = (date: Date | string | null | undefined): string => {
+  if (!date) return "";
+  if (typeof date === "string") {
+    return date.split("T")[0];
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
 
 export default function CertificationCard({
@@ -22,10 +18,11 @@ export default function CertificationCard({
   onChange,
   onDelete,
   onSlotClick,
-}: Props) {
+  onBlur,
+}) {
   const neverExpire = !certification.expires_at;
 
-  const update = (patch: Partial<CertificationCardData>) => {
+  const update = (patch: Partial<UserCertification>) => {
     onChange?.({ ...certification, ...patch });
   };
 
@@ -50,7 +47,7 @@ export default function CertificationCard({
         </button>
       </div>
 
-      <div className="entry-body">
+      <div className="entry-body" onBlur={() => onBlur?.(certification)}>
         <div
           className="cert-date-row"
           style={{ display: "flex", gap: 12, marginBottom: 12 }}
@@ -70,8 +67,12 @@ export default function CertificationCard({
               type="date"
               className="cert-obtained-at"
               style={{ width: "100%" }}
-              value={certification.obtained_at || ""}
-              onChange={(e) => update({ obtained_at: e.target.value || null })}
+              value={formatDate(certification.obtained_at)}
+              onChange={(e) =>
+                update({
+                  obtained_at: e.target.value ? new Date(e.target.value) : null,
+                })
+              }
             />
           </div>
 
@@ -114,7 +115,9 @@ export default function CertificationCard({
                     update({
                       expires_at: e.target.checked
                         ? null
-                        : certification.expires_at || null,
+                        : certification.expires_at
+                          ? new Date(certification.expires_at)
+                          : null,
                     })
                   }
                 />
@@ -127,8 +130,12 @@ export default function CertificationCard({
               className="cert-expires-at"
               style={{ width: "100%" }}
               disabled={neverExpire}
-              value={certification.expires_at || ""}
-              onChange={(e) => update({ expires_at: e.target.value || null })}
+              value={formatDate(certification.expires_at)}
+              onChange={(e) =>
+                update({
+                  expires_at: e.target.value ? new Date(e.target.value) : null,
+                })
+              }
             />
           </div>
         </div>

@@ -11,7 +11,7 @@ export class UserCertificationService {
   public async getByProfile(
     userProfileId: string,
   ): Promise<UserCertification[]> {
-    return await this.rpcClient.user_certifications.getCertificationByProfile({
+    return await this.rpcClient.user_certifications.getCertificationsByProfile({
       userProfileId,
     });
   }

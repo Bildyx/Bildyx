@@ -48,7 +48,14 @@ const jobService = new JobService();
 const teamSubjectService = new TeamSubjectService();
 const subjectService = new SubjectService();
 
-type ModalName = "team" | "member" | "editMember" | "city" | "photo" | "editTeam" | null;
+type ModalName =
+  | "team"
+  | "member"
+  | "editMember"
+  | "city"
+  | "photo"
+  | "editTeam"
+  | null;
 
 export function useCompanyProfile() {
   const { slug } = useParams<{ slug: string }>();
@@ -57,6 +64,7 @@ export function useCompanyProfile() {
 
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [myOrganization, setMyOrganization] = useState<Organization | null>(
     null,
   );
@@ -87,6 +95,12 @@ export function useCompanyProfile() {
   const [modal, setModal] = useState<ModalName>(null);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [entitySearchSlot, setEntitySearchSlot] = useState<string | null>(null);
+
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => Promise<void> | void;
+  } | null>(null);
 
   const handleStartEditUrl = () => {
     setUrlInputVal(
@@ -146,9 +160,22 @@ export function useCompanyProfile() {
       }
 
       const session = getSession();
-      if (!session || session.companyId !== org.id) {
+      const userIsAdmin = !!(
+        session &&
+        (session.companyId === org.id || session.organizationId === org.id)
+      );
+
+      if (isAdminMode && !userIsAdmin) {
         toast.error("You are not authorized to manage this company.");
         navigate("/login");
+        return;
+      }
+
+      setIsAdmin(userIsAdmin);
+      setMyOrganization(org);
+
+      if (!isAdminMode && !org.is_public && !userIsAdmin) {
+        setLoading(false);
         return;
       }
 
@@ -168,7 +195,6 @@ export function useCompanyProfile() {
         jobsData,
         teamSubjectsData,
         subjectsData,
-        orgData,
       ] = await Promise.all([
         teamService.getAll({ organization_id: myOrgId }),
         teamMemberService.getAll(),
@@ -183,14 +209,12 @@ export function useCompanyProfile() {
         jobService.getAll(),
         teamSubjectService.getAll(),
         subjectService.getAll(),
-        organizationService.getById(myOrgId),
       ]);
 
       setCities(citiesData);
       setJobs(jobsData);
       setTeamSubjects(teamSubjectsData);
       setAllSubjects(subjectsData);
-      setMyOrganization(orgData);
       setTeams(teamsData);
 
       const teamIds = new Set(teamsData.map((t) => t.id));
@@ -225,8 +249,12 @@ export function useCompanyProfile() {
     loadData();
   }, [slug]);
 
+  const visibleTeams = isAdminMode
+    ? teams
+    : teams.filter((t) => t.visibility === "PUBLIC");
+
   const activeTeam =
-    teams.find((t) => t.id === activeTeamId) || teams[0] || null;
+    visibleTeams.find((t) => t.id === activeTeamId) || visibleTeams[0] || null;
   const filteredMembers = members.filter(
     (m) => !activeTeam || !m.team_id || m.team_id === activeTeam.id,
   );
@@ -286,26 +314,31 @@ export function useCompanyProfile() {
     }
   }
 
-  async function deleteTeam(id: string) {
-    if (!window.confirm("Are you sure you want to delete this team?")) return;
-    try {
-      await teamService.delete(id);
-      setTeams((prev) => prev.filter((t) => t.id !== id));
-      setMembers((prev) => prev.filter((m) => m.team_id !== id));
-      setTeamProfiles((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      if (activeTeamId === id) {
-        const remaining = teams.filter((t) => t.id !== id);
-        setActiveTeamId(remaining[0]?.id || null);
-      }
-      toast.success("Team deleted.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete team.");
-    }
+  function deleteTeam(id: string) {
+    setDeleteConfirm({
+      title: "Delete Team",
+      message: "Are you sure you want to delete this team?",
+      onConfirm: async () => {
+        try {
+          await teamService.delete(id);
+          setTeams((prev) => prev.filter((t) => t.id !== id));
+          setMembers((prev) => prev.filter((m) => m.team_id !== id));
+          setTeamProfiles((prev) => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+          if (activeTeamId === id) {
+            const remaining = teams.filter((t) => t.id !== id);
+            setActiveTeamId(remaining[0]?.id || null);
+          }
+          toast.success("Team deleted.");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to delete team.");
+        }
+      },
+    });
   }
 
   async function saveMember(
@@ -357,16 +390,21 @@ export function useCompanyProfile() {
     }
   }
 
-  async function deleteMember(id: string) {
-    if (!window.confirm("Are you sure you want to delete this member?")) return;
-    try {
-      await teamMemberService.delete(id);
-      setMembers((prev) => prev.filter((m) => m.id !== id));
-      toast.success("Member deleted.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete member.");
-    }
+  function deleteMember(id: string) {
+    setDeleteConfirm({
+      title: "Delete Member",
+      message: "Are you sure you want to delete this member?",
+      onConfirm: async () => {
+        try {
+          await teamMemberService.delete(id);
+          setMembers((prev) => prev.filter((m) => m.id !== id));
+          toast.success("Member deleted.");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to delete member.");
+        }
+      },
+    });
   }
 
   async function toggleLeader(id: string) {
@@ -436,16 +474,21 @@ export function useCompanyProfile() {
     }
   }
 
-  async function removeOffice(id: string) {
-    if (!window.confirm("Are you sure you want to delete this office?")) return;
-    try {
-      await teamOfficeService.delete(id);
-      setOffices((prev) => prev.filter((o) => o.id !== id));
-      toast.success("Office removed.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to remove office.");
-    }
+  function removeOffice(id: string) {
+    setDeleteConfirm({
+      title: "Delete Office",
+      message: "Are you sure you want to delete this office?",
+      onConfirm: async () => {
+        try {
+          await teamOfficeService.delete(id);
+          setOffices((prev) => prev.filter((o) => o.id !== id));
+          toast.success("Office removed.");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to remove office.");
+        }
+      },
+    });
   }
 
   function startEditProfile() {
@@ -548,16 +591,21 @@ export function useCompanyProfile() {
     }
   }
 
-  async function removePhoto(id: string) {
-    if (!window.confirm("Are you sure you want to delete this photo?")) return;
-    try {
-      await teamPhotoService.delete(id);
-      setPhotos((prev) => prev.filter((p) => p.id !== id));
-      toast.success("Photo deleted.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete photo.");
-    }
+  function removePhoto(id: string) {
+    setDeleteConfirm({
+      title: "Delete Photo",
+      message: "Are you sure you want to delete this photo?",
+      onConfirm: async () => {
+        try {
+          await teamPhotoService.delete(id);
+          setPhotos((prev) => prev.filter((p) => p.id !== id));
+          toast.success("Photo deleted.");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to delete photo.");
+        }
+      },
+    });
   }
 
   async function handleEntitySelect(entityId: string) {
@@ -615,74 +663,125 @@ export function useCompanyProfile() {
     }
   }
 
-  async function handleUnlinkParent() {
+  function handleUnlinkParent() {
     if (!myOrganization?.id) return;
-    if (!window.confirm("Are you sure you want to unlink the parent company?"))
-      return;
+    setDeleteConfirm({
+      title: "Unlink Parent Company",
+      message: "Are you sure you want to unlink the parent company?",
+      onConfirm: async () => {
+        try {
+          const updated = await organizationService.update(myOrganization.id!, {
+            parent_organization_id: null,
+          });
+          setMyOrganization(updated);
+          toast.success("Parent company unlinked.");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to unlink parent company.");
+        }
+      },
+    });
+  }
+
+  function removePartner(id: string) {
+    setDeleteConfirm({
+      title: "Unlink Partner",
+      message: "Unlink this partner?",
+      onConfirm: async () => {
+        try {
+          await teamPartnerService.delete(id);
+          setPartners((prev) => prev.filter((p) => p.id !== id));
+          toast.success("Partner unlinked.");
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  }
+
+  function removeCustomer(id: string) {
+    setDeleteConfirm({
+      title: "Unlink Customer",
+      message: "Unlink this customer?",
+      onConfirm: async () => {
+        try {
+          await teamCustomerService.delete(id);
+          setCustomers((prev) => prev.filter((c) => c.id !== id));
+          toast.success("Customer unlinked.");
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  }
+
+  function removeInvestor(id: string) {
+    setDeleteConfirm({
+      title: "Unlink Investor",
+      message: "Unlink this investor?",
+      onConfirm: async () => {
+        try {
+          await teamInvestorService.delete(id);
+          setInvestors((prev) => prev.filter((i) => i.id !== id));
+          toast.success("Investor unlinked.");
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  }
+
+  function removeSubsidiary(id: string) {
+    setDeleteConfirm({
+      title: "Unlink Subsidiary",
+      message: "Unlink this subsidiary?",
+      onConfirm: async () => {
+        try {
+          await teamSubsidiaryService.delete(id);
+          setSubsidiaries((prev) => prev.filter((s) => s.id !== id));
+          toast.success("Subsidiary unlinked.");
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  }
+
+  function removeProduct(id: string) {
+    setDeleteConfirm({
+      title: "Unlink Product/Service",
+      message: "Unlink this product/service?",
+      onConfirm: async () => {
+        try {
+          await teamSubjectService.delete(id);
+          setTeamSubjects((prev) => prev.filter((s) => s.id !== id));
+          toast.success("Product unlinked.");
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  }
+
+  async function togglePublishStatus() {
+    if (!myOrganization?.id) return;
     try {
+      setIsPublishing(true);
+      const nextIsPublic = !myOrganization.is_public;
       const updated = await organizationService.update(myOrganization.id, {
-        parent_organization_id: null,
+        is_public: nextIsPublic,
       });
       setMyOrganization(updated);
-      toast.success("Parent company unlinked.");
+      toast.success(
+        nextIsPublic
+          ? "Company profile is now published."
+          : "Company profile is now unpublished.",
+      );
     } catch (err) {
       console.error(err);
-      toast.error("Failed to unlink parent company.");
-    }
-  }
-
-  async function removePartner(id: string) {
-    if (!window.confirm("Unlink this partner?")) return;
-    try {
-      await teamPartnerService.delete(id);
-      setPartners((prev) => prev.filter((p) => p.id !== id));
-      toast.success("Partner unlinked.");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async function removeCustomer(id: string) {
-    if (!window.confirm("Unlink this customer?")) return;
-    try {
-      await teamCustomerService.delete(id);
-      setCustomers((prev) => prev.filter((c) => c.id !== id));
-      toast.success("Customer unlinked.");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async function removeInvestor(id: string) {
-    if (!window.confirm("Unlink this investor?")) return;
-    try {
-      await teamInvestorService.delete(id);
-      setInvestors((prev) => prev.filter((i) => i.id !== id));
-      toast.success("Investor unlinked.");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async function removeSubsidiary(id: string) {
-    if (!window.confirm("Unlink this subsidiary?")) return;
-    try {
-      await teamSubsidiaryService.delete(id);
-      setSubsidiaries((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Subsidiary unlinked.");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async function removeProduct(id: string) {
-    if (!window.confirm("Unlink this product/service?")) return;
-    try {
-      await teamSubjectService.delete(id);
-      setTeamSubjects((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Product unlinked.");
-    } catch (err) {
-      console.error(err);
+      toast.error("Failed to update publish status.");
+    } finally {
+      setIsPublishing(false);
     }
   }
 
@@ -696,7 +795,7 @@ export function useCompanyProfile() {
     loading,
     isAdmin,
     myOrganization,
-    teams,
+    teams: visibleTeams,
     members,
     offices,
     teamProfiles,
@@ -741,6 +840,8 @@ export function useCompanyProfile() {
     setAllSubjects,
     setActiveTeamId,
     setMode,
+    deleteConfirm,
+    setDeleteConfirm,
     setIsEditingProfile,
     setProfileDraft,
     setIsEditingUrl,
@@ -771,5 +872,7 @@ export function useCompanyProfile() {
     removeInvestor,
     removeSubsidiary,
     removeProduct,
+    togglePublishStatus,
+    isPublishing,
   };
 }

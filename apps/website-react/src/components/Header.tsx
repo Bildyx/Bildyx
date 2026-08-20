@@ -15,6 +15,7 @@ type HeaderProps = {
   brandSuffix?: string;
   centerNav?: React.ReactNode;
   simpleAccountIcon?: boolean;
+  onStatusClick?: () => void;
 };
 
 export default function Header({
@@ -26,6 +27,7 @@ export default function Header({
   brandSuffix = "",
   centerNav,
   simpleAccountIcon = false,
+  onStatusClick,
 }: HeaderProps) {
   const { isLoggedIn, isMenuOpen, setIsMenuOpen, signOut } = useAuthNav();
   const navigate = useNavigate();
@@ -106,8 +108,20 @@ export default function Header({
           >
             {isAdmin && (
               <>
-                <button className="company-admin-status-pill" type="button">
-                  <i className="bi bi-circle" aria-hidden="true"></i>
+                <button
+                  className="company-admin-status-pill"
+                  type="button"
+                  onClick={onStatusClick}
+                  disabled={statusLabel === "Saving..."}
+                >
+                  {statusLabel === "Saving..." ? (
+                    <span className="ca-spinner" style={{ marginRight: 6 }}></span>
+                  ) : (
+                    <i
+                      className={`bi ${statusLabel === "Published" ? "bi-circle-fill text-success" : "bi-circle"}`}
+                      aria-hidden="true"
+                    ></i>
+                  )}
                   <span>{statusLabel}</span>
                 </button>
                 <button

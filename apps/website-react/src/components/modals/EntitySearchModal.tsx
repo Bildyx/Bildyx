@@ -140,6 +140,7 @@ export default function EntitySearchModal({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const config = slotType ? ENTITY_SEARCH_CONFIG[slotType] : null;
 
@@ -148,6 +149,7 @@ export default function EntitySearchModal({
       setQuery("");
       setResults([]);
       setLoading(false);
+      setIsSelecting(false);
       return;
     }
 
@@ -253,13 +255,23 @@ export default function EntitySearchModal({
                   return (
                     <li
                       key={entity.id}
-                      className="org-result-item"
-                      onClick={() => {
-                        onSelect(entity.id, entity);
-                        onClose();
+                      className={`org-result-item ${isSelecting ? "opacity-50 pointer-events-none" : ""}`}
+                      onClick={async () => {
+                        if (isSelecting) return;
+                        setIsSelecting(true);
+                        try {
+                          await onSelect(entity.id, entity);
+                          onClose();
+                        } catch {
+                          // Handled by parent
+                        } finally {
+                          setIsSelecting(false);
+                        }
                       }}
                     >
-                      <div className="org-item-name">{label}</div>
+                      <div className="org-item-name">
+                        {isSelecting ? "Saving selection..." : label}
+                      </div>
                     </li>
                   );
                 })

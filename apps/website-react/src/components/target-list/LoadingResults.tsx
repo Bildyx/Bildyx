@@ -1,5 +1,3 @@
-import React from "react";
-
 export function LoadingResults() {
   return (
     <div className="tl-match-section">

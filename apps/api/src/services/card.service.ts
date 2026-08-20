@@ -174,16 +174,7 @@ export async function renderCardHtml(
   };
 
   const renderHeader = (title: string): string => {
-    const defaultLogoUrl = getIconUrl("logos", "Logo-MayGraph_Big1.png");
-    let logoUrl;
-    console.log(data);
-    if (data.avatar_url) {
-      logoUrl = String(data.avatar_url).trim();
-    } else if (data.logo_url) {
-      logoUrl = String(data.logo_url).trim();
-    } else {
-      logoUrl = defaultLogoUrl;
-    }
+    const logoUrl = getIconUrl("logos", "Logo-MayGraph_Big1.png");
     return `
         <div class="header-row">
             <div class="maygraph-logo">

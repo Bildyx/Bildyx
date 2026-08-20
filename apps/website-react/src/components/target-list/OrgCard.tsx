@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { CardService } from "../../services/card.service";
 import { CardPopover } from "./CardPopover";
-import type { TargetRow } from "./types";
 
 const cardService = new CardService();
 
@@ -21,11 +20,7 @@ function formatWebsiteUrl(url: string): string {
   return `https://${trimmed}`;
 }
 
-interface OrgCardProps {
-  row: TargetRow;
-}
-
-export function OrgCard({ row }: OrgCardProps) {
+export function OrgCard({ row }) {
   const website =
     typeof row.website_url === "string"
       ? row.website_url

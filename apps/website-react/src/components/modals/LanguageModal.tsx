@@ -42,11 +42,13 @@ export function formatLanguageLabel(key: string) {
 export function LanguageModal({ open, onClose, onConfirm }) {
   const [language, setLanguage] = useState("");
   const [level, setLevel] = useState<string>("Fluent");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setLanguage("");
       setLevel("Fluent");
+      setIsSubmitting(false);
     }
   }, [open]);
 
@@ -54,14 +56,21 @@ export function LanguageModal({ open, onClose, onConfirm }) {
     return null;
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!language) {
       toast.error("Please select a language.");
       return;
     }
 
-    onConfirm(language, level);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      await onConfirm(language, level);
+      onClose();
+    } catch {
+      // Error handled by parent
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -113,7 +122,12 @@ export function LanguageModal({ open, onClose, onConfirm }) {
         </div>
 
         <div className="lang-modal-actions">
-          <button type="button" className="lang-modal-cancel" onClick={onClose}>
+          <button
+            type="button"
+            className="lang-modal-cancel"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             Cancel
           </button>
 
@@ -121,8 +135,10 @@ export function LanguageModal({ open, onClose, onConfirm }) {
             type="button"
             className="lang-modal-confirm"
             onClick={handleConfirm}
+            disabled={isSubmitting}
+            style={{ opacity: isSubmitting ? 0.6 : 1 }}
           >
-            Add Language
+            {isSubmitting ? "Adding..." : "Add Language"}
           </button>
         </div>
       </div>

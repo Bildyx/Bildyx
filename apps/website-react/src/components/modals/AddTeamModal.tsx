@@ -4,6 +4,10 @@ import type { CityListItem } from "@repo/models/cities";
 import { Subject } from "@repo/models/subjects";
 import { TeamSubject } from "@repo/models/team_subjects";
 import type { Team } from "@repo/models/teams";
+import { useFormValidation } from "../../hooks/useFormValidation";
+import ValidatedForm from "../forms/ValidatedForm";
+import { PostTeamSchema } from "@repo/models/teams";
+import FormInput from "../forms/FormInput";
 
 const TEAM_TYPES = [
   "Operate",
@@ -16,6 +20,8 @@ const TEAM_TYPES = [
   "Sales",
   "Management",
 ];
+
+const teamFormSchema = PostTeamSchema.omit({ organization_id: true });
 
 interface AddTeamModalProps {
   offices: OrganizationOffice[];
@@ -47,11 +53,43 @@ export function AddTeamModal({
   const [visibility, setVisibility] = useState(initial?.visibility || "PUBLIC");
   const [cityId, setCityId] = useState(initial?.city_id || "");
   const [brand, setBrand] = useState("");
-  const [productService, setProductService] = useState(initial?.product_service || "");
+  const [productService, setProductService] = useState(
+    initial?.product_service || "",
+  );
+
+  const { errors, validateForm, setErrors } = useFormValidation(teamFormSchema);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const officeCities = offices
     .map((o) => cities.find((c) => c.id === o.city_id))
     .filter(Boolean) as CityListItem[];
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = {
+      name: name.trim(),
+      type,
+      city_id: cityId || undefined,
+      visibility,
+      product_service: productService || null,
+    };
+    if (validateForm(payload as any)) {
+      setIsSubmitting(true);
+      try {
+        await onSubmit(
+          name.trim(),
+          type,
+          cityId,
+          visibility,
+          productService || undefined,
+        );
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
 
   return (
     <div
@@ -77,111 +115,161 @@ export function AddTeamModal({
             : "Fill in the details to create a new team."}
         </p>
 
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Team Type</label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">Select team type</option>
-              {TEAM_TYPES.map((t) => (
-                <option value={t} key={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
+        <ValidatedForm
+          errors={errors}
+          setErrors={setErrors}
+          onSubmit={handleFormSubmit}
+          noValidate
+        >
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Team Type
+              </label>
+              <select
+                value={type}
+                onChange={(e) => {
+                  setType(e.target.value);
+                  if (errors.type) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.type;
+                      return next;
+                    });
+                  }
+                }}
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${
+                  errors.type ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                <option value="">Select team type</option>
+                {TEAM_TYPES.map((t) => (
+                  <option value={t} key={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+              {errors.type && (
+                <small className="text-red-500 text-xs mt-1 block">
+                  {errors.type}
+                </small>
+              )}
+            </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Name of Team</label>
-            <input
-              type="text"
-              placeholder="e.g. Team Epsilon"
-              value={name}
-              maxLength={35}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="text-right text-xs text-gray-400 mt-1">
-              {name.length}/35
+            <div>
+              <FormInput
+                name="name"
+                label="Name of Team"
+                type="text"
+                placeholder="e.g. Team Epsilon"
+                value={name}
+                maxLength={35}
+                onChange={(e) => setName(e.target.value)}
+                error={errors.name}
+              />
+              <div className="text-right text-xs text-gray-400 mt-1">
+                {name.length}/35
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Visibility
+              </label>
+              <select
+                value={visibility}
+                onChange={(e) => setVisibility(e.target.value as any)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="PUBLIC">Public Team</option>
+                <option value="PRIVATE">Private Team</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                City
+              </label>
+              <select
+                value={cityId}
+                onChange={(e) => {
+                  setCityId(e.target.value);
+                  if (errors.city_id) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.city_id;
+                      return next;
+                    });
+                  }
+                }}
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${
+                  errors.city_id ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                <option value="">Select city</option>
+                {officeCities.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}, {c.country_name}
+                  </option>
+                ))}
+              </select>
+              {errors.city_id && (
+                <small className="text-red-500 text-xs mt-1 block">
+                  {errors.city_id}
+                </small>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Brand
+              </label>
+              <select
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">Select brand (optional)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Product / Service
+              </label>
+              <select
+                value={productService}
+                onChange={(e) => setProductService(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">None</option>
+                {allSubjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Visibility</label>
-            <select
-              value={visibility}
-              onChange={(e) => setVisibility(e.target.value as any)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-150">
+            <button
+              type="button"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              onClick={onClose}
+              disabled={isSubmitting}
             >
-              <option value="PUBLIC">Public Team</option>
-              <option value="PRIVATE">Private Team</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">City</label>
-            <select
-              value={cityId}
-              onChange={(e) => setCityId(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={isSubmitting}
             >
-              <option value="">Select city</option>
-              {officeCities.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}, {c.country_name}
-                </option>
-              ))}
-            </select>
+              {isSubmitting ? (initial ? "Saving Changes..." : "Creating Team...") : (initial ? "Save Changes" : "Create Team")}
+            </button>
           </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Brand</label>
-            <select
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">Select brand (optional)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Product / Service</label>
-            <select
-              value={productService}
-              onChange={(e) => setProductService(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">None</option>
-              {allSubjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-150">
-          <button
-            type="button"
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            disabled={!name.trim() || !cityId || !type}
-            onClick={() => onSubmit(name.trim(), type, cityId, visibility, productService || undefined)}
-          >
-            {initial ? "Save Changes" : "Create Team"}
-          </button>
-        </div>
+        </ValidatedForm>
       </div>
     </div>
   );

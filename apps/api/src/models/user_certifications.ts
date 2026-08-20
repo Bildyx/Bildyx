@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { zNullableUUID } from "./utils/preprocessors";
 
 export const UserCertificationSchema = z.object({
   id: z.uuid(),
   user_profile_id: z.uuid(),
-  certification_id: z.uuid(),
+  certification_id: zNullableUUID(),
   obtained_at: z.coerce.date().nullable().optional(),
   expires_at: z.coerce.date().nullable().optional(),
 });
@@ -18,18 +19,12 @@ export const GetUserCertificationSchema = z.object({
 });
 
 // POST
-export const PostUserCertificationSchema = z.object({
-  user_profile_id: z.uuid(),
-  certification_id: z.uuid(),
-  obtained_at: z.coerce.date().nullable().optional(),
-  expires_at: z.coerce.date().nullable().optional(),
+export const PostUserCertificationSchema = UserCertificationSchema.omit({
+  id: true,
 });
 
 // PATCH
-export const PutUserCertificationSchema = z.object({
-  obtained_at: z.coerce.date().nullable().optional(),
-  expires_at: z.coerce.date().nullable().optional(),
-});
+export const PutUserCertificationSchema = PostUserCertificationSchema.partial();
 
 // DELETE
 export const DeleteUserCertificationSchema = z.object({

@@ -1,12 +1,10 @@
 import React from "react";
 import { OrgCard } from "./OrgCard";
 import { SubjectCard } from "./SubjectCard";
-import type { MatchCategory, TargetRow } from "./types";
-
-interface MatchSectionProps {
-  category: MatchCategory;
-  rows: TargetRow[];
-}
+import type {
+  MatchCategory,
+  TargetRow,
+} from "../../pages/job-seeker/TargetList";
 
 const SECTION_CONFIG: Record<
   MatchCategory,
@@ -29,7 +27,7 @@ const SECTION_CONFIG: Record<
   },
 };
 
-export function MatchSection({ category, rows }: MatchSectionProps) {
+export function MatchSection({ category, rows }) {
   const config = SECTION_CONFIG[category];
 
   if (rows.length === 0) return null;

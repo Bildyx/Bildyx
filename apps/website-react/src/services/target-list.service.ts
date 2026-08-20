@@ -1,16 +1,7 @@
+import { GetTargetList, TargetRow } from "@repo/models/target_list";
 import { getRPCClient } from "./rpc";
-import type { TargetRow, MatchCategory } from "../components/target-list/types";
-import { EmployeeCountRange, OrganizationSubType } from "@prisma/client";
 
-export type GetTargetsParams = {
-  userProfileId: string;
-  city?: string;
-  country?: string;
-  sizes?: EmployeeCountRange[];
-  subtypes?: OrganizationSubType[];
-  matchFilter?: MatchCategory;
-  keyword?: string;
-};
+export type GetTargetsParams = GetTargetList;
 
 export class TargetListService {
   private readonly rpcClient = getRPCClient();

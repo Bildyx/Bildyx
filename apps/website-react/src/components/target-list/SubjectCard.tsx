@@ -1,15 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CardService } from "../../services/card.service";
 import { CardPopover } from "./CardPopover";
-import type { TargetRow } from "./types";
 
 const cardService = new CardService();
 
-interface SubjectCardProps {
-  row: TargetRow;
-}
-
-export function SubjectCard({ row }: SubjectCardProps) {
+export function SubjectCard({ row }) {
   const [html, setHtml] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);

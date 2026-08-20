@@ -1,30 +1,29 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
-import Mission from "./pages/Mission";
-import Company from "./pages/Company";
-import Contact from "./pages/Contact";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsService from "./pages/TermsService";
-import WhyBuiltIt from "./pages/WhyBuiltIt";
-import Generic from "./pages/Generic";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import VerifyEmail from "./pages/VerifyEmail";
-import CompanyArchives from "./pages/CompanyArchives";
-import CompanyArchiveTrue from "./pages/CompanyArchiveTrue";
-import Microresume from "./pages/Microresume";
-import MicroresumeExample from "./pages/MicroresumeExample";
-import WhyTeams from "./pages/WhyTeams";
-import TeamExample from "./pages/TeamExample";
-import MyJobs from "./pages/MyJobs";
-import TargetList from "./pages/TargetList";
-import Login from "./pages/Login";
-import TestsPreferences from "./pages/TestsPreferences";
-import Test from "./pages/Test";
-import ResultTest from "./pages/ResultTest";
-import Profile from "./pages/Profile";
-import CompanyProfile from "./pages/CompanyProfile";
-import NotYetMigrated from "./pages/NotYetMigrated";
+import Mission from "./pages/static/Mission";
+import Company from "./pages/company/Company";
+import Contact from "./pages/static/Contact";
+import PrivacyPolicy from "./pages/static/PrivacyPolicy";
+import TermsService from "./pages/static/TermsService";
+import WhyBuiltIt from "./pages/static/WhyBuiltIt";
+import Generic from "./pages/static/Generic";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
+import CompanyArchives from "./pages/company/CompanyArchives";
+import CompanyArchiveTrue from "./pages/company/CompanyArchiveTrue";
+import Microresume from "./pages/static/Microresume";
+import MicroresumeExample from "./pages/static/MicroresumeExample";
+import WhyTeams from "./pages/static/WhyTeams";
+import TeamExample from "./pages/static/TeamExample";
+import TargetList from "./pages/job-seeker/TargetList";
+import Login from "./pages/auth/Login";
+import TestsPreferences from "./pages/tests/TestsPreferences";
+import Test from "./pages/tests/Test";
+import ResultTest from "./pages/tests/ResultTest";
+import Profile from "./pages/job-seeker/Profile";
+import CompanyProfile from "./pages/company/CompanyProfile";
+import NotYetMigrated from "./pages/static/NotYetMigrated";
 
 export default function App() {
   return (
@@ -50,7 +49,6 @@ export default function App() {
       <Route path="/microresume-example" element={<MicroresumeExample />} />
       <Route path="/why-teams" element={<WhyTeams />} />
       <Route path="/team-example" element={<TeamExample />} />
-      <Route path="/my-jobs" element={<MyJobs />} />
       <Route path="/target-list" element={<TargetList />} />
       <Route path="/login" element={<Login />} />
       <Route path="/tests-preferences" element={<TestsPreferences />} />

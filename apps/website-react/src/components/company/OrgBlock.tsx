@@ -20,15 +20,15 @@ export default function OrgBlock({
   isAdminMode,
   onDelete,
 }: Props) {
+  if (!isAdminMode && items.length === 0) {
+    return null;
+  }
+
   return (
     <section className="ca-block">
       <header>
         <span>{title}</span>
-        {isAdminMode && (
-          <button onClick={onAddClick}>
-            {addButtonLabel}
-          </button>
-        )}
+        {isAdminMode && <button onClick={onAddClick}>{addButtonLabel}</button>}
       </header>
       <div>
         {items.length === 0 ? (

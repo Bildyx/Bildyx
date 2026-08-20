@@ -1,11 +1,3 @@
-/**
- * CardPopover — affiche la vraie carte générée (iframe) dans un popover fixed,
- * positionné intelligemment dans le viewport via getBoundingClientRect.
- *
- * On utilise postMessage pour récupérer la hauteur exacte après scaling,
- * ce qui évite le problème de contour coupé.
- */
-
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -47,20 +39,17 @@ export function buildSrcDoc(html: string): string {
   <script>${SCALE_SCRIPT}<\/script></body></html>`;
 }
 
-/* ── Composant ───────────────────────────────────────────────── */
 interface CardPopoverProps {
   html: string | null;
   title: string;
   anchorEl: HTMLElement | null;
 }
 
-const POPOVER_WIDTH = 380;
 const MARGIN = 12;
 
 export function CardPopover({ html, title, anchorEl }: CardPopoverProps) {
   const [iframeHeight, setIframeHeight] = React.useState(0);
 
-  // Écoute le postMessage de l'iframe pour connaître la hauteur exacte
   React.useEffect(() => {
     function onMessage(evt: MessageEvent) {
       if (
@@ -76,25 +65,25 @@ export function CardPopover({ html, title, anchorEl }: CardPopoverProps) {
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
-  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
+  const [coords, setCoords] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
-  // Position the popover dynamically next to the anchor element.
   React.useLayoutEffect(() => {
     if (!anchorEl) return;
-    const POPOVER_WIDTH = 400; // slightly wider to avoid any layout clamping
+    const POPOVER_WIDTH = 400;
     const estimatedH = iframeHeight || 440;
     const rect = anchorEl.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // Horizontal: prefer right of card, fall back to left
     let left = rect.right + MARGIN;
     if (left + POPOVER_WIDTH > vw - MARGIN) {
       left = rect.left - POPOVER_WIDTH - MARGIN;
     }
     left = Math.max(MARGIN, Math.min(left, vw - POPOVER_WIDTH - MARGIN));
 
-    // Vertical: align top with card, clamp to viewport using actual resolved height
     let top = rect.top;
     if (top + estimatedH > vh - MARGIN) {
       top = vh - estimatedH - MARGIN;

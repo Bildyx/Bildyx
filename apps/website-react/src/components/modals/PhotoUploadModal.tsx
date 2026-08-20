@@ -7,6 +7,7 @@ interface PhotoUploadModalProps {
 
 export function PhotoUploadModal({ onSubmit, onClose }: PhotoUploadModalProps) {
   const [preview, setPreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -74,16 +75,27 @@ export function PhotoUploadModal({ onSubmit, onClose }: PhotoUploadModalProps) {
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
             onClick={onClose}
+            disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             type="button"
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            disabled={!preview}
-            onClick={() => preview && onSubmit(preview)}
+            disabled={!preview || isSubmitting}
+            onClick={async () => {
+              if (!preview || isSubmitting) return;
+              setIsSubmitting(true);
+              try {
+                await onSubmit(preview);
+              } catch (err) {
+                console.error(err);
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
           >
-            Add Photo
+            {isSubmitting ? "Adding..." : "Add Photo"}
           </button>
         </div>
       </div>

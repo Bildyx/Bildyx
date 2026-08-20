@@ -1,35 +1,14 @@
-import React from "react";
+import { UserEducation } from "@repo/models/user_educations";
 import BackendCardSlot from "./BackendCardSlot";
-
-export type EducationCardData = {
-  id: string;
-  start_year?: number | null;
-  end_year?: number | null;
-  graduated?: boolean;
-
-  organization_id?: string | null;
-  university_name?: string | null;
-
-  degree_id?: string | null;
-  degree_name?: string | null;
-};
-
-type Props = {
-  education: EducationCardData;
-  onChange?: (education: EducationCardData) => void;
-  onDelete?: () => void;
-  onCollapse?: (button: HTMLButtonElement) => void;
-  onSlotClick?: (slot: HTMLElement) => void;
-};
 
 export default function EducationCard({
   education,
   onChange,
   onDelete,
-  onCollapse,
   onSlotClick,
-}: Props) {
-  const update = (patch: Partial<EducationCardData>) => {
+  onBlur,
+}) {
+  const update = (patch: Partial<UserEducation>) => {
     onChange?.({ ...education, ...patch });
   };
 
@@ -46,7 +25,6 @@ export default function EducationCard({
             className="entry-tool js-collapse"
             type="button"
             aria-label="Collapse or expand education"
-            onClick={(e) => onCollapse?.(e.currentTarget)}
           >
             ＋
           </button>
@@ -61,7 +39,7 @@ export default function EducationCard({
         </div>
       </div>
 
-      <div className="entry-body">
+      <div className="entry-body" onBlur={() => onBlur?.(education)}>
         <div className="education-form-line" style={{ width: "100%" }}>
           <div className="education-fields" style={{ width: "100%" }}>
             <div

@@ -7,37 +7,7 @@ import {
   OrganizationSubtypeEnum,
   EmployeeCountRangeEnum,
 } from "../models/utils/enums";
-
-const GetTargetListSchema = z.object({
-  userProfileId: z.uuid(),
-  matchFilter: z.enum(["same", "similar", "different"]).optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  sizes: z
-    .preprocess(
-      (val) => (typeof val === "string" ? [val] : val),
-      z.array(EmployeeCountRangeEnum),
-    )
-    .optional(),
-  subtypes: z
-    .preprocess(
-      (val) => (typeof val === "string" ? [val] : val),
-      z.array(OrganizationSubtypeEnum),
-    )
-    .optional(),
-  subject_category_id: zNullableUUID(),
-  industry_id: zNullableUUID(),
-  keyword: z.string().optional(),
-});
-
-const TargetRowSchema = OrganizationSchema.extend({
-  subject_id: z.uuid().nullable().optional(),
-  subject_category_id: z.uuid().nullable().optional(),
-  subject_name: z.string().nullable().optional(),
-  subject_description: z.string().nullable().optional(),
-  subject_logo_url: z.string().nullable().optional(),
-  match_category: z.enum(["same", "similar", "different"]).optional(),
-});
+import { GetTargetListSchema, TargetRowSchema } from "../models/target_list";
 
 export const target_list = {
   getTargets: publicProcedure

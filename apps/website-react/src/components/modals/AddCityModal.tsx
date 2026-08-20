@@ -39,6 +39,7 @@ export function AddCityModal({ cities, onSubmit, onClose }: AddCityModalProps) {
   const [selectedCity, setSelectedCity] = useState<CityListItem | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [officeType, setOfficeType] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -155,16 +156,27 @@ export function AddCityModal({ cities, onSubmit, onClose }: AddCityModalProps) {
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
             onClick={onClose}
+            disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             type="button"
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            disabled={!selectedCity || !officeType}
-            onClick={() => selectedCity && onSubmit(selectedCity.id, officeType)}
+            disabled={!selectedCity || !officeType || isSubmitting}
+            onClick={async () => {
+              if (!selectedCity || !officeType || isSubmitting) return;
+              setIsSubmitting(true);
+              try {
+                await onSubmit(selectedCity.id, officeType);
+              } catch (err) {
+                console.error(err);
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
           >
-            Add City
+            {isSubmitting ? "Adding..." : "Add City"}
           </button>
         </div>
       </div>

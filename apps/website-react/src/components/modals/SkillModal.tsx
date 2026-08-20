@@ -47,9 +47,12 @@ export function SkillModal({ open, onClose, onConfirm }) {
     };
   }, [open]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (!open) {
       setSelectedSkill("");
+      setIsSubmitting(false);
     }
   }, [open]);
 
@@ -57,14 +60,21 @@ export function SkillModal({ open, onClose, onConfirm }) {
     return null;
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedSkill) {
       toast.error("Please select a skill.");
       return;
     }
 
-    onConfirm(selectedSkill);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      await onConfirm(selectedSkill);
+      onClose();
+    } catch {
+      // Error handled by parent
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -102,7 +112,12 @@ export function SkillModal({ open, onClose, onConfirm }) {
         </select>
 
         <div className="lang-modal-actions" style={{ marginTop: 24 }}>
-          <button type="button" className="lang-modal-cancel" onClick={onClose}>
+          <button
+            type="button"
+            className="lang-modal-cancel"
+            onClick={onClose}
+            disabled={loading || isSubmitting}
+          >
             Cancel
           </button>
 
@@ -110,9 +125,10 @@ export function SkillModal({ open, onClose, onConfirm }) {
             type="button"
             className="lang-modal-confirm"
             onClick={handleConfirm}
-            disabled={loading}
+            disabled={loading || isSubmitting}
+            style={{ opacity: loading || isSubmitting ? 0.6 : 1 }}
           >
-            Add Skill
+            {isSubmitting ? "Adding..." : "Add Skill"}
           </button>
         </div>
       </div>

@@ -1,30 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import BackendCardSlot from "./BackendCardSlot";
+import type { UserExperience } from "@repo/models/user_experiences";
 
-export type ExperienceCardData = {
-  id: string;
-  start_year?: number | null;
-  end_year?: number | null;
-  current?: boolean;
-  role_title?: string | null;
-  summary?: string | null;
-
-  organization_id?: string | null;
-  company_name?: string | null;
-
-  subject_id?: string | null;
-  subject_name?: string | null;
-
-  job_id?: string | null;
-};
-
-type Props = {
-  experience: ExperienceCardData;
+type ExperienceCardProps = {
+  experience: UserExperience;
   index: number;
-  onChange?: (experience: ExperienceCardData) => void;
+  onChange?: (experience: UserExperience) => void;
   onDelete?: () => void;
-  onCollapse?: (button: HTMLButtonElement) => void;
   onSlotClick?: (slot: HTMLElement) => void;
+  onBlur?: (experience: UserExperience) => void;
 };
 
 export default function ExperienceCard({
@@ -32,44 +16,50 @@ export default function ExperienceCard({
   index,
   onChange,
   onDelete,
-  onCollapse,
   onSlotClick,
-}: Props) {
+  onBlur,
+}: ExperienceCardProps) {
   const summaryRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (summaryRef.current) {
-      const words = (experience.summary || "").trim()
-        ? (experience.summary || "").trim().split(/\s+/).length
-        : 0;
-      const counter = summaryRef.current.nextElementSibling;
-      if (counter?.classList.contains("word-counter")) {
-        counter.textContent = `${words}/60 words`;
-      }
-    }
-  }, [experience.summary]);
+    if (!summaryRef.current) return;
 
-  const update = (patch: Partial<ExperienceCardData>) => {
-    onChange?.({ ...experience, ...patch });
+    const words = (experience.description || "").trim()
+      ? (experience.description || "").trim().split(/\s+/).length
+      : 0;
+
+    const counter = summaryRef.current.nextElementSibling;
+
+    if (counter?.classList.contains("word-counter")) {
+      counter.textContent = `${words}/60 words`;
+    }
+  }, [experience.description]);
+
+  const update = (patch: Partial<UserExperience>) => {
+    onChange?.({
+      ...experience,
+      ...patch,
+    });
   };
 
   return (
     <article
       className="entry-card"
       data-entry="experience"
-      data-id={experience.id}
+      data-id={experience.id ?? ""}
     >
       <div className="entry-toolbar">
         <h3>Work Experience {index + 1}</h3>
+
         <div>
           <button
             className="entry-tool js-collapse"
             type="button"
             aria-label="Collapse or expand work experience"
-            onClick={(e) => onCollapse?.(e.currentTarget)}
           >
             ＋
           </button>
+
           <button
             className="entry-tool js-remove-entry"
             type="button"
@@ -81,7 +71,7 @@ export default function ExperienceCard({
         </div>
       </div>
 
-      <div className="entry-body">
+      <div className="entry-body" onBlur={() => onBlur?.(experience)}>
         <div className="entry-header-line">
           <div className="entry-controls" style={{ width: "100%" }}>
             <div
@@ -93,10 +83,17 @@ export default function ExperienceCard({
                 marginBottom: 12,
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                }}
+              >
                 <label style={{ fontSize: "0.85em", opacity: 0.8 }}>
                   Start Year
                 </label>
+
                 <input
                   type="number"
                   className="start-year"
@@ -115,12 +112,26 @@ export default function ExperienceCard({
                 />
               </div>
 
-              <span style={{ alignSelf: "flex-end", marginBottom: 8 }}>–</span>
+              <span
+                style={{
+                  alignSelf: "flex-end",
+                  marginBottom: 8,
+                }}
+              >
+                –
+              </span>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                }}
+              >
                 <label style={{ fontSize: "0.85em", opacity: 0.8 }}>
                   End Year
                 </label>
+
                 <input
                   type="number"
                   className="end-year"
@@ -178,13 +189,18 @@ export default function ExperienceCard({
               <label style={{ fontSize: "0.85em", opacity: 0.8 }}>
                 Role Title
               </label>
+
               <input
                 type="text"
                 className="exp-role-title"
                 placeholder="Add role title..."
                 style={{ width: "100%" }}
-                value={experience.role_title || ""}
-                onChange={(e) => update({ role_title: e.target.value })}
+                value={experience.title || ""}
+                onChange={(e) =>
+                  update({
+                    title: e.target.value,
+                  })
+                }
               />
             </div>
           </div>
@@ -201,13 +217,18 @@ export default function ExperienceCard({
           <label style={{ fontSize: "0.85em", opacity: 0.8 }}>
             Work Summary
           </label>
+
           <textarea
             ref={summaryRef}
             maxLength={600}
             data-word-counter
             placeholder="Add work summary..."
-            value={experience.summary || ""}
-            onChange={(e) => update({ summary: e.target.value })}
+            value={experience.description || ""}
+            onChange={(e) =>
+              update({
+                description: e.target.value,
+              })
+            }
           />
         </div>
 
@@ -216,6 +237,7 @@ export default function ExperienceCard({
         <div className="backend-grid backend-grid--three">
           <section>
             <h4>Company</h4>
+
             <BackendCardSlot
               slotType="company-card"
               entityId={experience.organization_id}
@@ -226,6 +248,7 @@ export default function ExperienceCard({
 
           <section>
             <h4>Product/Service</h4>
+
             <BackendCardSlot
               slotType="subject-card"
               entityId={experience.subject_id}
@@ -236,6 +259,7 @@ export default function ExperienceCard({
 
           <section>
             <h4>Role</h4>
+
             <BackendCardSlot
               slotType="role-card"
               entityId={experience.job_id}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSession } from "../lib/session";
 import { toast } from "../lib/toast";
+
 import { UserService } from "../services/user.service";
 import { UserProfileService } from "../services/user-profile.service";
 import { UserLanguageService } from "../services/user-language.service";
@@ -9,6 +10,7 @@ import { UserSkillService } from "../services/user-skill.service";
 import { UserExperienceService } from "../services/user-experience.service";
 import { UserEducationService } from "../services/user-education.service";
 import { UserCertificationService } from "../services/user-certification.service";
+
 import { SkillService } from "../services/skill.service";
 import { OrganizationService } from "../services/organization.service";
 import { CityService } from "../services/city.service";
@@ -17,15 +19,27 @@ import { JobService } from "../services/job.service";
 import { SubjectService } from "../services/subject.service";
 import { DegreeService } from "../services/degree.service";
 import { CertificationService } from "../services/certification.service";
+
 import type { UserLanguage } from "@repo/models/user_languages";
 import type { UserSkill } from "@repo/models/user_skills";
-import type { ExperienceCardData } from "../components/cards/ExperienceCard";
-import type { EducationCardData } from "../components/cards/EducationCard";
-import type { CertificationCardData } from "../components/cards/CertificationCard";
+import type { UserExperience } from "@repo/models/user_experiences";
+import type {
+  PutUserEducation,
+  UserEducation,
+} from "@repo/models/user_educations";
+import type {
+  PutUserCertification,
+  UserCertification,
+} from "@repo/models/user_certifications";
+const getProficiencyWeight = (prof?: string | null): number => {
+  if (prof === "NATIVE") return 3;
+  if (prof === "FLUENT") return 2;
+  return 1;
+};
 
-function uid() {
-  return `local-${Math.random().toString(36).slice(2)}`;
-}
+const sortLanguages = (langs: UserLanguage[]): UserLanguage[] => {
+  return [...langs].sort((a, b) => getProficiencyWeight(b.proficiency) - getProficiencyWeight(a.proficiency));
+};
 
 const userService = new UserService();
 const userProfileService = new UserProfileService();
@@ -34,6 +48,7 @@ const userSkillService = new UserSkillService();
 const userExperienceService = new UserExperienceService();
 const userEducationService = new UserEducationService();
 const userCertificationService = new UserCertificationService();
+
 const skillService = new SkillService();
 const organizationService = new OrganizationService();
 const cityService = new CityService();
@@ -57,11 +72,19 @@ export function useProfile() {
 
   const [languages, setLanguages] = useState<UserLanguage[]>([]);
   const [skills, setSkills] = useState<UserSkill[]>([]);
-  const [experiences, setExperiences] = useState<ExperienceCardData[]>([]);
-  const [educations, setEducations] = useState<EducationCardData[]>([]);
-  const [certifications, setCertifications] = useState<CertificationCardData[]>(
-    [],
+  const [experiences, setExperiences] = useState<UserExperience[]>([]);
+  const [educations, setEducations] = useState<UserEducation[]>([]);
+  const [certifications, setCertifications] = useState<UserCertification[]>([]);
+
+  // Drafts
+  const [draftExperience, setDraftExperience] = useState<UserExperience | null>(
+    null,
   );
+  const [draftEducation, setDraftEducation] = useState<UserEducation | null>(
+    null,
+  );
+  const [draftCertification, setDraftCertification] =
+    useState<UserCertification | null>(null);
 
   const [entityModalOpen, setEntityModalOpen] = useState(false);
   const [entityModalSlot, setEntityModalSlot] = useState<string | null>(null);
@@ -76,44 +99,14 @@ export function useProfile() {
   const [showSkillModal, setShowSkillModal] = useState(false);
   const [skillSuggestions, setSkillSuggestions] = useState<string[]>([]);
 
-  const deletedIds = useRef({
-    languages: [] as string[],
-    skills: [] as string[],
-    experiences: [] as string[],
-    educations: [] as string[],
-    certifications: [] as string[],
-  });
-
-  const lastSavedRef = useRef({
-    name: "",
-    role: "",
-    summary: "",
-    avatarUrl: null as string | null,
-  });
-  const modifiedCardIdsRef = useRef<Set<string>>(new Set());
-
-  const nameRef = useRef(name);
-  nameRef.current = name;
-  const roleRef = useRef(role);
-  roleRef.current = role;
-  const summaryRef = useRef(summary);
-  summaryRef.current = summary;
-  const avatarUrlRef = useRef(avatarUrl);
-  avatarUrlRef.current = avatarUrl;
-
-  const languagesRef = useRef(languages);
-  languagesRef.current = languages;
-  const skillsRef = useRef(skills);
-  skillsRef.current = skills;
-  const experiencesRef = useRef(experiences);
-  experiencesRef.current = experiences;
-  const educationsRef = useRef(educations);
-  educationsRef.current = educations;
-  const certificationsRef = useRef(certifications);
-  certificationsRef.current = certifications;
+  const hasLoaded = useRef(false);
 
   const loadData = async () => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+
     const session = getSession();
+
     if (!session?.userId) {
       navigate("/login");
       return;
@@ -121,8 +114,8 @@ export function useProfile() {
 
     try {
       const [user, fullProfile] = await Promise.all([
-        userService.getById(session.userId!),
-        userProfileService.getFullProfileByUserId(session.userId!),
+        userService.getById(session.userId),
+        userProfileService.getFullProfileByUserId(session.userId),
       ]);
 
       if (!fullProfile) {
@@ -131,6 +124,7 @@ export function useProfile() {
       }
 
       setProfileId(fullProfile.id);
+
       const resolvedName =
         fullProfile.display_name ||
         [fullProfile.first_name, fullProfile.last_name]
@@ -138,69 +132,79 @@ export function useProfile() {
           .join(" ") ||
         user.email ||
         "";
-      const resolvedRole = fullProfile.role || "";
-      const resolvedSummary = fullProfile.biography || "";
 
       setName(resolvedName);
-      setRole(resolvedRole);
-      setSummary(resolvedSummary);
-
-      lastSavedRef.current = {
-        name: resolvedName,
-        role: resolvedRole,
-        summary: resolvedSummary,
-        avatarUrl: fullProfile.avatar_url || null,
-      };
+      setRole(fullProfile.role || "");
+      setSummary(fullProfile.biography || "");
       setAvatarUrl(fullProfile.avatar_url || null);
-      setLanguages(fullProfile.languages || []);
+
+      setLanguages(sortLanguages(fullProfile.languages || []));
       setSkills(fullProfile.skills || []);
 
       const resolvedExperiences = await Promise.all(
-        ((fullProfile.experiences as ExperienceCardData[]) || []).map(
-          async (exp) => {
-            let companyName = exp.company_name || "";
+        ((fullProfile.experiences as UserExperience[]) || []).map(
+          async (experience) => {
+            let companyName = (experience as any).company_name;
             let countryName = "";
-            let roleTitle = exp.role_title || "";
-            let subjectName = exp.subject_name || "";
+            let roleTitle = experience.title;
+            let subjectName = (experience as any).subject_name;
 
-            if (exp.organization_id) {
+            if (experience.organization_id) {
               try {
-                const org = await organizationService.getById(
-                  exp.organization_id,
+                const organization = await organizationService.getById(
+                  experience.organization_id,
                 );
-                if (org) {
-                  companyName = org.name;
-                  if (org.city_id) {
-                    const city = await cityService.getById(org.city_id);
-                    if (city && city.country_id) {
+
+                if (organization) {
+                  companyName = organization.name;
+
+                  if (organization.city_id) {
+                    const city = await cityService.getById(
+                      organization.city_id,
+                    );
+
+                    if (city?.country_id) {
                       const country = await countryService.getById(
                         city.country_id,
                       );
+
                       if (country) {
                         countryName = country.name;
                       }
                     }
                   }
                 }
-              } catch {}
+              } catch {
+                // Ignore failure
+              }
             }
 
-            if (exp.job_id && !roleTitle) {
+            if (experience.job_id && !roleTitle) {
               try {
-                const job = await jobService.getById(exp.job_id);
-                if (job) roleTitle = job.title;
-              } catch {}
+                const job = await jobService.getById(experience.job_id);
+                if (job) {
+                  roleTitle = job.title;
+                }
+              } catch {
+                // Ignore failure
+              }
             }
 
-            if (exp.subject_id && !subjectName) {
+            if (experience.subject_id && !subjectName) {
               try {
-                const subject = await subjectService.getById(exp.subject_id);
-                if (subject) subjectName = subject.name;
-              } catch {}
+                const subject = await subjectService.getById(
+                  experience.subject_id,
+                );
+                if (subject) {
+                  subjectName = subject.name;
+                }
+              } catch {
+                // Ignore failure
+              }
             }
 
             return {
-              ...exp,
+              ...experience,
               company_name: companyName,
               role_title: roleTitle,
               subject_name: subjectName,
@@ -211,43 +215,55 @@ export function useProfile() {
       );
 
       const resolvedEducations = await Promise.all(
-        ((fullProfile.educations as EducationCardData[]) || []).map(
-          async (edu) => {
-            let universityName = edu.university_name || "";
+        ((fullProfile.educations as UserEducation[]) || []).map(
+          async (education) => {
+            let universityName = (education as any).university_name;
             let countryName = "";
-            let degreeName = edu.degree_name || "";
+            let degreeName = (education as any).degree_name;
 
-            if (edu.organization_id) {
+            if (education.organization_id) {
               try {
-                const org = await organizationService.getById(
-                  edu.organization_id,
+                const organization = await organizationService.getById(
+                  education.organization_id,
                 );
-                if (org) {
-                  universityName = org.name;
-                  if (org.city_id) {
-                    const city = await cityService.getById(org.city_id);
-                    if (city && city.country_id) {
+
+                if (organization) {
+                  universityName = organization.name;
+
+                  if (organization.city_id) {
+                    const city = await cityService.getById(
+                      organization.city_id,
+                    );
+
+                    if (city?.country_id) {
                       const country = await countryService.getById(
                         city.country_id,
                       );
+
                       if (country) {
                         countryName = country.name;
                       }
                     }
                   }
                 }
-              } catch {}
+              } catch {
+                // Ignore failure
+              }
             }
 
-            if (edu.degree_id && !degreeName) {
+            if (education.degree_id && !degreeName) {
               try {
-                const deg = await degreeService.getById(edu.degree_id);
-                if (deg) degreeName = deg.name;
-              } catch {}
+                const degree = await degreeService.getById(education.degree_id);
+                if (degree) {
+                  degreeName = degree.name;
+                }
+              } catch {
+                // Ignore failure
+              }
             }
 
             return {
-              ...edu,
+              ...education,
               university_name: universityName,
               degree_name: degreeName,
               country_name: countryName,
@@ -257,21 +273,25 @@ export function useProfile() {
       );
 
       const resolvedCertifications = await Promise.all(
-        ((fullProfile.certifications as CertificationCardData[]) || []).map(
-          async (cert) => {
-            let certificationName = cert.certification_name || "";
+        ((fullProfile.certifications as UserCertification[]) || []).map(
+          async (certification) => {
+            let certificationName = (certification as any).certification_name;
 
-            if (cert.certification_id && !certificationName) {
+            if (certification.certification_id && !certificationName) {
               try {
-                const c = await certificationService.getById(
-                  cert.certification_id,
+                const result = await certificationService.getById(
+                  certification.certification_id,
                 );
-                if (c) certificationName = c.name;
-              } catch {}
+                if (result) {
+                  certificationName = result.name;
+                }
+              } catch {
+                // Ignore failure
+              }
             }
 
             return {
-              ...cert,
+              ...certification,
               certification_name: certificationName,
             } as any;
           },
@@ -295,6 +315,9 @@ export function useProfile() {
     loadData();
   }, [navigate]);
 
+  /**
+   * Entity Modal
+   */
   function openEntityModal(
     slotType: string,
     entryId: string,
@@ -310,16 +333,10 @@ export function useProfile() {
     const slotType = slot.dataset.cardSlot;
     const entryCard = slot.closest(".entry-card") as HTMLElement | null;
 
-    if (!slotType || !entryCard) {
-      return;
-    }
+    if (!slotType || !entryCard) return;
 
-    const entryId = entryCard.dataset.id;
+    const entryId = entryCard.dataset.id || "draft";
     const entryType = entryCard.dataset.entry;
-
-    if (!entryId) {
-      return;
-    }
 
     if (
       entryType !== "experience" &&
@@ -333,152 +350,231 @@ export function useProfile() {
   }
 
   async function handleEntitySelect(entityId: string, entity: any) {
-    if (!entityModalEntryId || !entityModalEntryType || !entityModalSlot) {
+    if (!entityModalEntryId || !entityModalEntryType || !entityModalSlot)
       return;
-    }
 
-    modifiedCardIdsRef.current.add(entityModalEntryId);
+    const entryId = entityModalEntryId;
+    const entryType = entityModalEntryType;
+    const slotType = entityModalSlot;
 
-    let resolvedCountryName = "";
-    if (
-      entityModalSlot === "company-card" ||
-      entityModalSlot === "university-card"
-    ) {
-      try {
-        const org = await organizationService.getById(entityId);
-        if (org && org.city_id) {
-          const city = await cityService.getById(org.city_id);
-          if (city && city.country_id) {
-            const country = await countryService.getById(city.country_id);
-            if (country) {
-              resolvedCountryName = country.name;
+    try {
+      let resolvedCountryName = "";
+
+      if (slotType === "company-card" || slotType === "university-card") {
+        try {
+          const organization = await organizationService.getById(entityId);
+          if (organization?.city_id) {
+            const city = await cityService.getById(organization.city_id);
+            if (city?.country_id) {
+              const country = await countryService.getById(city.country_id);
+              if (country) resolvedCountryName = country.name;
             }
           }
+        } catch {
+          // Optionnel
         }
-      } catch {}
+      }
+
+      if (entryType === "experience") {
+        const isDraft = entryId === "draft";
+        const currentExp = isDraft
+          ? draftExperience
+          : experiences.find((i) => i.id === entryId);
+        if (!currentExp || !profileId) return;
+
+        let nextExperience: UserExperience = { ...currentExp };
+
+        if (slotType === "company-card") {
+          nextExperience = {
+            ...nextExperience,
+            organization_id: entityId,
+            company_name: entity.name,
+            country_name: resolvedCountryName,
+          } as any;
+        }
+
+        if (slotType === "subject-card") {
+          nextExperience = {
+            ...nextExperience,
+            subject_id: entityId,
+            subject_name: entity.name,
+          } as any;
+        }
+
+        if (slotType === "role-card") {
+          nextExperience = {
+            ...nextExperience,
+            job_id: entityId,
+            role_title: entity.title,
+          } as any;
+        }
+
+        if (isDraft) {
+          // Création directe en BDD dès la sélection
+          const created = await userExperienceService.create({
+            user_profile_id: profileId,
+            organization_id: nextExperience.organization_id ?? null,
+            subject_id: nextExperience.subject_id ?? null,
+            job_id: nextExperience.job_id ?? null,
+            title: nextExperience.title ?? null,
+            description: nextExperience.description ?? null,
+            start_year: nextExperience.start_year ?? null,
+            end_year: nextExperience.end_year ?? null,
+            current: nextExperience.current ?? false,
+          });
+
+          setExperiences((prev) => [
+            ...prev,
+            { ...nextExperience, id: created.id },
+          ]);
+          setDraftExperience(null);
+        } else {
+          setExperiences((prev) =>
+            prev.map((item) => (item.id === entryId ? nextExperience : item)),
+          );
+          await saveExperience(nextExperience);
+        }
+      }
+
+      if (entryType === "education") {
+        const isDraft = entryId === "draft";
+        const currentEdu = isDraft
+          ? draftEducation
+          : educations.find((i) => i.id === entryId);
+        if (!currentEdu || !profileId) return;
+
+        let nextEducation: UserEducation = { ...currentEdu };
+
+        if (slotType === "university-card") {
+          nextEducation = {
+            ...nextEducation,
+            organization_id: entityId,
+            university_name: entity.name,
+            country_name: resolvedCountryName,
+          } as any;
+        }
+
+        if (slotType === "degree-card") {
+          nextEducation = {
+            ...nextEducation,
+            degree_id: entityId,
+            degree_name: entity.name,
+          } as any;
+        }
+
+        if (isDraft) {
+          // Création directe en BDD dès la sélection
+          const created = await userEducationService.create({
+            user_profile_id: profileId,
+            start_year: nextEducation.start_year ?? null,
+            end_year: nextEducation.end_year ?? null,
+            degree_id: nextEducation.degree_id ?? null,
+            organization_id: nextEducation.organization_id ?? null,
+            graduated: nextEducation.graduated ?? false,
+          } as any);
+
+          setEducations((prev) => [
+            ...prev,
+            { ...nextEducation, id: created.id },
+          ]);
+          setDraftEducation(null);
+        } else {
+          setEducations((prev) =>
+            prev.map((item) => (item.id === entryId ? nextEducation : item)),
+          );
+          await saveEducation(nextEducation);
+        }
+      }
+
+      if (entryType === "certification") {
+        const isDraft = entryId === "draft";
+        const currentCert = isDraft
+          ? draftCertification
+          : certifications.find((i) => i.id === entryId);
+        if (!currentCert || !profileId) return;
+
+        let nextCertification: UserCertification = { ...currentCert };
+
+        if (slotType === "certification-card") {
+          nextCertification = {
+            ...nextCertification,
+            certification_id: entityId,
+            certification_name: entity.name,
+          } as any;
+        }
+
+        if (isDraft) {
+          // Création directe en BDD dès la sélection
+          const created = await userCertificationService.create({
+            user_profile_id: profileId,
+            certification_id: nextCertification.certification_id ?? null,
+            obtained_at: nextCertification.obtained_at ?? null,
+            expires_at: nextCertification.expires_at ?? null,
+          } as any);
+
+          setCertifications((prev) => [
+            ...prev,
+            { ...nextCertification, id: created.id },
+          ]);
+          setDraftCertification(null);
+        } else {
+          setCertifications((prev) =>
+            prev.map((item) =>
+              item.id === entryId ? nextCertification : item,
+            ),
+          );
+          await saveCertification(nextCertification);
+        }
+      }
+
+      closeEntityModal();
+    } catch (err) {
+      console.error("[Profile] Entity selection error:", err);
+      toast.error("Could not save this selection.");
     }
-
-    if (entityModalEntryType === "experience") {
-      setExperiences((prev) =>
-        prev.map((experience) => {
-          if (experience.id !== entityModalEntryId) {
-            return experience;
-          }
-
-          if (entityModalSlot === "company-card") {
-            return {
-              ...experience,
-              organization_id: entityId,
-              company_name: entity.name,
-              country_name: resolvedCountryName,
-            } as any;
-          }
-
-          if (entityModalSlot === "subject-card") {
-            return {
-              ...experience,
-              subject_id: entityId,
-              subject_name: entity.name,
-            };
-          }
-
-          if (entityModalSlot === "role-card") {
-            return {
-              ...experience,
-              job_id: entityId,
-              role_title: entity.title,
-            };
-          }
-
-          return experience;
-        }),
-      );
-    }
-
-    if (entityModalEntryType === "education") {
-      setEducations((prev) =>
-        prev.map((education) => {
-          if (education.id !== entityModalEntryId) {
-            return education;
-          }
-
-          if (entityModalSlot === "university-card") {
-            return {
-              ...education,
-              organization_id: entityId,
-              university_name: entity.name,
-              country_name: resolvedCountryName,
-            } as any;
-          }
-
-          if (entityModalSlot === "degree-card") {
-            return {
-              ...education,
-              degree_id: entityId,
-              degree_name: entity.name,
-            };
-          }
-
-          return education;
-        }),
-      );
-    }
-
-    if (entityModalEntryType === "certification") {
-      setCertifications((prev) =>
-        prev.map((certification) => {
-          if (certification.id !== entityModalEntryId) {
-            return certification;
-          }
-
-          if (entityModalSlot === "certification-card") {
-            return {
-              ...certification,
-              certification_id: entityId,
-              certification_name: entity.name,
-            };
-          }
-
-          return certification;
-        }),
-      );
-    }
-
-    setEntityModalOpen(false);
-    setEntityModalSlot(null);
-    setEntityModalEntryId(null);
-    setEntityModalEntryType(null);
-    setTimeout(() => handleSave(true), 0);
   }
 
-  function addLanguage(language: string, level: string) {
-    let levelEnum = level.toUpperCase();
-    if (levelEnum === "INTERMEDIATE") {
-      levelEnum = "CONVERSATIONAL";
-    }
-    setLanguages((prev) => [
-      ...prev,
-      {
-        id: uid(),
-        user_profile_id: profileId || "",
+  /**
+   * Languages
+   */
+  async function addLanguage(language: string, level: string) {
+    if (!profileId) return;
+
+    let proficiency = level.toUpperCase();
+    if (proficiency === "INTERMEDIATE") proficiency = "CONVERSATIONAL";
+
+    try {
+      const created = await userLanguageService.create({
+        user_profile_id: profileId,
         language: language as any,
-        proficiency: levelEnum as any,
-      },
-    ]);
-    setShowLangModal(false);
-    setTimeout(() => handleSave(true), 0);
+        proficiency: proficiency as any,
+      });
+
+      setLanguages((prev) => sortLanguages([...prev, created]));
+      setShowLangModal(false);
+    } catch (err) {
+      console.error("[Profile] Language create error:", err);
+      toast.error("Could not add this language.");
+    }
   }
 
-  function removeLanguage(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.languages.push(id);
-    setLanguages((prev) => prev.filter((l) => l.id !== id));
-    setTimeout(() => handleSave(true), 0);
+  async function removeLanguage(id: string) {
+    try {
+      await userLanguageService.delete(id);
+      setLanguages((prev) => prev.filter((lang) => lang.id !== id));
+    } catch (err) {
+      console.error("[Profile] Language delete error:", err);
+      toast.error("Could not remove this language.");
+    }
   }
 
+  /**
+   * Skills
+   */
   async function openSkillPicker() {
     try {
       const all = await skillService.search("");
-      setSkillSuggestions(all.map((s) => s.name).sort());
+      setSkillSuggestions(all.map((skill) => skill.name).sort());
     } catch {
       setSkillSuggestions([]);
     }
@@ -486,105 +582,335 @@ export function useProfile() {
   }
 
   async function addSkill(skillName: string) {
-    let skillId = "";
+    if (!profileId) return;
+
     try {
       const list = await skillService.getAll();
       const existing = list.find(
-        (s: any) => s.name.toLowerCase() === skillName.toLowerCase(),
+        (skill: any) => skill.name.toLowerCase() === skillName.toLowerCase(),
       );
+
+      let skillId: string;
       if (existing) {
         skillId = existing.id;
       } else {
-        const res = await skillService.create({
+        const createdSkill = await skillService.create({
           name: skillName.trim(),
           serial_number:
             "SKI-" + Math.random().toString(36).substring(2, 11).toUpperCase(),
         });
-        skillId = res.id;
+        skillId = createdSkill.id;
       }
+
+      const createdUserSkill = await userSkillService.create({
+        user_profile_id: profileId,
+        skill_id: skillId,
+      });
+
+      setSkills((prev) => [
+        ...prev,
+        {
+          ...createdUserSkill,
+          skill_id: skillId,
+          name: skillName,
+        } as any,
+      ]);
+      setShowSkillModal(false);
     } catch (err) {
-      console.error("Failed to resolve or create skill:", err);
+      console.error("[Profile] Skill create error:", err);
       toast.error("Failed to add skill.");
+    }
+  }
+
+  async function removeSkill(id: string) {
+    try {
+      await userSkillService.delete(id);
+      setSkills((prev) => prev.filter((skill) => skill.id !== id));
+    } catch (err) {
+      console.error("[Profile] Skill delete error:", err);
+      toast.error("Could not remove this skill.");
+    }
+  }
+
+  /**
+   * Experiences
+   */
+  function addExperience() {
+    setDraftExperience({
+      id: "draft",
+      user_profile_id: profileId || "",
+      organization_id: null,
+      subject_id: null,
+      job_id: null,
+      title: null,
+      description: null,
+      start_year: null,
+      end_year: null,
+      current: false,
+    } as any);
+  }
+
+  function cancelDraftExperience() {
+    setDraftExperience(null);
+  }
+
+  function updateDraftExperience(next: UserExperience) {
+    setDraftExperience(next);
+  }
+
+  async function saveDraftExperience() {
+    if (!profileId || !draftExperience) return;
+
+    const hasData =
+      draftExperience.title ||
+      draftExperience.description ||
+      draftExperience.organization_id ||
+      draftExperience.job_id ||
+      draftExperience.subject_id ||
+      draftExperience.start_year ||
+      draftExperience.end_year;
+
+    if (!hasData) {
+      setDraftExperience(null);
       return;
     }
 
-    setSkills((prev) => [
-      ...prev,
-      {
-        id: uid(),
-        user_profile_id: profileId || "",
-        skill_id: skillId,
-        name: skillName,
-      } as any,
-    ]);
-    setShowSkillModal(false);
-    setTimeout(() => handleSave(true), 0);
+    try {
+      const created = await userExperienceService.create({
+        user_profile_id: profileId,
+        organization_id: draftExperience.organization_id ?? null,
+        subject_id: draftExperience.subject_id ?? null,
+        job_id: draftExperience.job_id ?? null,
+        title: draftExperience.title ?? null,
+        description: draftExperience.description ?? null,
+        start_year: draftExperience.start_year ?? null,
+        end_year: draftExperience.end_year ?? null,
+        current: draftExperience.current ?? false,
+      });
+
+      setExperiences((prev) => [
+        ...prev,
+        { ...draftExperience, id: created.id },
+      ]);
+      setDraftExperience(null);
+    } catch (err) {
+      console.error("[Profile] Draft experience save error:", err);
+      toast.error("Could not create experience.");
+    }
   }
 
-  function removeSkill(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.skills.push(id);
-    setSkills((prev) => prev.filter((s) => s.id !== id));
-    setTimeout(() => handleSave(true), 0);
+  async function removeExperience(id: string) {
+    try {
+      await userExperienceService.delete(id);
+      setExperiences((prev) => prev.filter((exp) => exp.id !== id));
+    } catch (err) {
+      console.error("[Profile] Experience delete error:", err);
+      toast.error("Could not remove this experience.");
+    }
   }
 
-  function addExperience() {
-    setExperiences((prev) => [
-      ...prev,
-      { id: uid(), userProfileId: profileId || "" },
-    ]);
-  }
-
-  function removeExperience(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.experiences.push(id);
-    setExperiences((prev) => prev.filter((e) => e.id !== id));
-    setTimeout(() => handleSave(true), 0);
-  }
-
-  function addEducation() {
-    setEducations((prev) => [
-      ...prev,
-      { id: uid(), userProfileId: profileId || "" },
-    ]);
-  }
-
-  function removeEducation(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.educations.push(id);
-    setEducations((prev) => prev.filter((e) => e.id !== id));
-    setTimeout(() => handleSave(true), 0);
-  }
-
-  function addCertification() {
-    setCertifications((prev) => [
-      ...prev,
-      { id: uid(), userProfileId: profileId || "" },
-    ]);
-  }
-
-  function removeCertification(id: string) {
-    if (!id.startsWith("local-")) deletedIds.current.certifications.push(id);
-    setCertifications((prev) => prev.filter((c) => c.id !== id));
-    setTimeout(() => handleSave(true), 0);
-  }
-
-  function updateExperience(next: ExperienceCardData) {
-    modifiedCardIdsRef.current.add(next.id);
+  function updateExperience(next: UserExperience) {
     setExperiences((prev) =>
       prev.map((item) => (item.id === next.id ? next : item)),
     );
   }
 
-  function updateEducation(next: EducationCardData) {
-    modifiedCardIdsRef.current.add(next.id);
+  async function saveExperience(experience: UserExperience) {
+    if (!profileId) return;
+
+    try {
+      const payload = {
+        user_profile_id: profileId,
+        organization_id: experience.organization_id ?? null,
+        subject_id: experience.subject_id ?? null,
+        job_id: experience.job_id ?? null,
+        title: experience.title ?? null,
+        description: experience.description ?? null,
+        start_year: experience.start_year ?? null,
+        end_year: experience.end_year ?? null,
+        current: experience.current ?? false,
+      };
+
+      await userExperienceService.update(experience.id, payload);
+    } catch (err) {
+      console.error("[Profile] Experience save error:", err);
+      toast.error("Could not save this experience.");
+    }
+  }
+
+  /**
+   * Education
+   */
+  function addEducation() {
+    setDraftEducation({
+      id: "draft",
+      user_profile_id: profileId || "",
+      start_year: null,
+      end_year: null,
+      degree_id: null,
+      organization_id: null,
+      graduated: false,
+    } as any);
+  }
+
+  function cancelDraftEducation() {
+    setDraftEducation(null);
+  }
+
+  function updateDraftEducation(next: UserEducation) {
+    setDraftEducation(next);
+  }
+
+  async function saveDraftEducation() {
+    if (!profileId || !draftEducation) return;
+
+    const hasData =
+      draftEducation.degree_id ||
+      draftEducation.organization_id ||
+      draftEducation.start_year ||
+      draftEducation.end_year ||
+      draftEducation.graduated;
+
+    if (!hasData) {
+      setDraftEducation(null);
+      return;
+    }
+
+    try {
+      const created = await userEducationService.create({
+        user_profile_id: profileId,
+        start_year: draftEducation.start_year,
+        end_year: draftEducation.end_year,
+        degree_id: draftEducation.degree_id,
+        organization_id: draftEducation.organization_id,
+        graduated: draftEducation.graduated ?? false,
+      } as any);
+
+      setEducations((prev) => [...prev, { ...draftEducation, id: created.id }]);
+      setDraftEducation(null);
+    } catch (err) {
+      console.error("[Profile] Draft education save error:", err);
+      toast.error("Could not create education.");
+    }
+  }
+
+  async function removeEducation(id: string) {
+    try {
+      await userEducationService.delete(id);
+      setEducations((prev) => prev.filter((edu) => edu.id !== id));
+    } catch (err) {
+      console.error("[Profile] Education delete error:", err);
+      toast.error("Could not remove this education.");
+    }
+  }
+
+  function updateEducation(next: UserEducation) {
     setEducations((prev) =>
       prev.map((item) => (item.id === next.id ? next : item)),
     );
   }
 
-  function updateCertification(next: CertificationCardData) {
-    modifiedCardIdsRef.current.add(next.id);
+  async function saveEducation(education: UserEducation) {
+    if (!profileId) return;
+
+    try {
+      const payload: PutUserEducation = {
+        start_year: education.start_year,
+        end_year: education.end_year,
+        degree_id: education.degree_id,
+        graduated: education.graduated,
+      };
+
+      await userEducationService.update(education.id, payload);
+    } catch (err) {
+      console.error("[Profile] Education save error:", err);
+      toast.error("Could not save this education.");
+    }
+  }
+
+  /**
+   * Certifications
+   */
+  function addCertification() {
+    setDraftCertification({
+      id: "draft",
+      user_profile_id: profileId || "",
+      certification_id: null,
+      obtained_at: null,
+      expires_at: null,
+    } as any);
+  }
+
+  function cancelDraftCertification() {
+    setDraftCertification(null);
+  }
+
+  function updateDraftCertification(next: UserCertification) {
+    setDraftCertification(next);
+  }
+
+  async function saveDraftCertification() {
+    if (!profileId || !draftCertification) return;
+
+    const hasData =
+      draftCertification.certification_id ||
+      draftCertification.obtained_at ||
+      draftCertification.expires_at;
+
+    if (!hasData) {
+      setDraftCertification(null);
+      return;
+    }
+
+    try {
+      const created = await userCertificationService.create({
+        user_profile_id: profileId,
+        certification_id: draftCertification.certification_id,
+        obtained_at: draftCertification.obtained_at,
+        expires_at: draftCertification.expires_at,
+      } as any);
+
+      setCertifications((prev) => [
+        ...prev,
+        { ...draftCertification, id: created.id },
+      ]);
+      setDraftCertification(null);
+    } catch (err) {
+      console.error("[Profile] Draft certification save error:", err);
+      toast.error("Could not create certification.");
+    }
+  }
+
+  async function removeCertification(id: string) {
+    try {
+      await userCertificationService.delete(id);
+      setCertifications((prev) => prev.filter((cert) => cert.id !== id));
+    } catch (err) {
+      console.error("[Profile] Certification delete error:", err);
+      toast.error("Could not remove this certification.");
+    }
+  }
+
+  function updateCertification(next: UserCertification) {
     setCertifications((prev) =>
       prev.map((item) => (item.id === next.id ? next : item)),
     );
+  }
+
+  async function saveCertification(certification: UserCertification) {
+    if (!profileId) return;
+
+    try {
+      const payload: PutUserCertification = {
+        obtained_at: certification.obtained_at,
+        expires_at: certification.expires_at,
+      };
+
+      await userCertificationService.update(certification.id, payload);
+    } catch (err) {
+      console.error("[Profile] Certification save error:", err);
+      toast.error("Could not save this certification.");
+    }
   }
 
   function closeEntityModal() {
@@ -597,174 +923,59 @@ export function useProfile() {
   function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = () => {
-      const b64 = reader.result as string;
-      setAvatarUrl(b64);
-      setTimeout(() => handleSave(true, undefined, b64), 0);
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      setAvatarUrl(base64);
+
+      if (!profileId) return;
+
+      try {
+        await userProfileService.update(profileId, {
+          avatar_url: base64,
+        });
+      } catch (err) {
+        console.error("[Profile] Avatar save error:", err);
+        toast.error("Could not save your avatar.");
+      }
     };
+
     reader.readAsDataURL(file);
   }
 
   async function handleSave(
     silent: boolean = false,
-    overrides?: { name?: string; role?: string; summary?: string },
+    overrides?: {
+      name?: string;
+      role?: string;
+      summary?: string;
+    },
     overrideAvatarUrl?: string,
   ) {
-    const activeName =
-      overrides?.name !== undefined ? overrides.name : nameRef.current;
-    const activeRole =
-      overrides?.role !== undefined ? overrides.role : roleRef.current;
-    const activeSummary =
-      overrides?.summary !== undefined ? overrides.summary : summaryRef.current;
-
-    const activeAvatar =
-      overrideAvatarUrl !== undefined
-        ? overrideAvatarUrl
-        : avatarUrlRef.current;
-
     if (!profileId) {
-      localStorage.setItem(
-        "bildyx_profile_draft",
-        JSON.stringify({
-          savedAt: new Date().toISOString(),
-          name: activeName,
-          summary: activeSummary,
-          role: activeRole,
-          avatarUrl: activeAvatar,
-        }),
-      );
-      if (!silent) {
-        toast("Profile saved locally (offline)");
-      }
+      if (!silent) toast.error("Profile is not available.");
       return;
     }
 
+    const activeName = overrides?.name !== undefined ? overrides.name : name;
+    const activeRole = overrides?.role !== undefined ? overrides.role : role;
+    const activeSummary =
+      overrides?.summary !== undefined ? overrides.summary : summary;
+    const activeAvatar =
+      overrideAvatarUrl !== undefined ? overrideAvatarUrl : avatarUrl;
+
     setIsSaving(true);
+
     try {
-      const jobs: Promise<unknown>[] = [];
-
-      // Only update name, role, summary, and avatar if they changed
-      const profilePatch: Record<string, string> = {};
-      if (activeName !== lastSavedRef.current.name) {
-        profilePatch.display_name = activeName;
-      }
-      if (activeRole !== lastSavedRef.current.role) {
-        profilePatch.role = activeRole;
-      }
-      if (activeSummary !== lastSavedRef.current.summary) {
-        profilePatch.biography = activeSummary;
-      }
-      if (activeAvatar !== lastSavedRef.current.avatarUrl) {
-        profilePatch.avatar_url = activeAvatar || "";
-      }
-
-      if (Object.keys(profilePatch).length > 0) {
-        jobs.push(userProfileService.update(profileId, profilePatch));
-      }
-
-      deletedIds.current.languages.forEach((id) =>
-        jobs.push(userLanguageService.delete(id)),
-      );
-      deletedIds.current.skills.forEach((id) =>
-        jobs.push(userSkillService.delete(id)),
-      );
-      deletedIds.current.experiences.forEach((id) =>
-        jobs.push(userExperienceService.delete(id)),
-      );
-      deletedIds.current.educations.forEach((id) =>
-        jobs.push(userEducationService.delete(id)),
-      );
-      deletedIds.current.certifications.forEach((id) =>
-        jobs.push(userCertificationService.delete(id)),
-      );
-
-      languagesRef.current.forEach((lang) => {
-        if (lang.id.startsWith("local-"))
-          jobs.push(
-            userLanguageService.create({
-              user_profile_id: profileId,
-              language: lang.language,
-              proficiency: lang.proficiency,
-            }),
-          );
-      });
-      skillsRef.current.forEach((skill) => {
-        if (skill.id.startsWith("local-"))
-          jobs.push(
-            userSkillService.create({
-              user_profile_id: profileId,
-              skill_id: skill.skill_id,
-            }),
-          );
-      });
-      experiencesRef.current.forEach((exp) => {
-        const payload = { ...exp, user_profile_id: profileId };
-        if (exp.id.startsWith("local-")) {
-          jobs.push(userExperienceService.create(payload));
-        } else if (modifiedCardIdsRef.current.has(exp.id)) {
-          jobs.push(userExperienceService.update(exp.id, payload));
-        }
-      });
-      educationsRef.current.forEach((edu) => {
-        const payload = { ...edu, user_profile_id: profileId };
-        if (edu.id.startsWith("local-")) {
-          jobs.push(userEducationService.create(payload));
-        } else if (modifiedCardIdsRef.current.has(edu.id)) {
-          jobs.push(userEducationService.update(edu.id, payload));
-        }
-      });
-      certificationsRef.current.forEach((cert) => {
-        if (!cert.certification_id) return;
-
-        const obtained_at = cert.obtained_at
-          ? new Date(cert.obtained_at)
-          : null;
-        const expires_at = cert.expires_at ? new Date(cert.expires_at) : null;
-
-        if (cert.id.startsWith("local-")) {
-          jobs.push(
-            userCertificationService.create({
-              user_profile_id: profileId!,
-              certification_id: cert.certification_id,
-              obtained_at,
-              expires_at,
-            }),
-          );
-        } else if (modifiedCardIdsRef.current.has(cert.id)) {
-          jobs.push(
-            userCertificationService.update(cert.id, {
-              obtained_at,
-              expires_at,
-            }),
-          );
-        }
-      });
-
-      if (jobs.length > 0) {
-        await Promise.all(jobs);
-        await loadData();
-      }
-
-      // Update baseline after successful save
-      lastSavedRef.current = {
-        name: activeName,
+      await userProfileService.update(profileId, {
+        display_name: activeName,
         role: activeRole,
-        summary: activeSummary,
-        avatarUrl: activeAvatar,
-      };
-      modifiedCardIdsRef.current.clear();
+        biography: activeSummary,
+        avatar_url: activeAvatar || "",
+      });
 
-      deletedIds.current = {
-        languages: [],
-        skills: [],
-        experiences: [],
-        educations: [],
-        certifications: [],
-      };
-      if (!silent) {
-        toast.success("Profile saved.");
-      }
+      if (!silent) toast.success("Profile saved.");
     } catch (err) {
       console.error("[Profile] Save error:", err);
       toast.error("Could not save your profile. Please try again.");
@@ -777,54 +988,82 @@ export function useProfile() {
     profileId,
     loaded,
     isSaving,
+
     name,
     setName,
+
     role,
     setRole,
+
     summary,
     setSummary,
+
     avatarUrl,
     setAvatarUrl,
+
     languages,
     setLanguages,
+
     skills,
     setSkills,
+
     experiences,
     setExperiences,
+    draftExperience,
+    addExperience,
+    cancelDraftExperience,
+    updateDraftExperience,
+    saveDraftExperience,
+    removeExperience,
+    updateExperience,
+    saveExperience,
+
     educations,
     setEducations,
+    draftEducation,
+    addEducation,
+    cancelDraftEducation,
+    updateDraftEducation,
+    saveDraftEducation,
+    removeEducation,
+    updateEducation,
+    saveEducation,
+
     certifications,
     setCertifications,
+    draftCertification,
+    addCertification,
+    cancelDraftCertification,
+    updateDraftCertification,
+    saveDraftCertification,
+    removeCertification,
+    updateCertification,
+    saveCertification,
+
     entityModalOpen,
-    setEntityModalOpen,
     entityModalSlot,
     entityModalEntryId,
     entityModalEntryType,
+
     showLangModal,
     setShowLangModal,
+
     showSkillModal,
     setShowSkillModal,
+
     skillSuggestions,
     openSkillPicker,
+
     addLanguage,
     removeLanguage,
+
     addSkill,
     removeSkill,
-    addExperience,
-    removeExperience,
-    addEducation,
-    removeEducation,
-    addCertification,
-    removeCertification,
+
     handleSave,
     handleSlotClick,
     handleEntitySelect,
     handleAvatarChange,
-    lastSavedRef,
-    modifiedCardIdsRef,
-    updateExperience,
-    updateEducation,
-    updateCertification,
     closeEntityModal,
   };
 }

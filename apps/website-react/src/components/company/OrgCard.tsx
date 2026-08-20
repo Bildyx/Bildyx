@@ -79,7 +79,9 @@ export function OrgCard({
         onLoad={handleLoad}
         style={{ width: "100%", border: "none", display: "block" }}
       />
-      <i className="ca-card-delete-btn bi bi-trash" onClick={onDelete} />
+      {onDelete && (
+        <i className="ca-card-delete-btn bi bi-trash" onClick={onDelete} />
+      )}
     </div>
   );
 }

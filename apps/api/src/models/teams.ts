@@ -3,10 +3,10 @@ import { TeamVisibilityEnum } from "./utils/enums";
 
 export const TeamSchema = z.object({
   id: z.uuid(),
-  type: z.string().trim().min(1),
-  name: z.string().trim().min(1),
+  type: z.string().trim().min(1, "Team type is required."),
+  name: z.string().trim().min(1, "Team name is required."),
   visibility: TeamVisibilityEnum.optional().default("PUBLIC"),
-  city_id: z.uuid(),
+  city_id: z.uuid("City is required."),
   product_service: z.string().nullable().optional(),
   organization_id: z.uuid(),
 });
