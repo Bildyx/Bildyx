@@ -10,7 +10,6 @@ import {
   checkEnumArray,
   checkFloat,
   checkInt,
-  checkJson,
   checkRequiredText,
   checkScaleEnum,
   LANGUAGE_ALIASES,
@@ -62,8 +61,12 @@ const EXPECTED_COLUMNS = [
   "religion",
   "cultural_values",
   "people_description",
-  "metadata",
 ];
+
+// "metadata": scoped for a pending schema extension (see
+// updates/schema.prisma) that never shipped - Country has no such column
+// live. Tolerated in the CSV, never written (see types.ts).
+const LEGACY_COLUMNS = ["metadata"];
 
 // Country.isoCode is normalized (upper-cased, truncated to 2 chars) before
 // being used as the natural key for hashing/DB writes - exposed here so
@@ -80,8 +83,8 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
   csvFile: "countries.csv",
   naturalKeyColumn: "iso_code",
   naturalKeyField: "isoCode",
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
   normalizeNaturalKey: normalizeIsoCode,
 
   async buildFkContext() {},
@@ -142,9 +145,6 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
     const numberOfUniversities = checkInt(row.number_of_universities, "number_of_universities");
     if (numberOfUniversities.issue) warnings.push(numberOfUniversities.issue);
 
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
-
     return {
       naturalKey: isoCode,
       data: {
@@ -192,7 +192,6 @@ export const countriesAdapter: ImportAdapter<CsvRow, void> = {
         religion: row.religion || null,
         culturalValues: row.cultural_values || null,
         peopleDescription: row.people_description || null,
-        metadata: metadata.value,
       },
       errors,
       warnings,

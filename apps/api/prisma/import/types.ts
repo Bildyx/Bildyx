@@ -64,14 +64,27 @@ export interface ImportAdapter<Row extends CsvRow = CsvRow, Fk = unknown> {
   // identity function, which is correct for every adapter except Country.
   normalizeNaturalKey?: (raw: string) => string;
   // Prisma field name for the model's soft-delete timestamp, used by
-  // --prune only (see run.ts). Every one of the 11 reference models has one
-  // ("deletedAt" or, for Subject/StudyFields, "deleted_at").
-  deletedAtField: string;
+  // --prune only (see run.ts). Only StudyFields actually has one
+  // ("deleted_at") in the live schema today: the other reference models were
+  // scoped for a soft-delete column (see updates/schema.prisma) that never
+  // shipped. Omit for a model with no such column - run.ts then reports
+  // --prune as unsupported for it instead of crashing on an unknown Prisma
+  // argument.
+  deletedAtField?: string;
   // Exact set of business columns the current schema/template expects,
   // mirroring what generate_excel_templates.py would produce (business
   // scalar fields + M2M free-text columns). Used for header validation and
   // as the row-hash input.
   expectedColumns: string[];
+  // Columns some real CSV/Excel files carry (e.g. "metadata", or
+  // Organization's "project"/"offices"/"partners"/"subsidiaries") that have
+  // no matching column in the live schema yet - they were scoped for the
+  // same pending soft-delete/metadata extension as deletedAtField above (see
+  // updates/schema.prisma). Tolerated whether present or absent in the
+  // header (never reported as missing or extra), always ignored by mapRow:
+  // this keeps both the legacy filled-in files and a freshly generated,
+  // schema-driven template (which won't have these columns) importable.
+  legacyColumns?: string[];
   // Implicit many-to-many relations, carried in the CSV by a ";"-separated
   // text column (see M2M_COLUMNS in
   // scripts/generate_excel_templates.py).

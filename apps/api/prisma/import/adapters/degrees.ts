@@ -3,7 +3,6 @@ import {
   checkEnum,
   checkFloat,
   checkInt,
-  checkJson,
   checkRequiredText,
 } from "../checks";
 import type { CsvRow, ImportAdapter, MappedRow, RowIssue } from "../types";
@@ -16,8 +15,12 @@ const EXPECTED_COLUMNS = [
   "duration_years",
   "description",
   "score",
-  "metadata",
 ];
+
+// "metadata": scoped for a pending schema extension (see
+// updates/schema.prisma) that never shipped - Degree has no such column
+// live. Tolerated in the CSV, never written (see types.ts).
+const LEGACY_COLUMNS = ["metadata"];
 
 export const degreesAdapter: ImportAdapter<CsvRow, void> = {
   modelName: "Degree",
@@ -25,8 +28,8 @@ export const degreesAdapter: ImportAdapter<CsvRow, void> = {
   csvFile: "degrees.csv",
   naturalKeyColumn: "serial_number",
   naturalKeyField: "serial_number",
-  deletedAtField: "deletedAt",
   expectedColumns: EXPECTED_COLUMNS,
+  legacyColumns: LEGACY_COLUMNS,
 
   async buildFkContext() {},
 
@@ -48,9 +51,6 @@ export const degreesAdapter: ImportAdapter<CsvRow, void> = {
     const score = checkInt(row.score, "score");
     if (score.issue) warnings.push(score.issue);
 
-    const metadata = checkJson(row.metadata, "metadata");
-    if (metadata.issue) warnings.push(metadata.issue);
-
     return {
       naturalKey: serialNumber.value,
       data: {
@@ -61,7 +61,6 @@ export const degreesAdapter: ImportAdapter<CsvRow, void> = {
         durationYears: durationYears.value,
         description: row.description || null,
         score: score.value,
-        metadata: metadata.value,
       },
       errors,
       warnings,

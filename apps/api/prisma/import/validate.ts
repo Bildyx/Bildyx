@@ -19,15 +19,25 @@ export function parseHeaderColumns(rawHeader: string[]): string[] {
 // structurally disagrees with what the current schema expects - reject the
 // whole file rather than silently importing a subset (this is the exact
 // organizations.xlsx/skills.xlsx trap the new engine must catch cleanly).
+//
+// legacyColumns is the one deliberate exception: a column tolerated whether
+// present or absent, counted as neither missing nor extra. Without it, a
+// column some real files carry but the live schema doesn't have yet (see
+// ImportAdapter.legacyColumns) would force a choice between rejecting those
+// files ("extra") or rejecting a freshly generated, schema-driven template
+// that lacks the same column ("missing") - it can't satisfy an exact-set
+// check against both at once.
 export function validateHeader(
   rawHeader: string[],
   expectedColumns: string[],
+  legacyColumns: string[] = [],
 ): HeaderValidation {
   const actual = new Set(parseHeaderColumns(rawHeader));
   const expected = new Set(expectedColumns);
+  const legacy = new Set(legacyColumns);
 
   const missing = expectedColumns.filter((c) => !actual.has(c));
-  const extra = [...actual].filter((c) => !expected.has(c));
+  const extra = [...actual].filter((c) => !expected.has(c) && !legacy.has(c));
 
   return { ok: missing.length === 0 && extra.length === 0, missing, extra };
 }

@@ -142,18 +142,14 @@ NATURAL_KEY_FIELD_BY_MODEL = {
 # soft-delete timestamp for each target model. Used only by --dump-spec, so
 # export-current-data.ts can filter out soft-deleted rows without needing to
 # know each model's naming quirk itself (mirrors ImportAdapter.deletedAtField
-# in prisma/import/types.ts).
+# in prisma/import/types.ts). Only StudyFields actually has such a column in
+# the live schema today - the other reference models were scoped for a
+# soft-delete column (see updates/schema.prisma) that never shipped. A model
+# absent from this map has no key in --dump-spec's output ("deletedAtField":
+# null), and export-current-data.ts then skips the deleted-rows filter for it
+# instead of querying a column that doesn't exist.
 DELETED_AT_FIELD_BY_MODEL = {
-    "Industry": "deletedAt",
-    "Country": "deletedAt",
-    "City": "deletedAt",
-    "Job": "deletedAt",
-    "Organization": "deletedAt",
-    "Skill": "deletedAt",
-    "Certification": "deletedAt",
     "StudyFields": "deleted_at",
-    "Degree": "deletedAt",
-    "Subject": "deleted_at",
 }
 
 # Excel's actual row limit. Data validation ranges are cheap to extend this
@@ -740,7 +736,7 @@ def main():
             spec[model_name] = {
                 "prismaModel": prisma_client_accessor(model_name),
                 "tableName": table_name,
-                "deletedAtField": DELETED_AT_FIELD_BY_MODEL.get(model_name, "deletedAt"),
+                "deletedAtField": DELETED_AT_FIELD_BY_MODEL.get(model_name),
                 "fields": [
                     {
                         "column": f["column"],
