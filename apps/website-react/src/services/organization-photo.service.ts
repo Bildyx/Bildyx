@@ -5,7 +5,7 @@ import type {
   PutOrganizationPhoto,
 } from "@repo/models/organization_photos";
 
-export class TeamPhotoService {
+export class OrganizationPhotoService {
   private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {

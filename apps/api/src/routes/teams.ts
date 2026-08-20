@@ -36,6 +36,9 @@ export const teams = {
       if (input.visibility) {
         query = query.where("visibility", "=", input.visibility as any);
       }
+      if (input.organization_id) {
+        query = query.where("organization_id", "=", input.organization_id);
+      }
       return (await query.selectAll().execute()) as any;
     }),
 

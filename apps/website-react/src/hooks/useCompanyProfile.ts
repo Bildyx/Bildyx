@@ -7,11 +7,11 @@ import { TeamService } from "../services/team.service";
 import { TeamMemberService } from "../services/team-member.service";
 import { TeamOfficeService } from "../services/team-office.service";
 import { TeamProfileService } from "../services/team-profile.service";
-import { TeamPhotoService } from "../services/team-photo.service";
-import { TeamPartnerService } from "../services/team-partner.service";
-import { TeamCustomerService } from "../services/team-customer.service";
-import { TeamInvestorService } from "../services/team-investor.service";
-import { TeamSubsidiaryService } from "../services/team-subsidiary.service";
+import { OrganizationPhotoService } from "../services/organization-photo.service";
+import { OrganizationPartnerService } from "../services/organization-partner.service";
+import { OrganizationCustomerService } from "../services/organization-customer.service";
+import { OrganizationInvestorService } from "../services/organization-investor.service";
+import { OrganizationSubsidiaryService } from "../services/organization-subsidiary.service";
 import { CityService } from "../services/city.service";
 import { OrganizationService } from "../services/organization.service";
 import { JobService } from "../services/job.service";
@@ -37,18 +37,18 @@ const teamService = new TeamService();
 const teamMemberService = new TeamMemberService();
 const teamOfficeService = new TeamOfficeService();
 const teamProfileService = new TeamProfileService();
-const teamPhotoService = new TeamPhotoService();
-const teamPartnerService = new TeamPartnerService();
-const teamCustomerService = new TeamCustomerService();
-const teamInvestorService = new TeamInvestorService();
-const teamSubsidiaryService = new TeamSubsidiaryService();
+const teamPhotoService = new OrganizationPhotoService();
+const teamPartnerService = new OrganizationPartnerService();
+const teamCustomerService = new OrganizationCustomerService();
+const teamInvestorService = new OrganizationInvestorService();
+const teamSubsidiaryService = new OrganizationSubsidiaryService();
 const cityService = new CityService();
 const organizationService = new OrganizationService();
 const jobService = new JobService();
 const teamSubjectService = new TeamSubjectService();
 const subjectService = new SubjectService();
 
-type ModalName = "team" | "member" | "editMember" | "city" | "photo" | null;
+type ModalName = "team" | "member" | "editMember" | "city" | "photo" | "editTeam" | null;
 
 export function useCompanyProfile() {
   const { slug } = useParams<{ slug: string }>();
@@ -170,15 +170,15 @@ export function useCompanyProfile() {
         subjectsData,
         orgData,
       ] = await Promise.all([
-        teamService.getAll(),
+        teamService.getAll({ organization_id: myOrgId }),
         teamMemberService.getAll(),
         teamOfficeService.getAll(),
         teamProfileService.getAll(),
-        teamPhotoService.getAll(),
-        teamPartnerService.getAll(),
-        teamCustomerService.getAll(),
-        teamInvestorService.getAll(),
-        teamSubsidiaryService.getAll(),
+        teamPhotoService.getAll({ organization_id: myOrgId }),
+        teamPartnerService.getAll({ organization_id: myOrgId }),
+        teamCustomerService.getAll({ organization_id: myOrgId }),
+        teamInvestorService.getAll({ organization_id: myOrgId }),
+        teamSubsidiaryService.getAll({ organization_id: myOrgId }),
         cityService.getAll(),
         jobService.getAll(),
         teamSubjectService.getAll(),
@@ -192,8 +192,10 @@ export function useCompanyProfile() {
       setAllSubjects(subjectsData);
       setMyOrganization(orgData);
       setTeams(teamsData);
-      setMembers(membersData);
-      setOffices(officesData);
+
+      const teamIds = new Set(teamsData.map((t) => t.id));
+      setMembers(membersData.filter((m) => teamIds.has(m.team_id)));
+      setOffices(officesData.filter((o) => o.organization_id === myOrgId));
       setPhotos(photosData);
       setPartners(partnersData);
       setCustomers(customersData);
@@ -233,13 +235,21 @@ export function useCompanyProfile() {
   );
   const teamProfile = activeTeam ? teamProfiles[activeTeam.id] : undefined;
 
-  async function addTeam(name: string, type: string, cityId: string) {
+  async function addTeam(
+    name: string,
+    type: string,
+    cityId: string,
+    visibility: string,
+    productService?: string,
+  ) {
     try {
       const created = await teamService.create({
         name,
         type,
         city_id: cityId,
-        visibility: "PUBLIC",
+        visibility: visibility as any,
+        product_service: productService || null,
+        organization_id: myOrganization!.id,
       });
       setTeams((prev) => [...prev, created]);
       setActiveTeamId(created.id);
@@ -248,6 +258,31 @@ export function useCompanyProfile() {
     } catch (err) {
       console.error(err);
       toast.error("Failed to create team.");
+    }
+  }
+
+  async function updateTeam(
+    teamId: string,
+    name: string,
+    type: string,
+    cityId: string,
+    visibility: string,
+    productService?: string,
+  ) {
+    try {
+      const updated = await teamService.update(teamId, {
+        name,
+        type,
+        city_id: cityId,
+        visibility: visibility as any,
+        product_service: productService || null,
+      });
+      setTeams((prev) => prev.map((t) => (t.id === teamId ? updated : t)));
+      setModal(null);
+      toast.success(`"${name}" has been updated.`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update team.");
     }
   }
 
@@ -277,10 +312,11 @@ export function useCompanyProfile() {
     fullname: string,
     jobId: string,
     avatarFile?: File,
+    profileImageUrl?: string,
   ) {
     if (!activeTeam) return;
     try {
-      let profile_image = "";
+      let profile_image = profileImageUrl || "";
       if (avatarFile) {
         const reader = new FileReader();
         const b64Promise = new Promise<string>((resolve) => {
@@ -383,13 +419,13 @@ export function useCompanyProfile() {
     }
   }
 
-  async function addOffice(cityId: string) {
+  async function addOffice(cityId: string, officeType: string) {
     if (!myOrganization?.id) return;
     try {
       const created = await teamOfficeService.create({
         organization_id: myOrganization.id,
         city_id: cityId,
-        type: "MAIN",
+        type: officeType,
       });
       setOffices((prev) => [...prev, created]);
       setModal(null);
@@ -715,6 +751,7 @@ export function useCompanyProfile() {
     handleStartEditUrl,
     handleSaveUrl,
     addTeam,
+    updateTeam,
     deleteTeam,
     saveMember,
     deleteMember,

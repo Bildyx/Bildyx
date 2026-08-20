@@ -1,5 +1,10 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
 import { defineConfig } from "prisma/config";
+
+// Load environment variables from workspace root or current directory
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

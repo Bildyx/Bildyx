@@ -1,18 +1,20 @@
-import React, { FormEvent, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "../lib/toast";
 import { AuthService } from "../services/auth.service";
 import { savePendingAccountType } from "../lib/authSession";
 import { useCaptcha } from "../hooks/useCaptcha";
-import { extractErrorMessage, passwordScore } from "../lib/formHelpers";
+import { passwordScore } from "../lib/formHelpers";
 import FormField from "./FormField";
 import CaptchaBox from "./CaptchaBox";
+import ValidatedForm from "./ValidatedForm";
 import type { SignupInput } from "../services/auth.service";
+import { useFormValidation } from "../hooks/useFormValidation";
+import { SignupInputSchema } from "@repo/models/auth";
 
 const authService = new AuthService();
 
 type AccountType = "company" | "seeker";
-type FieldErrors = Record<string, string>;
 
 type RegisterFormProps = {
   isActive: boolean;
@@ -27,7 +29,6 @@ export default function RegisterForm({
 }: RegisterFormProps) {
   const navigate = useNavigate();
 
-  // ─── Signup form state ──────────────────────────────────────
   const [accountType, setAccountType] = useState<AccountType>("company");
   const [companyName, setCompanyName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -36,74 +37,72 @@ export default function RegisterForm({
   const [signupPassword, setSignupPassword] = useState("");
   const [terms, setTerms] = useState(false);
   const [marketing, setMarketing] = useState(false);
-  const [signupErrors, setSignupErrors] = useState<FieldErrors>({});
   const [isSigningUp, setIsSigningUp] = useState(false);
   const signupCaptcha = useCaptcha();
 
+  const { errors, validateForm, setErrors } =
+    useFormValidation(SignupInputSchema);
+
   async function handleSignup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    let ok = true;
 
-    if (!signupCaptcha.verify()) {
-      toast.warning("Please enter the captcha.");
-      ok = false;
-    }
-    if (!terms) {
-      toast.warning("Please accept the Terms and Privacy Policy.");
-      ok = false;
-    }
-    if (!ok) return;
-
-    const body: SignupInput = {
-      accountType,
+    const basePayload = {
       email: signupEmail.trim(),
       password: signupPassword.trim(),
       marketing,
     };
-    if (accountType === "company") body.companyName = companyName.trim();
-    else {
-      body.firstName = firstName.trim();
-      body.lastName = lastName.trim();
+
+    const payload: SignupInput =
+      accountType === "company"
+        ? {
+            accountType: "company",
+            companyName: companyName.trim(),
+            ...basePayload,
+          }
+        : {
+            accountType: "seeker",
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            ...basePayload,
+          };
+
+    // 1. On lance TOUTES les validations
+    const isFormValid = validateForm(payload); // Met les inputs en rouge via Zod
+    const isCaptchaValid = signupCaptcha.verify(); // Affiche l'erreur de captcha
+
+    if (!isFormValid || !isCaptchaValid) {
+      return;
     }
 
+    if (!terms) {
+      toast.error("Please accept the Terms and Privacy Policy.");
+      return;
+    }
+
+    // 3. Soumission API si tout est vert
     setIsSigningUp(true);
-    setSignupErrors({});
     try {
-      const data = await authService.signup(body);
+      const data = await authService.signup(payload);
       savePendingAccountType(accountType, data.userId);
       toast.success("Account created! Please verify your email.");
       navigate(`/verify-email?userId=${encodeURIComponent(data.userId)}`);
     } catch (err) {
-      console.error(err);
-      let errorData:
-        | { data?: { issues?: { path: string[]; message: string }[] } }
-        | undefined;
-      if (err instanceof Error) {
-        try {
-          errorData = JSON.parse(err.message);
-        } catch {
-          // not JSON, fall through
-        }
-      }
-
-      if (errorData?.data?.issues) {
-        const fieldErrors: FieldErrors = {};
-        errorData.data.issues.forEach((issue) => {
-          fieldErrors[issue.path[0]] = issue.message;
-        });
-        setSignupErrors(fieldErrors);
-        toast.error("Please fix the errors in the form.");
-      } else {
-        toast.error(extractErrorMessage(err, "Sign up failed."));
-      }
+      // ... gestion d'erreur API
     } finally {
       setIsSigningUp(false);
     }
   }
 
+  const handleAccountTypeChange = (type: AccountType) => {
+    setAccountType(type);
+    setErrors({});
+  };
+
   return (
-    <form
+    <ValidatedForm
       className={`auth-form${isActive ? " active" : ""}`}
+      errors={errors}
+      setErrors={setErrors}
       noValidate
       onSubmit={handleSignup}
     >
@@ -125,7 +124,7 @@ export default function RegisterForm({
             name="accountType"
             value="company"
             checked={accountType === "company"}
-            onChange={() => setAccountType("company")}
+            onChange={() => handleAccountTypeChange("company")}
           />
           <span>Company</span>
         </label>
@@ -137,7 +136,7 @@ export default function RegisterForm({
             name="accountType"
             value="seeker"
             checked={accountType === "seeker"}
-            onChange={() => setAccountType("seeker")}
+            onChange={() => handleAccountTypeChange("seeker")}
           />
           <span>Job Seeker</span>
         </label>
@@ -154,7 +153,7 @@ export default function RegisterForm({
           autoComplete="organization"
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
-          error={signupErrors.companyName}
+          error={errors.companyName}
         />
       ) : (
         <div>
@@ -198,7 +197,7 @@ export default function RegisterForm({
               autoComplete="given-name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              error={signupErrors.firstName}
+              error={errors.firstName}
             />
 
             <FormField
@@ -211,14 +210,14 @@ export default function RegisterForm({
               autoComplete="family-name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              error={signupErrors.lastName}
+              error={errors.lastName}
             />
           </div>
         </div>
       )}
 
       <FormField
-        id="email"
+        id="signupEmail"
         name="email"
         label={accountType === "company" ? "Work Email" : "Email"}
         type="email"
@@ -230,11 +229,11 @@ export default function RegisterForm({
         required
         value={signupEmail}
         onChange={(e) => setSignupEmail(e.target.value)}
-        error={signupErrors.email}
+        error={errors.email}
       />
 
       <FormField
-        id="password"
+        id="signupPassword"
         name="password"
         label="Password"
         type="password"
@@ -245,9 +244,8 @@ export default function RegisterForm({
         required
         value={signupPassword}
         onChange={(e) => setSignupPassword(e.target.value)}
-        error={signupErrors.password}
+        error={errors.password}
         showPasswordToggle={true}
-        hint="Minimum 8 characters, with uppercase, lowercase, number and symbol recommended."
       >
         <meter
           className="password-meter"
@@ -291,6 +289,6 @@ export default function RegisterForm({
             ? "Create Company Account"
             : "Create Job Seeker Account"}
       </button>
-    </form>
+    </ValidatedForm>
   );
 }

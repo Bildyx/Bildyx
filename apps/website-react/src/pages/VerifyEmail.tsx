@@ -3,7 +3,10 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthLayout from "../components/AuthLayout";
+import FormField from "../components/FormField";
+import ValidatedForm from "../components/ValidatedForm";
 import { usePageMeta } from "../hooks/usePageMeta";
+import { useFormValidation } from "../hooks/useFormValidation";
 import { extractErrorMessage } from "../lib/formHelpers";
 import { toast } from "../lib/toast";
 import { AuthService } from "../services/auth.service";
@@ -13,6 +16,7 @@ import {
   getRedirectPath,
   saveBildyxSession,
 } from "../lib/authSession";
+import { VerifyEmailInputSchema } from "@repo/models/auth";
 
 const authService = new AuthService();
 const userService = new UserService();
@@ -27,10 +31,13 @@ export default function VerifyEmail() {
   const [email, setEmail] = useState("");
   const emailRef = useRef("");
   const [code, setCode] = useState("");
-  const [codeError, setCodeError] = useState("");
   const [pageError, setPageError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
+
+  const { errors, validateForm, setErrors } = useFormValidation(
+    VerifyEmailInputSchema,
+  );
 
   useEffect(() => {
     if (!userId) {
@@ -100,23 +107,20 @@ export default function VerifyEmail() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!code.trim()) {
-      setCodeError("Enter your verification code.");
-      return;
-    }
-    setCodeError("");
+    const payload = {
+      email: email.trim(),
+      code: code.trim(),
+    };
+
+    if (!validateForm(payload)) return;
 
     setIsSubmitting(true);
     try {
-      const data = await authService.verifyEmail({
-        email: email.trim(),
-        code: code.trim(),
-      });
+      const data = await authService.verifyEmail(payload);
       toast.success("Email verified! Redirecting to your profile...");
       emailRef.current = "";
 
       const verifiedUser = getAuthUser(data);
-
       saveBildyxSession(verifiedUser, email.trim());
 
       setTimeout(async () => {
@@ -159,7 +163,13 @@ export default function VerifyEmail() {
       <Header />
 
       <AuthLayout formLabel="Email verification page">
-        <form className="auth-form active" noValidate onSubmit={handleSubmit}>
+        <ValidatedForm
+          className="auth-form active"
+          errors={errors}
+          setErrors={setErrors}
+          noValidate
+          onSubmit={handleSubmit}
+        >
           <div className="form-heading center">
             <h2>Verify your email</h2>
             <p>Enter the code we just emailed you.</p>
@@ -184,24 +194,20 @@ export default function VerifyEmail() {
             </p>
           )}
 
-          <div className="field">
-            <label htmlFor="verifyCode">Verification code</label>
-            <div className={`input-wrap${codeError ? " invalid" : ""}`}>
-              <img className="input-icon" src="/images/image.png" alt="" />
-              <input
-                id="verifyCode"
-                name="code"
-                type="text"
-                placeholder="e.g. ABC123"
-                maxLength={6}
-                autoComplete="one-time-code"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
-            </div>
-            <small className="error">{codeError}</small>
-          </div>
+          <FormField
+            id="verifyCode"
+            name="code"
+            label="Verification code"
+            type="text"
+            placeholder="e.g. ABC123"
+            maxLength={6}
+            autoComplete="one-time-code"
+            required
+            icon="/images/image.png"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            error={errors.code}
+          />
 
           <button className="submit-btn" type="submit" disabled={isSubmitting}>
             {isSubmitting ? "..." : "Verify"}
@@ -222,7 +228,7 @@ export default function VerifyEmail() {
               Log in
             </Link>
           </p>
-        </form>
+        </ValidatedForm>
       </AuthLayout>
 
       <Footer />

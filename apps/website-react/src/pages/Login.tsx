@@ -8,7 +8,8 @@ import CaptchaBox from "../components/CaptchaBox";
 import RegisterForm from "../components/RegisterForm";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useCaptcha } from "../hooks/useCaptcha";
-import { extractErrorMessage, validEmail } from "../lib/formHelpers";
+import { useFormValidation } from "../hooks/useFormValidation";
+import { extractErrorMessage } from "../lib/formHelpers";
 import { toast } from "../lib/toast";
 import {
   addAttempt,
@@ -19,10 +20,10 @@ import {
 } from "../lib/authSession";
 import { AuthService } from "../services/auth.service";
 import { User } from "@repo/models/users";
+import { LoginSchema } from "@repo/models/auth";
+import ValidatedForm from "../components/ValidatedForm";
 
 const authService = new AuthService();
-
-type FieldErrors = Record<string, string>;
 
 export default function Login() {
   usePageMeta("Bildyx — Login / Sign Up", "Log in or create a Bildyx account.");
@@ -49,7 +50,7 @@ export default function Login() {
           } else {
             toast.error(`Failed to load ${provider} session.`);
           }
-        } catch (err) {
+        } catch {
           toast.error(`${provider} authentication failed.`);
         }
       }
@@ -64,31 +65,22 @@ export default function Login() {
     };
   }, [navigate]);
 
-  // ─── Login form state ───────────────────────────────────────
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [loginErrors, setLoginErrors] = useState<FieldErrors>({});
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const loginCaptcha = useCaptcha();
 
+  const { errors, validateForm, setErrors } = useFormValidation(LoginSchema);
+
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    let ok = true;
     const email = loginEmail.trim();
-    const errors: FieldErrors = {};
 
-    if (!validEmail(email)) {
-      errors.email = "Enter a valid email.";
-      ok = false;
-    }
-    if (loginPassword.length === 0) {
-      errors.password = "Password is required.";
-      ok = false;
-    }
-    setLoginErrors(errors);
+    const isFormValid = validateForm({ email, password: loginPassword });
 
-    if (!loginCaptcha.verify()) ok = false;
-    if (!ok) return;
+    const isCaptchaValid = loginCaptcha.verify();
+
+    if (!isFormValid || !isCaptchaValid) return;
 
     if (tooManyAttempts(email)) {
       toast.warning("Too many login attempts. Try again later.");
@@ -168,8 +160,10 @@ export default function Login() {
           handleLinkedinSignup={handleLinkedinSignup}
         />
 
-        <form
+        <ValidatedForm
           className={`auth-form${activeTab === "login" ? " active" : ""}`}
+          errors={errors}
+          setErrors={setErrors}
           noValidate
           onSubmit={handleLogin}
         >
@@ -218,7 +212,7 @@ export default function Login() {
             required
             value={loginEmail}
             onChange={(e) => setLoginEmail(e.target.value)}
-            error={loginErrors.email}
+            error={errors.email}
           />
 
           <FormField
@@ -232,7 +226,7 @@ export default function Login() {
             required
             value={loginPassword}
             onChange={(e) => setLoginPassword(e.target.value)}
-            error={loginErrors.password}
+            error={errors.password}
             showPasswordToggle={true}
           >
             <div className="label-row">
@@ -256,7 +250,7 @@ export default function Login() {
               Sign up
             </button>
           </p>
-        </form>
+        </ValidatedForm>
       </AuthLayout>
 
       <Footer />

@@ -3,6 +3,7 @@ import { OrganizationOffice } from "@repo/models/organization_offices";
 import type { CityListItem } from "@repo/models/cities";
 import { Subject } from "@repo/models/subjects";
 import { TeamSubject } from "@repo/models/team_subjects";
+import type { Team } from "@repo/models/teams";
 
 const TEAM_TYPES = [
   "Operate",
@@ -19,10 +20,17 @@ const TEAM_TYPES = [
 interface AddTeamModalProps {
   offices: OrganizationOffice[];
   cities: CityListItem[];
-  onSubmit: (name: string, type: string, cityId: string) => void;
+  onSubmit: (
+    name: string,
+    type: string,
+    cityId: string,
+    visibility: string,
+    productService?: string,
+  ) => void;
   onClose: () => void;
   teamSubjects?: TeamSubject[];
   allSubjects?: Subject[];
+  initial?: Team;
 }
 
 export function AddTeamModal({
@@ -32,13 +40,14 @@ export function AddTeamModal({
   onClose,
   teamSubjects = [],
   allSubjects = [],
+  initial,
 }: AddTeamModalProps) {
-  const [type, setType] = useState("");
-  const [name, setName] = useState("");
-  const [visibility, setVisibility] = useState("PUBLIC");
-  const [cityId, setCityId] = useState("");
+  const [type, setType] = useState(initial?.type || "");
+  const [name, setName] = useState(initial?.name || "");
+  const [visibility, setVisibility] = useState(initial?.visibility || "PUBLIC");
+  const [cityId, setCityId] = useState(initial?.city_id || "");
   const [brand, setBrand] = useState("");
-  const [productService, setProductService] = useState("");
+  const [productService, setProductService] = useState(initial?.product_service || "");
 
   const officeCities = offices
     .map((o) => cities.find((c) => c.id === o.city_id))
@@ -59,8 +68,14 @@ export function AddTeamModal({
           <i className="bi bi-x-lg text-lg"></i>
         </button>
 
-        <h3 className="text-xl font-bold text-gray-900 mb-1">Add New Team</h3>
-        <p className="text-sm text-gray-500 mb-6">Fill in the details to create a new team.</p>
+        <h3 className="text-xl font-bold text-gray-900 mb-1">
+          {initial ? "Edit Team" : "Add New Team"}
+        </h3>
+        <p className="text-sm text-gray-500 mb-6">
+          {initial
+            ? "Modify the details of your team."
+            : "Fill in the details to create a new team."}
+        </p>
 
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
           <div>
@@ -98,7 +113,7 @@ export function AddTeamModal({
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Visibility</label>
             <select
               value={visibility}
-              onChange={(e) => setVisibility(e.target.value)}
+              onChange={(e) => setVisibility(e.target.value as any)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="PUBLIC">Public Team</option>
@@ -162,9 +177,9 @@ export function AddTeamModal({
             type="button"
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={!name.trim() || !cityId || !type}
-            onClick={() => onSubmit(name.trim(), type, cityId)}
+            onClick={() => onSubmit(name.trim(), type, cityId, visibility, productService || undefined)}
           >
-            Create Team
+            {initial ? "Save Changes" : "Create Team"}
           </button>
         </div>
       </div>

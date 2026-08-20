@@ -5,7 +5,7 @@ import type {
   PutOrganizationInvestor,
 } from "@repo/models/organization_investors";
 
-export class TeamInvestorService {
+export class OrganizationInvestorService {
   private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {

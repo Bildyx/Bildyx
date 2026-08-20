@@ -41,6 +41,7 @@ import { organization_subsidiaries } from "./organization_subsidiaries";
 import { organization_partners } from "./organization_partners";
 import { organization_photos } from "./organization_photos";
 import { target_list } from "./target_list";
+import { contact_requests } from "./contact_requests";
 
 export const router = publicProcedure.router({
   auth,
@@ -85,5 +86,6 @@ export const router = publicProcedure.router({
   team_profiles,
   team_subjects,
   target_list,
+  contact_requests,
 });
 export type Router = typeof router;

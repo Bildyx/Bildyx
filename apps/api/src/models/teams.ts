@@ -8,6 +8,7 @@ export const TeamSchema = z.object({
   visibility: TeamVisibilityEnum.optional().default("PUBLIC"),
   city_id: z.uuid(),
   product_service: z.string().nullable().optional(),
+  organization_id: z.uuid(),
 });
 
 export const GetTeamsSchema = z.object({
@@ -15,6 +16,7 @@ export const GetTeamsSchema = z.object({
   type: z.string().optional(),
   city_id: z.uuid().optional(),
   visibility: TeamVisibilityEnum.optional(),
+  organization_id: z.uuid().optional(),
 });
 
 export const GetTeamSchema = z.object({

@@ -339,13 +339,7 @@ export const cards = {
         ctx.res.setHeader("Cache-Control", "public, max-age=300");
 
         const mapped = await mapOrganization(row);
-        const t2 = performance.now();
         const html = await renderCardHtml(template, mapped);
-        const t3 = performance.now();
-
-        console.log(
-          `[cards/organization] id=${id} | DB: ${(t1 - t0).toFixed(0)}ms | map: ${(t2 - t1).toFixed(0)}ms | render: ${(t3 - t2).toFixed(0)}ms | total: ${(t3 - t0).toFixed(0)}ms`,
-        );
 
         return await sendHtmlResponse(ctx, html);
       } catch (err) {

@@ -5,7 +5,7 @@ import type {
   PutOrganizationCustomer,
 } from "@repo/models/organization_customers";
 
-export class TeamCustomerService {
+export class OrganizationCustomerService {
   private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {

@@ -12,7 +12,12 @@ const jobService = new JobService();
 interface AddTeamMemberModalProps {
   teamId: string;
   initial?: Partial<TeamMember>;
-  onSubmit: (fullname: string, jobId: string, avatarFile?: File) => void;
+  onSubmit: (
+    fullname: string,
+    jobId: string,
+    avatarFile?: File,
+    profileImageUrl?: string,
+  ) => void;
   onClose: () => void;
   teams?: Team[];
   members?: TeamMember[];
@@ -97,6 +102,119 @@ export function AddTeamMemberModal({
           j.title.toLowerCase().includes(jobSearchVal.toLowerCase().trim()),
         )
       : [];
+
+  if (initial) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl relative my-8">
+          <button
+            type="button"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <i className="bi bi-x-lg text-lg"></i>
+          </button>
+
+          <h3 className="text-xl font-bold text-gray-900 mb-1">
+            Edit Team Member
+          </h3>
+          <p className="text-sm text-gray-500 mb-6">
+            Update job title or profile image for this team member.
+          </p>
+
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                disabled
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500 cursor-not-allowed outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Job Title
+              </label>
+              <select
+                value={jobId}
+                onChange={(e) => setJobId(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">Select job title</option>
+                {jobs.map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Profile Image
+              </label>
+              <div className="flex items-center gap-4">
+                {previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="rounded-full w-14 h-14 object-cover border border-gray-200"
+                  />
+                ) : (
+                  <div className="rounded-full w-14 h-14 bg-gray-100 flex items-center justify-center text-gray-700 text-lg font-bold border border-gray-200">
+                    {name.charAt(0).toUpperCase() || "?"}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors inline-flex items-center gap-2"
+                  onClick={() =>
+                    document.getElementById("avatar-upload-input-edit")?.click()
+                  }
+                >
+                  <i className="bi bi-upload"></i>
+                  <span>Change Image</span>
+                </button>
+                <input
+                  id="avatar-upload-input-edit"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFile}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-150">
+            <button
+              type="button"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={!jobId}
+              onClick={() => onSubmit(name, jobId, avatarFile, previewUrl)}
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -348,7 +466,7 @@ export function AddTeamMemberModal({
             type="button"
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5"
             disabled={!name.trim() || !jobId}
-            onClick={() => onSubmit(name.trim(), jobId, avatarFile)}
+            onClick={() => onSubmit(name.trim(), jobId, avatarFile, previewUrl)}
           >
             <i className="bi bi-person-plus text-sm"></i>
             <span>Add Member</span>

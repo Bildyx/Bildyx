@@ -599,7 +599,7 @@
 }
 
 .tl-inline-card__name {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--tl-text);
   white-space: nowrap;

@@ -5,7 +5,7 @@ import type {
   PutOrganizationSubsidiary,
 } from "@repo/models/organization_subsidiaries";
 
-export class TeamSubsidiaryService {
+export class OrganizationSubsidiaryService {
   private readonly rpcClient = getRPCClient();
 
   public async getAll(filters?: {

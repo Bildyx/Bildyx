@@ -112,185 +112,187 @@ export function useProfile() {
   const certificationsRef = useRef(certifications);
   certificationsRef.current = certifications;
 
-  useEffect(() => {
+  const loadData = async () => {
     const session = getSession();
     if (!session?.userId) {
       navigate("/login");
       return;
     }
 
-    (async () => {
-      try {
-        const [user, fullProfile] = await Promise.all([
-          userService.getById(session.userId!),
-          userProfileService.getFullProfileByUserId(session.userId!),
-        ]);
+    try {
+      const [user, fullProfile] = await Promise.all([
+        userService.getById(session.userId!),
+        userProfileService.getFullProfileByUserId(session.userId!),
+      ]);
 
-        if (!fullProfile) {
-          setLoaded(true);
-          return;
-        }
-
-        setProfileId(fullProfile.id);
-        const resolvedName =
-          fullProfile.display_name ||
-          [fullProfile.first_name, fullProfile.last_name]
-            .filter(Boolean)
-            .join(" ") ||
-          user.email ||
-          "";
-        const resolvedRole = fullProfile.role || "";
-        const resolvedSummary = fullProfile.biography || "";
-
-        setName(resolvedName);
-        setRole(resolvedRole);
-        setSummary(resolvedSummary);
-
-        lastSavedRef.current = {
-          name: resolvedName,
-          role: resolvedRole,
-          summary: resolvedSummary,
-          avatarUrl: fullProfile.avatar_url || null,
-        };
-        setAvatarUrl(fullProfile.avatar_url || null);
-        setLanguages(fullProfile.languages || []);
-        setSkills(fullProfile.skills || []);
-
-        const resolvedExperiences = await Promise.all(
-          ((fullProfile.experiences as ExperienceCardData[]) || []).map(
-            async (exp) => {
-              let companyName = exp.company_name || "";
-              let countryName = "";
-              let roleTitle = exp.role_title || "";
-              let subjectName = exp.subject_name || "";
-
-              if (exp.organization_id) {
-                try {
-                  const org = await organizationService.getById(
-                    exp.organization_id,
-                  );
-                  if (org) {
-                    companyName = org.name;
-                    if (org.city_id) {
-                      const city = await cityService.getById(org.city_id);
-                      if (city && city.country_id) {
-                        const country = await countryService.getById(
-                          city.country_id,
-                        );
-                        if (country) {
-                          countryName = country.name;
-                        }
-                      }
-                    }
-                  }
-                } catch {}
-              }
-
-              if (exp.job_id && !roleTitle) {
-                try {
-                  const job = await jobService.getById(exp.job_id);
-                  if (job) roleTitle = job.title;
-                } catch {}
-              }
-
-              if (exp.subject_id && !subjectName) {
-                try {
-                  const subject = await subjectService.getById(exp.subject_id);
-                  if (subject) subjectName = subject.name;
-                } catch {}
-              }
-
-              return {
-                ...exp,
-                company_name: companyName,
-                role_title: roleTitle,
-                subject_name: subjectName,
-                country_name: countryName,
-              } as any;
-            },
-          ),
-        );
-
-        const resolvedEducations = await Promise.all(
-          ((fullProfile.educations as EducationCardData[]) || []).map(
-            async (edu) => {
-              let universityName = edu.university_name || "";
-              let countryName = "";
-              let degreeName = edu.degree_name || "";
-
-              if (edu.organization_id) {
-                try {
-                  const org = await organizationService.getById(
-                    edu.organization_id,
-                  );
-                  if (org) {
-                    universityName = org.name;
-                    if (org.city_id) {
-                      const city = await cityService.getById(org.city_id);
-                      if (city && city.country_id) {
-                        const country = await countryService.getById(
-                          city.country_id,
-                        );
-                        if (country) {
-                          countryName = country.name;
-                        }
-                      }
-                    }
-                  }
-                } catch {}
-              }
-
-              if (edu.degree_id && !degreeName) {
-                try {
-                  const deg = await degreeService.getById(edu.degree_id);
-                  if (deg) degreeName = deg.name;
-                } catch {}
-              }
-
-              return {
-                ...edu,
-                university_name: universityName,
-                degree_name: degreeName,
-                country_name: countryName,
-              } as any;
-            },
-          ),
-        );
-
-        const resolvedCertifications = await Promise.all(
-          ((fullProfile.certifications as CertificationCardData[]) || []).map(
-            async (cert) => {
-              let certificationName = cert.certification_name || "";
-
-              if (cert.certification_id && !certificationName) {
-                try {
-                  const c = await certificationService.getById(
-                    cert.certification_id,
-                  );
-                  if (c) certificationName = c.name;
-                } catch {}
-              }
-
-              return {
-                ...cert,
-                certification_name: certificationName,
-              } as any;
-            },
-          ),
-        );
-
-        setExperiences(resolvedExperiences);
-        setEducations(resolvedEducations);
-        setCertifications(resolvedCertifications);
-      } catch (err) {
-        console.error("[Profile] Failed to load profile:", err);
-        toast.error(
-          "Could not load your profile from the API — showing an empty MicroResume you can fill in manually.",
-        );
-      } finally {
+      if (!fullProfile) {
         setLoaded(true);
+        return;
       }
-    })();
+
+      setProfileId(fullProfile.id);
+      const resolvedName =
+        fullProfile.display_name ||
+        [fullProfile.first_name, fullProfile.last_name]
+          .filter(Boolean)
+          .join(" ") ||
+        user.email ||
+        "";
+      const resolvedRole = fullProfile.role || "";
+      const resolvedSummary = fullProfile.biography || "";
+
+      setName(resolvedName);
+      setRole(resolvedRole);
+      setSummary(resolvedSummary);
+
+      lastSavedRef.current = {
+        name: resolvedName,
+        role: resolvedRole,
+        summary: resolvedSummary,
+        avatarUrl: fullProfile.avatar_url || null,
+      };
+      setAvatarUrl(fullProfile.avatar_url || null);
+      setLanguages(fullProfile.languages || []);
+      setSkills(fullProfile.skills || []);
+
+      const resolvedExperiences = await Promise.all(
+        ((fullProfile.experiences as ExperienceCardData[]) || []).map(
+          async (exp) => {
+            let companyName = exp.company_name || "";
+            let countryName = "";
+            let roleTitle = exp.role_title || "";
+            let subjectName = exp.subject_name || "";
+
+            if (exp.organization_id) {
+              try {
+                const org = await organizationService.getById(
+                  exp.organization_id,
+                );
+                if (org) {
+                  companyName = org.name;
+                  if (org.city_id) {
+                    const city = await cityService.getById(org.city_id);
+                    if (city && city.country_id) {
+                      const country = await countryService.getById(
+                        city.country_id,
+                      );
+                      if (country) {
+                        countryName = country.name;
+                      }
+                    }
+                  }
+                }
+              } catch {}
+            }
+
+            if (exp.job_id && !roleTitle) {
+              try {
+                const job = await jobService.getById(exp.job_id);
+                if (job) roleTitle = job.title;
+              } catch {}
+            }
+
+            if (exp.subject_id && !subjectName) {
+              try {
+                const subject = await subjectService.getById(exp.subject_id);
+                if (subject) subjectName = subject.name;
+              } catch {}
+            }
+
+            return {
+              ...exp,
+              company_name: companyName,
+              role_title: roleTitle,
+              subject_name: subjectName,
+              country_name: countryName,
+            } as any;
+          },
+        ),
+      );
+
+      const resolvedEducations = await Promise.all(
+        ((fullProfile.educations as EducationCardData[]) || []).map(
+          async (edu) => {
+            let universityName = edu.university_name || "";
+            let countryName = "";
+            let degreeName = edu.degree_name || "";
+
+            if (edu.organization_id) {
+              try {
+                const org = await organizationService.getById(
+                  edu.organization_id,
+                );
+                if (org) {
+                  universityName = org.name;
+                  if (org.city_id) {
+                    const city = await cityService.getById(org.city_id);
+                    if (city && city.country_id) {
+                      const country = await countryService.getById(
+                        city.country_id,
+                      );
+                      if (country) {
+                        countryName = country.name;
+                      }
+                    }
+                  }
+                }
+              } catch {}
+            }
+
+            if (edu.degree_id && !degreeName) {
+              try {
+                const deg = await degreeService.getById(edu.degree_id);
+                if (deg) degreeName = deg.name;
+              } catch {}
+            }
+
+            return {
+              ...edu,
+              university_name: universityName,
+              degree_name: degreeName,
+              country_name: countryName,
+            } as any;
+          },
+        ),
+      );
+
+      const resolvedCertifications = await Promise.all(
+        ((fullProfile.certifications as CertificationCardData[]) || []).map(
+          async (cert) => {
+            let certificationName = cert.certification_name || "";
+
+            if (cert.certification_id && !certificationName) {
+              try {
+                const c = await certificationService.getById(
+                  cert.certification_id,
+                );
+                if (c) certificationName = c.name;
+              } catch {}
+            }
+
+            return {
+              ...cert,
+              certification_name: certificationName,
+            } as any;
+          },
+        ),
+      );
+
+      setExperiences(resolvedExperiences);
+      setEducations(resolvedEducations);
+      setCertifications(resolvedCertifications);
+    } catch (err) {
+      console.error("[Profile] Failed to load profile:", err);
+      toast.error(
+        "Could not load your profile from the API — showing an empty MicroResume you can fill in manually.",
+      );
+    } finally {
+      setLoaded(true);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
   }, [navigate]);
 
   function openEntityModal(
@@ -741,6 +743,7 @@ export function useProfile() {
 
       if (jobs.length > 0) {
         await Promise.all(jobs);
+        await loadData();
       }
 
       // Update baseline after successful save

@@ -8,6 +8,7 @@ export class TeamService {
     name?: string;
     type?: string;
     city_id?: string;
+    organization_id?: string;
   }): Promise<Team[]> {
     return await this.rpcClient.teams.getAll(filters || {});
   }

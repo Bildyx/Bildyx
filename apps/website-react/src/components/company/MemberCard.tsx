@@ -23,9 +23,13 @@ export function MemberCard({
       className="ca-member"
       style={{
         position: "relative",
-        cursor: "pointer",
+        cursor: isAdminMode ? "pointer" : "default",
       }}
-      onClick={onEdit}
+      onClick={() => {
+        if (isAdminMode) {
+          onEdit();
+        }
+      }}
     >
       {isAdminMode && (
         <>
@@ -87,7 +91,25 @@ export function MemberCard({
             }}
           />
         ) : (
-          <div className="ca-default-avatar">☻</div>
+          <div
+            className="ca-default-avatar-initials"
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+              fontSize: 18,
+              margin: "0 auto",
+            }}
+          >
+            {member.fullname.charAt(0).toUpperCase()}
+          </div>
         )}
       </div>
       <strong>{member.fullname}</strong>

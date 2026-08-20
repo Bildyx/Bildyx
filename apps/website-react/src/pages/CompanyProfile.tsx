@@ -77,6 +77,7 @@ export default function CompanyProfile() {
     handleStartEditUrl,
     handleSaveUrl,
     addTeam,
+    updateTeam,
     deleteTeam,
     saveMember,
     deleteMember,
@@ -399,7 +400,15 @@ export default function CompanyProfile() {
                           className={
                             team.id === activeTeam?.id ? "is-active" : ""
                           }
-                          onClick={() => setActiveTeamId(team.id)}
+                          onClick={() => {
+                            if (activeTeam && team.id === activeTeam.id) {
+                              if (isAdminMode) {
+                                setModal("editTeam");
+                              }
+                            } else {
+                              setActiveTeamId(team.id);
+                            }
+                          }}
                         >
                           {team.name}
                           {isAdminMode && (
@@ -675,6 +684,20 @@ export default function CompanyProfile() {
           offices={offices}
           cities={cities}
           onSubmit={addTeam}
+          onClose={() => setModal(null)}
+          teamSubjects={teamSubjects}
+          allSubjects={allSubjects}
+        />
+      )}
+
+      {modal === "editTeam" && activeTeam && (
+        <AddTeamModal
+          initial={activeTeam}
+          offices={offices}
+          cities={cities}
+          onSubmit={(name, type, cityId, visibility, productService) =>
+            updateTeam(activeTeam.id, name, type, cityId, visibility, productService)
+          }
           onClose={() => setModal(null)}
           teamSubjects={teamSubjects}
           allSubjects={allSubjects}

@@ -33,7 +33,6 @@ export function OrgCard({ row }: OrgCardProps) {
         ? row.website
         : null;
 
-  const initials = (row.name ?? "?").slice(0, 2).toUpperCase();
   const empLabel = row.numberOfEmployees
     ? (EMP_LABELS[String(row.numberOfEmployees)] ?? null)
     : null;
@@ -78,16 +77,10 @@ export function OrgCard({ row }: OrgCardProps) {
       onMouseLeave={() => setHovered(false)}
       title={website ? `Open ${website}` : undefined}
     >
-      <div className="tl-inline-card__avatar">
-        {row.avatar_url ? (
-          <img src={String(row.avatar_url)} alt="" />
-        ) : (
-          <span>{initials}</span>
-        )}
-      </div>
-
       <div className="tl-inline-card__body">
-        <strong className="tl-inline-card__name">{row.name ?? "Unknown"}</strong>
+        <strong className="tl-inline-card__name">
+          {row.name ?? "Unknown"}
+        </strong>
         {row.subtype && (
           <span className="tl-inline-card__tag">
             {String(row.subtype).replace(/_/g, " ")}
@@ -102,7 +95,9 @@ export function OrgCard({ row }: OrgCardProps) {
         )}
       </div>
 
-      {website && <i className="bi bi-box-arrow-up-right tl-inline-card__link-icon" />}
+      {website && (
+        <i className="bi bi-box-arrow-up-right tl-inline-card__link-icon" />
+      )}
 
       {hovered && (
         <CardPopover
